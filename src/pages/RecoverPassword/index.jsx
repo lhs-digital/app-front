@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom'
 
 const RecoverPassword = () => {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
 
   return (
     <div className='container-center'>
@@ -17,10 +16,10 @@ const RecoverPassword = () => {
         </div>
 
         <form>
-          <p>Um link de recuperação de senha será enviado ao seu email, caso esteja cadastrado no sistema.</p>
+          <p>Um código de recuperação de senha será enviado ao seu email, caso esteja cadastrado no sistema.</p>
           <input
             type="email"
-            placeholder="Digite o seu email"
+            placeholder="Insira o seu email"
             value={email}
             onChange={ (e) => setEmail(e.target.value) }
           />

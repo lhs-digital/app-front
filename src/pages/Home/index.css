@@ -1,0 +1,41 @@
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+    background-color: #f8f9fa;
+    padding: 0 12px;
+    background-color: #181c2e;
+    color: white;
+}
+
+.topo h1 {
+    flex: 1; 
+    display: flex;
+    justify-content: center;
+}
+
+.menu:hover {
+    opacity: 0.9;
+    cursor: pointer;
+    background-color: #54596d89;
+    border-radius: 100%;
+}
+
+.logout {
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    border: 0;
+    border-radius: 4px;
+    background-color: #181c2e;
+    color: white;
+    font-size: 1.3rem;
+}
+
+.logout:hover {
+    opacity: 0.9;
+}
