@@ -28,7 +28,6 @@ class UserService {
       localStorage.removeItem("token");
     }
   }
-
 }
 
 // eslint-disable-next-line

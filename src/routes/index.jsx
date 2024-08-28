@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "../pages/Home";
 import SignIn from "../pages/SignIn";
 import RecoverPassword from "../pages/RecoverPassword";
+import PasswordUpdate from "../pages/PasswordUpdate";
 import { Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -26,6 +27,7 @@ const RoutesApp = () => {
                 <Routes>
                     <Route path="/" element={<Public Item={SignIn} />} />
                     <Route path="/recover-password" element={<Public Item={RecoverPassword} />} />
+                    <Route path="/password-update/:token" element={<Public Item={PasswordUpdate} />} />
                     <Route exact path="/dashboard-admin" element={<Private Item={Home} />} />
                     <Route path="*" element={<SignIn />} />
                 </Routes>
