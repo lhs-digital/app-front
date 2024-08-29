@@ -9,8 +9,13 @@ import { toast } from 'react-toastify';
 const SignIn = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const navigate = useNavigate()
-  
+
+  const handleRememberMeChange = () => {
+    setRememberMe(!rememberMe)
+  }
+
   const Login = async (event) => {
     event.preventDefault()
 
@@ -18,9 +23,8 @@ const SignIn = () => {
       toast.warning('Preencha o email e a senha para acessar o sistema!')
       return
     }
-
     try {
-      await UserService.login(email, password);
+      await UserService.login(email, password, rememberMe);
       navigate('/dashboard-admin');
     } catch (error) {
       error.status === 422 ? toast.error('Email ou senha inválidos!') : toast.error('Erro ao tentar acessar o sistema!')
@@ -52,6 +56,16 @@ const SignIn = () => {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete='current-password'
           />
+
+          <div className='remember-me'>
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={handleRememberMeChange}
+            />
+            <label htmlFor="rememberMe">Lembrar-me por 7 dias</label>
+          </div>
 
           <button type='submit'>Acessar</button>
         </form>
