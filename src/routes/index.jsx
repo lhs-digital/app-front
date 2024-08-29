@@ -1,5 +1,5 @@
-import { Fragment } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Fragment, useEffect } from "react";
+import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
 import Home from "../pages/Home";
 import SignIn from "../pages/SignIn";
 import RecoverPassword from "../pages/RecoverPassword";
@@ -20,9 +20,38 @@ const Public = ({ Item }) => {
     return signed ? <Navigate to="/dashboard-admin" /> : <Item />;
 };
 
+const AuthCheck = () => {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            const rememberMe = localStorage.getItem("rememberMe");
+            const token = localStorage.getItem("token");
+            const expiresAt = localStorage.getItem("expiresAt");
+
+            if (rememberMe && token) {
+                const currentTime = new Date().getTime();
+
+                if (expiresAt && currentTime > parseInt(expiresAt, 10)) {
+                    console.log("Token expired. Removing token.");
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("rememberMe");
+                    localStorage.removeItem("expiresAt");
+                    navigate('/');
+                }
+            }
+        },1 * 24 * 60 * 60 * 1000); // Verifica a cada um dia
+
+        return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
+    }, [navigate]);
+
+    return null;
+};
+
 const RoutesApp = () => {
     return (
         <BrowserRouter>
+            <AuthCheck />
             <Fragment>
                 <Routes>
                     <Route path="/" element={<Public Item={SignIn} />} />

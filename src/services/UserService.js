@@ -1,7 +1,7 @@
 import api from "./api";
 
 class UserService {
-  async login(email, password) {
+  async login(email, password, rememberMe) {
     try {
       const response = await api.post(`/login`, {
         email,
@@ -10,7 +10,15 @@ class UserService {
 
       const token = response.data;
 
-      localStorage.setItem("token", token.token);
+      if (rememberMe) {
+        localStorage.setItem("token", token.token);
+        localStorage.setItem("rememberMe", rememberMe);
+
+        const expiresAt = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
+        localStorage.setItem("expiresAt", expiresAt);
+      } else {
+        localStorage.setItem("token", token.token);
+      }
 
       return response.data;
     } catch (error) {
@@ -26,6 +34,8 @@ class UserService {
       console.error("Logout falhou:", error);
     } finally {
       localStorage.removeItem("token");
+      localStorage.removeItem("rememberMe");
+      localStorage.removeItem("expiresAt");
     }
   }
 }
