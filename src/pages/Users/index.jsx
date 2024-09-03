@@ -1,0 +1,177 @@
+import React from 'react';
+import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
+import {
+    Box,
+    Flex,
+    Button,
+    useDisclosure,
+    Table,
+    Thead,
+    Tr,
+    Th,
+    Tbody,
+    Td,
+    useBreakpointValue,
+    Input,
+    Heading
+} from "@chakra-ui/react";
+import { useEffect, useState } from 'react';
+import ModalComp from '../../components/ModalComp';
+import api from '../../services/api';
+import { toast } from 'react-toastify';
+import Header from '../../components/Header';
+import ModalDelete from '../../components/ModalDelete';
+
+const Users = () => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
+    const [data, setData] = useState([]);
+    const [dataEdit, setDataEdit] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const [lastPage, setLastPage] = useState(null);
+    const [refresh, setRefresh] = useState(false);
+    const [search, setSearch] = useState('');
+    const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
+
+    const isMobile = useBreakpointValue({ base: true, lg: false });
+
+    useEffect(() => {
+        const getData = async () => {
+            setLoading(true); // Ativar o carregamento
+            try {
+                const response = await (api.get(`/user?page=${currentPage}`));
+                setCurrentPage(response.data.meta.current_page);
+                setLastPage(response.data.meta.last_page);
+                setData(response.data.data);
+            } catch (error) {
+                console.error('Erro ao verificar lista de usuários', error);
+            } finally {
+                setLoading(false)
+            }
+        };
+        getData();
+    }, [setData, currentPage, lastPage, refresh]);
+
+    const handleRemove = async () => {
+        try {
+            await (api.delete(`/user/${deleteId}`));
+            setRefresh(!refresh);
+            toast.success('Usuário removido com sucesso!');
+            onCloseDelete(); // Fechar o modal de confirmação
+        } catch (error) {
+            console.error('Erro ao verificar lista de usuários', error);
+        }
+    };
+
+    const handleEdit = (user) => {
+        setDataEdit(user);
+        onOpen();
+    };
+
+    const handleDelete = (id) => {
+        setDeleteId(id); // Armazenar o ID do usuário que será excluído
+        onOpenDelete(); // Abrir o modal de confirmação
+    };
+
+    return (
+        <>
+            <Header />
+            <Heading textAlign='center' mt='12px'>Gerenciamento de Usuários</Heading>
+            <Flex
+                align="center"
+                justify="center"
+                flexDirection="column"
+                fontSize="20px"
+                fontFamily="poppins"
+            >
+                <Box maxW={800} w="100%" py={10} px={2}>
+                    <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
+                        NOVO CADASTRO
+                    </Button>
+
+                    <Input
+                        mt={4}
+                        placeholder="Buscar usuário"
+                        size="lg"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    <Box overflowY="auto" height="100%">
+                        <Table mt="6">
+                            <Thead>
+                                <Tr>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="20px">Nome</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="20px">E-mail</Th>
+                                    <Th p={0}></Th>
+                                    <Th p={0}></Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {(!search ? data : data.filter(user =>
+                                    user.name.toLowerCase().includes(search.toLowerCase()) ||
+                                    user.email.toLowerCase().includes(search.toLowerCase())
+                                )).map(({ name, email, id }, index) => (
+                                    <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }}>
+                                        <Td maxW={isMobile ? 5 : 100}> {name} </Td>
+                                        <Td maxW={isMobile ? 5 : 100}> {email} </Td>
+                                        <Td p={0}>
+                                            <EditIcon
+                                                fontSize={20}
+                                                onClick={() => handleEdit({ name, email, id, index })}
+                                            />
+                                        </Td>
+                                        <Td p={0}>
+                                            <DeleteIcon
+                                                fontSize={20}
+                                                onClick={() => handleDelete(id)}
+                                            />
+                                        </Td>
+                                    </Tr>
+                                ))}
+                            </Tbody>
+                        </Table>
+                    </Box>
+                </Box>
+
+                {isOpen && (
+                    <ModalComp
+                        isOpen={isOpen}
+                        onClose={onClose}
+                        data={data}
+                        setData={setData}
+                        dataEdit={dataEdit}
+                        setDataEdit={setDataEdit}
+                        setRefresh={setRefresh}
+                        refresh={refresh}
+                    />
+                )}
+
+                {isDeleteOpen && (
+                    <ModalDelete
+                        isOpen={isDeleteOpen}
+                        onClose={onCloseDelete}
+                        onConfirm={handleRemove} // Função de confirmação de exclusão
+                    />
+                )}
+
+                <Box maxW={800} py={5} px={2}>
+                    {Array.from({ length: lastPage }, (_, i) => (
+                        <Button
+                            ml="6px"
+                            color={currentPage === i + 1 ? 'white' : 'black'}
+                            backgroundColor={currentPage === i + 1 ? 'blue.500' : 'gray.200'}
+                            key={i}
+                            onClick={() => setCurrentPage(i + 1)}
+                        >
+                            {i + 1}
+                        </Button>
+                    ))}
+                </Box>
+            </Flex>
+        </>
+    );
+};
+
+export default Users;
