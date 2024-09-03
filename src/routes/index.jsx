@@ -7,6 +7,8 @@ import PasswordUpdate from "../pages/PasswordUpdate";
 import { Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Users from "../pages/Users";
+import FirstAccess from "../pages/FirstAccess";
 
 const Private = ({ Item }) => {
     const signed = localStorage.getItem("token");
@@ -57,8 +59,12 @@ const RoutesApp = () => {
                     <Route path="/" element={<Public Item={SignIn} />} />
                     <Route path="/recover-password" element={<Public Item={RecoverPassword} />} />
                     <Route path="/password-update/:token" element={<Public Item={PasswordUpdate} />} />
+                    <Route path="/first-access/:token" element={<Public Item={FirstAccess} />} />
                     <Route exact path="/dashboard-admin" element={<Private Item={Home} />} />
                     <Route path="*" element={<SignIn />} />
+
+                    {/* SuperAdmin */}
+                    <Route path="/users" element={<Private Item={Users} />} />
                 </Routes>
             </Fragment>
             <ToastContainer

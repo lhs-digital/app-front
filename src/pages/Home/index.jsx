@@ -1,34 +1,42 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import UserService from '../../services/UserService'
 import './index.css'
-import LogoutIcon from '@mui/icons-material/Logout';
-import MenuIcon from '@mui/icons-material/Menu';
+import Header from '../../components/Header';
+import { Link } from 'react-router-dom';
+import { Button, Flex, Heading, Stack } from '@chakra-ui/react';
 
 const Home = () => {
-  const navigate = useNavigate()
-
-  const logout = async () => {
-    try {
-      await UserService.logout()
-      navigate('/')
-
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
   return (
-    <div>
-      <header className='topo'>
-        <MenuIcon className='menu' />
-        <h1>App Provedores</h1>
-      </header>
-      <h1>Bem vindo, Administrador!</h1>
-      <button className='logout' onClick={logout}><LogoutIcon /></button>
+    <>
+      <Header />
+      <Flex
+        align="center"
+        justify="center"
+        flexDirection="column"
+        fontSize="20px"
+        fontFamily="poppins"
+        mt="20px"
+      >
 
-
-    </div>
+        <Heading>Bem vindo, Administrador!</Heading>
+        <Stack spacing={4} direction='column' align='center' gap='4px' mt="12px">
+          <Link to='/users'>
+            <Button width={350} colorScheme='blue' variant='solid' size='lg'>
+              Gerenciamento de Usuários
+            </Button>
+          </Link>
+          <Button width={350} colorScheme='blue' variant='solid' size='lg'>
+            Gerenciamento de Permissões
+          </Button>
+          <Button width={350} colorScheme='blue' variant='solid' size='lg'>
+            Gerenciamento de Roles
+          </Button>
+          <Button width={350} colorScheme='blue' variant='solid' size='lg'>
+            Gerenciamento de Empresas
+          </Button>
+        </Stack>
+      </Flex>
+    </>
   )
 }
 
