@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     Modal,
     ModalOverlay,
@@ -19,10 +19,33 @@ import api from '../../services/api'
 import { toast } from 'react-toastify'
 
 
-const ModalComp = ({ data, setData, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
+const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
     const [name, setName] = useState(dataEdit.name || "")
     const [email, setEmail] = useState(dataEdit.email || "")
     const [role, setRole] = useState(dataEdit.role || "")
+    const [company, setCompany] = useState(dataEdit?.company?.id || "")
+    const [companies, setCompanies] = useState([])
+    const [roles, setRoles] = useState([])
+
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                console.log(company)
+                const responseCompany = await (api.get(`/company/get_companies`));
+                setCompanies(responseCompany.data.data);
+                const params = company ? { params: { company_id: company } } : {}
+                const responseRole = await (api.get(`/role/roles_from_company`, params));
+                setRoles(responseRole.data.data);
+            } catch (error) {
+                console.error('Erro ao acessar as roles por empresa', error);
+            }
+        };
+        getData();
+    }, [setRoles, company]);
+
+    const handleCompanyChange = (event) => {
+        setCompany(event.target.value); // Atualiza o estado com o valor selecionado
+    };
 
     const handleRoleChange = (event) => {
         setRole(event.target.value); // Atualiza o estado com o valor selecionado
@@ -33,6 +56,7 @@ const ModalComp = ({ data, setData, dataEdit, isOpen, onClose, setRefresh, refre
             await (api.post('/user', {
                 name,
                 email,
+                company_id: company,
                 role_id: role
             }));
 
@@ -49,6 +73,7 @@ const ModalComp = ({ data, setData, dataEdit, isOpen, onClose, setRefresh, refre
             await (api.put(`/user/${dataEdit.id}`, {
                 name,
                 email,
+                company_id: company,
                 role_id: role
             }));
 
@@ -62,7 +87,7 @@ const ModalComp = ({ data, setData, dataEdit, isOpen, onClose, setRefresh, refre
 
     const handleSave = () => {
         if (!name || !email || !role) {
-            toast.warning('Preencha todos os campos!')
+            toast.warning('Preencha os campos obrigatórios: Nome, E-mail e Role')
             return;
         }
 
@@ -102,7 +127,7 @@ const ModalComp = ({ data, setData, dataEdit, isOpen, onClose, setRefresh, refre
                     <ModalBody>
                         <FormControl display="flex" flexDirection="column" gap={4}>
                             <Box>
-                                <FormLabel>Nome</FormLabel>
+                                <FormLabel>Nome *</FormLabel>
                                 <Input
                                     type="text"
                                     value={name}
@@ -110,7 +135,7 @@ const ModalComp = ({ data, setData, dataEdit, isOpen, onClose, setRefresh, refre
                                 />
                             </Box>
                             <Box>
-                                <FormLabel>E-mail</FormLabel>
+                                <FormLabel>E-mail *</FormLabel>
                                 <Input
                                     type="text"
                                     value={email}
@@ -118,14 +143,31 @@ const ModalComp = ({ data, setData, dataEdit, isOpen, onClose, setRefresh, refre
                                 />
                             </Box>
                             <Box>
-                                <FormLabel>Role</FormLabel>
+                                <FormLabel>Empresa</FormLabel>
                                 <Select
                                     placeholder='Selecione uma opção'
-                                    value={role}
+                                    value={company}
+                                    onChange={handleCompanyChange}
+                                >
+                                    {
+                                        companies.map((companyItem) => (
+                                            <option key={companyItem.id} value={companyItem.id}>{companyItem.name} {companyItem.id}</option>
+                                        ))
+                                    }
+                                </Select>
+                            </Box>
+                            <Box>
+                                <FormLabel>Role *</FormLabel>
+                                <Select
+                                    placeholder='Selecione uma opção'
+                                    value={role?.id}
                                     onChange={handleRoleChange}
                                 >
-                                    <option value='1'>Administrador</option>
-                                    <option value='2'>Técnico</option>
+                                    {
+                                        roles.map((roleItem) => (
+                                            <option key={roleItem.id} value={roleItem.id}>{roleItem.name}</option>
+                                        ))
+                                    }
                                 </Select>
                             </Box>
                         </FormControl>

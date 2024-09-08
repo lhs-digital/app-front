@@ -23,7 +23,7 @@ import Header from '../../components/Header';
 import ModalDelete from '../../components/ModalDelete';
 import ModalView from '../../components/ModalView';
 
-const Users = () => {
+const Companies = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
@@ -46,7 +46,6 @@ const Users = () => {
                 const response = await (api.get(`/user?page=${currentPage}`));
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
-                console.log(response.data.data)
                 setData(response.data.data);
             } catch (error) {
                 console.error('Erro ao verificar lista de usuários', error);
@@ -122,9 +121,8 @@ const Users = () => {
                             <Tbody>
                                 {(!search ? data : data.filter(user =>
                                     user.name.toLowerCase().includes(search.toLowerCase()) ||
-                                    user.email.toLowerCase().includes(search.toLowerCase()) ||
-                                    user.role.name.toLowerCase().includes(search.toLowerCase())
-                                )).map(({ name, email, role, company, id }, index) => (
+                                    user.email.toLowerCase().includes(search.toLowerCase())
+                                )).map(({ name, email, role, id }, index) => (
                                     <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }} onClick={() => handleView(index)}>
                                         <Td maxW={isMobile ? 5 : 100}> {name} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {email} </Td>
@@ -134,7 +132,7 @@ const Users = () => {
                                                 fontSize={20}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleEdit({ name, email, role, company, id, index })
+                                                    handleEdit({ name, email, role, id, index })
                                                 }}
                                             />
                                         </Td>
@@ -201,4 +199,4 @@ const Users = () => {
     );
 };
 
-export default Users;
+export default Companies;
