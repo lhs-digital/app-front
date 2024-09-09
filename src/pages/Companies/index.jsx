@@ -22,6 +22,8 @@ import { toast } from 'react-toastify';
 import Header from '../../components/Header';
 import ModalDelete from '../../components/ModalDelete';
 import ModalView from '../../components/ModalView';
+import ModalViewCompany from '../../components/ModalViewCompany';
+import ModalCompany from '../../components/ModalCompany';
 
 const Companies = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -43,7 +45,7 @@ const Companies = () => {
         const getData = async () => {
             setLoading(true); // Ativar o carregamento
             try {
-                const response = await (api.get(`/user?page=${currentPage}`));
+                const response = await (api.get(`/company?page=${currentPage}`));
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
                 setData(response.data.data);
@@ -58,17 +60,17 @@ const Companies = () => {
 
     const handleRemove = async () => {
         try {
-            await (api.delete(`/user/${deleteId}`));
+            await (api.delete(`/company/${deleteId}`));
             setRefresh(!refresh);
-            toast.success('Usuário removido com sucesso!');
+            toast.success('Empresa removida com sucesso!');
             onCloseDelete(); // Fechar o modal de confirmação
         } catch (error) {
             console.error('Erro ao verificar lista de usuários', error);
         }
     };
 
-    const handleEdit = (user) => {
-        setDataEdit(user);
+    const handleEdit = (company) => {
+        setDataEdit(company);
         onOpen();
     };
 
@@ -86,7 +88,7 @@ const Companies = () => {
     return (
         <>
             <Header />
-            <Heading textAlign='center' mt='12px'>Gerenciamento de Usuários</Heading>
+            <Heading textAlign='center' mt='12px'>Gerenciamento de Empresas</Heading>
             <Flex
                 align="center"
                 justify="center"
@@ -101,7 +103,7 @@ const Companies = () => {
 
                     <Input
                         mt={4}
-                        placeholder="Buscar usuário"
+                        placeholder="Buscar empresa"
                         size="lg"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -112,27 +114,25 @@ const Companies = () => {
                             <Thead>
                                 <Tr>
                                     <Th maxW={isMobile ? 5 : 100} fontSize="16px">Nome</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">E-mail</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Role</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">CNPJ</Th>
                                     <Th p={0}></Th>
                                     <Th p={0}></Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {(!search ? data : data.filter(user =>
-                                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                                    user.email.toLowerCase().includes(search.toLowerCase())
-                                )).map(({ name, email, role, id }, index) => (
+                                {(!search ? data : data.filter(company =>
+                                    company.name.toLowerCase().includes(search.toLowerCase()) ||
+                                    company.cnpj.toLowerCase().includes(search.toLowerCase())
+                                )).map(({ name, cnpj, roles_count, id }, index) => (
                                     <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }} onClick={() => handleView(index)}>
                                         <Td maxW={isMobile ? 5 : 100}> {name} </Td>
-                                        <Td maxW={isMobile ? 5 : 100}> {email} </Td>
-                                        <Td maxW={isMobile ? 5 : 100}> {role.name} </Td>
+                                        <Td maxW={isMobile ? 5 : 100}> {cnpj} </Td>
                                         <Td p={0}>
                                             <EditIcon
                                                 fontSize={20}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleEdit({ name, email, role, id, index })
+                                                    handleEdit({ name, cnpj, roles_count, id, index })
                                                 }}
                                             />
                                         </Td>
@@ -153,7 +153,7 @@ const Companies = () => {
                 </Box>
 
                 {isOpen && (
-                    <ModalComp
+                    <ModalCompany
                         isOpen={isOpen}
                         onClose={onClose}
                         data={data}
@@ -174,8 +174,8 @@ const Companies = () => {
                 )}
 
                 {isViewOpen && (
-                    <ModalView
-                        selectedUser={dataView}
+                    <ModalViewCompany
+                        selectedCompany={dataView}
                         isOpen={isViewOpen}
                         onClose={onCloseView}
                     />

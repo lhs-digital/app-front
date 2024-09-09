@@ -151,7 +151,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                 >
                                     {
                                         companies.map((companyItem) => (
-                                            <option key={companyItem.id} value={companyItem.id}>{companyItem.name} {companyItem.id}</option>
+                                            <option key={companyItem.id} value={companyItem.id}>{companyItem.name}</option>
                                         ))
                                     }
                                 </Select>

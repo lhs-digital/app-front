@@ -31,9 +31,11 @@ const Home = () => {
           <Button width={350} colorScheme='blue' variant='solid' size='lg'>
             Gerenciamento de Roles
           </Button>
-          <Button width={350} colorScheme='blue' variant='solid' size='lg'>
-            Gerenciamento de Empresas
-          </Button>
+          <Link to="/companies">
+            <Button width={350} colorScheme='blue' variant='solid' size='lg'>
+              Gerenciamento de Empresas
+            </Button>
+          </Link>
         </Stack>
       </Flex>
     </>
