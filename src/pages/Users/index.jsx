@@ -46,7 +46,6 @@ const Users = () => {
                 const response = await (api.get(`/user?page=${currentPage}`));
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
-                console.log(response.data.data)
                 setData(response.data.data);
             } catch (error) {
                 console.error('Erro ao verificar lista de usuários', error);

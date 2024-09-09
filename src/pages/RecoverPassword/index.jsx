@@ -25,7 +25,7 @@ const RecoverPassword = () => {
       if (response.data.status !== "error") {
         toast.success('Código de recuperação enviado com sucesso!')
         setTimeout(() => {
-          navigate('/password-token/6qTbhh3UyjGc6xbjEJedPOCSA8d3l0fiSLIqLHB2SQjO8Zt37m6LSPjl1syw')
+          navigate('/')
         }, 3000)
       } else {
         toast.error('Email não cadastrado no sistema!')

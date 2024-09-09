@@ -9,6 +9,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Users from "../pages/Users";
 import FirstAccess from "../pages/FirstAccess";
+import Companies from "../pages/Companies";
 
 const Private = ({ Item }) => {
     const signed = localStorage.getItem("token");
@@ -65,6 +66,7 @@ const RoutesApp = () => {
 
                     {/* SuperAdmin */}
                     <Route path="/users" element={<Private Item={Users} />} />
+                    <Route path="/companies" element={<Private Item={Companies} />} />
                 </Routes>
             </Fragment>
             <ToastContainer
