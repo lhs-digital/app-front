@@ -20,7 +20,6 @@ const ModalView = ({ selectedUser, isOpen, onClose }) => {
                     <Box ><b>Nome:</b> {selectedUser?.name} </Box>
                     <Box ><b>Email:</b> {selectedUser?.email} </Box>
                     <Box ><b>Role:</b> {selectedUser?.role.name} </Box>
-                    <Box ><b>Empresa:</b> {selectedUser?.company.name} </Box>
                 </ModalBody>
                 <ModalFooter>
                     <Button variant="ghost" onClick={onClose}>Voltar</Button>

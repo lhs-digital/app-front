@@ -12,7 +12,8 @@ import {
     Tbody,
     Td,
     useBreakpointValue,
-    Input
+    Input,
+    Heading
 } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import ModalComp from '../../components/ModalComp';
@@ -20,12 +21,16 @@ import api from '../../services/api';
 import { toast } from 'react-toastify';
 import Header from '../../components/Header';
 import ModalDelete from '../../components/ModalDelete';
+import ModalRole from '../../components/ModalRole';
+import ModalViewRole from '../../components/ModalViewRole';
 
 const Roles = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
+    const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
     const [data, setData] = useState([]);
     const [dataEdit, setDataEdit] = useState({});
+    const [dataView, setDataView] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage] = useState(null);
     const [refresh, setRefresh] = useState(false);
@@ -37,7 +42,7 @@ const Roles = () => {
     useEffect(() => {
         const getData = async () => {
             try {
-                const response = await (api.get(`/user?page=${currentPage}`));
+                const response = await (api.get(`/role?page=${currentPage}`));
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
                 setData(response.data.data);
@@ -50,9 +55,9 @@ const Roles = () => {
 
     const handleRemove = async () => {
         try {
-            await (api.delete(`/user/${deleteId}`));
+            await (api.delete(`/role/${deleteId}`));
             setRefresh(!refresh);
-            toast.success('Usuário removido com sucesso!');
+            toast.success('Role removida com sucesso!');
             onCloseDelete(); // Fechar o modal de confirmação
         } catch (error) {
             console.error('Erro ao verificar lista de usuários', error);
@@ -64,6 +69,12 @@ const Roles = () => {
         onOpen();
     };
 
+    const handleView = (index) => {
+        const selectedRole = data;
+        setDataView(selectedRole[index]);
+        onOpenView();
+    };
+
     const handleDelete = (id) => {
         setDeleteId(id); // Armazenar o ID do usuário que será excluído
         onOpenDelete(); // Abrir o modal de confirmação
@@ -72,6 +83,7 @@ const Roles = () => {
     return (
         <>
             <Header />
+            <Heading textAlign='center' mt='12px'>Gerenciamento de Roles</Heading>
             <Flex
                 align="center"
                 justify="center"
@@ -86,7 +98,7 @@ const Roles = () => {
 
                     <Input
                         mt={4}
-                        placeholder="Buscar usuário"
+                        placeholder="Buscar role"
                         size="lg"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -96,30 +108,38 @@ const Roles = () => {
                         <Table mt="6">
                             <Thead>
                                 <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="20px">Nome</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="20px">E-mail</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Nome</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Empresa</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Qtd Permissões</Th>
                                     <Th p={0}></Th>
                                     <Th p={0}></Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {(!search ? data : data.filter(user =>
-                                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                                    user.email.toLowerCase().includes(search.toLowerCase())
-                                )).map(({ name, email, id }, index) => (
-                                    <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }}>
+                                {(!search ? data : data.filter(role =>
+                                    role.name.toLowerCase().includes(search.toLowerCase()) ||
+                                    role.company?.name.toLowerCase().includes(search.toLowerCase())
+                                )).map(({ name, nivel, company, permissions_count, id }, index) => (
+                                    <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }} onClick={() => handleView(index)}>
                                         <Td maxW={isMobile ? 5 : 100}> {name} </Td>
-                                        <Td maxW={isMobile ? 5 : 100}> {email} </Td>
+                                        <Td maxW={isMobile ? 5 : 100}> {company?.name} </Td>
+                                        <Td maxW={isMobile ? 5 : 100}> {permissions_count} </Td>
                                         <Td p={0}>
                                             <EditIcon
                                                 fontSize={20}
-                                                onClick={() => handleEdit({ name, email, id, index })}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEdit({ name, nivel, company, id, index })
+                                                }}
                                             />
                                         </Td>
                                         <Td p={0}>
                                             <DeleteIcon
                                                 fontSize={20}
-                                                onClick={() => handleDelete(id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(id)
+                                                }}
                                             />
                                         </Td>
                                     </Tr>
@@ -130,7 +150,7 @@ const Roles = () => {
                 </Box>
 
                 {isOpen && (
-                    <ModalComp
+                    <ModalRole
                         isOpen={isOpen}
                         onClose={onClose}
                         data={data}
@@ -147,6 +167,14 @@ const Roles = () => {
                         isOpen={isDeleteOpen}
                         onClose={onCloseDelete}
                         onConfirm={handleRemove} // Função de confirmação de exclusão
+                    />
+                )}
+
+                {isViewOpen && (
+                    <ModalViewRole
+                        selectedRole={dataView}
+                        isOpen={isViewOpen}
+                        onClose={onCloseView}
                     />
                 )}
 

@@ -11,7 +11,10 @@ import {
     FormControl,
     FormLabel,
     Input,
-    Box
+    Box,
+    Stack,
+    Checkbox,
+    Wrap
 } from "@chakra-ui/react"
 import { useState } from 'react'
 import { Select } from '@chakra-ui/react'
@@ -19,83 +22,77 @@ import api from '../../services/api'
 import { toast } from 'react-toastify'
 
 
-const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
+const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
     const [name, setName] = useState(dataEdit.name || "")
-    const [email, setEmail] = useState(dataEdit.email || "")
-    const [role, setRole] = useState(dataEdit.role || "")
+    const [nivel, setNivel] = useState(dataEdit.nivel || "")
     const [company, setCompany] = useState(dataEdit.company?.id || "")
+    const [rolePermissions, setRolePermissions] = useState(dataEdit.permissions || [])
+    const [permissions, setPermissions] = useState([])
     const [companies, setCompanies] = useState([])
-    const [roles, setRoles] = useState([])
 
     useEffect(() => {
         const getData = async () => {
             try {
-                console.log(company)
                 const responseCompany = await (api.get(`/company/get_companies`));
                 setCompanies(responseCompany.data.data);
-                const params = company ? { params: { company_id: company } } : {}
-                const responseRole = await (api.get(`/role/roles_from_company`, params));
-                setRoles(responseRole.data.data);
+                const responsePermissions = await (api.get(`/permissions`));
+                setPermissions(responsePermissions.data.data);
             } catch (error) {
                 console.error('Erro ao acessar as roles por empresa', error);
             }
         };
         getData();
-    }, [setRoles, company]);
+    }, []);
+
+    const saveData = async () => {
+        try {
+            await (api.post('/role', {
+                name,
+                nivel,
+                company_id: company,
+                permissions: rolePermissions
+            }));
+
+            setRefresh(!refresh);
+            toast.success('Role cadastrada com sucesso!')
+
+        } catch (error) {
+            console.error('Erro ao cadastrar Role', error);
+        }
+    }
 
     const handleCompanyChange = (event) => {
         setCompany(event.target.value); // Atualiza o estado com o valor selecionado
     };
 
-    const handleRoleChange = (event) => {
-        setRole(event.target.value); // Atualiza o estado com o valor selecionado
-    };
-
-    const saveData = async () => {
-        try {
-            await (api.post('/user', {
-                name,
-                email,
-                company_id: company,
-                role_id: role
-            }));
-
-            setRefresh(!refresh);
-            toast.success('Usuário cadastrado com sucesso!')
-
-        } catch (error) {
-            console.error('Erro ao salvar usuário', error);
-        }
-    }
-
     const updateUser = async () => {
         try {
-            await (api.put(`/user/${dataEdit.id}`, {
+            await (api.put(`/role/${dataEdit.id}`, {
                 name,
-                email,
+                nivel,
                 company_id: company,
-                role_id: role
+                permissions: rolePermissions
             }));
 
             setRefresh(!refresh);
-            toast.success('Usuário editado com sucesso!')
+            toast.success('Role alterada com sucesso!')
 
         } catch (error) {
-            console.error('Erro ao editar usuário', error);
+            console.error('Erro ao alterar Role', error);
         }
     }
 
     const handleSave = () => {
-        if (!name || !email || !role) {
-            toast.warning('Preencha os campos obrigatórios: Nome, E-mail e Role')
+        if (!name || !nivel || !company) {
+            toast.warning('Preencha os campos obrigatórios: Nome, Nível e Empresa')
             return;
         }
 
 
-        if (emailAlreadyExists()) {
-            toast.warning('E-mail já cadastrado!')
-            return
-        }
+        // if (cnpjAlreadyExists()) {
+        //     toast.warning('CNPJ já cadastrado!')
+        //     return
+        // }
 
         if (dataEdit.id) {
             updateUser()
@@ -106,13 +103,13 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
         onClose()
     }
 
-    const emailAlreadyExists = () => {
-        if (dataEdit.email !== email && data?.length) {
-            return data.find((item) => item.email === email)
-        }
+    // const cnpjAlreadyExists = () => {
+    //     if (dataEdit.cnpj !== cnpj && data?.length) {
+    //         return data.find((item) => item.cnpj === cnpj)
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     return (
         <>
@@ -120,7 +117,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        {(dataEdit.id ? 'Editar Usuário' : 'Cadastrar Usuário')}
+                        {(dataEdit.id ? 'Editar Role' : 'Cadastrar Role')}
                     </ModalHeader>
                     <ModalCloseButton />
 
@@ -135,11 +132,11 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                 />
                             </Box>
                             <Box>
-                                <FormLabel>E-mail *</FormLabel>
+                                <FormLabel>Nível *</FormLabel>
                                 <Input
-                                    type="text"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    type="number"
+                                    value={nivel}
+                                    onChange={(e) => setNivel(e.target.value)}
                                 />
                             </Box>
                             <Box>
@@ -157,18 +154,32 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                 </Select>
                             </Box>
                             <Box>
-                                <FormLabel>Role *</FormLabel>
-                                <Select
-                                    placeholder='Selecione uma opção'
-                                    value={role?.id}
-                                    onChange={handleRoleChange}
-                                >
+                                <FormLabel>Permissões</FormLabel>
+                                <Wrap spacing={5} direction='row'>
                                     {
-                                        roles.map((roleItem) => (
-                                            <option key={roleItem.id} value={roleItem.id}>{roleItem.name}</option>
+                                        // Se a permissão estiver no array de permissões da role, o checkbox estará marcado
+                                        // Se não estiver, o checkbox estará desmarcado
+                                        permissions.map((permission) => (
+                                            <Checkbox
+                                                isChecked={rolePermissions.includes(permission.id)}
+                                                key={permission.id}
+                                                value={permission.id}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setRolePermissions(prevPermissions => [
+                                                            ...prevPermissions,
+                                                            permission.id
+                                                        ])
+                                                    } else {
+                                                        setRolePermissions(prevPermissions =>
+                                                            prevPermissions.filter(item => item !== permission.id))
+                                                    }
+                                                }}>
+                                                {permission.name}
+                                            </Checkbox>
                                         ))
                                     }
-                                </Select>
+                                </Wrap>
                             </Box>
                         </FormControl>
                     </ModalBody>
@@ -188,4 +199,4 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     )
 }
 
-export default ModalComp
+export default ModalRole
