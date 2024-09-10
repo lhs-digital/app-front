@@ -34,7 +34,7 @@ const ModalCompany = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) 
             toast.success('Empresa cadastrada com sucesso!')
 
         } catch (error) {
-            console.error('Erro ao salvar usuário', error);
+            console.error('Erro ao cadastrar empresa', error);
         }
     }
 
@@ -55,7 +55,7 @@ const ModalCompany = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) 
 
     const handleSave = () => {
         if (!name || !cnpj) {
-            toast.warning('Preencha os campos obrigatórios: Nome, E-mail e Role')
+            toast.warning('Preencha os campos obrigatórios: Nome e CNPJ')
             return;
         }
 
@@ -88,7 +88,7 @@ const ModalCompany = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) 
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>
-                        {(dataEdit.id ? 'Editar Usuário' : 'Cadastrar Usuário')}
+                        {(dataEdit.id ? 'Editar Empresa' : 'Cadastrar Empresa')}
                     </ModalHeader>
                     <ModalCloseButton />
 

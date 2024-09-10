@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Users from "../pages/Users";
 import FirstAccess from "../pages/FirstAccess";
 import Companies from "../pages/Companies";
+import Roles from "../pages/Roles";
 
 const Private = ({ Item }) => {
     const signed = localStorage.getItem("token");
@@ -52,21 +53,31 @@ const AuthCheck = () => {
 };
 
 const RoutesApp = () => {
+    const signed = localStorage.getItem("token");
+    
     return (
         <BrowserRouter>
             <AuthCheck />
             <Fragment>
                 <Routes>
+                    {/* Publico */}
                     <Route path="/" element={<Public Item={SignIn} />} />
                     <Route path="/recover-password" element={<Public Item={RecoverPassword} />} />
                     <Route path="/password-update/:token" element={<Public Item={PasswordUpdate} />} />
                     <Route path="/first-access/:token" element={<Public Item={FirstAccess} />} />
+
+                    {/* Dashboards */}
                     <Route exact path="/dashboard-admin" element={<Private Item={Home} />} />
-                    <Route path="*" element={<SignIn />} />
 
                     {/* SuperAdmin */}
                     <Route path="/users" element={<Private Item={Users} />} />
                     <Route path="/companies" element={<Private Item={Companies} />} />
+                    <Route path="/roles" element={<Private Item={Roles} />} />
+
+                    {/* 404 */}
+                    <Route path="*" element=
+                    {signed ? <Navigate to="/dashboard-admin" /> : <Navigate to="/" />}
+                    />
                 </Routes>
             </Fragment>
             <ToastContainer

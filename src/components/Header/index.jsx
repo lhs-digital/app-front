@@ -1,12 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import LogoutIcon from '@mui/icons-material/Logout';
-import MenuIcon from '@mui/icons-material/Menu';
 import "./header.css"
 import { Link, useNavigate } from 'react-router-dom'
 import UserService from '../../services/UserService'
 import { Heading } from '@chakra-ui/react';
+import { Container } from './styles';
+import { FaBars } from 'react-icons/fa'
+import Sidebar from '../Sidebar';
 
 const Header = () => {
+    const [sidebar, setSidebar] = useState(false)
+
+    const showSidebar = () => setSidebar(!sidebar)
 
     const navigate = useNavigate()
 
@@ -23,10 +28,14 @@ const Header = () => {
 
     return (
         <>
-            <header className='topo'>
-                {/* <MenuIcon className='menu' /> */}
-                <Link to="/"><Heading>App Provedores</Heading></Link>
-            </header>
+            <Container>
+                <FaBars onClick={showSidebar} />
+                {sidebar && <Sidebar active={setSidebar} />}
+                <Link to='/'>
+                    <Heading className='white'>App-Provedores</Heading>
+                </Link>
+            </Container>
+
             <button className='logout' onClick={logout}><LogoutIcon /></button>
         </>
     )

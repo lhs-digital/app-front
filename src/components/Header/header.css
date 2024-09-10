@@ -34,11 +34,15 @@
     padding: 12px;
     border: 0;
     border-radius: 4px;
-    background-color: #181c2e;
+    background-color: #1A202C;
     color: white;
     font-size: 1.3rem;
 }
 
 .logout:hover {
     opacity: 0.9;
+}
+
+.white {
+    color: white;
 }
