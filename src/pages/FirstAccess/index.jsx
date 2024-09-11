@@ -32,7 +32,6 @@ const FirstAccess = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log(password, passwordConfirmation)
 
     if (!password || !passwordConfirmation) {
       toast.warning('Preencha os campos para definir uma nova senha!')

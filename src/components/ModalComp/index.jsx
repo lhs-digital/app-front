@@ -30,7 +30,6 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     useEffect(() => {
         const getData = async () => {
             try {
-                console.log(company)
                 const responseCompany = await (api.get(`/company/get_companies`));
                 setCompanies(responseCompany.data.data);
                 const params = company ? { params: { company_id: company } } : {}

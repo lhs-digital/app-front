@@ -17,7 +17,6 @@ import MyPermissions from "../pages/MyPermissions";
 
 const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
     const { signed, user, permissions } = useContext(AuthContext);
-    console.log(user)
 
     // Verifica se o usuário possui uma das roles permitidas
     // const hasRoleAccess = allowedRoles.length === 0 || allowedRoles.includes(user?.user?.role?.name);
@@ -51,7 +50,6 @@ const AuthCheck = () => {
                 const currentTime = new Date().getTime();
 
                 if (expiresAt && currentTime > parseInt(expiresAt, 10)) {
-                    console.log("Token expired. Removing token.");
                     localStorage.removeItem("token");
                     localStorage.removeItem("rememberMe");
                     localStorage.removeItem("expiresAt");
