@@ -13,6 +13,7 @@ import {
     Wrap,
 } from '@chakra-ui/react';
 import api from '../../services/api';
+import { toast } from 'react-toastify';
 
 const ModalViewRole = ({ selectedRole, isOpen, onClose }) => {
     const [permissions, setPermissions] = useState([]);
@@ -27,7 +28,7 @@ const ModalViewRole = ({ selectedRole, isOpen, onClose }) => {
             loadPermissions();
         }, [selectedRole]);
     } catch (error) {
-        console.log(error);
+        toast.error(error);
     }
 
     return (

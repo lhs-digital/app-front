@@ -4,7 +4,6 @@ import { AuthContext } from '../context/AuthContext';
 
 const PrivateRoute = ({ Item, allowedRoles }) => {
     const { signed, user } = useContext(AuthContext);
-    console.log(signed)
 
     // Verifica se o usuário está logado e se possui uma das roles permitidas
     const hasAccess = signed && roles.some(role => allowedRoles.includes(role.name));
