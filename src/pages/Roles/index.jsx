@@ -23,6 +23,8 @@ import Header from '../../components/Header';
 import ModalDelete from '../../components/ModalDelete';
 import ModalRole from '../../components/ModalRole';
 import ModalViewRole from '../../components/ModalViewRole';
+import { useContext } from 'react';
+import { AuthContext } from '../../contexts/auth';
 
 const Roles = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -36,6 +38,7 @@ const Roles = () => {
     const [refresh, setRefresh] = useState(false);
     const [search, setSearch] = useState('');
     const [deleteId, setDeleteId] = useState(null);
+    const { permissions } = useContext(AuthContext);
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
@@ -92,9 +95,14 @@ const Roles = () => {
                 fontFamily="poppins"
             >
                 <Box maxW={800} w="100%" py={10} px={2}>
-                    <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
-                        NOVO CADASTRO
-                    </Button>
+                    {permissions.some(permissions => permissions.name === 'create_roles') ?
+                        (
+                            <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
+                                NOVO CADASTRO
+                            </Button>
+                        )
+                        : null
+                    }
 
                     <Input
                         mt={4}
@@ -125,22 +133,33 @@ const Roles = () => {
                                         <Td maxW={isMobile ? 5 : 100}> {company?.name} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {permissions_count} </Td>
                                         <Td p={0}>
-                                            <EditIcon
-                                                fontSize={20}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleEdit({ name, nivel, company, id, index })
-                                                }}
-                                            />
+                                            {permissions.some(permissions => permissions.name === 'update_roles') ?
+                                                (
+                                                    <EditIcon
+                                                        fontSize={20}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEdit({ name, nivel, company, id, index })
+                                                        }}
+                                                    />
+                                                )
+                                                : null
+                                            }
                                         </Td>
                                         <Td p={0}>
-                                            <DeleteIcon
-                                                fontSize={20}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDelete(id)
-                                                }}
-                                            />
+                                            {permissions.some(permissions => permissions.name === 'delete_roles') ?
+                                                (
+                                                    <DeleteIcon
+                                                        fontSize={20}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDelete(id)
+                                                        }}
+                                                    />
+                                                )
+                                                : null
+                                            }
+
                                         </Td>
                                     </Tr>
                                 ))}

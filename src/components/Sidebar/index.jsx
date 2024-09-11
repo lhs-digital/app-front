@@ -12,7 +12,6 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 
 import SidebarItem from '../SidebarItem'
-import UserService from '../../services/UserService'
 
 const Sidebar = ({ active }) => {
     const navigate = useNavigate();
@@ -21,21 +20,11 @@ const Sidebar = ({ active }) => {
         active(false)
     }
 
-    const logout = async () => {
-        try {
-            await UserService.logout()
-            navigate('/')
-
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     return (
         <Container sidebar={active}>
             <FaTimes onClick={closeSidebar} />
             <Content>
-                <Link to="/">
+                <Link to="/dashboard">
                     <SidebarItem Icon={FaHome} Text="Início" />
                 </Link>
                 <Link to="/users">
@@ -47,7 +36,9 @@ const Sidebar = ({ active }) => {
                 <Link to="/roles">
                     <SidebarItem Icon={FaRegFileAlt} Text="Gerenciamento de Roles" />
                 </Link>
-                <SidebarItem Icon={FaRegSun} Text="Minhas Permissões" />
+                <Link to="/my-permissions">
+                    <SidebarItem Icon={FaRegSun} Text="Minhas Permissões" />
+                </Link>
             </Content>
         </Container>
     )
