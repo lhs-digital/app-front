@@ -1,12 +1,12 @@
 import React from 'react'
 import './index.css'
 import Header from '../../components/Header';
-import { Link } from 'react-router-dom';
-import { Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
-import SidebarItem from '../../components/SidebarItem';
-import { FaHome } from 'react-icons/fa';
+import { Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { useContext } from 'react';
+import { AuthContext } from '../../contexts/auth';
 
 const Home = () => {
+  const { user, permissions } = useContext(AuthContext)
 
   return (
     <>
@@ -20,33 +20,13 @@ const Home = () => {
         mt="20px"
       >
 
-        <Heading>Bem vindo, Super-Admin!</Heading>
+        <Heading>Bem vindo, {user?.user.name}!</Heading>
         <Stack spacing={3} textAlign="center">
-          <Text >
+          <Text>
             Esta é a primeira versão do sistema de gerenciamento de provedores.
             Você pode encontrar as funcionalidades disponíveis no sidemenu ao lado esquerdo.
           </Text>
-        </Stack>
-        <Stack spacing={4} direction='column' align='center' gap='4px' mt="12px">
-          {/* <Link to='/users'>
-            <SidebarItem Icon={FaHome} Text="Início" />
-            <Button width={350} colorScheme='blue' variant='solid' size='lg'>
-              Gerenciamento de Usuários
-            </Button>
-          </Link>
-          <Link to='/roles'>
-            <Button width={350} colorScheme='blue' variant='solid' size='lg'>
-              Gerenciamento de Roles
-            </Button>
-          </Link>
-          <Link to="/companies">
-            <Button width={350} colorScheme='blue' variant='solid' size='lg'>
-              Gerenciamento de Empresas
-            </Button>
-          </Link>
-          <Button width={350} colorScheme='blue' variant='solid' size='lg'>
-            Minhas Permissões
-          </Button> */}
+
         </Stack>
       </Flex>
     </>

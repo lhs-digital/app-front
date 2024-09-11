@@ -11,17 +11,31 @@ import Users from "../pages/Users";
 import FirstAccess from "../pages/FirstAccess";
 import Companies from "../pages/Companies";
 import Roles from "../pages/Roles";
+import { useContext } from "react";
+import { AuthContext } from "../contexts/auth";
+import MyPermissions from "../pages/MyPermissions";
 
-const Private = ({ Item }) => {
-    const signed = localStorage.getItem("token");
+const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
+    const { signed, user, permissions } = useContext(AuthContext);
+    console.log(user)
 
-    return signed ? <Item /> : <Navigate to="/" />;
+    // Verifica se o usuário possui uma das roles permitidas
+    // const hasRoleAccess = allowedRoles.length === 0 || allowedRoles.includes(user?.user?.role?.name);
+
+    // Verifica se o usuário possui ao menos uma das permissões permitidas
+    const hasPermissionAccess = allowedPermissions.length === 0 || permissions.some(permission => allowedPermissions.includes(permission.name));
+
+    // Verifica se o usuário está autenticado, possui uma role permitida e possui uma permissão permitida
+    const hasAccess = signed && hasPermissionAccess;
+
+    // Renderiza o componente se o usuário tiver acesso; caso contrário, redireciona para a página inicial
+    return hasAccess ? <Item /> : <Navigate to="/" />;
 };
 
 const Public = ({ Item }) => {
     const signed = localStorage.getItem("token");
 
-    return signed ? <Navigate to="/dashboard-admin" /> : <Item />;
+    return signed ? <Navigate to="/dashboard" /> : <Item />;
 };
 
 const AuthCheck = () => {
@@ -44,7 +58,7 @@ const AuthCheck = () => {
                     navigate('/');
                 }
             }
-        },1 * 24 * 60 * 60 * 1000); // Verifica a cada um dia
+        }, 1 * 24 * 60 * 60 * 1000); // Verifica a cada um dia
 
         return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
     }, [navigate]);
@@ -54,29 +68,27 @@ const AuthCheck = () => {
 
 const RoutesApp = () => {
     const signed = localStorage.getItem("token");
-    
+
     return (
         <BrowserRouter>
             <AuthCheck />
             <Fragment>
                 <Routes>
-                    {/* Publico */}
                     <Route path="/" element={<Public Item={SignIn} />} />
                     <Route path="/recover-password" element={<Public Item={RecoverPassword} />} />
                     <Route path="/password-update/:token" element={<Public Item={PasswordUpdate} />} />
                     <Route path="/first-access/:token" element={<Public Item={FirstAccess} />} />
 
-                    {/* Dashboards */}
-                    <Route exact path="/dashboard-admin" element={<Private Item={Home} />} />
+                    <Route exact path="/dashboard" element={<Private Item={Home} allowedRoles={['super-admin', 'Limitado']} />} />
 
-                    {/* SuperAdmin */}
-                    <Route path="/users" element={<Private Item={Users} />} />
-                    <Route path="/companies" element={<Private Item={Companies} />} />
-                    <Route path="/roles" element={<Private Item={Roles} />} />
+                    <Route path="/users" element={<Private Item={Users} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_users', 'view_users', 'create_users', 'delete_users', 'update_users']} />} />
+                    <Route path="/companies" element={<Private Item={Companies} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_companies', 'view_companies', 'create_companies', 'delete_companies', 'update_companies']} />} />
+                    <Route path="/roles" element={<Private Item={Roles} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_roles', 'view_roles', 'create_roles', 'delete_roles', 'update_roles']} />} />
+                    <Route path="/my-permissions" element={<Private Item={MyPermissions} allowedRoles={['super-admin', 'Limitado']} />} />
 
                     {/* 404 */}
                     <Route path="*" element=
-                    {signed ? <Navigate to="/dashboard-admin" /> : <Navigate to="/" />}
+                        {signed ? <Navigate to="/dashboard-admin" /> : <Navigate to="/" />}
                     />
                 </Routes>
             </Fragment>

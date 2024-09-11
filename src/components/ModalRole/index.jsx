@@ -26,9 +26,24 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     const [name, setName] = useState(dataEdit.name || "")
     const [nivel, setNivel] = useState(dataEdit.nivel || "")
     const [company, setCompany] = useState(dataEdit.company?.id || "")
-    const [rolePermissions, setRolePermissions] = useState(dataEdit.permissions || [])
+    const [rolePermissions, setRolePermissions] = useState([])
     const [permissions, setPermissions] = useState([])
     const [companies, setCompanies] = useState([])
+
+    const [selectAll, setSelectAll] = useState(false);
+
+    // Função para selecionar ou desmarcar todas as permissões
+    const handleSelectAll = () => {
+        if (!selectAll) {
+            // Marca todas as permissões
+            const allPermissionIds = permissions.map(permission => permission.id);
+            setRolePermissions(allPermissionIds);
+        } else {
+            // Desmarca todas as permissões
+            setRolePermissions([]);
+        }
+        setSelectAll(!selectAll);
+    };
 
     useEffect(() => {
         const getData = async () => {
@@ -37,12 +52,17 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                 setCompanies(responseCompany.data.data);
                 const responsePermissions = await (api.get(`/permissions`));
                 setPermissions(responsePermissions.data.data);
+
+                if (dataEdit) {
+                    const responsePermissions = await (api.get(`/role/${dataEdit.id}`));
+                    setRolePermissions(responsePermissions.data.data.permissions.map(permission => permission.id));
+                }
             } catch (error) {
                 console.error('Erro ao acessar as roles por empresa', error);
             }
         };
         getData();
-    }, []);
+    }, [dataEdit]);
 
     const saveData = async () => {
         try {
@@ -83,7 +103,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     }
 
     const handleSave = () => {
-        if (!name || !nivel || !company) {
+        if (!name || !nivel) {
             toast.warning('Preencha os campos obrigatórios: Nome, Nível e Empresa')
             return;
         }
@@ -156,6 +176,11 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                             <Box>
                                 <FormLabel>Permissões</FormLabel>
                                 <Wrap spacing={5} direction='row'>
+                                    <Checkbox
+                                        isChecked={selectAll}
+                                        onChange={handleSelectAll}
+                                        width="100%"
+                                    >Selecionar todas as permissões</Checkbox>
                                     {
                                         // Se a permissão estiver no array de permissões da role, o checkbox estará marcado
                                         // Se não estiver, o checkbox estará desmarcado

@@ -1,16 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import './signin.css'
 import logo from '../../assets/logo.jpg'
 import { Link } from 'react-router-dom'
 import UserService from '../../services/UserService'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
+import { AuthContext } from '../../contexts/auth'
 
 const SignIn = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const navigate = useNavigate()
+
+  const { signIn } = useContext(AuthContext)
 
   const handleRememberMeChange = () => {
     setRememberMe(!rememberMe)
@@ -23,11 +26,13 @@ const SignIn = () => {
       toast.warning('Preencha o email e a senha para acessar o sistema!')
       return
     }
+
     try {
-      await UserService.login(email, password, rememberMe);
-      navigate('/dashboard-admin');
+      await signIn(email, password, rememberMe)
+      navigate('/dashboard')
+
     } catch (error) {
-      error.status === 422 ? toast.error('Email ou senha inválidos!') : toast.error('Erro ao tentar acessar o sistema!')
+      toast.error('Email ou senha inválidos!')
     }
   }
 

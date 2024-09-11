@@ -24,6 +24,8 @@ import ModalDelete from '../../components/ModalDelete';
 import ModalView from '../../components/ModalView';
 import ModalViewCompany from '../../components/ModalViewCompany';
 import ModalCompany from '../../components/ModalCompany';
+import { useContext } from 'react';
+import { AuthContext } from '../../contexts/auth';
 
 const Companies = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -38,6 +40,8 @@ const Companies = () => {
     const [search, setSearch] = useState('');
     const [deleteId, setDeleteId] = useState(null);
     const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
+
+    const { permissions } = useContext(AuthContext);
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
@@ -97,9 +101,15 @@ const Companies = () => {
                 fontFamily="poppins"
             >
                 <Box maxW={800} w="100%" py={10} px={2}>
-                    <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
-                        NOVO CADASTRO
-                    </Button>
+                    {permissions.some(permissions => permissions.name === 'create_companies') ?
+                        (
+                            <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
+                                NOVO CADASTRO
+                            </Button>
+                        )
+                        : null
+                    }
+
 
                     <Input
                         mt={4}
@@ -128,22 +138,32 @@ const Companies = () => {
                                         <Td maxW={isMobile ? 5 : 100}> {name} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {cnpj} </Td>
                                         <Td p={0}>
-                                            <EditIcon
-                                                fontSize={20}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleEdit({ name, cnpj, roles_count, id, index })
-                                                }}
-                                            />
+                                            {permissions.some(permissions => permissions.name === 'update_companies') ?
+                                                (
+                                                    <EditIcon
+                                                        fontSize={20}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEdit({ name, cnpj, roles_count, id, index })
+                                                        }}
+                                                    />
+                                                )
+                                                : null
+                                            }
                                         </Td>
                                         <Td p={0}>
-                                            <DeleteIcon
-                                                fontSize={20}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDelete(id)
-                                                }}
-                                            />
+                                            {permissions.some(permissions => permissions.name === 'update_companies') ?
+                                                (
+                                                    <DeleteIcon
+                                                        fontSize={20}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDelete(id)
+                                                        }}
+                                                    />
+                                                )
+                                                : null
+                                            }
                                         </Td>
                                     </Tr>
                                 ))}
