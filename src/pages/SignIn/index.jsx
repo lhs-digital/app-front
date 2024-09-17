@@ -2,7 +2,6 @@ import React, { useState, useContext } from 'react'
 import './signin.css'
 import logo from '../../assets/logo.jpg'
 import { Link } from 'react-router-dom'
-import UserService from '../../services/UserService'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../contexts/auth'

@@ -1,38 +1,40 @@
 import { useState, createContext, useEffect } from 'react';
 import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 export const AuthContext = createContext({});
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [permissions, setPermissions] = useState([]);
+    const navigate = useNavigate();
 
-    // Carrega o usuário e permissões salvas no localStorage quando o AuthProvider é montado
+    // Carrega o usuário, permissões e token salvos no localStorage ou sessionStorage
     useEffect(() => {
         const storagedUser = localStorage.getItem('user');
         const storagedPermissions = localStorage.getItem('permissions');
         const storagedToken = localStorage.getItem('token');
+        const expiresAt = localStorage.getItem('expiresAt');
 
-        if (storagedToken && storagedUser) {
+
+        // Verifica se o token está expirado
+        if (storagedToken && storagedUser && expiresAt && new Date().getTime() < expiresAt) {
             setUser(JSON.parse(storagedUser));
             setPermissions(JSON.parse(storagedPermissions) || []);
+        } else {
+            if(storagedToken) logout();
         }
     }, []);
 
     const signIn = async (email, password, rememberMe) => {
         try {
             const response = await api.post(`/login`, { email, password });
-            const token = response.data;
+            const token = response.data.token;
 
-            if (rememberMe) {
-                localStorage.setItem("token", token.token);
-                localStorage.setItem("rememberMe", rememberMe);
-
-                const expiresAt = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
-                localStorage.setItem("expiresAt", expiresAt);
-            } else {
-                localStorage.setItem("token", token.token);
-            }
+            const expiresAt = new Date().getTime() + (rememberMe ? 7 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000);
+            localStorage.setItem("token", token);
+            localStorage.setItem("expiresAt", expiresAt);
+            localStorage.setItem("rememberMe", rememberMe);
 
             // Salva os dados do usuário no estado e no localStorage
             setUser(response.data);
@@ -64,6 +66,8 @@ const AuthProvider = ({ children }) => {
             localStorage.removeItem("permissions");
             setUser(null);
             setPermissions([]);
+
+            navigate('/');
         }
     };
 
