@@ -14,6 +14,7 @@ import Roles from "../pages/Roles";
 import { useContext } from "react";
 import { AuthContext } from "../contexts/auth";
 import MyPermissions from "../pages/MyPermissions";
+import Logs from "../pages/Logs";
 
 const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
     const { signed, user, permissions } = useContext(AuthContext);
@@ -77,12 +78,13 @@ const RoutesApp = () => {
                     <Route path="/password-update/:token" element={<Public Item={PasswordUpdate} />} />
                     <Route path="/first-access/:token" element={<Public Item={FirstAccess} />} />
 
-                    <Route exact path="/dashboard" element={<Private Item={Home} allowedRoles={['super-admin', 'Limitado']} />} />
+                    <Route exact path="/dashboard" element={<Private Item={Home} allowedRoles={['super-admin']} />} />
 
                     <Route path="/users" element={<Private Item={Users} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_users', 'view_users', 'create_users', 'delete_users', 'update_users']} />} />
-                    <Route path="/companies" element={<Private Item={Companies} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_companies', 'view_companies', 'create_companies', 'delete_companies', 'update_companies']} />} />
+                    <Route path="/companies" element={<Private Item={Companies} allowedRoles={['super-admin']} allowedPermissions={['view_any_companies', 'view_companies', 'create_companies', 'delete_companies', 'update_companies']} />} />
                     <Route path="/roles" element={<Private Item={Roles} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_roles', 'view_roles', 'create_roles', 'delete_roles', 'update_roles']} />} />
-                    <Route path="/my-permissions" element={<Private Item={MyPermissions} allowedRoles={['super-admin', 'Limitado']} />} />
+                    <Route path="/my-permissions" element={<Private Item={MyPermissions} allowedRoles={['super-admin']} />} />
+                    <Route path="/logs" element={<Private Item={Logs} allowedRoles={['super-admin']} />} />
 
                     {/* 404 */}
                     <Route path="*" element=

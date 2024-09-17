@@ -7,14 +7,25 @@ import {
     FaUserAlt,
     FaBriefcase,
     FaRegFileAlt,
-    FaDoorOpen,
+    FaBook,
 } from 'react-icons/fa'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import SidebarItem from '../SidebarItem'
+import { useContext } from 'react'
+import { AuthContext } from '../../contexts/auth'
 
 const Sidebar = ({ active }) => {
-    const navigate = useNavigate();
+    const { permissions } = useContext(AuthContext);
+    const usersPermissions = ['view_users', 'view_any_users', 'update_users', 'delete_users'];
+    const companyPermissions = ['view_companies', 'view_any_companies', 'update_companies', 'delete_companies'];
+    const rolesPermissions = ['view_roles', 'view_any_roles', 'update_roles', 'delete_roles'];
+
+    const hasPermission = (thePermissions) => {
+        return permissions.some(permission =>
+            thePermissions.includes(permission.name)
+        );
+    }
 
     const closeSidebar = () => {
         active(false)
@@ -27,18 +38,41 @@ const Sidebar = ({ active }) => {
                 <Link to="/dashboard">
                     <SidebarItem Icon={FaHome} Text="Início" />
                 </Link>
-                <Link to="/users">
-                    <SidebarItem Icon={FaUserAlt} Text="Gerenciamento de Usuários" />
-                </Link>
-                <Link to="/companies">
-                    <SidebarItem Icon={FaBriefcase} Text="Gerenciamento de Empresas" />
-                </Link>
-                <Link to="/roles">
-                    <SidebarItem Icon={FaRegFileAlt} Text="Gerenciamento de Roles" />
-                </Link>
+                {hasPermission(usersPermissions) ?
+                    (
+                        <Link to="/users">
+                            <SidebarItem Icon={FaUserAlt} Text="Gerenciamento de Usuários" />
+                        </Link>
+                    )
+                    : null
+                }
+                {hasPermission(companyPermissions) ?
+                    (
+                        <Link to="/companies">
+                            <SidebarItem Icon={FaBriefcase} Text="Gerenciamento de Empresas" />
+                        </Link>
+                    )
+                    : null
+                }
+
+                {hasPermission(companyPermissions) ?
+                    (
+                        <Link to="/roles">
+                            <SidebarItem Icon={FaRegFileAlt} Text="Gerenciamento de Roles" />
+                        </Link>
+                    )
+                    : null
+                }
+
                 <Link to="/my-permissions">
                     <SidebarItem Icon={FaRegSun} Text="Minhas Permissões" />
                 </Link>
+
+
+                <Link to="/logs">
+                    <SidebarItem Icon={FaBook} Text="Logs" />
+                </Link>
+
             </Content>
         </Container>
     )
