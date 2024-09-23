@@ -1,5 +1,5 @@
 import { Fragment, useEffect } from "react";
-import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import Home from "../pages/Home";
 import SignIn from "../pages/SignIn";
 import RecoverPassword from "../pages/RecoverPassword";
@@ -14,6 +14,7 @@ import Roles from "../pages/Roles";
 import { useContext } from "react";
 import { AuthContext } from "../contexts/auth";
 import MyPermissions from "../pages/MyPermissions";
+import Logs from "../pages/Logs";
 
 const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
     const { signed, user, permissions } = useContext(AuthContext);
@@ -32,44 +33,17 @@ const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
 };
 
 const Public = ({ Item }) => {
-    const signed = localStorage.getItem("token");
+    const { signed } = useContext(AuthContext);
+
 
     return signed ? <Navigate to="/dashboard" /> : <Item />;
 };
 
-const AuthCheck = () => {
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            const rememberMe = localStorage.getItem("rememberMe");
-            const token = localStorage.getItem("token");
-            const expiresAt = localStorage.getItem("expiresAt");
-
-            if (rememberMe && token) {
-                const currentTime = new Date().getTime();
-
-                if (expiresAt && currentTime > parseInt(expiresAt, 10)) {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("rememberMe");
-                    localStorage.removeItem("expiresAt");
-                    navigate('/');
-                }
-            }
-        }, 1 * 24 * 60 * 60 * 1000); // Verifica a cada um dia
-
-        return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
-    }, [navigate]);
-
-    return null;
-};
-
 const RoutesApp = () => {
-    const signed = localStorage.getItem("token");
+    const { signed } = useContext(AuthContext);
 
     return (
-        <BrowserRouter>
-            <AuthCheck />
+        <>
             <Fragment>
                 <Routes>
                     <Route path="/" element={<Public Item={SignIn} />} />
@@ -77,12 +51,13 @@ const RoutesApp = () => {
                     <Route path="/password-update/:token" element={<Public Item={PasswordUpdate} />} />
                     <Route path="/first-access/:token" element={<Public Item={FirstAccess} />} />
 
-                    <Route exact path="/dashboard" element={<Private Item={Home} allowedRoles={['super-admin', 'Limitado']} />} />
+                    <Route exact path="/dashboard" element={<Private Item={Home} allowedRoles={['super-admin']} />} />
 
                     <Route path="/users" element={<Private Item={Users} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_users', 'view_users', 'create_users', 'delete_users', 'update_users']} />} />
-                    <Route path="/companies" element={<Private Item={Companies} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_companies', 'view_companies', 'create_companies', 'delete_companies', 'update_companies']} />} />
+                    <Route path="/companies" element={<Private Item={Companies} allowedRoles={['super-admin']} allowedPermissions={['view_any_companies', 'view_companies', 'create_companies', 'delete_companies', 'update_companies']} />} />
                     <Route path="/roles" element={<Private Item={Roles} allowedRoles={['super-admin', 'Limitado']} allowedPermissions={['view_any_roles', 'view_roles', 'create_roles', 'delete_roles', 'update_roles']} />} />
-                    <Route path="/my-permissions" element={<Private Item={MyPermissions} allowedRoles={['super-admin', 'Limitado']} />} />
+                    <Route path="/my-permissions" element={<Private Item={MyPermissions} allowedRoles={['super-admin']} />} />
+                    <Route path="/logs" element={<Private Item={Logs} allowedRoles={['super-admin']} />} />
 
                     {/* 404 */}
                     <Route path="*" element=
@@ -93,7 +68,7 @@ const RoutesApp = () => {
             <ToastContainer
                 position="bottom-right"
             />
-        </BrowserRouter>
+        </>
     );
 }
 

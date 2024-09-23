@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import LogoutIcon from '@mui/icons-material/Logout';
 import "./header.css"
 import { Link, useNavigate } from 'react-router-dom'
-import UserService from '../../services/UserService'
 import { Heading } from '@chakra-ui/react';
 import { Container } from './styles';
 import { FaBars } from 'react-icons/fa'
