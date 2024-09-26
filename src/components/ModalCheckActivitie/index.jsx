@@ -12,13 +12,12 @@ import {
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 
-const ModalCheckActivitie = ({ id, status, isOpen, onClose, onConfirm, setRefresh, refresh }) => {
+const ModalCheckActivitie = ({ id, status, isOpen, onClose, setRefresh, refresh }) => {
     const handleConfirm = async () => {
         try {
             // Chamada para a API para alterar o status da atividade
             await api.put(`/auditing/${id}/toggle_status`);
             toast.success('Status da atividade alterado com sucesso!');
-            onConfirm(); // Função callback para indicar que a operação foi concluída
             
         } catch (error) {
             console.error('Erro ao alterar o status da atividade', error);

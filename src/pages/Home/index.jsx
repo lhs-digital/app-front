@@ -5,6 +5,7 @@ import { Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import ListActivities from '../../components/ListActivities/ListActivities';
+import { PieChart } from '@mui/icons-material';
 
 const Home = () => {
   const { user } = useContext(AuthContext)
@@ -24,7 +25,7 @@ const Home = () => {
         paddingX="24px"
       >
 
-        <Stack >
+        <Stack maxWidth="800px">
           <Heading>Bem vindo, {user?.user.name}!</Heading>
           <Text textAlign="justify" >
             Esta é a primeira versão do sistema de gerenciamento de provedores.
@@ -32,7 +33,7 @@ const Home = () => {
           </Text>
 
         </Stack>
-        
+
         <ListActivities />
       </Flex>
     </>
