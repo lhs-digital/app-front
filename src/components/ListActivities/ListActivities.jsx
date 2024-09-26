@@ -6,6 +6,7 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import { InputLabel } from '@mui/material';
+import { toast } from 'react-toastify';
 
 const ListActivities = () => {
     const [data, setData] = useState([]);
@@ -15,7 +16,7 @@ const ListActivities = () => {
     const [refresh, setRefresh] = useState(false);
     const [search, setSearch] = useState('');
     const [table, setTable] = useState('');
-    const [priorityOrder, setPriorityOrder] = useState("asc");
+    const [priorityOrder, setPriorityOrder] = useState("desc");
     const [status, setStatus] = useState(false);
     const [createdAt, setCreatedAt] = useState('');
     const [updatedAt, setUpdatedAt] = useState('');
@@ -23,7 +24,7 @@ const ListActivities = () => {
     // Guardar os parâmetros de filtro
     const [filterParams, setFilterParams] = useState({
         search: '',
-        priorityOrder: 'asc',
+        priorityOrder: 'desc',
         createdAt: '',
         updatedAt: ''
     });
@@ -57,6 +58,12 @@ const ListActivities = () => {
 
     const handlePriorityOrder = () => {
         setPriorityOrder(prevOrder => prevOrder === "asc" ? "desc" : "asc");
+        setFilterParams({
+            search: '',
+            priorityOrder: priorityOrder === "asc" ? "desc" : "asc",
+            createdAt: '',
+            updatedAt: ''
+        });
     }
 
     const handleClean = () => {
@@ -79,26 +86,36 @@ const ListActivities = () => {
         if (!table && !search) {
             return;
         }
-        // Atualiza o estado com os parâmetros atuais de filtro
+
         setFilterParams({
             search,
             priorityOrder,
             createdAt,
             updatedAt
         });
-        // Reinicia para a primeira página ao aplicar um filtro
         setCurrentPage(1);
         setRefresh(!refresh);
     }
 
-    // Função para renderizar os botões de paginação dinamicamente
-    const renderPagination = () => {
-        const startPage = Math.max(2, currentPage - 2); // Definir o início das páginas
-        const endPage = Math.min(lastPage - 1, currentPage + 2); // Definir o fim das páginas
+    const handleAud = async () => {
+        try {
+            await api.post('/auditing/start');
+            toast.success('Auditoria disparada com sucesso! Aguarde cerca de 5~7 minutos para atualizar a lista.');
 
+            // espere 7 minutos para dar refresh na lista
+            setTimeout(() => {
+                setRefresh(!refresh);
+            }, 420000);
+        } catch (error) {
+            console.error('Erro ao disparar auditoria', error);
+        }
+    }
+
+    const renderPagination = () => {
+        const startPage = Math.max(2, currentPage - 2);
+        const endPage = Math.min(lastPage - 1, currentPage + 2);
         const buttons = [];
 
-        // Primeira página
         buttons.push(
             <Button
                 ml="6px"
@@ -111,12 +128,10 @@ const ListActivities = () => {
             </Button>
         );
 
-        // Reticências se houver um intervalo grande
         if (startPage > 2) {
             buttons.push(<Text ml="6px" key="ellipsis-start">...</Text>);
         }
 
-        // Páginas intermediárias
         for (let i = startPage; i <= endPage; i++) {
             buttons.push(
                 <Button
@@ -131,12 +146,10 @@ const ListActivities = () => {
             );
         }
 
-        // Reticências se houver um intervalo grande antes da última página
         if (endPage < lastPage - 1) {
             buttons.push(<Text ml="6px" key="ellipsis-end">...</Text>);
         }
 
-        // Última página
         if (lastPage > 1) {
             buttons.push(
                 <Button
@@ -207,7 +220,7 @@ const ListActivities = () => {
                     >
                         <Button onClick={handlePriorityOrder}>
                             {
-                                priorityOrder ?
+                                priorityOrder === "asc" ?
                                     (
                                         <Tooltip label="Ordem Crescente de Prioridade" aria-label="Ordem Crescente">
                                             <Icon as={KeyboardDoubleArrowUpIcon}></Icon>
@@ -228,6 +241,7 @@ const ListActivities = () => {
                             </ButtonGroup>
                         </Box>
                     </Flex>
+                    <Button colorScheme="blue" onClick={handleAud}>Disparar Auditoria</Button>
                 </FormControl>
                 <Tabs variant="unstyled" colorScheme="blue">
                     <TabList>
