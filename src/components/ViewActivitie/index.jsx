@@ -38,6 +38,7 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, isO
                     <Box ><b>Tabela:</b> clients </Box>
                     <Box ><b>Coluna:</b> {selectedActivitie?.column} </Box>
                     <Box ><b>Erro:</b> {selectedActivitie?.message} </Box>
+                    <Box ><b>Valor do campo:</b> {selectedActivitie?.value} </Box>
                     <Box ><b>Prioridade:</b> {selectedActivitie?.priority} </Box>
                     <Box ><b>Status:</b> {
 

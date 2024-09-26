@@ -1,4 +1,4 @@
-import { Box, Checkbox, Grid, ListIcon, ListItem, Text, useDisclosure } from '@chakra-ui/react'
+import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useDisclosure } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import ViewActivitie from '../ViewActivitie';
 import ModalCheckActivitie from '../ModalCheckActivitie';
@@ -36,16 +36,21 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 isChecked={activitie?.status}
             />
             <Grid
-                templateColumns="1fr 1fr"
+                templateColumns="2fr 1fr"
                 flex="1"
                 onClick={handleView}
                 cursor="pointer"
 
             >
                 <Box>
-                    <Text fontWeight="bold" fontSize="xl">#{activitie?.id}</Text>
+                    <Text fontWeight="bold" fontSize="xl">
+                        #{activitie?.id}
+                    </Text>
                     <Text fontWeight="bold" fontSize="xl"> Tabela: <Text as="cite" fontWeight="normal">clients</Text></Text>
-                    <Text fontSize='lg'>Coluna: <Text as="cite">{activitie?.column}</Text></Text>
+                    <Text fontWeight="bold" fontSize="lg">
+                        Primary Key Value: <Text as="cite" fontWeight="normal">{activitie?.primary_key_value}</Text>
+                    </Text>
+                    <Text fontWeight="bold" fontSize='lg'>Coluna: <Text as="cite" fontWeight="normal">{activitie?.column}</Text></Text>
                 </Box>
                 <Box
                     textAlign="right"
