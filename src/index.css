@@ -8,6 +8,10 @@
     box-sizing: border-box;
 }
 
+* > p {
+    color: #1A202C;
+}
+
 html,body, #root {
     height: 100%;
 }
