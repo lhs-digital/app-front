@@ -37,6 +37,7 @@
     background-color: #1A202C;
     color: white;
     font-size: 1.3rem;
+    z-index: 1;
 }
 
 .logout:hover {

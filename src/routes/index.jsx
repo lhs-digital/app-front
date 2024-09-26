@@ -1,5 +1,5 @@
-import { Fragment, useEffect } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Fragment } from "react";
+import { Route, Routes } from "react-router-dom";
 import Home from "../pages/Home";
 import SignIn from "../pages/SignIn";
 import RecoverPassword from "../pages/RecoverPassword";
@@ -16,8 +16,9 @@ import { AuthContext } from "../contexts/auth";
 import MyPermissions from "../pages/MyPermissions";
 import Logs from "../pages/Logs";
 
+
 const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
-    const { signed, user, permissions } = useContext(AuthContext);
+    const { signed , permissions } = useContext(AuthContext);
 
     // Verifica se o usuário possui uma das roles permitidas
     // const hasRoleAccess = allowedRoles.length === 0 || allowedRoles.includes(user?.user?.role?.name);
@@ -66,7 +67,8 @@ const RoutesApp = () => {
                 </Routes>
             </Fragment>
             <ToastContainer
-                position="bottom-right"
+                position="top-right"
+                stacked
             />
         </>
     );
