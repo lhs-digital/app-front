@@ -69,11 +69,12 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
     const updateUser = async () => {
         try {
+            console.log(dataEdit.id, company, role)
             await (api.put(`/user/${dataEdit.id}`, {
                 name,
                 email,
                 company_id: company,
-                role_id: role
+                role_id: role.id
             }));
 
             setRefresh(!refresh);
