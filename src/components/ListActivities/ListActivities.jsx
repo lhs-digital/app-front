@@ -18,8 +18,8 @@ const ListActivities = () => {
     const [table, setTable] = useState('');
     const [priorityOrder, setPriorityOrder] = useState("desc");
     const [status, setStatus] = useState(false);
-    const [createdAt, setCreatedAt] = useState('');
-    const [updatedAt, setUpdatedAt] = useState('');
+    const [createdAt, setCreatedAt] = useState([]);
+    const [updatedAt, setUpdatedAt] = useState([]);
 
     // Guardar os parâmetros de filtro
     const [filterParams, setFilterParams] = useState({
@@ -86,6 +86,9 @@ const ListActivities = () => {
         if (!table && !search) {
             return;
         }
+
+        console.log(createdAt)
+        console.log(updatedAt)
 
         setFilterParams({
             search,
@@ -189,28 +192,48 @@ const ListActivities = () => {
                     />
 
                     <Grid
-                        templateColumns="1fr 1fr"
+                        templateColumns="1fr"
                         gap={4}
                     >
                         <Box>
                             <FormLabel fontSize="lg">Data de Criação</FormLabel>
-                            <Input
-                                size="lg"
-                                placeholder='Data de Criação'
-                                type='date'
-                                value={createdAt}
-                                onChange={(e) => setCreatedAt(e.target.value)}
-                            />
+                            <Flex alignItems="center" gap="6px">
+                                <Input
+                                    size="lg"
+                                    placeholder='Data de Criação'
+                                    type='date'
+                                    value={createdAt[0]}
+                                    onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
+                                />
+                                até
+                                <Input
+                                    size="lg"
+                                    placeholder='Data de Criação'
+                                    type='date'
+                                    value={createdAt[1]}
+                                    onChange={(e) => setCreatedAt([createdAt[0], e.target.value])}
+                                />
+                            </Flex>
                         </Box>
                         <Box>
                             <FormLabel fontSize="lg">Data de Atualização</FormLabel>
-                            <Input
-                                size="lg"
-                                placeholder='Data de Atualização'
-                                type='date'
-                                value={updatedAt}
-                                onChange={(e) => setUpdatedAt(e.target.value)}
-                            />
+                            <Flex alignItems="center" gap="6px">
+                                <Input
+                                    size="lg"
+                                    placeholder='Data de Atualização'
+                                    type='date'
+                                    value={updatedAt[0]}
+                                    onChange={(e) => setUpdatedAt([e.target.value, updatedAt[1]])}
+                                />
+                                até
+                                <Input
+                                    size="lg"
+                                    placeholder='Data de Atualização'
+                                    type='date'
+                                    value={updatedAt[1]}
+                                    onChange={(e) => setUpdatedAt([updatedAt[0], e.target.value])}
+                                />
+                            </Flex>
                         </Box>
                     </Grid>
                     <Flex
