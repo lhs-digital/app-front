@@ -5,7 +5,6 @@ import { Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import ListActivities from '../../components/ListActivities/ListActivities';
-import { PieChart } from '@mui/icons-material';
 
 const Home = () => {
   const { user } = useContext(AuthContext)

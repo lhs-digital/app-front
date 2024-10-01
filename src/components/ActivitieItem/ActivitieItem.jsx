@@ -1,4 +1,4 @@
-import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useDisclosure } from '@chakra-ui/react'
+import { Box, Checkbox, Grid, ListIcon, ListItem, Text, useDisclosure } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import ViewActivitie from '../ViewActivitie';
 import ModalCheckActivitie from '../ModalCheckActivitie';

@@ -12,7 +12,6 @@ import {
     FormLabel,
     Input,
     Box,
-    Stack,
     Checkbox,
     Wrap
 } from "@chakra-ui/react"

@@ -9,7 +9,6 @@ import {
     Button,
     Box,
     Checkbox,
-    FormLabel,
     Wrap,
 } from '@chakra-ui/react';
 import api from '../../services/api';
