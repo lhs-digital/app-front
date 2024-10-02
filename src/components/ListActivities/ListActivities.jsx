@@ -215,26 +215,6 @@ const ListActivities = () => {
                                 />
                             </Flex>
                         </Box>
-                        <Box>
-                            <FormLabel fontSize="lg">Data de Atualização</FormLabel>
-                            <Flex alignItems="center" gap="6px">
-                                <Input
-                                    size="lg"
-                                    placeholder='Data de Atualização'
-                                    type='date'
-                                    value={updatedAt[0]}
-                                    onChange={(e) => setUpdatedAt([e.target.value, updatedAt[1]])}
-                                />
-                                até
-                                <Input
-                                    size="lg"
-                                    placeholder='Data de Atualização'
-                                    type='date'
-                                    value={updatedAt[1]}
-                                    onChange={(e) => setUpdatedAt([updatedAt[0], e.target.value])}
-                                />
-                            </Flex>
-                        </Box>
                     </Grid>
                     <Flex
                         justifyContent="space-between"

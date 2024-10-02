@@ -20,6 +20,40 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
         onOpenDelete(); // Abrir o modal de confirmação
     };
 
+    const formattedPriority = (priority) => {
+        switch (priority) {
+            case 1:
+                return "Muito Baixa";
+            case 2:
+                return "Baixa";
+            case 3:
+                return "Média";
+            case 4:
+                return "Alta";
+            case 5:
+                return "Urgente";
+            default:
+                return "Muito Baixa"
+        }
+    };
+
+    const getPriorityColor = (priority) => {
+        switch (priority) {
+            case 1:
+                return { textColor: 'gray.600', bgColor: 'gray.100' }; // Muito Baixa
+            case 2:
+                return { textColor: 'blue.600', bgColor: 'blue.100' }; // Baixa
+            case 3:
+                return { textColor: 'yellow.600', bgColor: 'yellow.100' }; // Média
+            case 4:
+                return { textColor: 'orange.600', bgColor: 'orange.100' }; // Alta
+            case 5:
+                return { textColor: 'red.600', bgColor: 'red.100' }; // Crítica
+            default:
+                return { textColor: 'black', bgColor: 'gray.300' }; // Desconhecida
+        }
+    };
+
     return (
         <ListItem
             display="flex"
@@ -57,8 +91,21 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                     display="flex"
                     flexDirection="column"
                     justifyContent="space-between"
+                    marginLeft="auto"
+                    width="60%"
                 >
-                    <Text fontSize="lg">{activitie?.priority}</Text>
+                    <Tooltip label={`Prioridade: ${formattedPriority(activitie?.priority)}`} aria-label="Prioridade">
+                        <Text
+                            fontSize="lg"
+                            color={getPriorityColor(activitie?.priority).textColor}
+                            bg={getPriorityColor(activitie?.priority).bgColor}
+                            border="1px solid"
+                            textAlign="center"
+                            p={1}
+                            rounded="6px"
+                            title={`Prioridade: ${formattedPriority(activitie?.priority)}`}
+                        ><b>{formattedPriority(activitie?.priority)}</b></Text>
+                    </Tooltip>
 
                     <Box>
                         {
