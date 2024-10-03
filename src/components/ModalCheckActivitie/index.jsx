@@ -18,7 +18,6 @@ const ModalCheckActivitie = ({ id, status, isOpen, onClose, setRefresh, refresh 
             // Chamada para a API para alterar o status da atividade
             await api.put(`/auditing/${id}/toggle_status`);
             toast.success('Status da atividade alterado com sucesso!');
-            
         } catch (error) {
             console.error('Erro ao alterar o status da atividade', error);
         } finally {
