@@ -22,13 +22,13 @@ const PieChart = () => {
                     const percentage0 = ((item.status_0 / total) * 100).toFixed(2);
                     const percentage1 = ((item.status_1 / total) * 100).toFixed(2);
                     return {
-                        labels: ['Concluída', 'Pendentes'],
+                        labels: ['Pendentes', 'Concluídas'],
                         datasets: [
                             {
                                 label: item.column,
                                 data: [item.status_0, item.status_1],
-                                backgroundColor: ['#36A2EB', '#FFCE56'],
-                                hoverBackgroundColor: ['#36A2EB', '#FFCE56'],
+                                backgroundColor: ['#FFCE56', '#36A2EB'],
+                                hoverBackgroundColor: ['#FFCE56', '#36A2EB'],
                             },
                         ],
                         percentages: [percentage0, percentage1],
