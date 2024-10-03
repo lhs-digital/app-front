@@ -34,7 +34,7 @@ const ListActivities = () => {
         const getData = async () => {
             setLoading(true); // Ativar o carregamento
             try {
-                const response = await (api.get(`/auditing?page=${currentPage}&per_page=${per_page}&status=${status ? 1 : 0}`,
+                const response = await (api.get(`/auditing?page=${currentPage}&per_page=${per_page}`,
                     {
                         params: {
                             search: filterParams?.search,
