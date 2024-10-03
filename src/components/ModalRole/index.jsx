@@ -190,16 +190,21 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                                 key={permission.id}
                                                 value={permission.id}
                                                 onChange={(e) => {
+                                                    const permissionId = permission.id;
                                                     if (e.target.checked) {
+                                                        // Adiciona a permissão ao estado se marcada
                                                         setRolePermissions(prevPermissions => [
                                                             ...prevPermissions,
-                                                            permission.id
-                                                        ])
+                                                            permissionId
+                                                        ]);
                                                     } else {
+                                                        // Remove a permissão do estado se desmarcada
                                                         setRolePermissions(prevPermissions =>
-                                                            prevPermissions.filter(item => item !== permission.id))
+                                                            prevPermissions.filter(item => item !== permissionId)
+                                                        );
                                                     }
-                                                }}>
+                                                }}
+                                            >
                                                 {permission.name}
                                             </Checkbox>
                                         ))

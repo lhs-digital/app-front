@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Flex, FormControl, FormLabel, Grid, Heading, Icon, Input, List, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, Text, Tooltip } from '@chakra-ui/react'
+import { Box, Button, ButtonGroup, Flex, FormControl, FormLabel, Grid, Heading, Icon, Input, List, Select, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, Text, Tooltip } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import ActivitieItem from '../ActivitieItem/ActivitieItem';
 import api from '../../services/api';
