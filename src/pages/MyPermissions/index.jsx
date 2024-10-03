@@ -1,18 +1,18 @@
 import React from 'react'
 import Header from '../../components/Header'
-import { Flex, Heading, Stack, Text } from '@chakra-ui/react'
+import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react'
 import { useContext } from 'react'
 import { AuthContext } from '../../contexts/auth'
 
 const MyPermissions = () => {
     const { permissions } = useContext(AuthContext)
-    
+
     return (
         <>
             <Header />
             <Flex
-                align="center"
-                justify="center"
+                alignItems="center"
+                justifyContent="center"
                 flexDirection="column"
                 fontSize="20px"
                 fontFamily="poppins"
@@ -20,22 +20,18 @@ const MyPermissions = () => {
             >
 
                 <Heading>Minhas Permissões:</Heading>
-                <Stack spacing={3} textAlign="center">
-
-                    <Text>
-                        {
-                            permissions.length > 0 ? (
-                                permissions.map(permission => {
-                                    return (
-                                        <Text key={permission.id}>{permission.name}</Text>
-                                    )
-                                })
-                            ) : (
-                                <Text>Você não possui permissões</Text>
-                            )
-                        }
-                    </Text>
-                </Stack>
+                <Text width="60%" textAlign="center">
+                    {permissions.length > 0 ? (
+                        permissions.map((permission, index) => (
+                            <span key={index}>
+                                {permission.name}
+                                {index < permissions.length - 1 && ", "}
+                            </span>
+                        ))
+                    ) : (
+                        <span>Você não possui permissões</span>
+                    )}
+                </Text>
             </Flex>
         </>
     )

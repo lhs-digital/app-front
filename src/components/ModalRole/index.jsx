@@ -22,8 +22,8 @@ import { toast } from 'react-toastify'
 
 
 const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
-    const [name, setName] = useState(dataEdit.name || "")
-    const [nivel, setNivel] = useState(dataEdit.nivel || "")
+    const [name, setName] = useState(dataEdit?.name || "")
+    const [nivel, setNivel] = useState(dataEdit?.nivel)
     const [company, setCompany] = useState(dataEdit.company?.id || "")
     const [rolePermissions, setRolePermissions] = useState([])
     const [permissions, setPermissions] = useState([])
@@ -163,6 +163,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                 <Select
                                     placeholder='Selecione uma opção'
                                     value={company}
+                                    disabled={dataEdit.company?.id}
                                     onChange={handleCompanyChange}
                                 >
                                     {

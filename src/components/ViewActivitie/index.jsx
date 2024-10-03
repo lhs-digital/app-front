@@ -27,6 +27,24 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, isO
             onClose();
         }
     };
+
+    const formattedPriority = (priority) => {
+        switch (priority) {
+            case 1:
+                return "Muito Baixa";
+            case 2:
+                return "Baixa";
+            case 3:
+                return "Média";
+            case 4:
+                return "Alta";
+            case 5:
+                return "Urgente";
+            default:
+                return "Muito Baixa"
+        }
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
@@ -39,7 +57,7 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, isO
                     <Box ><b>Coluna:</b> {selectedActivitie?.column} </Box>
                     <Box ><b>Erro:</b> {selectedActivitie?.message} </Box>
                     <Box ><b>Valor do campo:</b> {selectedActivitie?.value} </Box>
-                    <Box ><b>Prioridade:</b> {selectedActivitie?.priority} </Box>
+                    <Box ><b>Prioridade:</b> {formattedPriority(selectedActivitie?.priority)} </Box>
                     <Box ><b>Status:</b> {
 
                         selectedActivitie?.status === true ? 'Concluída' : 'Pendente'

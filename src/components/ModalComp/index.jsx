@@ -20,9 +20,9 @@ import { toast } from 'react-toastify'
 
 
 const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
-    const [name, setName] = useState(dataEdit.name || "")
-    const [email, setEmail] = useState(dataEdit.email || "")
-    const [role, setRole] = useState(dataEdit.role || "")
+    const [name, setName] = useState(dataEdit?.name || "")
+    const [email, setEmail] = useState(dataEdit?.email || "")
+    const [role, setRole] = useState(dataEdit?.role || "")
     const [company, setCompany] = useState(dataEdit.company?.id || "")
     const [companies, setCompanies] = useState([])
     const [roles, setRoles] = useState([])
@@ -139,6 +139,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                 <Input
                                     type="text"
                                     value={email}
+                                    disabled={dataEdit?.email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
                             </Box>

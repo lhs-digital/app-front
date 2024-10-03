@@ -6,6 +6,7 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import { toast } from 'react-toastify';
+import PieChart from '../PieChart';
 
 const ListActivities = () => {
     const [data, setData] = useState([]);
@@ -18,14 +19,14 @@ const ListActivities = () => {
     const [priorityOrder, setPriorityOrder] = useState("desc");
     const [status, setStatus] = useState(false);
     const [createdAt, setCreatedAt] = useState([]);
-    const [updatedAt, setUpdatedAt] = useState([]);
+    const [per_page, setPer_page] = useState(20);
+    const [priority, setPriority] = useState('');
 
     // Guardar os parâmetros de filtro
     const [filterParams, setFilterParams] = useState({
         search: '',
         priorityOrder: 'desc',
-        createdAt: '',
-        updatedAt: ''
+        createdAt: [],
     });
 
 
@@ -33,16 +34,16 @@ const ListActivities = () => {
         const getData = async () => {
             setLoading(true); // Ativar o carregamento
             try {
-                const response = await (api.get(`/auditing?page=${currentPage}`,
+                const response = await (api.get(`/auditing?page=${currentPage}&per_page=${per_page}&status=${status ? 1 : 0}`,
                     {
                         params: {
-                            search: filterParams.search,
-                            priority_order: filterParams.priorityOrder,
-                            created_at: filterParams.createdAt,
-                            updated_at: filterParams.updatedAt
+                            search: filterParams?.search,
+                            priority_order: filterParams?.priorityOrder,
+                            created_at: [filterParams?.createdAt[0], filterParams?.createdAt[1]],
                         }
                     }
                 ));
+
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
                 setData(response.data.data);
@@ -53,15 +54,14 @@ const ListActivities = () => {
             }
         };
         getData();
-    }, [currentPage, refresh, filterParams]);
+    }, [currentPage, refresh, filterParams, per_page, status]);
 
     const handlePriorityOrder = () => {
         setPriorityOrder(prevOrder => prevOrder === "asc" ? "desc" : "asc");
         setFilterParams({
             search: '',
             priorityOrder: priorityOrder === "asc" ? "desc" : "asc",
-            createdAt: '',
-            updatedAt: ''
+            createdAt: [],
         });
     }
 
@@ -69,48 +69,29 @@ const ListActivities = () => {
         setSearch('');
         setTable('');
         setPriorityOrder('asc');
-        setCreatedAt('');
-        setUpdatedAt('');
+        setCreatedAt([null, null]);
         setFilterParams({
             search: '',
             priorityOrder: 'asc',
-            createdAt: '',
-            updatedAt: ''
+            createdAt: [],
         });
         setCurrentPage(1);
         setRefresh(!refresh);
     }
 
     const handleFilter = () => {
-        if (!table && !search) {
-            return;
-        }
-
-        console.log(createdAt)
-        console.log(updatedAt)
-
         setFilterParams({
             search,
             priorityOrder,
             createdAt,
-            updatedAt
         });
+
         setCurrentPage(1);
         setRefresh(!refresh);
     }
 
-    const handleAud = async () => {
-        try {
-            await api.post('/auditing/start');
-            toast.success('Auditoria disparada com sucesso! Aguarde cerca de 5~7 minutos para atualizar a lista.');
-
-            // espere 7 minutos para dar refresh na lista
-            setTimeout(() => {
-                setRefresh(!refresh);
-            }, 420000);
-        } catch (error) {
-            console.error('Erro ao disparar auditoria', error);
-        }
+    const handlePerPageChange = (e) => {
+        setPer_page(e.target.value);
     }
 
     const renderPagination = () => {
@@ -177,7 +158,11 @@ const ListActivities = () => {
                 gap="12px"
                 flexDirection="column"
                 display="flex"
-            >
+                >
+                <Heading>Gráficos das Atividades</Heading>
+                <PieChart />
+
+
                 <Heading>Lista de Atividades</Heading>
                 <FormControl
                     display="flex" flexDirection="column" gap={4}
@@ -201,7 +186,7 @@ const ListActivities = () => {
                                     size="lg"
                                     placeholder='Data de Criação'
                                     type='date'
-                                    value={createdAt[0]}
+                                    value={createdAt[0] || ""}
                                     onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
                                 />
                                 até
@@ -209,28 +194,8 @@ const ListActivities = () => {
                                     size="lg"
                                     placeholder='Data de Criação'
                                     type='date'
-                                    value={createdAt[1]}
+                                    value={createdAt[1] || ""}
                                     onChange={(e) => setCreatedAt([createdAt[0], e.target.value])}
-                                />
-                            </Flex>
-                        </Box>
-                        <Box>
-                            <FormLabel fontSize="lg">Data de Atualização</FormLabel>
-                            <Flex alignItems="center" gap="6px">
-                                <Input
-                                    size="lg"
-                                    placeholder='Data de Atualização'
-                                    type='date'
-                                    value={updatedAt[0]}
-                                    onChange={(e) => setUpdatedAt([e.target.value, updatedAt[1]])}
-                                />
-                                até
-                                <Input
-                                    size="lg"
-                                    placeholder='Data de Atualização'
-                                    type='date'
-                                    value={updatedAt[1]}
-                                    onChange={(e) => setUpdatedAt([updatedAt[0], e.target.value])}
                                 />
                             </Flex>
                         </Box>
@@ -263,9 +228,8 @@ const ListActivities = () => {
                             </ButtonGroup>
                         </Box>
                     </Flex>
-                    <Button colorScheme="blue" onClick={handleAud}>Disparar Auditoria</Button>
                 </FormControl>
-                <Tabs variant="unstyled" colorScheme="blue">
+                <Tabs variant="unstyled" colorScheme="blue" marginTop="24px">
                     <TabList>
                         <Tab _selected={{ color: 'blue.500' }} color="gray.400" fontSize="lg"
                             onClick={() => setStatus(false)}
@@ -273,6 +237,17 @@ const ListActivities = () => {
                         <Tab _selected={{ color: 'blue.500' }} color="gray.400" fontSize="lg"
                             onClick={() => setStatus(true)}
                         >Concluídas</Tab>
+                        <Select
+                            value={per_page}
+                            marginLeft="auto"
+                            width="150px"
+                            onChange={handlePerPageChange}
+                        >
+                            <option value={10}>10 por página</option>
+                            <option value={20}>20 por página</option>
+                            <option value={30}>30 por página</option>
+                            <option value={50}>50 por página</option>
+                        </Select>
                     </TabList>
                     <TabIndicator mt='-1.5px' height='2px' bg='blue.500' borderRadius='1px' />
 

@@ -7,7 +7,14 @@ import { AuthContext } from '../../contexts/auth';
 import ListActivities from '../../components/ListActivities/ListActivities';
 
 const Home = () => {
-  const { user } = useContext(AuthContext)
+  const { user, permissions } = useContext(AuthContext)
+  const tasksPermissions = ['view_any_tasks', 'update_tasks'];
+
+  const hasPermission = (thePermissions) => {
+      return permissions.some(permission =>
+          thePermissions.includes(permission.name)
+      );
+  }
 
   return (
     <>
@@ -33,7 +40,13 @@ const Home = () => {
 
         </Stack>
 
-        <ListActivities />
+        {
+          hasPermission(tasksPermissions) ?
+            (
+              <ListActivities />
+            ) : null
+        }
+
       </Flex>
     </>
   )
