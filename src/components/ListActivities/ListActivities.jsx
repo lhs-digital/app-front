@@ -5,7 +5,6 @@ import api from '../../services/api';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import { InputLabel } from '@mui/material';
 import { toast } from 'react-toastify';
 import PieChart from '../PieChart';
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import {
     Modal,
     ModalOverlay,
@@ -14,7 +14,6 @@ import {
     Box
 } from "@chakra-ui/react"
 import { useState } from 'react'
-import { Select } from '@chakra-ui/react'
 import api from '../../services/api'
 import { toast } from 'react-toastify'
 

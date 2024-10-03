@@ -12,9 +12,9 @@ import {
     FormLabel,
     Input,
     Box,
-    Stack,
     Checkbox,
-    Wrap
+    Wrap,
+    SimpleGrid
 } from "@chakra-ui/react"
 import { useState } from 'react'
 import { Select } from '@chakra-ui/react'
@@ -50,6 +50,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
             try {
                 const responseCompany = await (api.get(`/company/get_companies`));
                 setCompanies(responseCompany.data.data);
+
                 const responsePermissions = await (api.get(`/permissions`));
                 setPermissions(responsePermissions.data.data);
 
@@ -108,12 +109,6 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
             return;
         }
 
-
-        // if (cnpjAlreadyExists()) {
-        //     toast.warning('CNPJ já cadastrado!')
-        //     return
-        // }
-
         if (dataEdit.id) {
             updateUser()
         } else {
@@ -123,13 +118,23 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
         onClose()
     }
 
-    // const cnpjAlreadyExists = () => {
-    //     if (dataEdit.cnpj !== cnpj && data?.length) {
-    //         return data.find((item) => item.cnpj === cnpj)
-    //     }
+    const handlePermissions = (e, permissionId) => {
 
-    //     return false;
-    // }
+        if (e.target.checked) {
+            // Adiciona a permissão ao estado se marcada
+            setRolePermissions(prevPermissions => [
+                ...prevPermissions,
+                permissionId
+            ]);
+        } else {
+            // Remove a permissão do estado se desmarcada
+            setRolePermissions(prevPermissions =>
+                prevPermissions.filter(item => item !== permissionId)
+            );
+        }
+        console.log(permissionId);
+        console.log(rolePermissions);
+    }
 
     return (
         <>
@@ -144,24 +149,27 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                     <ModalBody>
                         <FormControl display="flex" flexDirection="column" gap={4}>
                             <Box>
-                                <FormLabel>Nome *</FormLabel>
+                                <FormLabel htmlFor='name'>Nome *</FormLabel>
                                 <Input
+                                    id="name"
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                 />
                             </Box>
                             <Box>
-                                <FormLabel>Nível *</FormLabel>
+                                <FormLabel htmlFor='nivel'>Nível *</FormLabel>
                                 <Input
+                                    id="nivel"
                                     type="number"
                                     value={nivel}
                                     onChange={(e) => setNivel(e.target.value)}
                                 />
                             </Box>
                             <Box>
-                                <FormLabel>Empresa</FormLabel>
+                                <FormLabel htmlFor='company'>Empresa</FormLabel>
                                 <Select
+                                    id='company'
                                     placeholder='Selecione uma opção'
                                     value={company}
                                     disabled={dataEdit.company?.id}
@@ -175,37 +183,27 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                 </Select>
                             </Box>
                             <Box>
-                                <FormLabel>Permissões</FormLabel>
-                                <Wrap spacing={5} direction='row'>
+                                <FormLabel htmlFor='permissions'>Permissões</FormLabel>
+                                <SimpleGrid columns={2} spacing={5}>
                                     <Checkbox
+                                        id="selectAll"
                                         isChecked={selectAll}
                                         onChange={handleSelectAll}
                                         width="100%"
-                                    >Selecionar todas as permissões</Checkbox>
-                                    {
-                                        // Se a permissão estiver no array de permissões da role, o checkbox estará marcado
-                                        // Se não estiver, o checkbox estará desmarcado
-                                        permissions.map((permission) => (
-                                            <Checkbox
-                                                isChecked={rolePermissions.includes(permission.id)}
-                                                key={permission.id}
-                                                value={permission.id}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        setRolePermissions(prevPermissions => [
-                                                            ...prevPermissions,
-                                                            permission.id
-                                                        ])
-                                                    } else {
-                                                        setRolePermissions(prevPermissions =>
-                                                            prevPermissions.filter(item => item !== permission.id))
-                                                    }
-                                                }}>
-                                                {permission.name}
-                                            </Checkbox>
-                                        ))
-                                    }
-                                </Wrap>
+                                    >
+                                        Selecionar todas as permissões
+                                    </Checkbox>
+                                    {permissions.map((permission) => (
+                                        <Checkbox
+                                            id={permission?.name}
+                                            isChecked={rolePermissions.includes(permission.id)}
+                                            key={permission.id}
+                                            onChange={(e) => handlePermissions(e, permission.id)}
+                                        >
+                                            {permission.name}
+                                        </Checkbox>
+                                    ))}
+                                </SimpleGrid>
                             </Box>
                         </FormControl>
                     </ModalBody>
