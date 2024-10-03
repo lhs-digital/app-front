@@ -69,9 +69,14 @@ const Sidebar = ({ active }) => {
                 </Link>
 
 
-                <Link to="/logs">
-                    <SidebarItem Icon={FaBook} Text="Logs" />
-                </Link>
+                {hasPermission("view_any_logs") ?
+                    (
+                        <Link to="/logs">
+                            <SidebarItem Icon={FaBook} Text="Logs" />
+                        </Link>
+                    )
+                    : null
+                }
 
             </Content>
         </Container>
