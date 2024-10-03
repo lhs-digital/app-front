@@ -6,7 +6,7 @@ import { Box, Text, Flex, VStack, Grid } from '@chakra-ui/react';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PieChart = () => {
+const PieChart = ({refresh}) => {
     const [chartsData, setChartsData] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -44,7 +44,7 @@ const PieChart = () => {
             }
         };
         getData();
-    }, []);
+    }, [refresh]);
 
     if (loading) return <Text>Carregando...</Text>;
 

@@ -158,9 +158,12 @@ const ListActivities = () => {
                 gap="12px"
                 flexDirection="column"
                 display="flex"
-                >
+            >
                 <Heading>Gráficos das Atividades</Heading>
-                <PieChart />
+                <PieChart
+                    refresh={refresh}
+                    setRefresh={setRefresh}
+                />
 
 
                 <Heading>Lista de Atividades</Heading>
