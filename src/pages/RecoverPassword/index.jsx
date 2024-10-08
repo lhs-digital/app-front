@@ -4,6 +4,7 @@ import logo from '../../assets/logo.jpg'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../../services/api'
+import { Heading, Text } from '@chakra-ui/react'
 
 const RecoverPassword = () => {
   const [email, setEmail] = useState('')
@@ -41,8 +42,8 @@ const RecoverPassword = () => {
       <div className="login">
         <div className="login-area">
           <img src={logo} alt="Logo do App Provedores" />
-          <h1>App Provedores</h1>
-          <p>Sistema de Gerenciamento de Provedores</p>
+          <Heading>App Provedores</Heading>
+          <Text color="white">Sistema de Gerenciamento de Provedores</Text>
         </div>
 
         <form onSubmit={handleSubmit}>
