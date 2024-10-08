@@ -13,7 +13,9 @@ import {
     Td,
     useBreakpointValue,
     Input,
-    Heading
+    Heading,
+    Divider,
+    Stack
 } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import ModalComp from '../../components/ModalComp';
@@ -92,7 +94,24 @@ const Companies = () => {
     return (
         <>
             <Header />
-            <Heading textAlign='center' mt='12px'>Gerenciamento de Empresas</Heading>
+            <Flex
+                align="center"
+                justify="center"
+                flexDirection="column"
+                fontSize="20px"
+                fontFamily="poppins"
+                mt="20px"
+                gap="24px"
+                width="100%"
+                paddingX="24px"
+            >
+                <Stack width="800px">
+
+                    <Heading mt='12px'>Gerenciamento de Empresas</Heading>
+                    <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
+                    <Heading fontSize="lg" fontWeight="regular" color="gray.500">Administração e supervisão das informações empresariais</Heading>
+                </Stack>
+            </Flex>
             <Flex
                 align="center"
                 justify="center"

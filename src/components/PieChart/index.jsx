@@ -2,11 +2,11 @@ import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import api from '../../services/api';
 import { useEffect, useState } from 'react';
-import { Box, Text, Flex, VStack, Grid } from '@chakra-ui/react';
+import { Box, Text, Flex, VStack, Grid, Select, FormLabel } from '@chakra-ui/react';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PieChart = ({refresh}) => {
+const PieChart = ({ refresh }) => {
     const [chartsData, setChartsData] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -49,15 +49,24 @@ const PieChart = ({refresh}) => {
     if (loading) return <Text>Carregando...</Text>;
 
     return (
-        <Box display="flex" paddingBottom="42px" overflowX="auto" overflowY="hidden">
-            {chartsData.map((data, index) => (
-                <Box key={index} width="240px" height="240px" margin="20px"> {/* Ajuste a largura aqui */}
-                    <Flex direction="column" alignItems="center">
-                        <Text fontSize="lg" fontWeight="bold" mb="2">Coluna: {data.datasets[0].label}</Text>
-                        <Pie data={data} />
-                    </Flex>
-                </Box>
-            ))}
+        <Box display="flex" flexDirection="column">
+            <Box>
+                <FormLabel fontSize="lg">Selecione a Tabela:</FormLabel>
+                <Select size="lg">
+                    <option>clients</option>
+                </Select>
+            </Box>
+            <Box display="flex" paddingBottom="42px" overflowX="auto" overflowY="hidden">
+
+                {chartsData.map((data, index) => (
+                    <Box key={index} width="240px" height="240px" margin="20px"> {/* Ajuste a largura aqui */}
+                        <Flex direction="column" alignItems="center">
+                            <Text fontSize="lg" fontWeight="bold" mb="2">Coluna: {data.datasets[0].label}</Text>
+                            <Pie data={data} />
+                        </Flex>
+                    </Box>
+                ))}
+            </Box>
         </Box>
     );
 };
