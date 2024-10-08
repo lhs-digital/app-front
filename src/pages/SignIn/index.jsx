@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../contexts/auth'
+import { Heading, Text } from '@chakra-ui/react'
 
 const SignIn = () => {
   const [email, setEmail] = useState('')
@@ -40,8 +41,8 @@ const SignIn = () => {
       <div className="login">
         <div className="login-area">
           <img src={logo} alt="Logo do App Provedores" />
-          <h1>App Provedores</h1>
-          <p>Sistema de Gerenciamento de Provedores</p>
+          <Heading>App Provedores</Heading>
+          <Text color="white">Sistema de Gerenciamento de Provedores</Text>
         </div>
 
         <form onSubmit={Login}>
