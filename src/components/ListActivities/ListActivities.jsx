@@ -18,7 +18,7 @@ const ListActivities = () => {
     const [status, setStatus] = useState(null);
     const [createdAt, setCreatedAt] = useState([]);
     const [per_page, setPer_page] = useState(20);
-    const [priority, setPriority] = useState('');
+    const [priority, setPriority] = useState(null);
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
@@ -27,7 +27,8 @@ const ListActivities = () => {
         search: '',
         priorityOrder: 'desc',
         createdAt: [],
-        status: null
+        status: null,
+        priority: null
     });
 
     useEffect(() => {
@@ -40,6 +41,7 @@ const ListActivities = () => {
                                 search: filterParams?.search,
                                 priority_order: filterParams?.priorityOrder,
                                 ...(status !== null && { status: status }),
+                                priority: filterParams?.priority,
                                 created_at: [filterParams?.createdAt[0], filterParams?.createdAt[1]],
                             }
                         }
@@ -73,6 +75,7 @@ const ListActivities = () => {
             search: '',
             status: null,
             priorityOrder: newOrder,
+            priority: null,
             createdAt: [],
         });
     }
@@ -86,6 +89,7 @@ const ListActivities = () => {
             search: '',
             priorityOrder: 'desc',
             status: null,
+            priority: null,
             createdAt: [],
         });
         setCurrentPage(1);
@@ -96,6 +100,7 @@ const ListActivities = () => {
         setFilterParams({
             search,
             priorityOrder,
+            priority,
             status: null,
             createdAt,
         });
@@ -217,6 +222,22 @@ const ListActivities = () => {
                             </Select>
                         </Box>
 
+                        <Box>
+                            <FormLabel fontSize="lg">Selecione a Prioridade:</FormLabel>
+                            <Select
+                                size="lg"
+                                value={priority}
+                                onChange={(e) => setPriority(e.target.value)}
+                            >
+                                <option value={null}>Todas</option>
+                                <option value={1}>Muito Baixa</option>
+                                <option value={2}>Baixa</option>
+                                <option value={3}>Média</option>
+                                <option value={4}>Alta</option>
+                                <option value={5}>Urgente</option>
+                            </Select>
+                        </Box>
+
                         <Flex
                             justifyContent="space-between"
                             alignItems="center"
@@ -267,7 +288,7 @@ const ListActivities = () => {
                             ))
                         }
                     </List>
-                    {/* Renderizando a paginação */}
+
                     <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
                 </Box>
             </Box>
