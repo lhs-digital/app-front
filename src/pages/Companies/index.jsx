@@ -12,22 +12,19 @@ import {
     Tbody,
     Td,
     useBreakpointValue,
-    Input,
-    Heading,
-    Divider,
-    Stack
+    Input
 } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
-import ModalComp from '../../components/ModalComp';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
 import Header from '../../components/Header';
 import ModalDelete from '../../components/ModalDelete';
-import ModalView from '../../components/ModalView';
 import ModalViewCompany from '../../components/ModalViewCompany';
 import ModalCompany from '../../components/ModalCompany';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/auth';
+import Title from '../../components/Title';
+import Pagination from '../../components/Pagination';
 
 const Companies = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -94,24 +91,9 @@ const Companies = () => {
     return (
         <>
             <Header />
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
-                mt="20px"
-                gap="24px"
-                width="100%"
-                paddingX="24px"
-            >
-                <Stack width="800px">
 
-                    <Heading mt='12px'>Gerenciamento de Empresas</Heading>
-                    <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
-                    <Heading fontSize="lg" fontWeight="regular" color="gray.500">Administração e supervisão das informações empresariais</Heading>
-                </Stack>
-            </Flex>
+            <Title title="Gerenciamento de Empresas" subtitle="Administração e supervisão das informações empresariais"/>
+
             <Flex
                 align="center"
                 justify="center"
@@ -220,19 +202,7 @@ const Companies = () => {
                     />
                 )}
 
-                <Box maxW={800} py={5} px={2}>
-                    {Array.from({ length: lastPage }, (_, i) => (
-                        <Button
-                            ml="6px"
-                            color={currentPage === i + 1 ? 'white' : 'black'}
-                            backgroundColor={currentPage === i + 1 ? 'blue.500' : 'gray.200'}
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                        >
-                            {i + 1}
-                        </Button>
-                    ))}
-                </Box>
+                <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
             </Flex>
         </>
     );

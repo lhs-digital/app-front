@@ -3,7 +3,7 @@ import axios from "axios";
 export const TOKEN_KEY = "@app-provedores-token";
 
 const api = axios.create({
-    baseURL: "http://back.lighthouse.radbios.com/api",
+    baseURL: "https://back.lighthouse.radbios.com/api",
 });
 
 api.interceptors.request.use(async (config) => {

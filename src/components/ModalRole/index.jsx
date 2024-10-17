@@ -13,7 +13,6 @@ import {
     Input,
     Box,
     Checkbox,
-    Wrap,
     SimpleGrid
 } from "@chakra-ui/react"
 import { useState } from 'react'
@@ -132,8 +131,6 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                 prevPermissions.filter(item => item !== permissionId)
             );
         }
-        console.log(permissionId);
-        console.log(rolePermissions);
     }
 
     return (
