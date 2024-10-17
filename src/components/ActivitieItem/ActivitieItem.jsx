@@ -1,4 +1,4 @@
-import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useDisclosure } from '@chakra-ui/react'
+import { Box, Checkbox, Divider, Grid, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import ViewActivitie from '../ViewActivitie';
 import ModalCheckActivitie from '../ModalCheckActivitie';
@@ -8,6 +8,8 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
     const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const [dataView, setDataView] = useState(activitie);
     const dateFormatted = (date) => new Date(date).toLocaleDateString('pt-BR');
+    const isMobile = useBreakpointValue({ base: true, lg: false });
+    const theme = useTheme();
 
     const handleView = () => {
         // Simulando o conjunto de dados da atividade
@@ -60,6 +62,8 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             alignItems="center"
             justifyContent="center"
             border="1px solid #e2e8f0"
+            borderLeft={`8px solid ${activitie?.status === true ? theme.colors.green[500] : theme.colors.orange[500]
+                }`}
             rounded="md"
             padding="12px"
             _hover={{ backgroundColor: "gray.50" }}
@@ -71,7 +75,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                     onChange={handleDelete}
                     isChecked={activitie?.status}
                     paddingRight="12px"
-                    title="Marque para concluir a atividade"
+                    title={activitie?.status === true ? "Marque para alterar o status da atividade para: Pendente" : "Marque para alterar o status da atividade para: Concluída"}
                 />
             </Tooltip>
             <Grid
@@ -100,17 +104,17 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 >
                     <Box
                         display="flex"
+                        flexDirection={isMobile ? "column" : "flex"}
                         justifyContent="flex-end"
-                        alignItems="center"
+                        alignItems="flex-end"
                         marginBottom="10px"
                         gap="6px"
                     >
                         <Tooltip label={`Prioridade: ${formattedPriority(activitie?.priority)}`} aria-label="Prioridade">
                             <Text
-                                fontSize="lg"
+                                fontSize={isMobile ? "sm" : "md"}
                                 color={getPriorityColor(activitie?.priority).textColor}
                                 bg={getPriorityColor(activitie?.priority).bgColor}
-                                border="1px solid"
                                 textAlign="center"
                                 p={1}
                                 rounded="6px"

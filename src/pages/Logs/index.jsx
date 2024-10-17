@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../../components/Header'
-import { Box, Button, Divider, Flex, Heading, Input, Stack, Table, Tbody, Td, Th, Thead, Tr, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Button, Divider, Flex, Heading, Icon, Input, Stack, Table, Tbody, Td, Text, Th, Thead, Tr, useBreakpointValue } from '@chakra-ui/react'
 import api from '../../services/api';
+import Title from '../../components/Title';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
+import Pagination from '../../components/Pagination';
 
 const Logs = () => {
     const isMobile = useBreakpointValue({ base: true, lg: false });
@@ -28,29 +32,14 @@ const Logs = () => {
             }
         };
         getData();
-    }, [data, currentPage, lastPage]);
+    }, [currentPage]);
 
     return (
         <>
             <Header></Header>
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
-                mt="20px"
-                gap="24px"
-                width="100%"
-                paddingX="24px"
-            >
-                <Stack width="1200px">
 
-                    <Heading mt='12px'>Logs do Sistema</Heading>
-                    <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
-                    <Heading fontSize="lg" fontWeight="regular" color="gray.500">Registro detalhado de atividades e eventos do sistema</Heading>
-                </Stack>
-            </Flex>
+            <Title title="Logs do Sistema" subtitle="Registro detalhado de atividades e eventos do sistema" />
+
             <Flex
                 align="center"
                 justify="center"
@@ -60,7 +49,7 @@ const Logs = () => {
             >
 
 
-                <Box maxW={1200} w="100%" py={10} >
+                <Box maxW={800} w="100%" py={10} >
                     <Input
                         mt={4}
                         placeholder="Buscar Logs"
@@ -68,7 +57,7 @@ const Logs = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Box overflowY="auto" height="100%">
+                    <Box overflowX="auto" height="100%">
                         <Table mt="6" overflowX="auto">
                             <Thead>
                                 <Tr>
@@ -114,19 +103,7 @@ const Logs = () => {
                     </Box>
                 </Box>
 
-                <Box maxW={800} py={5} px={2}>
-                    {Array.from({ length: lastPage }, (_, i) => (
-                        <Button
-                            ml="6px"
-                            color={currentPage === i + 1 ? 'white' : 'black'}
-                            backgroundColor={currentPage === i + 1 ? 'blue.500' : 'gray.200'}
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                        >
-                            {i + 1}
-                        </Button>
-                    ))}
-                </Box>
+               <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage}/>
             </Flex>
         </>
     )
