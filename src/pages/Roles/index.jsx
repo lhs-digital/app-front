@@ -13,12 +13,8 @@ import {
     Td,
     useBreakpointValue,
     Input,
-    Heading,
-    Stack,
-    Divider
 } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
-import ModalComp from '../../components/ModalComp';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
 import Header from '../../components/Header';
@@ -27,6 +23,8 @@ import ModalRole from '../../components/ModalRole';
 import ModalViewRole from '../../components/ModalViewRole';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/auth';
+import Title from '../../components/Title'
+import Pagination from '../../components/Pagination';
 
 const Roles = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -88,24 +86,9 @@ const Roles = () => {
     return (
         <>
             <Header />
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
-                mt="20px"
-                gap="24px"
-                width="100%"
-                paddingX="24px"
-            >
-                <Stack width="800px">
 
-                    <Heading mt='12px'>Gerenciamento de Roles</Heading>
-                    <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
-                    <Heading fontSize="lg" fontWeight="regular" color="gray.500">Administração e atribuição de permissões e funções de usuários</Heading>
-                </Stack>
-            </Flex>
+            <Title title="Gerenciamento de Roles" subtitle="Administração e atribuição de permissões e funções de usuários"/>
+
             <Flex
                 align="center"
                 justify="center"
@@ -216,19 +199,7 @@ const Roles = () => {
                     />
                 )}
 
-                <Box maxW={800} py={5} px={2}>
-                    {Array.from({ length: lastPage }, (_, i) => (
-                        <Button
-                            ml="6px"
-                            color={currentPage === i + 1 ? 'white' : 'black'}
-                            backgroundColor={currentPage === i + 1 ? 'blue.500' : 'gray.200'}
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                        >
-                            {i + 1}
-                        </Button>
-                    ))}
-                </Box>
+                <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
             </Flex>
         </>
     );

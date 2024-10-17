@@ -12,10 +12,7 @@ import {
     Tbody,
     Td,
     useBreakpointValue,
-    Input,
-    Heading,
-    Divider,
-    Stack
+    Input
 } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import ModalComp from '../../components/ModalComp';
@@ -26,6 +23,8 @@ import ModalDelete from '../../components/ModalDelete';
 import ModalView from '../../components/ModalView';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/auth';
+import Title from '../../components/Title';
+import Pagination from '../../components/Pagination';
 
 const Users = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -92,25 +91,9 @@ const Users = () => {
     return (
         <>
             <Header />
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
-                mt="20px"
-                gap="24px"
-                width="100%"
-                paddingX="24px"
-            >
-                <Stack width="800px">
 
-                    <Heading mt='12px'>Gerenciamento de Usuários</Heading>
-                    <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
-                    <Heading fontSize="lg" fontWeight="regular" color="gray.500">Administre, edite e remova usuários conforme necessário</Heading>
-                </Stack>
-            </Flex>
-
+            <Title title="Gerenciamento de Usuários" subtitle="Administre, edite e remova usuários conforme necessário"/>
+            
             <Flex
                 align="center"
                 justify="center"
@@ -223,19 +206,7 @@ const Users = () => {
                     />
                 )}
 
-                <Box maxW={800} py={5} px={2}>
-                    {Array.from({ length: lastPage }, (_, i) => (
-                        <Button
-                            ml="6px"
-                            color={currentPage === i + 1 ? 'white' : 'black'}
-                            backgroundColor={currentPage === i + 1 ? 'blue.500' : 'gray.200'}
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                        >
-                            {i + 1}
-                        </Button>
-                    ))}
-                </Box>
+                <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
             </Flex>
         </>
     );
