@@ -1,14 +1,17 @@
-import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useDisclosure, useTheme } from '@chakra-ui/react'
+import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import ViewActivitie from '../ViewActivitie';
 import ModalCheckActivitie from '../ModalCheckActivitie';
-import { dateFormatted } from '../../services/utils';
+import { dateFormatted, formattedPriority, getPriorityColor } from '../../services/utils';
 
-const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
+const ActivitieItemAll = ({ activitie, setRefresh, refresh }) => {
     const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
     const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const [dataView, setDataView] = useState(activitie);
     const theme = useTheme();
+
+    const isMobile = useBreakpointValue({ base: true, lg: false });
+
 
     const handleView = () => {
         const selectedActivitie = dataView;
@@ -30,7 +33,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 }`}
             rounded="md"
             padding="12px"
-            background="white"
             _hover={{ backgroundColor: "gray.50" }}
         >
             <Tooltip >
@@ -44,7 +46,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 />
             </Tooltip>
             <Grid
-                templateColumns="1fr"
+                templateColumns="1fr 1fr"
                 flex="1"
                 onClick={handleView}
                 cursor="pointer"
@@ -54,10 +56,11 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
 
             >
                 <Box>
+                    <Text fontWeight="bold" fontSize="lg"> Tabela: <Text as="cite" fontWeight="normal">clients</Text></Text>
                     <Text fontWeight="bold" fontSize="lg">
                         ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.primary_key_value}</Text>
                     </Text>
-                    <Text fontWeight="bold" fontSize='md'>Campo inválido: <Text as="cite" fontWeight="normal">{activitie?.column}</Text></Text>
+                    <Text fontWeight="bold" fontSize='lg'>Campo inválido: <Text as="cite" fontWeight="normal">{activitie?.column}</Text></Text>
                 </Box>
                 <Box
                     textAlign="right"
@@ -66,6 +69,28 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                     justifyContent="space-between"
                     marginLeft="auto"
                 >
+                    <Box
+                        display="flex"
+                        flexDirection={isMobile ? "column" : "flex"}
+                        justifyContent="center"
+                        alignItems="center"
+                        width={isMobile ? "100%" : "auto"}
+                        marginBottom="10px"
+                        gap="6px"
+                    >
+                        <Tooltip label={`Prioridade: ${formattedPriority(activitie?.priority)}`} aria-label="Prioridade">
+                            <Text
+                                fontSize={isMobile ? "sm" : "md"}
+                                color={getPriorityColor(activitie?.priority).textColor}
+                                bg={getPriorityColor(activitie?.priority).bgColor}
+                                textAlign="center"
+                                p={1}
+                                width="100%"
+                                rounded="6px"
+                                title={`Prioridade: ${formattedPriority(activitie?.priority)}`}
+                            >Prioridade: <b>{formattedPriority(activitie?.priority)}</b></Text>
+                        </Tooltip>
+                    </Box>
 
                     <Box>
                         {
@@ -97,7 +122,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             {isViewOpen && (
                 <ViewActivitie
                     selectedActivitie={dataView}
-                    setDataView={setDataView}
                     id={activitie?.id}
                     status={activitie?.status}
                     isOpen={isViewOpen}
@@ -110,4 +134,4 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
     )
 }
 
-export default ActivitieItem
+export default ActivitieItemAll

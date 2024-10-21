@@ -36,3 +36,20 @@ ul {
 button {
     cursor: pointer;
 }
+
+/* Aplica a customização do scroll no WebKit */
+::-webkit-scrollbar {
+    width: 6px; /* Define a largura da barra de rolagem */
+    height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #adb6bf; /* Cor do thumb (a parte que se move) */
+    border-radius: 10px; /* Deixa a barra mais arredondada */
+}
+
+::-webkit-scrollbar-track {
+
+    background-color: transparent; /* Cor do fundo da barra de rolagem */
+}
+
