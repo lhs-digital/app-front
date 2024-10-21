@@ -1,14 +1,13 @@
-import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
+import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useDisclosure, useTheme } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import ViewActivitie from '../ViewActivitie';
 import ModalCheckActivitie from '../ModalCheckActivitie';
-import { dateFormatted, formattedPriority, getPriorityColor } from '../../services/utils';
+import { dateFormatted } from '../../services/utils';
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
     const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
     const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const [dataView, setDataView] = useState(activitie);
-    const isMobile = useBreakpointValue({ base: true, lg: false });
     const theme = useTheme();
 
     const handleView = () => {
@@ -27,10 +26,11 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             alignItems="center"
             justifyContent="center"
             border="1px solid #e2e8f0"
-            borderLeft={`8px solid ${activitie?.status === true ? theme.colors.green[500] : theme.colors.orange[500]
+            borderLeft={`4px solid ${activitie?.status === true ? theme.colors.green[500] : theme.colors.orange[500]
                 }`}
             rounded="md"
             padding="12px"
+            background="white"
             _hover={{ backgroundColor: "gray.50" }}
         >
             <Tooltip >
@@ -44,21 +44,20 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 />
             </Tooltip>
             <Grid
-                templateColumns="1fr 1fr"
+                templateColumns="1fr"
                 flex="1"
                 onClick={handleView}
                 cursor="pointer"
-                gap={0}
+                gap={3}
                 padding={0}
                 margin={0}
 
             >
                 <Box>
-                    <Text fontWeight="bold" fontSize="xl"> Tabela: <Text as="cite" fontWeight="normal">clients</Text></Text>
                     <Text fontWeight="bold" fontSize="lg">
                         ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.primary_key_value}</Text>
                     </Text>
-                    <Text fontWeight="bold" fontSize='lg'>Campo inválido: <Text as="cite" fontWeight="normal">{activitie?.column}</Text></Text>
+                    <Text fontWeight="bold" fontSize='md'>Campo inválido: <Text as="cite" fontWeight="normal">{activitie?.column}</Text></Text>
                 </Box>
                 <Box
                     textAlign="right"
@@ -67,26 +66,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                     justifyContent="space-between"
                     marginLeft="auto"
                 >
-                    <Box
-                        display="flex"
-                        flexDirection={isMobile ? "column" : "flex"}
-                        justifyContent="flex-end"
-                        alignItems="flex-end"
-                        marginBottom="10px"
-                        gap="6px"
-                    >
-                        <Tooltip label={`Prioridade: ${formattedPriority(activitie?.priority)}`} aria-label="Prioridade">
-                            <Text
-                                fontSize={isMobile ? "sm" : "md"}
-                                color={getPriorityColor(activitie?.priority).textColor}
-                                bg={getPriorityColor(activitie?.priority).bgColor}
-                                textAlign="center"
-                                p={1}
-                                rounded="6px"
-                                title={`Prioridade: ${formattedPriority(activitie?.priority)}`}
-                            >Prioridade: <b>{formattedPriority(activitie?.priority)}</b></Text>
-                        </Tooltip>
-                    </Box>
 
                     <Box>
                         {
@@ -118,6 +97,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             {isViewOpen && (
                 <ViewActivitie
                     selectedActivitie={dataView}
+                    setDataView={setDataView}
                     id={activitie?.id}
                     status={activitie?.status}
                     isOpen={isViewOpen}

@@ -1,55 +1,55 @@
-import { Box, Button, ButtonGroup, Divider, Flex, FormControl, FormLabel, Grid, Heading, Input, List, Select, Text, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Button, ButtonGroup, Divider, Flex, FormControl, FormLabel, Grid, Heading, Input, List, Select, Text, Tooltip, useBreakpointValue } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import ActivitieItem from '../ActivitieItem/ActivitieItem';
 import api from '../../services/api';
-import { toast } from 'react-toastify';
 import PieChart from '../PieChart';
 import Pagination from '../Pagination';
+import { formattedPriority, getPriorityColor } from '../../services/utils';
+import { Link } from 'react-router-dom';
 
 const ListActivities = () => {
-    const [data, setData] = useState([]);
+    const [dataPriorityOne, setDataPriorityOne] = useState([]);
+    const [dataPriorityTwo, setDataPriorityTwo] = useState([]);
+    const [dataPriorityThree, setDataPriorityThree] = useState([]);
     const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
-    const [currentPage, setCurrentPage] = useState(1);
-    const [lastPage, setLastPage] = useState(null);
     const [refresh, setRefresh] = useState(false);
-    const [search, setSearch] = useState('');
-    const [table, setTable] = useState('');
-    const [priorityOrder, setPriorityOrder] = useState("desc");
     const [status, setStatus] = useState(null);
-    const [createdAt, setCreatedAt] = useState([]);
-    const [per_page, setPer_page] = useState(20);
-    const [priority, setPriority] = useState(null);
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
-
-    // Guardar os parâmetros de filtro
-    const [filterParams, setFilterParams] = useState({
-        search: '',
-        priorityOrder: 'desc',
-        createdAt: [],
-        status: null,
-        priority: null
-    });
 
     useEffect(() => {
         const getData = async () => {
             setLoading(true); // Ativar o carregamento
             try {
-                    const response = await (api.get(`/auditing?page=${currentPage}&per_page=${per_page}`,
-                        {
-                            params: {
-                                search: filterParams?.search,
-                                priority_order: filterParams?.priorityOrder,
-                                ...(status !== null && { status: status }),
-                                priority: filterParams?.priority,
-                                created_at: [filterParams?.createdAt[0], filterParams?.createdAt[1]],
-                            }
+                const responsePriorityOne = await (api.get(`/auditing?per_page=${50}`,
+                    {
+                        params: {
+                            priority: 1,
                         }
-                    ));
+                    }
+                ));
 
-                setCurrentPage(response.data.meta.current_page);
-                setLastPage(response.data.meta.last_page);
-                setData(response.data.data);
+                setDataPriorityOne(responsePriorityOne.data.data);
+
+                const responsePriorityTwo = await (api.get(`/auditing?per_page=${50}`,
+                    {
+                        params: {
+                            priority: 2,
+                        }
+                    }
+                ));
+
+                setDataPriorityTwo(responsePriorityTwo.data.data);
+
+                const responsePriorityThree = await (api.get(`/auditing?per_page=${50}`,
+                    {
+                        params: {
+                            priority: 3,
+                        }
+                    }
+                ));
+
+                setDataPriorityThree(responsePriorityThree.data.data);
             } catch (error) {
                 console.error('Erro ao verificar lista de usuários', error);
             } finally {
@@ -57,61 +57,7 @@ const ListActivities = () => {
             }
         };
         getData();
-    }, [currentPage, refresh, filterParams, per_page, status]);
-
-    const handleStatusChange = (e) => {
-        const newStatus = e.target.value;
-        setStatus(newStatus);
-        setFilterParams((prev) => ({
-            ...prev,
-            status: newStatus,
-        }));
-    };
-
-    const handlePriorityOrder = (event) => {
-        const newOrder = event.target.value;
-        setPriorityOrder(newOrder);
-        setFilterParams({
-            search: '',
-            status: null,
-            priorityOrder: newOrder,
-            priority: null,
-            createdAt: [],
-        });
-    }
-
-    const handleClean = () => {
-        setSearch('');
-        setTable('');
-        setPriorityOrder('desc');
-        setCreatedAt([null, null]);
-        setFilterParams({
-            search: '',
-            priorityOrder: 'desc',
-            status: null,
-            priority: null,
-            createdAt: [],
-        });
-        setCurrentPage(1);
-        setRefresh(!refresh);
-    }
-
-    const handleFilter = () => {
-        setFilterParams({
-            search,
-            priorityOrder,
-            priority,
-            status: null,
-            createdAt,
-        });
-
-        setCurrentPage(1);
-        setRefresh(!refresh);
-    }
-
-    const handlePerPageChange = (e) => {
-        setPer_page(e.target.value);
-    }
+    }, [refresh, status]);
 
     return (
         <>
@@ -148,148 +94,188 @@ const ListActivities = () => {
                     display="flex"
                 >
 
+                    <Flex alignItems="flex-end" justifyContent="space-between" >
 
-                    <Heading >Lista de Atividades</Heading>
-                    <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
-                    <Heading fontSize="lg" fontWeight="regular" color="gray.500">
-                        Gerencie todas as suas atividades pendentes e concluídas
-                    </Heading>
-
-                    <FormControl
-                        display="flex" flexDirection="column" gap={4} marginBottom="24px"
-                    >
-                        <Box>
-                            <FormLabel fontSize="lg">Selecione a Tabela:</FormLabel>
-                            <Select size="lg">
-                                <option>clients</option>
-                            </Select>
-                        </Box>
-                        <Box>
-                            <FormLabel fontSize="lg">Pesquise por:</FormLabel>
-                            <Input
-                                mt="0px"
-                                placeholder="ID do cliente, Campo inválido, Valor do campo inválido e Mensagem de erro"
-                                size="lg"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </Box>
-
-                        <Grid
-                            templateColumns="1fr"
-                            gap={4}
-                        >
-                            <Box>
-                                <FormLabel fontSize="lg">Data da Auditoria</FormLabel>
-                                <Flex alignItems="center" gap="6px">
-                                    <Input
-                                        size="lg"
-                                        placeholder='Data de Auditoria'
-                                        type='date'
-                                        value={createdAt[0] || ""}
-                                        onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
-                                    />
-                                    até
-                                    <Input
-                                        size="lg"
-                                        placeholder='Data de Auditoria'
-                                        type='date'
-                                        value={createdAt[1] || ""}
-                                        onChange={(e) => setCreatedAt([createdAt[0], e.target.value])}
-                                    />
-                                </Flex>
-                            </Box>
-                        </Grid>
-
-                        <Box>
-                            <FormLabel fontSize="lg">Selecione a Ordem de Prioridade:</FormLabel>
-                            <Select size="lg" value={priorityOrder} onChange={handlePriorityOrder}>
-                                <option value="desc">Decrescente</option>
-                                <option value="asc">Crescente</option>
-                            </Select>
-                        </Box>
-
-                        <Box>
-                            <FormLabel fontSize="lg">Selecione o Status:</FormLabel>
-                            <Select
-                                size="lg"
-                                value={status}
-                                onChange={handleStatusChange}
-                            >
-                                <option value={null}>Todos</option>
-                                <option value={0}>Pendentes</option>
-                                <option value={1}>Concluídas</option>
-                            </Select>
-                        </Box>
-
-                        <Box>
-                            <FormLabel fontSize="lg">Selecione a Prioridade:</FormLabel>
-                            <Select
-                                size="lg"
-                                value={priority}
-                                onChange={(e) => setPriority(e.target.value)}
-                            >
-                                <option value={null}>Todas</option>
-                                <option value={1}>Muito Baixa</option>
-                                <option value={2}>Baixa</option>
-                                <option value={3}>Média</option>
-                                <option value={4}>Alta</option>
-                                <option value={5}>Urgente</option>
-                            </Select>
-                        </Box>
-
-                        <Flex
-                            justifyContent="space-between"
-                            alignItems="center"
-                            flexDirection="row"
-                        >
-                            <Select
-                                value={per_page}
-                                width="150px"
-                                onChange={handlePerPageChange}
-                            >
-                                <option value={10}>10 por página</option>
-                                <option value={20}>20 por página</option>
-                                <option value={30}>30 por página</option>
-                                <option value={50}>50 por página</option>
-                            </Select>
-                            <Box>
-                                <ButtonGroup>
-                                    <Button onClick={handleClean}>Limpar Filtro</Button>
-                                    <Button colorScheme="blue" onClick={handleFilter}>Filtrar</Button>
-                                </ButtonGroup>
-                            </Box>
-                        </Flex>
-                    </FormControl>
-
-
-                    <Flex alignItems="center" gap={3}>
-                        <Flex alignItems="center">
-                            <Box width="12px" height="12px" bg="orange.500" borderRadius="30%" mr={2} />
-                            <Text fontSize="sm" color="gray.500">Pendentes</Text>
-                        </Flex>
-                        <Flex alignItems="center">
-                            <Box width="12px" height="12px" bg="green.500" borderRadius="30%" mr={2} />
-                            <Text fontSize="sm" color="gray.500">Concluídas</Text>
-                        </Flex>
+                        <Heading >Lista das Atividades</Heading>
+                        <Link to="/atividades" >
+                            <Button colorScheme='blue' variant='outline'>
+                                Ver Todas as Atividades
+                            </Button>
+                        </Link>
                     </Flex>
 
-                    <List spacing={3}>
-                        {
-                            data.map((item) => (
-                                (
-                                    <ActivitieItem
-                                        key={item.id}
-                                        activitie={item}
-                                        setRefresh={setRefresh}
-                                        refresh={refresh}
-                                    />
-                                )
-                            ))
-                        }
-                    </List>
+                    <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
+                    <Heading fontSize="lg" fontWeight="regular" color="gray.500">
+                        Gerencie as 50 primeiras atividades pendentes de cada prioridade abaixo
+                    </Heading>
 
-                    <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
+                    <Box>
+                        <FormLabel fontSize="lg">Selecione a Tabela:</FormLabel>
+                        <Select size="lg">
+                            <option>clients</option>
+                        </Select>
+                    </Box>
+
+                    <Box overflowX={isMobile ? "auto" : "hidden"}>
+
+                        <Grid
+                            templateColumns="repeat(3, 1fr)"
+                            gap={3}
+                            marginBottom="24px"
+                            width={isMobile ? "800px" : "100%"}
+                            height="740px"
+                            overflowY={isMobile ? "auto" : "hidden"}
+
+
+                        >
+                            <List spacing={3} bg={getPriorityColor(3).bgColor} rounded="6px" padding="6px">
+                                <Box
+                                    display="flex"
+                                    flexDirection={isMobile ? "column" : "flex"}
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    width={isMobile ? "100%" : "auto"}
+                                    marginBottom="10px"
+                                    gap="6px"
+                                >
+                                    <Tooltip label={`Prioridade: ${formattedPriority(3)}`} aria-label="Prioridade">
+                                        <Text
+                                            fontSize={isMobile ? "sm" : "md"}
+                                            color={getPriorityColor(3).textColor}
+                                            bg={getPriorityColor(3).bgColor}
+                                            textAlign="center"
+                                            p={1}
+                                            width="100%"
+                                            rounded="6px"
+                                            title={`Prioridade: ${formattedPriority(3)}`}
+                                        >Prioridade: <b>{formattedPriority(3)}</b></Text>
+                                    </Tooltip>
+                                </Box>
+                                <Box
+                                    display="flex"
+                                    flexDirection="column"
+                                    gap="6px"
+                                    overflowY="auto"
+                                    height="668px"
+                                    paddingRight="6px"
+                                    marginBottom="112px"
+                                >
+
+                                    {
+                                        dataPriorityThree.map((item) => (
+                                            (
+                                                (
+                                                    <ActivitieItem
+                                                        key={item.id}
+                                                        activitie={item}
+                                                        setRefresh={setRefresh}
+                                                        refresh={refresh}
+                                                    />
+                                                )
+                                            )
+                                        ))
+                                    }
+                                </Box>
+                            </List>
+                            <List spacing={3} bg={getPriorityColor(2).bgColor} rounded="6px" padding="6px">
+                                <Box
+                                    display="flex"
+                                    flexDirection={isMobile ? "column" : "flex"}
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    width={isMobile ? "100%" : "auto"}
+                                    marginBottom="10px"
+                                    gap="6px"
+                                >
+                                    <Tooltip label={`Prioridade: ${formattedPriority(2)}`} aria-label="Prioridade">
+                                        <Text
+                                            fontSize={isMobile ? "sm" : "md"}
+                                            color={getPriorityColor(2).textColor}
+                                            bg={getPriorityColor(2).bgColor}
+                                            textAlign="center"
+                                            p={1}
+                                            width="100%"
+                                            rounded="6px"
+                                            title={`Prioridade: ${formattedPriority(2)}`}
+                                        >Prioridade: <b>{formattedPriority(2)}</b></Text>
+                                    </Tooltip>
+                                </Box>
+                                <Box
+                                    display="flex"
+                                    flexDirection="column"
+                                    gap="6px"
+                                    overflowY="auto"
+                                    height="668px"
+                                    paddingRight="6px"
+                                >
+                                    {
+                                        dataPriorityTwo.length > 0 ?
+                                            dataPriorityTwo.map((item) => (
+                                                (
+                                                    (
+                                                        <ActivitieItem
+                                                            key={item.id}
+                                                            activitie={item}
+                                                            setRefresh={setRefresh}
+                                                            refresh={refresh}
+                                                        />
+                                                    )
+                                                )
+                                            )) : <Text fontSize="md" fontStyle="italic" textAlign="center" color="gray.500">Não há nenhuma atividade no momento.</Text>
+                                    }
+                                </Box>
+                            </List>
+                            <List spacing={3} bg={getPriorityColor(1).bgColor} rounded="6px" padding="6px">
+                                <Box
+                                    display="flex"
+                                    flexDirection={isMobile ? "column" : "flex"}
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    width={isMobile ? "100%" : "auto"}
+                                    marginBottom="10px"
+                                    gap="6px"
+                                >
+                                    <Tooltip label={`Prioridade: ${formattedPriority(1)}`} aria-label="Prioridade">
+                                        <Text
+                                            fontSize={isMobile ? "sm" : "md"}
+                                            color={getPriorityColor(1).textColor}
+                                            bg={getPriorityColor(1).bgColor}
+                                            textAlign="center"
+                                            p={1}
+                                            width="100%"
+                                            rounded="6px"
+                                            title={`Prioridade: ${formattedPriority(1)}`}
+                                        >Prioridade: <b>{formattedPriority(1)}</b></Text>
+                                    </Tooltip>
+                                </Box>
+                                <Box
+                                    display="flex"
+                                    flexDirection="column"
+                                    gap="6px"
+                                    overflowY="auto"
+                                    height="668px"
+                                    paddingRight="6px"
+                                >
+                                    {
+                                        dataPriorityOne.map((item) => (
+                                            (
+                                                (
+
+                                                    <ActivitieItem
+                                                        key={item.id}
+                                                        activitie={item}
+                                                        setRefresh={setRefresh}
+                                                        refresh={refresh}
+                                                    />
+                                                )
+                                            )
+                                        ))
+                                    }
+                                </Box>
+                            </List>
+                        </Grid>
+                    </Box>
+
                 </Box>
             </Box>
         </>
