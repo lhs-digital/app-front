@@ -14,54 +14,21 @@ import {
 } from '@chakra-ui/react';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
+import { formattedPriority, getPriorityColor } from '../../services/utils';
 
-const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, isOpen, onClose }) => {
+const ViewActivitie = ({ id, status, selectedActivitie, setDataView, setRefresh, refresh, isOpen, onClose }) => {
     const formattedDate = (date) => new Date(date).toLocaleDateString('pt-BR');
+
     const handleConfirm = async () => {
         try {
             // Chamada para a API para alterar o status da atividade
             await api.put(`/auditing/${id}/toggle_status`);
             toast.success('Status da atividade alterado com sucesso!');
-
         } catch (error) {
             console.error('Erro ao alterar o status da atividade', error);
         } finally {
             setRefresh(!refresh)
             onClose();
-        }
-    };
-
-    const formattedPriority = (priority) => {
-        switch (priority) {
-            case 1:
-                return "Muito Baixa";
-            case 2:
-                return "Baixa";
-            case 3:
-                return "Média";
-            case 4:
-                return "Alta";
-            case 5:
-                return "Urgente";
-            default:
-                return "Muito Baixa"
-        }
-    };
-
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case 1:
-                return { textColor: 'gray.600', bgColor: 'gray.100' }; // Muito Baixa
-            case 2:
-                return { textColor: 'blue.600', bgColor: 'blue.100' }; // Baixa
-            case 3:
-                return { textColor: 'yellow.600', bgColor: 'yellow.100' }; // Média
-            case 4:
-                return { textColor: 'orange.600', bgColor: 'orange.100' }; // Alta
-            case 5:
-                return { textColor: 'red.600', bgColor: 'red.100' }; // Crítica
-            default:
-                return { textColor: 'black', bgColor: 'gray.300' }; // Desconhecida
         }
     };
 
@@ -75,7 +42,6 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, isO
                         Encontre todas as informações da atividade com ID: #{selectedActivitie?.id}, abaixo:
                     </Text>
                 </ModalHeader>
-                <Divider borderColor="gray.300" width="90%" alignSelf="center" borderWidth="2px" marginBottom={4} />
                 <ModalBody>
                     <Box
                         display="flex"
@@ -113,12 +79,11 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, isO
                     <Box ><b>ID do Cliente:</b> {selectedActivitie?.primary_key_value} </Box>
                     <Box ><b>Tabela:</b> clients </Box>
                     <Box ><b>Campo inválido:</b> {selectedActivitie?.column} </Box>
-                    <Box ><b>Mensagem de Erro:</b> {selectedActivitie?.message} </Box>
-                    <Box ><b>Valor do campo:</b>
-                        {selectedActivitie?.value === "" ? ' O campo possui um valor nulo' : selectedActivitie?.value}
-                    </Box>
-                    <Box ><b>Data em que a Auditoria foi realizada:</b> {formattedDate(selectedActivitie?.created_at)} </Box>
-                    <Box ><b>Data em que a Auditoria foi atualizada:</b> {formattedDate(selectedActivitie?.updated_at)} </Box>
+                    <Box ><b>Auditoria foi realizada em:</b> {formattedDate(selectedActivitie?.created_at)} </Box>
+                    <Box ><b>Auditoria foi atualizada em:</b> {formattedDate(selectedActivitie?.updated_at)} </Box>
+                    <Divider borderColor="gray.300" width="100%" alignSelf="center" borderWidth="2px" marginY={4} />
+
+                    <Box minHeight="124px" backgroundColor="gray.200" rounded="md" padding={2} shadow="lg" color="blue.500"><b>Sugestão de Correção:</b>{selectedActivitie?.message} </Box>
                 </ModalBody>
                 <ModalFooter>
                     <Button mr={3} onClick={onClose}>Voltar</Button>
