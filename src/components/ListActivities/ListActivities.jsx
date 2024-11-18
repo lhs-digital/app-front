@@ -109,12 +109,12 @@ const ListActivities = () => {
                         Gerencie as 50 primeiras atividades pendentes de cada prioridade abaixo
                     </Heading>
 
-                    <Box>
+                    {/* <Box>
                         <FormLabel fontSize="lg">Selecione a Tabela:</FormLabel>
                         <Select size="lg">
                             <option>clients</option>
                         </Select>
-                    </Box>
+                    </Box> */}
 
                     <Box overflowX={isMobile ? "auto" : "hidden"}>
 

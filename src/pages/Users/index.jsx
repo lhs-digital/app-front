@@ -39,6 +39,8 @@ const Users = () => {
     const [search, setSearch] = useState('');
     const [deleteId, setDeleteId] = useState(null);
     const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
+    const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
+
 
     const { permissions } = useContext(AuthContext);
 
@@ -60,6 +62,22 @@ const Users = () => {
         };
         getData();
     }, [setData, currentPage, lastPage, refresh]);
+
+    const handleSort = (key) => {
+        const direction = sortConfig.direction === 'asc' && sortConfig.key === key ? 'desc' : 'asc';
+
+        const sortedData = [...data].sort((a, b) => {
+            const aKey = key.split('.').reduce((acc, part) => acc && acc[part], a);
+            const bKey = key.split('.').reduce((acc, part) => acc && acc[part], b);
+
+            if (aKey < bKey) return direction === 'asc' ? -1 : 1;
+            if (aKey > bKey) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        setSortConfig({ key, direction });
+        setData(sortedData);
+    };
 
     const handleRemove = async () => {
         try {
@@ -92,8 +110,8 @@ const Users = () => {
         <>
             <Header />
 
-            <Title title="Gerenciamento de Usuários" subtitle="Administre, edite e remova usuários conforme necessário"/>
-            
+            <Title title="Gerenciamento de Usuários" subtitle="Administre, edite e remova usuários conforme necessário" />
+
             <Flex
                 align="center"
                 justify="center"
@@ -124,9 +142,9 @@ const Users = () => {
                         <Table mt="6">
                             <Thead>
                                 <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Nome</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">E-mail</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Role</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('name')} cursor="pointer">Nome</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('email')} cursor="pointer">E-mail</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('role.name')} cursor="pointer">Role</Th>
                                     <Th p={0}></Th>
                                     <Th p={0}></Th>
                                 </Tr>
@@ -137,38 +155,38 @@ const Users = () => {
                                     user.email.toLowerCase().includes(search.toLowerCase()) ||
                                     user.role.name.toLowerCase().includes(search.toLowerCase())
                                 )).map(({ name, email, role, company, id }, index) => (
-                                    <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }} onClick={() => handleView(index)}>
+                                    <Tr
+                                        key={index}
+                                        cursor="pointer"
+                                        _hover={{ bg: "gray.50" }}
+                                        _odd={{ bg: "gray.100" }}
+                                        _even={{ bg: "white" }}
+                                        onClick={() => handleView(index)}
+                                    >
                                         <Td maxW={isMobile ? 5 : 100}> {name} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {email} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {role.name} </Td>
                                         <Td p={0}>
-                                            {permissions.some(permissions => permissions.name === 'update_users') ?
-                                                (
-                                                    <EditIcon
-                                                        fontSize={20}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleEdit({ name, email, role, company, id, index })
-                                                        }}
-                                                    />
-                                                )
-                                                : null
+                                            {permissions.some(permissions => permissions.name === 'update_users') &&
+                                                <EditIcon
+                                                    fontSize={20}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEdit({ name, email, role, company, id, index })
+                                                    }}
+                                                />
                                             }
                                         </Td>
                                         <Td p={0}>
-                                            {permissions.some(permissions => permissions.name === 'delete_users') ?
-                                                (
-                                                    <DeleteIcon
-                                                        fontSize={20}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(id)
-                                                        }}
-                                                    />
-                                                )
-                                                : null
+                                            {permissions.some(permissions => permissions.name === 'delete_users') &&
+                                                <DeleteIcon
+                                                    fontSize={20}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete(id)
+                                                    }}
+                                                />
                                             }
-
                                         </Td>
                                     </Tr>
                                 ))}

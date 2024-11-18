@@ -39,6 +39,7 @@ const Roles = () => {
     const [search, setSearch] = useState('');
     const [deleteId, setDeleteId] = useState(null);
     const { permissions } = useContext(AuthContext);
+    const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
@@ -83,11 +84,27 @@ const Roles = () => {
         onOpenDelete(); // Abrir o modal de confirmação
     };
 
+    const handleSort = (key) => {
+        const direction = sortConfig.direction === 'asc' && sortConfig.key === key ? 'desc' : 'asc';
+
+        const sortedData = [...data].sort((a, b) => {
+            const aKey = key.split('.').reduce((acc, part) => acc && acc[part], a);
+            const bKey = key.split('.').reduce((acc, part) => acc && acc[part], b);
+
+            if (aKey < bKey) return direction === 'asc' ? -1 : 1;
+            if (aKey > bKey) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        setSortConfig({ key, direction });
+        setData(sortedData);
+    };
+
     return (
         <>
             <Header />
 
-            <Title title="Gerenciamento de Roles" subtitle="Administração e atribuição de permissões e funções de usuários"/>
+            <Title title="Gerenciamento de Roles" subtitle="Administração e atribuição de permissões e funções de usuários" />
 
             <Flex
                 align="center"
@@ -118,9 +135,9 @@ const Roles = () => {
                         <Table mt="6">
                             <Thead>
                                 <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Nome</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Empresa</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Qtd Permissões</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('name')}>Nome</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('company.name')}>Empresa</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('permissions_count')}>Qtd Permissões</Th>
                                     <Th p={0}></Th>
                                     <Th p={0}></Th>
                                 </Tr>
@@ -130,7 +147,11 @@ const Roles = () => {
                                     role.name.toLowerCase().includes(search.toLowerCase()) ||
                                     role.company?.name.toLowerCase().includes(search.toLowerCase())
                                 )).map(({ name, nivel, company, permissions_count, id }, index) => (
-                                    <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }} onClick={() => handleView(index)}>
+                                    <Tr key={index} cursor="pointer"
+                                        _hover={{ bg: "gray.50" }}
+                                        _odd={{ bg: "gray.100" }}
+                                        _even={{ bg: "white" }}
+                                        onClick={() => handleView(index)}>
                                         <Td maxW={isMobile ? 5 : 100}> {name} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {company?.name} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {permissions_count} </Td>

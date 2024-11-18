@@ -8,6 +8,8 @@ import {
     FaBriefcase,
     FaRegFileAlt,
     FaBook,
+    FaAngleDoubleUp,
+    FaPaperclip
 } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 
@@ -63,6 +65,14 @@ const Sidebar = ({ active }) => {
                     )
                     : null
                 }
+
+                <Link to="/prioridades">
+                    <SidebarItem Icon={FaAngleDoubleUp} Text="Gerenciamento de Prioridades" />
+                </Link>
+
+                <Link to="/relatorios">
+                    <SidebarItem Icon={FaPaperclip} Text="Relatórios de Auditorias" />
+                </Link>
 
                 <Link to="/my-permissions">
                     <SidebarItem Icon={FaRegSun} Text="Minhas Permissões" />

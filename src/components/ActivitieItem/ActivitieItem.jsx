@@ -55,9 +55,17 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             >
                 <Box>
                     <Text fontWeight="bold" fontSize="lg">
-                        ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.primary_key_value}</Text>
+                        ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.record_id}</Text>
                     </Text>
-                    <Text fontWeight="bold" fontSize='md'>Campo inválido: <Text as="cite" fontWeight="normal">{activitie?.column}</Text></Text>
+                    <Text fontWeight="bold" fontSize="md">
+                        Campos inválidos:{" "}
+                        {activitie?.columns.map((col, index) => (
+                            <Text as="cite" fontWeight="normal" key={index}>
+                                {col.column}
+                                {index < activitie?.columns.length - 1 ? ", " : ""}
+                            </Text>
+                        ))}
+                    </Text>
                 </Box>
                 <Box
                     textAlign="right"
