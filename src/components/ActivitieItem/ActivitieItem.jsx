@@ -1,13 +1,15 @@
-import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useDisclosure, useTheme } from '@chakra-ui/react'
+import { Box, Checkbox, Divider, Flex, Grid, Icon, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import ViewActivitie from '../ViewActivitie';
 import ModalCheckActivitie from '../ModalCheckActivitie';
-import { dateFormatted } from '../../services/utils';
+import { dateFormatted, formattedPriority, getPriorityColor } from '../../services/utils';
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
     const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
     const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const [dataView, setDataView] = useState(activitie);
+    const isMobile = useBreakpointValue({ base: true, lg: false });
+
     const theme = useTheme();
 
     const handleView = () => {
@@ -26,7 +28,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             alignItems="center"
             justifyContent="center"
             border="1px solid #e2e8f0"
-            borderLeft={`4px solid ${activitie?.status === true ? theme.colors.green[500] : theme.colors.orange[500]
+            borderLeft={`4px solid ${activitie?.status === 1 ? theme.colors.green[500] : theme.colors.orange[500]
                 }`}
             rounded="md"
             padding="12px"
@@ -40,7 +42,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                     onChange={handleDelete}
                     isChecked={activitie?.status}
                     paddingRight="12px"
-                    title={activitie?.status === true ? "Marque para alterar o status da atividade para: Pendente" : "Marque para alterar o status da atividade para: Concluída"}
+                    title={activitie?.status === 1 ? "Marque para alterar o status da atividade para: Pendente" : "Marque para alterar o status da atividade para: Concluída"}
                 />
             </Tooltip>
             <Grid
@@ -53,17 +55,29 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 margin={0}
 
             >
-                <Box>
-                    <Text fontWeight="bold" fontSize="lg">
-                        ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.record_id}</Text>
-                    </Text>
-                    <Text fontWeight="bold" fontSize="md">
+                <Box marginLeft="12px">
+                    <Box display="flex" justifyContent="space-between">
+                        <Text fontWeight="bold" fontSize="lg">
+                            ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.record_id}</Text>
+                        </Text>
+                        <Icon name="chevron-right" size="24px" color="gray.500" />
+                    </Box>
+                    <Divider borderColor="gray.300" width="100%" alignSelf="center" borderWidth="1px" marginY={2} />
+                    <Text display="flex" alignItems="center" flexWrap="wrap" gap="6px" fontWeight="bold" fontSize="md">
                         Campos inválidos:{" "}
                         {activitie?.columns.map((col, index) => (
-                            <Text as="cite" fontWeight="normal" key={index}>
-                                {col.column}
-                                {index < activitie?.columns.length - 1 ? ", " : ""}
-                            </Text>
+                            <Tooltip label={`Prioridade: ${formattedPriority(col?.priority)}`} aria-label="Prioridade">
+                                <Text
+                                    fontSize={isMobile ? "sm" : "md"}
+                                    fontWeight="normal"
+                                    color={getPriorityColor(col?.priority).textColor}
+                                    bg={getPriorityColor(col?.priority).bgColor}
+                                    textAlign="center"
+                                    p={1}
+                                    rounded="6px"
+                                    title={`Prioridade: ${formattedPriority(col?.priority)}`}
+                                >{col?.column}</Text>
+                            </Tooltip>
                         ))}
                     </Text>
                 </Box>

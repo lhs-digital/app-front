@@ -33,7 +33,7 @@ const ModalCheckActivitie = ({ id, status, isOpen, onClose, setRefresh, refresh 
                 <ModalHeader>Confirmação de Status</ModalHeader>
                 <ModalBody>
                     {
-                        status === true ? (
+                        status === 1 ? (
                             <Text>Você tem certeza que deseja alterar o status dessa tarefa para <b>Pendente</b>?</Text>
                         ) : (
                             <Text>Você tem certeza que deseja alterar o status dessa tarefa para <b>Concluída</b>?</Text>
@@ -42,8 +42,8 @@ const ModalCheckActivitie = ({ id, status, isOpen, onClose, setRefresh, refresh 
                 </ModalBody>
                 <ModalFooter>
                     <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-                    <Button colorScheme={status === true ? "orange" : "green"} onClick={handleConfirm}>
-                        {status === true ? "Marcar como Pendente" : "Concluir Atividade"}
+                    <Button colorScheme={status === 1 ? "orange" : "green"} onClick={handleConfirm}>
+                        {status === 1 ? "Marcar como Pendente" : "Concluir Atividade"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

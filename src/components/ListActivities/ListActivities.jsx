@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Divider, Flex, FormControl, FormLabel, Grid, Heading, Input, List, Select, Text, Tooltip, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Button, ButtonGroup, Divider, Flex, FormControl, FormLabel, Grid, Heading, Input, List, Select, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, Text, Tooltip, useBreakpointValue } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import ActivitieItem from '../ActivitieItem/ActivitieItem';
 import api from '../../services/api';
@@ -8,56 +8,35 @@ import { formattedPriority, getPriorityColor } from '../../services/utils';
 import { Link } from 'react-router-dom';
 
 const ListActivities = () => {
+    const [data, setData] = useState([]);
     const [dataPriorityOne, setDataPriorityOne] = useState([]);
     const [dataPriorityTwo, setDataPriorityTwo] = useState([]);
     const [dataPriorityThree, setDataPriorityThree] = useState([]);
+    const [dataSelected, setDataSelected] = useState([]);
     const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
     const [refresh, setRefresh] = useState(false);
     const [status, setStatus] = useState(null);
+    const [priority, setPriority] = useState(3);
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
     useEffect(() => {
+        console.log('Chamando API com:', { priority, status });
         const getData = async () => {
-            setLoading(true); // Ativar o carregamento
+            setLoading(true);
             try {
-                const responsePriorityOne = await (api.get(`/auditing?per_page=${50}`,
-                    {
-                        params: {
-                            priority: 1,
-                        }
-                    }
-                ));
-
-                setDataPriorityOne(responsePriorityOne.data.data);
-
-                const responsePriorityTwo = await (api.get(`/auditing?per_page=${50}`,
-                    {
-                        params: {
-                            priority: 2,
-                        }
-                    }
-                ));
-
-                setDataPriorityTwo(responsePriorityTwo.data.data);
-
-                const responsePriorityThree = await (api.get(`/auditing?per_page=${50}`,
-                    {
-                        params: {
-                            priority: 3,
-                        }
-                    }
-                ));
-
-                setDataPriorityThree(responsePriorityThree.data.data);
+                const response = await api.get(`/auditing?per_page=${50}`, {
+                    params: { priority, status }
+                });
+                setData(response.data.data);
             } catch (error) {
-                console.error('Erro ao verificar lista de usuários', error);
+                console.error('Erro ao buscar atividades:', error);
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
         };
         getData();
-    }, [refresh, status]);
+    }, [priority, status, refresh]);
 
     return (
         <>
@@ -109,173 +88,46 @@ const ListActivities = () => {
                         Gerencie as 50 primeiras atividades pendentes de cada prioridade abaixo
                     </Heading>
 
-                    {/* <Box>
-                        <FormLabel fontSize="lg">Selecione a Tabela:</FormLabel>
-                        <Select size="lg">
-                            <option>clients</option>
-                        </Select>
-                    </Box> */}
+                    <Tabs variant="unstyled" colorScheme="blue" marginTop="24px">
+                        <TabList display="flex" justifyContent="space-between">
+                            <Box display="flex">
+                                <Tab _selected={{ color: 'blue.500' }} color="gray.400" fontSize="lg"
+                                    onClick={() => setStatus(0)}
+                                >Pendentes</Tab>
+                                <Tab _selected={{ color: 'blue.500' }} color="gray.400" fontSize="lg"
+                                    onClick={() => setStatus(1)}
+                                >Concluídas</Tab>
+                            </Box>
+                        </TabList>
+                        <TabIndicator mb='-1.5px' height='2px' bg='blue.500' borderRadius='1px' />
 
-                    <Box overflowX={isMobile ? "auto" : "hidden"}>
-
-                        <Grid
-                            templateColumns="repeat(3, 1fr)"
-                            gap={3}
-                            marginBottom="24px"
-                            width={isMobile ? "800px" : "100%"}
-                            height="740px"
-                            overflowY={isMobile ? "auto" : "hidden"}
-
-
-                        >
-                            <List spacing={3} bg={getPriorityColor(3).bgColor} rounded="6px" padding="6px">
-                                <Box
-                                    display="flex"
-                                    flexDirection={isMobile ? "column" : "flex"}
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    width={isMobile ? "100%" : "auto"}
-                                    marginBottom="10px"
-                                    gap="6px"
-                                >
-                                    <Tooltip label={`Prioridade: ${formattedPriority(3)}`} aria-label="Prioridade">
-                                        <Text
-                                            fontSize={isMobile ? "sm" : "md"}
-                                            color={getPriorityColor(3).textColor}
-                                            bg={getPriorityColor(3).bgColor}
-                                            textAlign="center"
-                                            p={1}
-                                            width="100%"
-                                            rounded="6px"
-                                            title={`Prioridade: ${formattedPriority(3)}`}
-                                        >Prioridade: <b>{formattedPriority(3)}</b></Text>
-                                    </Tooltip>
-                                </Box>
-                                <Box
-                                    display="flex"
-                                    flexDirection="column"
-                                    gap="6px"
-                                    overflowY="auto"
-                                    height="668px"
-                                    paddingRight="6px"
-                                    marginBottom="112px"
-                                >
-
-                                    {
-                                        dataPriorityThree.map((item) => (
-                                            (
-                                                (
-                                                    <ActivitieItem
-                                                        key={item.id}
-                                                        activitie={item}
-                                                        setRefresh={setRefresh}
-                                                        refresh={refresh}
-                                                    />
-                                                )
-                                            )
-                                        ))
-                                    }
-                                </Box>
-                            </List>
-                            <List spacing={3} bg={getPriorityColor(2).bgColor} rounded="6px" padding="6px">
-                                <Box
-                                    display="flex"
-                                    flexDirection={isMobile ? "column" : "flex"}
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    width={isMobile ? "100%" : "auto"}
-                                    marginBottom="10px"
-                                    gap="6px"
-                                >
-                                    <Tooltip label={`Prioridade: ${formattedPriority(2)}`} aria-label="Prioridade">
-                                        <Text
-                                            fontSize={isMobile ? "sm" : "md"}
-                                            color={getPriorityColor(2).textColor}
-                                            bg={getPriorityColor(2).bgColor}
-                                            textAlign="center"
-                                            p={1}
-                                            width="100%"
-                                            rounded="6px"
-                                            title={`Prioridade: ${formattedPriority(2)}`}
-                                        >Prioridade: <b>{formattedPriority(2)}</b></Text>
-                                    </Tooltip>
-                                </Box>
-                                <Box
-                                    display="flex"
-                                    flexDirection="column"
-                                    gap="6px"
-                                    overflowY="auto"
-                                    height="668px"
-                                    paddingRight="6px"
-                                >
-                                    {
-                                        dataPriorityTwo.length > 0 ?
-                                            dataPriorityTwo.map((item) => (
-                                                (
-                                                    (
-                                                        <ActivitieItem
-                                                            key={item.id}
-                                                            activitie={item}
-                                                            setRefresh={setRefresh}
-                                                            refresh={refresh}
-                                                        />
-                                                    )
-                                                )
-                                            )) : <Text fontSize="md" fontStyle="italic" textAlign="center" color="gray.500">Não há nenhuma atividade no momento.</Text>
-                                    }
-                                </Box>
-                            </List>
-                            <List spacing={3} bg={getPriorityColor(1).bgColor} rounded="6px" padding="6px">
-                                <Box
-                                    display="flex"
-                                    flexDirection={isMobile ? "column" : "flex"}
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    width={isMobile ? "100%" : "auto"}
-                                    marginBottom="10px"
-                                    gap="6px"
-                                >
-                                    <Tooltip label={`Prioridade: ${formattedPriority(1)}`} aria-label="Prioridade">
-                                        <Text
-                                            fontSize={isMobile ? "sm" : "md"}
-                                            color={getPriorityColor(1).textColor}
-                                            bg={getPriorityColor(1).bgColor}
-                                            textAlign="center"
-                                            p={1}
-                                            width="100%"
-                                            rounded="6px"
-                                            title={`Prioridade: ${formattedPriority(1)}`}
-                                        >Prioridade: <b>{formattedPriority(1)}</b></Text>
-                                    </Tooltip>
-                                </Box>
-                                <Box
-                                    display="flex"
-                                    flexDirection="column"
-                                    gap="6px"
-                                    overflowY="auto"
-                                    height="668px"
-                                    paddingRight="6px"
-                                >
-                                    {
-                                        dataPriorityOne.map((item) => (
-                                            (
-                                                (
-
-                                                    <ActivitieItem
-                                                        key={item.id}
-                                                        activitie={item}
-                                                        setRefresh={setRefresh}
-                                                        refresh={refresh}
-                                                    />
-                                                )
-                                            )
-                                        ))
-                                    }
-                                </Box>
-                            </List>
-                        </Grid>
-                    </Box>
-
+                        <TabPanels>
+                            <TabPanel paddingX={0}>
+                                <List spacing={3}>
+                                    {data.map((item) => (
+                                        <ActivitieItem
+                                            key={item.id}
+                                            activitie={item}
+                                            setRefresh={setRefresh}
+                                            refresh={refresh}
+                                        />
+                                    ))}
+                                </List>
+                            </TabPanel>
+                            <TabPanel paddingX={0}>
+                                <List spacing={3}>
+                                    {data.map((item) => (
+                                        <ActivitieItem
+                                            key={item.id}
+                                            activitie={item}
+                                            setRefresh={setRefresh}
+                                            refresh={refresh}
+                                        />
+                                    ))}
+                                </List>
+                            </TabPanel>
+                        </TabPanels>
+                    </Tabs>
                 </Box>
             </Box>
         </>
