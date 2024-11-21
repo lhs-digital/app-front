@@ -16,6 +16,8 @@ import { AuthContext } from "../contexts/auth";
 import MyPermissions from "../pages/MyPermissions";
 import Logs from "../pages/Logs";
 import AllActivities from "../pages/AllActivities";
+import Priorities from "../pages/Priorities";
+import ReportsAud from "../pages/ReportsAud";
 
 
 const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
@@ -56,6 +58,9 @@ const RoutesApp = () => {
                     <Route exact path="/dashboard" element={<Private Item={Home} allowedRoles={['super-admin']} />} />
 
                     <Route path="/atividades" element={<Private Item={AllActivities} allowedRoles={['super-admin']} />} />
+                    <Route path="/prioridades" element={<Private Item={Priorities} allowedRoles={['super-admin']} />} />
+                    <Route path="/relatorios" element={<Private Item={ReportsAud} allowedRoles={['super-admin']} />} />
+
 
                     <Route path="/users" element={<Private Item={Users} allowedRoles={['super-admin']} allowedPermissions={['view_any_users', 'view_users', 'create_users', 'delete_users', 'update_users']} />} />
                     <Route path="/companies" element={<Private Item={Companies} allowedRoles={['super-admin']} allowedPermissions={['view_any_companies', 'view_companies', 'create_companies', 'delete_companies', 'update_companies']} />} />

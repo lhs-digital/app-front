@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from '../../components/Header'
-import { Box, Divider, Flex, Heading, Stack, Text } from '@chakra-ui/react'
+import { Box, Checkbox, Divider, Flex, Grid, Heading, Stack, Text } from '@chakra-ui/react'
 import { useContext } from 'react'
 import { AuthContext } from '../../contexts/auth'
 import Title from '../../components/Title'
@@ -19,18 +19,30 @@ const MyPermissions = () => {
                 maxWidth="800px"
             >
 
-                <Text textAlign="justify" px={2}>
+                <Box textAlign="justify" px={2}>
                     {permissions.length > 0 ? (
                         permissions.map((permission, index) => (
-                            <span key={index}>
-                                {permission.name}
-                                {index < permissions.length - 1 && ", "}
-                            </span>
-                        ))
+                            <>
+                                <Grid key={index} alignItems='center' gap={3}>
+                                    {permission.category !== permissions[index - 1]?.category && (
+                                        <>
+                                            <b>{permission.category}</b>
+                                        </>
+                                    )}
+                                    <Flex alignItems='center' gap={2}>
+
+                                        <Checkbox isChecked={true} disabled />
+                                        <Text>{permission.label}</Text>
+                                    </Flex>
+
+                                </Grid>
+                            </>
+                        )
+                        )
                     ) : (
                         <span>Você não possui permissões</span>
                     )}
-                </Text>
+                </Box>
             </Flex>
         </>
     )

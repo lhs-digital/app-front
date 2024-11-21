@@ -35,4 +35,8 @@ export const Container = styled.div`
 
 export const Content = styled.div`
   margin-top: 100px;
+  overflow: auto;
+  height: 100%;
+  padding-bottom: 124px;
+
 `;

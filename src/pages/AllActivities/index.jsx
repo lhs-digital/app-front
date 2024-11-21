@@ -282,6 +282,7 @@ const AllActivities = () => {
                                     <Text fontSize="sm" color="gray.500">Concluídas</Text>
                                 </Flex>
                             </Flex>
+
                         </Flex>
 
                         <List spacing={3}>

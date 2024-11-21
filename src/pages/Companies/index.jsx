@@ -39,6 +39,7 @@ const Companies = () => {
     const [search, setSearch] = useState('');
     const [deleteId, setDeleteId] = useState(null);
     const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
+    const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
 
     const { permissions } = useContext(AuthContext);
 
@@ -88,11 +89,27 @@ const Companies = () => {
         onOpenDelete(); // Abrir o modal de confirmação
     };
 
+    const handleSort = (key) => {
+        const direction = sortConfig.direction === 'asc' && sortConfig.key === key ? 'desc' : 'asc';
+
+        const sortedData = [...data].sort((a, b) => {
+            const aKey = key.split('.').reduce((acc, part) => acc && acc[part], a);
+            const bKey = key.split('.').reduce((acc, part) => acc && acc[part], b);
+
+            if (aKey < bKey) return direction === 'asc' ? -1 : 1;
+            if (aKey > bKey) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        setSortConfig({ key, direction });
+        setData(sortedData);
+    };
+
     return (
         <>
             <Header />
 
-            <Title title="Gerenciamento de Empresas" subtitle="Administração e supervisão das informações empresariais"/>
+            <Title title="Gerenciamento de Empresas" subtitle="Administração e supervisão das informações empresariais" />
 
             <Flex
                 align="center"
@@ -124,8 +141,8 @@ const Companies = () => {
                         <Table mt="6">
                             <Thead>
                                 <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Nome</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">CNPJ</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('name')}>Nome</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('cnpj')}>CNPJ</Th>
                                     <Th p={0}></Th>
                                     <Th p={0}></Th>
                                 </Tr>
@@ -135,7 +152,11 @@ const Companies = () => {
                                     company.name.toLowerCase().includes(search.toLowerCase()) ||
                                     company.cnpj.toLowerCase().includes(search.toLowerCase())
                                 )).map(({ name, cnpj, roles_count, id }, index) => (
-                                    <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }} onClick={() => handleView(index)}>
+                                    <Tr key={index}
+                                        cursor="pointer"
+                                        _odd={{ bg: "gray.100" }}
+                                        _even={{ bg: "white" }}
+                                        _hover={{ bg: "gray.50" }} onClick={() => handleView(index)}>
                                         <Td maxW={isMobile ? 5 : 100}> {name} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {cnpj} </Td>
                                         <Td p={0}>
