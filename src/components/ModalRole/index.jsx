@@ -13,7 +13,11 @@ import {
     Input,
     Box,
     Checkbox,
-    SimpleGrid
+    SimpleGrid,
+    Divider,
+    Text,
+    Grid,
+    Flex
 } from "@chakra-ui/react"
 import { useState } from 'react'
 import { Select } from '@chakra-ui/react'
@@ -181,7 +185,8 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                             </Box>
                             <Box>
                                 <FormLabel htmlFor='permissions'>Permissões</FormLabel>
-                                <SimpleGrid columns={2} spacing={5}>
+                                <SimpleGrid columns={1} spacing={2}>
+                                    {/* Categoria: Selecionar todas as permissões */}
                                     <Checkbox
                                         id="selectAll"
                                         isChecked={selectAll}
@@ -190,15 +195,27 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                     >
                                         Selecionar todas as permissões
                                     </Checkbox>
-                                    {permissions.map((permission) => (
-                                        <Checkbox
-                                            id={permission?.name}
-                                            isChecked={rolePermissions.includes(permission.id)}
-                                            key={permission.id}
-                                            onChange={(e) => handlePermissions(e, permission.id)}
-                                        >
-                                            {permission.name}
-                                        </Checkbox>
+
+                                    {/* Mapeando as permissões */}
+                                    {permissions.map((permission, index) => (
+                                        <React.Fragment key={permission.id}>
+                                            {/* Exibir a categoria se for diferente da anterior */}
+                                            {permission.category !== permissions[index - 1]?.category && (
+                                                <>
+                                                    <Text><b>{permission.category}</b></Text>
+                                                    <Divider />  {/* Separador entre categorias */}
+                                                </>
+                                            )}
+
+                                            {/* Aqui, criamos o Grid para as permissões de uma categoria */}
+                                            <Checkbox
+                                                id={permission?.name}
+                                                isChecked={rolePermissions.includes(permission.id)}
+                                                onChange={(e) => handlePermissions(e, permission.id)}
+                                            >
+                                                {permission.label}
+                                            </Checkbox>
+                                        </React.Fragment>
                                     ))}
                                 </SimpleGrid>
                             </Box>
@@ -214,7 +231,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                         </Button>
                     </ModalFooter>
                 </ModalContent>
-            </Modal>
+            </Modal >
 
         </>
     )

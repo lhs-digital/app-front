@@ -1,4 +1,4 @@
-import { Box, Checkbox, Grid, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
+import { Box, Checkbox, Divider, Grid, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import ViewActivitie from '../ViewActivitie';
 import ModalCheckActivitie from '../ModalCheckActivitie';
@@ -12,11 +12,11 @@ const ActivitieItemAll = ({ activitie, setRefresh, refresh }) => {
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
-
     const handleView = () => {
         const selectedActivitie = dataView;
         setDataView(selectedActivitie);
         onOpenView();
+        console.log(activitie.priority)
     };
 
     const handleDelete = () => {
@@ -56,11 +56,27 @@ const ActivitieItemAll = ({ activitie, setRefresh, refresh }) => {
 
             >
                 <Box>
-                    <Text fontWeight="bold" fontSize="lg"> Tabela: <Text as="cite" fontWeight="normal">clients</Text></Text>
                     <Text fontWeight="bold" fontSize="lg">
-                        ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.primary_key_value}</Text>
+                        ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.record_id}</Text>
                     </Text>
-                    <Text fontWeight="bold" fontSize='lg'>Campo inválido: <Text as="cite" fontWeight="normal">{activitie?.column}</Text></Text>
+                    <Divider borderColor="gray.300" width="100%" alignSelf="center" borderWidth="1px" marginY={2} />
+                    <Text display="flex" alignItems="center" flexWrap="wrap" gap="6px" fontWeight="bold" fontSize="md">
+                        Campos inválidos:{" "}
+                        {activitie?.columns.map((col, index) => (
+                            <Tooltip label={`Prioridade: ${formattedPriority(col?.priority)}`} aria-label="Prioridade">
+                                <Text
+                                    fontSize={isMobile ? "sm" : "md"}
+                                    fontWeight="normal"
+                                    color={getPriorityColor(col.priority).textColor}
+                                    bg={getPriorityColor(col.priority).bgColor}
+                                    textAlign="center"
+                                    p={1}
+                                    rounded="6px"
+                                    title={`Prioridade: ${formattedPriority(col.priority)}`}
+                                >{col.column}</Text>
+                            </Tooltip>
+                        ))}
+                    </Text>
                 </Box>
                 <Box
                     textAlign="right"
