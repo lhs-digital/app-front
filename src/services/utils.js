@@ -25,3 +25,36 @@ export const getPriorityColor = (priority) => {
 };
 
 export const dateFormatted = (date) => new Date(date).toLocaleDateString('pt-BR');
+
+export const validarEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(email);
+}
+
+export const validarCPF = (cpf) => {
+    const regex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+    return regex.test(cpf);
+}
+
+export const validarCNPJ = (cnpj) => {
+    const regex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
+    return regex.test(cnpj);
+}
+
+export const validarDataNascimento = (data) => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(data)) return "Data de nascimento inválida";
+
+    const hoje = new Date();
+    const nascimento = new Date(data);
+    const idadeMinima = 18;
+
+    const idade = hoje.getFullYear() - nascimento.getFullYear();
+    const mes = hoje.getMonth() - nascimento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+        idade--;
+    }
+
+    return idade >= idadeMinima;
+}

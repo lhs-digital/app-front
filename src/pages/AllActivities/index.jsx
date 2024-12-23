@@ -11,7 +11,7 @@ import ActivitieItemAll from '../../components/ActivitieItem/AcitivitieItemAll';
 
 const AllActivities = () => {
     const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
+    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage] = useState(null);
     const [refresh, setRefresh] = useState(false);
@@ -25,7 +25,6 @@ const AllActivities = () => {
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
-    // Guardar os parâmetros de filtro
     const [filterParams, setFilterParams] = useState({
         search: '',
         priorityOrder: 'desc',
@@ -36,7 +35,7 @@ const AllActivities = () => {
 
     useEffect(() => {
         const getData = async () => {
-            setLoading(true); // Ativar o carregamento
+            setLoading(true);
             try {
                 const response = await (api.get(`/auditing?page=${currentPage}&per_page=${per_page}`,
                     {

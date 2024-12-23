@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react'
 import './signin.css'
-import logo from '../../assets/logo.jpg'
+import logo from '../../assets/Logo_1.svg'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../contexts/auth'
-import { Heading, Text } from '@chakra-ui/react'
+import { Checkbox, Heading, Text } from '@chakra-ui/react'
 
 const SignIn = () => {
   const [email, setEmail] = useState('')
@@ -39,9 +39,9 @@ const SignIn = () => {
   return (
     <div className='container-center'>
       <div className="login">
-        <div className="login-area">
           <img src={logo} alt="Logo do App Provedores" />
-          <Heading>App Provedores</Heading>
+        <div className="login-area">
+          <Heading marginTop="">App Provedores</Heading>
           <Text color="white">Sistema de Gerenciamento de Provedores</Text>
         </div>
 
@@ -63,16 +63,15 @@ const SignIn = () => {
           />
 
           <div className='remember-me'>
-            <input
-              type="checkbox"
+          
+            <Checkbox
               id="rememberMe"
               checked={rememberMe}
               onChange={handleRememberMeChange}
-            />
-            <label htmlFor="rememberMe">Lembrar-me por 7 dias</label>
+            >Lembrar-me por 7 dias</Checkbox>
           </div>
 
-          <button type='submit'>Acessar</button>
+          <button type='submit'>ENTRAR</button>
         </form>
 
         <Link to="/recover-password">Esqueceu sua senha? Recuperar senha</Link>

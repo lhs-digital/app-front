@@ -21,35 +21,43 @@ import api from '../../services/api';
 import { toast } from 'react-toastify';
 
 const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
-    const [name, setName] = useState(dataEdit?.name || "");
-    const [nivel, setNivel] = useState(dataEdit?.nivel);
-    const [company, setCompany] = useState(dataEdit.company?.id || "");
     const [listRules, setListRules] = useState([]);
     const [permissions, setPermissions] = useState([]);
-    const [companies, setCompanies] = useState([]);
     const [rules, setRules] = useState([]);
     const [checkedRules, setCheckedRules] = useState([]);
-    const [table, setTable] = useState(dataEdit?.table || "");
-    const [column, setColumn] = useState(dataEdit?.column || "");
+    const [table, setTable] = useState(dataEdit?.company_table_id || "");
+    const [column, setColumn] = useState(dataEdit?.name || "");
+    const [columnLabel, setColumnLabel] = useState(dataEdit?.label || "");
     const [priority, setPriority] = useState(dataEdit?.priority || "");
+    const [validations, setValidations] = useState(dataEdit?.validations || [])
     const [selectAll, setSelectAll] = useState(false);
+
+    const [ruleDetails, setRuleDetails] = useState({});
 
     const handleSelectAll = () => {
         if (!selectAll) {
-            const allPermissionIds = permissions.map(permission => permission.id);
-            setListRules(allPermissionIds);
+            const allRuleIds = rules.map(rule => rule.id);
+            const newRuleDetails = {};
+    
+            allRuleIds.forEach(id => {
+                newRuleDetails[id] = ruleDetails[id] || { params: "", message: "" };
+            });
+    
+            setListRules(allRuleIds);
+            setCheckedRules(allRuleIds);
+            setRuleDetails(newRuleDetails);
         } else {
             setListRules([]);
+            setCheckedRules([]);
+            setRuleDetails({});
         }
         setSelectAll(!selectAll);
     };
+    
 
     useEffect(() => {
         const getData = async () => {
             try {
-                const responseCompany = await api.get(`/company/get_companies`);
-                setCompanies(responseCompany.data.data);
-
                 const responsePermissions = await api.get(`/permissions`);
                 setPermissions(responsePermissions.data.data);
 
@@ -63,45 +71,57 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     }, [dataEdit]);
 
     const handleRuleChange = (ruleId, field, value) => {
-        setRules(prevRules =>
-            prevRules.map(rule =>
-                rule.id === ruleId ? { ...rule, [field]: value } : rule
-            )
-        );
+        setRuleDetails(prev => ({
+            ...prev,
+            [ruleId]: {
+                ...prev[ruleId],
+                [field]: value
+            }
+        }));
     };
 
     const saveData = async () => {
         const formattedRules = {};
 
         checkedRules.forEach(ruleId => {
-            const rule = rules.find(r => r.id === ruleId);
             formattedRules[ruleId] = {
-                message: rule.message || "",
-                params: rule.params || ""
+                message: ruleDetails[ruleId]?.message || "",
+                params: ruleDetails[ruleId]?.params || ""
             };
         });
 
         const dataToPost = {
             column: {
                 name: column,
-                priority: priority
+                priority: priority,
+                label: columnLabel
             },
             rules: formattedRules
         };
 
-        try {
-            await api.post('/company_tables/1/rules', dataToPost);
-            toast.success('Dados salvos com sucesso!');
-            onClose();
-            setRefresh(!refresh);
-        } catch (error) {
-            console.error('Erro ao salvar os dados', error);
-            toast.error('Erro ao salvar os dados');
+        if (dataEdit.id) {
+            try {
+                await api.put(`/company_table_columns/${dataEdit.id}/update`, dataToPost);
+                toast.success('Dados editados com sucesso!');
+                onClose();
+                setRefresh(!refresh);
+            } catch (error) {
+                console.error('Erro ao editar os dados', error);
+                toast.error('Erro ao editar os dados');
+            }
+        } else {
+            try {
+                await api.post('/company_tables/1/rules', dataToPost);
+                toast.success('Dados salvos com sucesso!');
+                onClose();
+                setRefresh(!refresh);
+            } catch (error) {
+                console.error('Erro ao salvar os dados', error);
+                toast.error('Erro ao salvar os dados');
+            }
         }
-    };
 
-    const handleCompanyChange = (event) => {
-        setCompany(event.target.value);
+        onClose()
     };
 
     const handleSave = () => {
@@ -114,19 +134,48 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
     const handlePermissions = (e, ruleId) => {
         if (e.target.checked) {
-            setListRules(prevPermissions => [...prevPermissions, ruleId]);
+            setListRules(prev => [...prev, ruleId]);
+            setCheckedRules(prev => [...prev, ruleId]);
+            setRuleDetails(prev => ({
+                ...prev,
+                [ruleId]: prev[ruleId] || { params: "", message: "" }
+            }));
         } else {
-            setListRules(prevPermissions =>
-                prevPermissions.filter(item => item !== ruleId)
-            );
+            setListRules(prev => prev.filter(id => id !== ruleId));
+            setCheckedRules(prev => prev.filter(id => id !== ruleId));
+            setRuleDetails(prev => {
+                const updated = { ...prev };
+                delete updated[ruleId];
+                return updated;
+            });
         }
-
-        setCheckedRules(prev =>
-            e.target.checked
-                ? [...prev, ruleId]
-                : prev.filter(id => id !== ruleId)
-        );
     };
+    
+
+    useEffect(() => {
+        if (!dataEdit?.validations?.length || !rules.length) return;
+
+        const updatedRuleDetails = {};
+        const updatedCheckedRules = [];
+        const updatedListRules = [];
+
+        dataEdit.validations.forEach(validation => {
+            const rule = rules.find((r) => r.name === validation.name);
+            if (rule) {
+                updatedRuleDetails[rule.id] = {
+                    params: validation.params || "",
+                    message: validation.message || ""
+                };
+                updatedCheckedRules.push(rule.id);
+                updatedListRules.push(rule.id);
+            }
+        });
+
+        setRuleDetails(updatedRuleDetails);
+        setCheckedRules(updatedCheckedRules);
+        setListRules(updatedListRules);
+    }, [dataEdit, rules]);
+
 
     return (
         <>
@@ -150,12 +199,21 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                 />
                             </Box>
                             <Box>
-                                <FormLabel htmlFor='column'>Coluna *</FormLabel>
+                                <FormLabel htmlFor='column'>Nome da Coluna *</FormLabel>
                                 <Input
                                     id="column"
                                     type="text"
                                     value={column}
                                     onChange={(e) => setColumn(e.target.value)}
+                                />
+                            </Box>
+                            <Box>
+                                <FormLabel htmlFor='columnLabel'>Label da Coluna *</FormLabel>
+                                <Input
+                                    id="columnLabel"
+                                    type="text"
+                                    value={columnLabel}
+                                    onChange={(e) => setColumnLabel(e.target.value)}
                                 />
                             </Box>
                             <Box>
@@ -184,24 +242,25 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                                 id={rule?.name}
                                                 isChecked={listRules.includes(rule.id)}
                                                 onChange={(e) => handlePermissions(e, rule.id)}
-                                            >
+                                                >
                                                 <b>{rule.name}</b>
                                                 <Text>Descrição: {rule?.description || "Não contém."} </Text>
                                             </Checkbox>
+
 
                                             {checkedRules.includes(rule.id) && (
                                                 <Box mt={2}>
                                                     <Input
                                                         placeholder="Parâmetros"
                                                         size="sm"
-                                                        value={rule.params || ""}
+                                                        value={ruleDetails[rule.id]?.params || ""}
                                                         mb={2}
                                                         onChange={(e) => handleRuleChange(rule.id, 'params', e.target.value)}
                                                     />
                                                     <Input
                                                         placeholder="Mensagem"
                                                         size="sm"
-                                                        value={rule.message || ""}
+                                                        value={ruleDetails[rule.id]?.message || ""}
                                                         onChange={(e) => handleRuleChange(rule.id, 'message', e.target.value)}
                                                     />
                                                 </Box>

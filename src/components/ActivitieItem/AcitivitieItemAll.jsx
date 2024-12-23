@@ -16,7 +16,6 @@ const ActivitieItemAll = ({ activitie, setRefresh, refresh }) => {
         const selectedActivitie = dataView;
         setDataView(selectedActivitie);
         onOpenView();
-        console.log(activitie.priority)
     };
 
     const handleDelete = () => {

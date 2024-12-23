@@ -4,12 +4,12 @@ import { faSortAlphaDown, faSortAlphaUp, faSortNumericDown, faSortNumericUp } fr
 import { Text, Th } from "@chakra-ui/react";
 
 const TableHeaderComponent = ({ onSort, label, isNumeric }) => {
-    const [sortOrder, setSortOrder] = useState(null); // null, 'asc', or 'desc'
+    const [sortOrder, setSortOrder] = useState(null);
   
     const toggleSortOrder = () => {
       const newOrder = sortOrder === "asc" ? "desc" : "asc";
       setSortOrder(newOrder);
-      onSort(newOrder); // Função para ordenar os dados
+      onSort(newOrder);
     };
   
     return (
