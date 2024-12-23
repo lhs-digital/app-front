@@ -35,14 +35,11 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
     const [selectAll, setSelectAll] = useState(false);
 
-    // Função para selecionar ou desmarcar todas as permissões
     const handleSelectAll = () => {
         if (!selectAll) {
-            // Marca todas as permissões
             const allPermissionIds = permissions.map(permission => permission.id);
             setRolePermissions(allPermissionIds);
         } else {
-            // Desmarca todas as permissões
             setRolePermissions([]);
         }
         setSelectAll(!selectAll);
@@ -86,7 +83,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     }
 
     const handleCompanyChange = (event) => {
-        setCompany(event.target.value); // Atualiza o estado com o valor selecionado
+        setCompany(event.target.value);
     };
 
     const updateUser = async () => {
@@ -124,13 +121,11 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     const handlePermissions = (e, permissionId) => {
 
         if (e.target.checked) {
-            // Adiciona a permissão ao estado se marcada
             setRolePermissions(prevPermissions => [
                 ...prevPermissions,
                 permissionId
             ]);
         } else {
-            // Remove a permissão do estado se desmarcada
             setRolePermissions(prevPermissions =>
                 prevPermissions.filter(item => item !== permissionId)
             );

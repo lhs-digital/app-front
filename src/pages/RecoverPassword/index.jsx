@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import './signin.css'
-import logo from '../../assets/logo.jpg'
+import '../SignIn/signin.css'
+import logo from '../../assets/Logo_1.svg'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '../../services/api'
@@ -40,8 +40,8 @@ const RecoverPassword = () => {
   return (
     <div className='container-center'>
       <div className="login">
-        <div className="login-area">
           <img src={logo} alt="Logo do App Provedores" />
+        <div className="login-area">
           <Heading>App Provedores</Heading>
           <Text color="white">Sistema de Gerenciamento de Provedores</Text>
         </div>

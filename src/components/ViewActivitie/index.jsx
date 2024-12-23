@@ -23,7 +23,6 @@ const ViewActivitie = ({ id, status, selectedActivitie, setDataView, setRefresh,
 
     const handleConfirm = async () => {
         try {
-            // Chamada para a API para alterar o status da atividade
             await api.put(`/auditing/${id}/toggle_status`);
             toast.success('Status da atividade alterado com sucesso!');
         } catch (error) {

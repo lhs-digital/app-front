@@ -1,9 +1,8 @@
-import { Box, Button, ButtonGroup, Divider, Flex, FormControl, FormLabel, Grid, Heading, Input, List, Select, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, Text, Tooltip, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Button, Divider, Flex, Heading, List, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, useBreakpointValue } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import ActivitieItem from '../ActivitieItem/ActivitieItem';
 import api from '../../services/api';
 import PieChart from '../PieChart';
-import Pagination from '../Pagination';
 import { formattedPriority, getPriorityColor } from '../../services/utils';
 import { Link } from 'react-router-dom';
 
@@ -13,7 +12,7 @@ const ListActivities = () => {
     const [dataPriorityTwo, setDataPriorityTwo] = useState([]);
     const [dataPriorityThree, setDataPriorityThree] = useState([]);
     const [dataSelected, setDataSelected] = useState([]);
-    const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
+    const [loading, setLoading] = useState(true);
     const [refresh, setRefresh] = useState(false);
     const [status, setStatus] = useState(null);
     const [priority, setPriority] = useState(3);
@@ -21,7 +20,6 @@ const ListActivities = () => {
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
     useEffect(() => {
-        console.log('Chamando API com:', { priority, status });
         const getData = async () => {
             setLoading(true);
             try {

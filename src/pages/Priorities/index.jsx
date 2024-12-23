@@ -5,6 +5,8 @@ import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button,
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import api from '../../services/api';
 import ModalRule from '../../components/ModalRule';
+import { toast } from 'react-toastify';
+import ModalRuleDelete from '../../components/ModalRuleDelete';
 
 const Priorities = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -12,6 +14,7 @@ const Priorities = () => {
     const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
     const [data, setData] = useState([]);
     const [dataEdit, setDataEdit] = useState({});
+    const [deleteId, setDeleteId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [search, setSearch] = useState('');
     const [lastPage, setLastPage] = useState(null);
@@ -22,8 +25,6 @@ const Priorities = () => {
     const [nivel, setNivel] = useState("");
     const [refresh, setRefresh] = useState(false);
 
-
-    // Guardar os parâmetros de filtro
     const [filterParams, setFilterParams] = useState({
         search: '',
         method: '',
@@ -39,7 +40,7 @@ const Priorities = () => {
 
     useEffect(() => {
         const getData = async () => {
-            setLoading(true); // Ativar o carregamento
+            setLoading(true);
             try {
                 const params = {
                     search: filterParams?.search || undefined,
@@ -54,7 +55,6 @@ const Priorities = () => {
                     params: filteredParams
                 });
 
-                console.log(response.data);
 
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
@@ -67,6 +67,27 @@ const Priorities = () => {
         };
         getData();
     }, [currentPage, refresh, filterParams]);
+
+    const handleEdit = (column) => {
+        setDataEdit(column);
+        onOpen();
+    };
+
+    const handleDelete = (id) => {
+        setDeleteId(id);
+        onOpenDelete();
+    };
+
+    const handleRemove = async () => {
+        try {
+            await (api.delete(`/company_table_columns/${deleteId}`));
+            setRefresh(!refresh);
+            toast.success('Regra removida com sucesso!');
+            onCloseDelete();
+        } catch (error) {
+            console.error('Erro ao remover regra', error);
+        }
+    };
 
     return (
         <>
@@ -114,8 +135,20 @@ const Priorities = () => {
                                                                             _expanded={{ bg: 'green.500', color: 'white' }}
                                                                             bg={isExpanded ? 'green.500' : 'gray.100'}
                                                                         >
-                                                                            <Box flex="1" textAlign="left">
+                                                                            <Box display="flex" width="100%" justifyContent="space-between" alignItems="center">
                                                                                 Coluna: {column.label}
+                                                                                <Box display="flex" justifyContent="space-between" alignItems="center" gap="12px">
+                                                                                    <EditIcon fontSize={20}
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            handleEdit(column)
+                                                                                        }}
+                                                                                    />
+                                                                                    <DeleteIcon fontSize={20} onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        handleDelete(column.id)
+                                                                                    }} />
+                                                                                </Box>
                                                                             </Box>
                                                                         </AccordionButton>
                                                                     </h3>
@@ -136,12 +169,6 @@ const Priorities = () => {
                                                                                         <Td maxW={isMobile ? 5 : 100}>{validation.name}</Td>
                                                                                         <Td maxW={isMobile ? 5 : 100}>{validation.params}</Td>
                                                                                         <Td maxW={isMobile ? 5 : 100}>{validation.message || "N/A"}</Td>
-                                                                                        <Td p={0}>
-                                                                                            <EditIcon fontSize={20} />
-                                                                                        </Td>
-                                                                                        <Td p={0}>
-                                                                                            <DeleteIcon fontSize={20} />
-                                                                                        </Td>
                                                                                     </Tr>
                                                                                 ))}
                                                                             </Tbody>
@@ -170,6 +197,14 @@ const Priorities = () => {
                         setDataEdit={setDataEdit}
                         setRefresh={setRefresh}
                         refresh={refresh}
+                    />
+                )}
+
+                {isDeleteOpen && (
+                    <ModalRuleDelete
+                        isOpen={isDeleteOpen}
+                        onClose={onCloseDelete}
+                        onConfirm={handleRemove}
                     />
                 )}
             </Flex>

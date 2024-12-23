@@ -7,6 +7,7 @@ import Pagination from '../../components/Pagination';
 import { dateFormatted } from '../../services/utils';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSortAlphaDown, faSortAlphaUp, faSortNumericDown, faSortNumericUp } from "@fortawesome/free-solid-svg-icons";
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 
 const Logs = () => {
     const isMobile = useBreakpointValue({ base: true, lg: false });
@@ -22,8 +23,6 @@ const Logs = () => {
     const [refresh, setRefresh] = useState(false);
     const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'asc' });
 
-
-    // Guardar os parâmetros de filtro
     const [filterParams, setFilterParams] = useState({
         search: '',
         method: '',
@@ -34,7 +33,7 @@ const Logs = () => {
 
     useEffect(() => {
         const getData = async () => {
-            setLoading(true); // Ativar o carregamento
+            setLoading(true);
             try {
                 const params = {
                     search: filterParams?.search || undefined,
@@ -101,6 +100,11 @@ const Logs = () => {
 
         setSortConfig({ key, direction });
         setData(sortedData);
+    };
+
+    const getSortIcon = (key) => {
+        if (sortConfig.key !== key) return null; 
+        return sortConfig.direction === 'asc' ? <ChevronUpIcon ml={2} /> : <ChevronDownIcon ml={2} />;
     };
 
     return (
@@ -210,15 +214,15 @@ const Logs = () => {
                         <Table mt="6" overflowX="auto">
                             <Thead>
                                 <Tr>
-                                    <Th fontSize="16px" onClick={() => handleSort('created_at')} cursor="pointer">Data de Registro</Th>
-                                    <Th fontSize="16px" onClick={() => handleSort('log.ip')} cursor="pointer">Endereço IP</Th>
-                                    <Th fontSize="16px" onClick={() => handleSort('log.email')} cursor="pointer">E-mail</Th>
-                                    <Th fontSize="16px" onClick={() => handleSort('log.user')} cursor="pointer">Usuário</Th>
-                                    <Th fontSize="16px" onClick={() => handleSort('log.method')} cursor="pointer">Operação</Th>
-                                    <Th fontSize="16px" onClick={() => handleSort('log.nivel')} cursor="pointer">Nível</Th>
-                                    <Th fontSize="16px" onClick={() => handleSort('log.type')} cursor="pointer">Tipo</Th>
-                                    <Th fontSize="16px" onClick={() => handleSort('log.url')} cursor="pointer">URL</Th>
-                                    <Th fontSize="16px" onClick={() => handleSort('log.table')} cursor="pointer">Tabela</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('created_at')} cursor="pointer">Data de Registro {getSortIcon('created_at')}</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('log.ip')} cursor="pointer">Endereço IP {getSortIcon('log.ip')}</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('log.email')} cursor="pointer">E-mail {getSortIcon('log.email')}</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('log.user')} cursor="pointer">Usuário {getSortIcon('log.user')}</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('log.method')} cursor="pointer">Operação {getSortIcon('log.method')}</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('log.nivel')} cursor="pointer">Nível {getSortIcon('log.nivel')}</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('log.type')} cursor="pointer">Tipo {getSortIcon('log.type')}</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('log.url')} cursor="pointer">URL {getSortIcon('log.url')}</Th>
+                                    <Th fontSize="16px" onClick={() => handleSort('log.table')} cursor="pointer">Tabela {getSortIcon('log.table')}</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>

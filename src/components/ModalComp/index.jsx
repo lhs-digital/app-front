@@ -43,11 +43,11 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     }, [setRoles, company]);
 
     const handleCompanyChange = (event) => {
-        setCompany(event.target.value); // Atualiza o estado com o valor selecionado
+        setCompany(event.target.value);
     };
 
     const handleRoleChange = (event) => {
-        setRole(event.target.value); // Atualiza o estado com o valor selecionado
+        setRole(event.target.value);
     };
 
     const saveData = async () => {

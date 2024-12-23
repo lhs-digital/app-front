@@ -7,7 +7,6 @@ const Pagination = ({ lastPage, currentPage, setCurrentPage }) => {
     const [localPage, setLocalPage] = useState(currentPage);
 
     useEffect(() => {
-        // Atualiza a página local quando a prop currentPage mudar.
         setLocalPage(currentPage);
     }, [currentPage]);
 
@@ -23,7 +22,6 @@ const Pagination = ({ lastPage, currentPage, setCurrentPage }) => {
         const startPage = Math.max(2, localPage - 2);
         const endPage = Math.min(lastPage - 1, localPage + 2);
 
-        // Primeiro botão (Página 1)
         buttons.push(
             <Button
                 ml="6px"
@@ -36,12 +34,10 @@ const Pagination = ({ lastPage, currentPage, setCurrentPage }) => {
             </Button>
         );
 
-        // Adiciona elipses (...) se necessário
         if (startPage > 2) {
             buttons.push(<Text ml="6px" key="ellipsis-start">...</Text>);
         }
 
-        // Botões de página intermediária
         for (let i = startPage; i <= endPage; i++) {
             buttons.push(
                 <Button
@@ -56,12 +52,10 @@ const Pagination = ({ lastPage, currentPage, setCurrentPage }) => {
             );
         }
 
-        // Adiciona elipses (...) se necessário
         if (endPage < lastPage - 1) {
             buttons.push(<Text ml="6px" key="ellipsis-end">...</Text>);
         }
 
-        // Último botão (Última página)
         if (lastPage > 1) {
             buttons.push(
                 <Button

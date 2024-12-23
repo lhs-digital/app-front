@@ -44,8 +44,6 @@ const ModalViewRole = ({ selectedRole, isOpen, onClose }) => {
                         <b>Permissões:</b>
                         <Wrap spacing={5} direction='row'>
                             {
-                                // Se a permissão estiver no array de permissões da role, o checkbox estará marcado
-                                // Se não estiver, o checkbox estará desmarcado
                                 permissions.map((permission) => (
                                     <Checkbox
                                         isDisabled

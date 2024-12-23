@@ -27,29 +27,24 @@ const ModalReport = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
 
     const generateReport = async () => {
         try {
-            // Faça a chamada à API, especificando o responseType como "blob" para garantir que o arquivo seja baixado corretamente
             const response = await api.get(`/report_generate/2`, {
                 params: {
                     start_date: createdAt[0],
                     end_date: createdAt[1],
                 },
-                responseType: 'blob'  // Isso é importante para downloads de arquivos
+                responseType: 'blob'
             });
 
-            // Cria um objeto Blob com os dados do arquivo
             const fileBlob = new Blob([response.data], { type: response.data.type });
 
-            // Cria uma URL temporária para o Blob
             const downloadUrl = URL.createObjectURL(fileBlob);
 
-            // Cria um link temporário para iniciar o download
             const link = document.createElement('a');
             link.href = downloadUrl;
-            link.download = 'relatorio.pdf';  // Nome do arquivo desejado
+            link.download = 'relatorio.pdf';
             document.body.appendChild(link);
             link.click();
 
-            // Remove o link temporário após o download
             document.body.removeChild(link);
             URL.revokeObjectURL(downloadUrl);
 

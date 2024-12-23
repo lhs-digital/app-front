@@ -9,7 +9,8 @@ import {
     FaRegFileAlt,
     FaBook,
     FaAngleDoubleUp,
-    FaPaperclip
+    FaPaperclip,
+    FaFolder
 } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 
@@ -22,6 +23,10 @@ const Sidebar = ({ active }) => {
     const usersPermissions = ['view_users', 'view_any_users', 'update_users', 'delete_users'];
     const companyPermissions = ['view_companies', 'view_any_companies', 'update_companies', 'delete_companies'];
     const rolesPermissions = ['view_roles', 'view_any_roles', 'update_roles', 'delete_roles'];
+    const auditoriaPermissions = ['view_any_tasks', 'update_tasks']
+    const relatorioPermissions = ['view_any_reports', 'report_generate']
+    const defineRules = ['define_rules']
+
 
     const hasPermission = (thePermissions) => {
         return permissions.some(permission =>
@@ -66,12 +71,27 @@ const Sidebar = ({ active }) => {
                     : null
                 }
 
-                <Link to="/prioridades">
-                    <SidebarItem Icon={FaAngleDoubleUp} Text="Gerenciamento de Prioridades" />
-                </Link>
+                {hasPermission(defineRules) ?
+                    (
+                        <Link to="/prioridades">
+                            <SidebarItem Icon={FaAngleDoubleUp} Text="Regras de Auditorias" />
+                        </Link>
 
-                <Link to="/relatorios">
-                    <SidebarItem Icon={FaPaperclip} Text="Relatórios de Auditorias" />
+                    ) : null
+                }
+
+                {hasPermission(relatorioPermissions) ?
+                    (
+                        <Link to="/relatorios">
+                            <SidebarItem Icon={FaPaperclip} Text="Relatórios de Auditorias" />
+                        </Link>
+                    )
+                    : null
+                }
+
+
+                <Link to="/formulario-cliente">
+                    <SidebarItem Icon={FaFolder} Text="Formulário de Cliente" />
                 </Link>
 
                 <Link to="/my-permissions">

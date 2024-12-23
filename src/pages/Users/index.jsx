@@ -1,5 +1,5 @@
 import React from 'react';
-import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
+import { EditIcon, DeleteIcon, ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import {
     Box,
     Flex,
@@ -38,7 +38,7 @@ const Users = () => {
     const [refresh, setRefresh] = useState(false);
     const [search, setSearch] = useState('');
     const [deleteId, setDeleteId] = useState(null);
-    const [loading, setLoading] = useState(true); // Adicionado estado de carregamento
+    const [loading, setLoading] = useState(true);
     const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
 
 
@@ -48,7 +48,7 @@ const Users = () => {
 
     useEffect(() => {
         const getData = async () => {
-            setLoading(true); // Ativar o carregamento
+            setLoading(true);
             try {
                 const response = await (api.get(`/user?page=${currentPage}`));
                 setCurrentPage(response.data.meta.current_page);
@@ -79,12 +79,17 @@ const Users = () => {
         setData(sortedData);
     };
 
+    const getSortIcon = (key) => {
+        if (sortConfig.key !== key) return null; 
+        return sortConfig.direction === 'asc' ? <ChevronUpIcon ml={2} /> : <ChevronDownIcon ml={2} />;
+    };
+
     const handleRemove = async () => {
         try {
             await (api.delete(`/user/${deleteId}`));
             setRefresh(!refresh);
             toast.success('Usuário removido com sucesso!');
-            onCloseDelete(); // Fechar o modal de confirmação
+            onCloseDelete();
         } catch (error) {
             console.error('Erro ao verificar lista de usuários', error);
         }
@@ -102,8 +107,8 @@ const Users = () => {
     };
 
     const handleDelete = (id) => {
-        setDeleteId(id); // Armazenar o ID do usuário que será excluído
-        onOpenDelete(); // Abrir o modal de confirmação
+        setDeleteId(id);
+        onOpenDelete();
     };
 
     return (
@@ -120,7 +125,6 @@ const Users = () => {
                 fontFamily="poppins"
             >
                 <Box maxW={800} w="100%" py={10} px={2}>
-                    {/* Caso tenha a permissao create_users */}
                     {permissions.some(permissions => permissions.name === 'create_users') ?
                         (
                             <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
@@ -142,9 +146,18 @@ const Users = () => {
                         <Table mt="6">
                             <Thead>
                                 <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('name')} cursor="pointer">Nome</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('email')} cursor="pointer">E-mail</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('role.name')} cursor="pointer">Role</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('name')} cursor="pointer">
+                                        Nome
+                                        {getSortIcon('name')}
+                                    </Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('email')} cursor="pointer">
+                                        E-mail
+                                        {getSortIcon('email')}
+                                    </Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('role.name')} cursor="pointer">
+                                        Role
+                                        {getSortIcon('role.name')}
+                                    </Th>
                                     <Th p={0}></Th>
                                     <Th p={0}></Th>
                                 </Tr>
@@ -212,7 +225,7 @@ const Users = () => {
                     <ModalDelete
                         isOpen={isDeleteOpen}
                         onClose={onCloseDelete}
-                        onConfirm={handleRemove} // Função de confirmação de exclusão
+                        onConfirm={handleRemove}
                     />
                 )}
 

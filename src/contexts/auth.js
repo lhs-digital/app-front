@@ -7,23 +7,25 @@ export const AuthContext = createContext({});
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [permissions, setPermissions] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // Carrega o usuário, permissões e token salvos no localStorage ou sessionStorage
     useEffect(() => {
-        const storagedUser = localStorage.getItem('user');
-        const storagedPermissions = localStorage.getItem('permissions');
-        const storagedToken = localStorage.getItem('token');
-        const expiresAt = localStorage.getItem('expiresAt');
+        const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
 
+        const storagedUser = storage.getItem('user');
+        const storagedPermissions = storage.getItem('permissions');
+        const storagedToken = storage.getItem('token');
+        const expiresAt = storage.getItem('expiresAt');
 
-        // Verifica se o token está expirado
         if (storagedToken && storagedUser && expiresAt && new Date().getTime() < expiresAt) {
             setUser(JSON.parse(storagedUser));
             setPermissions(JSON.parse(storagedPermissions) || []);
         } else {
-            if(storagedToken) logout();
+            if (storagedToken) logout();
         }
+
+        setLoading(false);
     }, []);
 
     const signIn = async (email, password, rememberMe) => {
@@ -31,19 +33,18 @@ const AuthProvider = ({ children }) => {
             const response = await api.post(`/login`, { email, password });
             const token = response.data.token;
 
+            const storage = rememberMe ? localStorage : sessionStorage;
             const expiresAt = new Date().getTime() + (rememberMe ? 7 * 24 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000);
-            localStorage.setItem("token", token);
-            localStorage.setItem("expiresAt", expiresAt);
-            localStorage.setItem("rememberMe", rememberMe);
 
-            // Salva os dados do usuário no estado e no localStorage
+            storage.setItem("token", token);
+            storage.setItem("expiresAt", expiresAt);
+
             setUser(response.data);
-            localStorage.setItem('user', JSON.stringify(response.data));
+            storage.setItem('user', JSON.stringify(response.data));
 
-            // Busca e salva as permissões do usuário
             const permissionsResponse = await api.get(`/me/permissions`);
             setPermissions(permissionsResponse.data.data);
-            localStorage.setItem('permissions', JSON.stringify(permissionsResponse.data.data));
+            storage.setItem('permissions', JSON.stringify(permissionsResponse.data.data));
 
             return response.data;
         } catch (error) {
@@ -58,15 +59,10 @@ const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error("Logout falhou:", error);
         } finally {
-            // Remove todos os dados do localStorage e reseta os estados
-            localStorage.removeItem("token");
-            localStorage.removeItem("rememberMe");
-            localStorage.removeItem("expiresAt");
-            localStorage.removeItem("user");
-            localStorage.removeItem("permissions");
+            localStorage.clear();
+            sessionStorage.clear();
             setUser(null);
             setPermissions([]);
-
             navigate('/');
         }
     };
@@ -78,7 +74,8 @@ const AuthProvider = ({ children }) => {
                 user,
                 permissions,
                 signIn,
-                logout
+                logout,
+                loading,
             }}
         >
             {children}

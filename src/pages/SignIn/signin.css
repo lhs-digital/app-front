@@ -8,18 +8,21 @@
 }
 
 .login {
-    background-color: #EAEAEC;
+    background-color: #5A939F;
     width: 600px;
     display: flex;
     align-items: center;
+    color: white;
+    border-radius: 12px;
     justify-content: center;
     flex-direction: column;
     box-shadow: 5px 10px 10px rgba(0, 0, 0, 0.1);
 }
 
 .login-area {
-    background-color: #181c2e;
-    color: white;
+    background-color: #fff;
+    /* border-radius: 12px 12px 0 0; */
+    color: #181c2e;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -29,12 +32,7 @@
 
 .login-area p {
     margin-bottom: 1rem;
-}
-
-.login-area img {
-    width: 170px;
-    padding: 20px;
-    border-radius: 100%;
+    color: #181c2e;
 }
 
 form {
@@ -42,6 +40,11 @@ form {
     width: 90%;
     display: flex;
     flex-direction: column;
+}
+
+form p {
+    color: white;
+    margin-bottom: 12px;
 }
 
 .login input {
@@ -52,14 +55,16 @@ form {
     padding: 10px;
     font-size: 15px;
     background-color: white;
+    color: black;
 }
 
 form button {
     height: 35px;
     border: 0;
     border-radius: 4px;
-    background-color: #181c2e;
-    color: white;
+    background-color: #EDDEA3;
+
+    color: #07181F;
     font-size: 1.3rem;
 }
 
@@ -69,7 +74,7 @@ form button:hover {
 
 .login a {
     margin: 1rem 0;
-    color: #000;
+    color: white;
     cursor: pointer;
 }
 

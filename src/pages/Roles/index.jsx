@@ -1,5 +1,5 @@
 import React from 'react';
-import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
+import { EditIcon, DeleteIcon, ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import {
     Box,
     Flex,
@@ -62,7 +62,7 @@ const Roles = () => {
             await (api.delete(`/role/${deleteId}`));
             setRefresh(!refresh);
             toast.success('Role removida com sucesso!');
-            onCloseDelete(); // Fechar o modal de confirmação
+            onCloseDelete();
         } catch (error) {
             console.error('Erro ao verificar lista de usuários', error);
         }
@@ -80,8 +80,8 @@ const Roles = () => {
     };
 
     const handleDelete = (id) => {
-        setDeleteId(id); // Armazenar o ID do usuário que será excluído
-        onOpenDelete(); // Abrir o modal de confirmação
+        setDeleteId(id);
+        onOpenDelete();
     };
 
     const handleSort = (key) => {
@@ -98,6 +98,11 @@ const Roles = () => {
 
         setSortConfig({ key, direction });
         setData(sortedData);
+    };
+
+    const getSortIcon = (key) => {
+        if (sortConfig.key !== key) return null; 
+        return sortConfig.direction === 'asc' ? <ChevronUpIcon ml={2} /> : <ChevronDownIcon ml={2} />;
     };
 
     return (
@@ -135,9 +140,9 @@ const Roles = () => {
                         <Table mt="6">
                             <Thead>
                                 <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('name')}>Nome</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('company.name')}>Empresa</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('permissions_count')}>Qtd Permissões</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('name')}>Nome {getSortIcon('name')}</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('company.name')}>Empresa {getSortIcon('company.name')}</Th>
+                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('permissions_count')}>Qtd Permissões {getSortIcon('permissions_count')}</Th>
                                     <Th p={0}></Th>
                                     <Th p={0}></Th>
                                 </Tr>
@@ -208,7 +213,7 @@ const Roles = () => {
                     <ModalDelete
                         isOpen={isDeleteOpen}
                         onClose={onCloseDelete}
-                        onConfirm={handleRemove} // Função de confirmação de exclusão
+                        onConfirm={handleRemove}
                     />
                 )}
 
