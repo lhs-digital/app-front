@@ -1,13 +1,9 @@
-import { Box, Button, ButtonGroup, Divider, Flex, FormControl, FormLabel, Grid, Heading, Input, List, Select, Text, Tooltip, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Button, ButtonGroup, Divider, Flex, FormControl, FormLabel, Grid, Heading, Input, List, Select, Text, useBreakpointValue } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import ActivitieItem from '../../components/ActivitieItem/ActivitieItem';
 import api from '../../services/api';
-import PieChart from '../../components/PieChart';
 import Pagination from '../../components/Pagination';
-import { formattedPriority, getPriorityColor } from '../../services/utils';
-import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
-import ActivitieItemAll from '../../components/ActivitieItem/AcitivitieItemAll';
 
 const AllActivities = () => {
     const [data, setData] = useState([]);
@@ -289,7 +285,7 @@ const AllActivities = () => {
                                 data.map((item) => (
                                     (
 
-                                        <ActivitieItemAll
+                                        <ActivitieItem
                                             key={item.id}
                                             activitie={item}
                                             setRefresh={setRefresh}

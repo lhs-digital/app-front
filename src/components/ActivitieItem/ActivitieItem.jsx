@@ -1,25 +1,22 @@
-import { Box, Checkbox, Divider, Grid, Icon, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box, Checkbox, Divider, Grid, Icon, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import ViewActivitie from '../ViewActivitie';
 import ModalCheckActivitie from '../ModalCheckActivitie';
 import { dateFormatted, formattedPriority, getPriorityColor } from '../../services/utils';
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
-    const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
     const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const [dataView, setDataView] = useState(activitie);
     const isMobile = useBreakpointValue({ base: true, lg: false });
-
     const theme = useTheme();
-
-    const handleView = () => {
-        const selectedActivitie = dataView;
-        setDataView(selectedActivitie);
-        onOpenView();
-    };
-
+    
     const handleDelete = () => {
         onOpenDelete();
+    };
+    
+    const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+    const toggleAccordion = () => {
+        setIsAccordionOpen((prevState) => !prevState);
     };
 
     return (
@@ -35,20 +32,22 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             background="white"
             _hover={{ backgroundColor: "gray.50" }}
         >
-            <Tooltip >
-                <ListIcon
-                    size="lg"
-                    as={Checkbox}
-                    onChange={handleDelete}
-                    isChecked={activitie?.status}
-                    paddingRight="12px"
-                    title={activitie?.status === 1 ? "Marque para alterar o status da atividade para: Pendente" : "Marque para alterar o status da atividade para: Concluída"}
-                />
-            </Tooltip>
+            {!isAccordionOpen && (
+                <Tooltip >
+                    <ListIcon
+                        size="lg"
+                        as={Checkbox}
+                        onChange={handleDelete}
+                        isChecked={activitie?.status}
+                        paddingRight="12px"
+                        title={activitie?.status === 1 ? "Marque para alterar o status da atividade para: Pendente" : "Marque para alterar o status da atividade para: Concluída"}
+                    />
+                </Tooltip>
+
+            )}
             <Grid
                 templateColumns="1fr"
                 flex="1"
-                onClick={handleView}
                 cursor="pointer"
                 gap={3}
                 padding={0}
@@ -60,27 +59,63 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                         <Text fontWeight="bold" fontSize="lg">
                             ID do Cliente: <Text as="cite" fontWeight="normal">{activitie?.record_id}</Text>
                         </Text>
-                        <Icon name="chevron-right" size="24px" color="gray.500" />
+                        <Tooltip label={`Prioridade: ${formattedPriority(activitie?.priority)}`} aria-label="Prioridade">
+                            <Text
+                                fontSize="lg"
+                                color={getPriorityColor(activitie?.priority).textColor}
+                                bg={getPriorityColor(activitie?.priority).bgColor}
+                                textAlign="center"
+                                shadow="sm"
+                                p={1}
+                                paddingX={2}
+                                rounded="6px"
+                                title={`Prioridade: ${formattedPriority(activitie?.priority)}`}
+                            > {isMobile ? '' : 'Prioridade Geral:'} <b>{formattedPriority(activitie?.priority)}</b></Text>
+                        </Tooltip>
                     </Box>
                     <Divider borderColor="gray.300" width="100%" alignSelf="center" borderWidth="1px" marginY={2} />
-                    <Text display="flex" alignItems="center" flexWrap="wrap" gap="6px" fontWeight="bold" fontSize="md">
-                        Campos inválidos:{" "}
-                        {activitie?.columns.map((col, index) => (
-                            <Tooltip label={`Prioridade: ${formattedPriority(col?.priority)}`} aria-label="Prioridade">
-                                <Text
-                                    fontSize={isMobile ? "sm" : "md"}
-                                    fontWeight="normal"
-                                    color={getPriorityColor(col?.priority).textColor}
-                                    bg={getPriorityColor(col?.priority).bgColor}
-                                    textAlign="center"
-                                    p={1}
-                                    rounded="6px"
-                                    title={`Prioridade: ${formattedPriority(col?.priority)}`}
-                                >{col?.column}</Text>
-                            </Tooltip>
-                        ))}
-                    </Text>
+                    {!isAccordionOpen && (
+                        <Text display="flex" alignItems="center" flexWrap="wrap" gap="6px" fontWeight="bold" fontSize="md">
+                            Campos inválidos:{" "}
+                            {activitie?.columns.map((col, index) => (
+                                <Tooltip label={`Prioridade: ${formattedPriority(+col?.priority)}`} aria-label="Prioridade">
+                                    <Text
+                                        fontSize={isMobile ? "sm" : "md"}
+                                        fontWeight="normal"
+                                        color={getPriorityColor(+col?.priority).textColor}
+                                        bg={getPriorityColor(+col?.priority).bgColor}
+                                        textAlign="center"
+                                        p={1}
+                                        rounded="6px"
+                                        title={`Prioridade: ${formattedPriority(+col?.priority)}`}
+                                    >{col?.column}</Text>
+                                </Tooltip>
+                            ))}
+                        </Text>
+
+                    )}
                 </Box>
+                {/* accordion aqui que traga tudo do ViewActivitie*/}
+                <Accordion allowToggle backgroundColor={theme.colors.gray[50]} >
+                    <AccordionItem border="none">
+                        <AccordionButton onClick={toggleAccordion}>
+                            <Box flex="1" textAlign="left" fontWeight="bold" fontSize="lg">
+                                Detalhes da Atividade
+                            </Box>
+                            <AccordionIcon />
+                        </AccordionButton>
+                        <AccordionPanel pb={4}>
+                            <ViewActivitie
+                                selectedActivitie={dataView}
+                                setDataView={setDataView}
+                                id={activitie?.id}
+                                status={activitie?.status}
+                                setRefresh={setRefresh}
+                                refresh={refresh}
+                            />
+                        </AccordionPanel>
+                    </AccordionItem>
+                </Accordion>
                 <Box
                     textAlign="right"
                     display="flex"
@@ -111,19 +146,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                     status={activitie?.status}
                     isOpen={isDeleteOpen}
                     onClose={onCloseDelete}
-                    setRefresh={setRefresh}
-                    refresh={refresh}
-                />
-            )}
-
-            {isViewOpen && (
-                <ViewActivitie
-                    selectedActivitie={dataView}
-                    setDataView={setDataView}
-                    id={activitie?.id}
-                    status={activitie?.status}
-                    isOpen={isViewOpen}
-                    onClose={onCloseView}
                     setRefresh={setRefresh}
                     refresh={refresh}
                 />
