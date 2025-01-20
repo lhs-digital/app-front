@@ -32,19 +32,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             background="white"
             _hover={{ backgroundColor: "gray.50" }}
         >
-            {!isAccordionOpen && (
-                <Tooltip >
-                    <ListIcon
-                        size="lg"
-                        as={Checkbox}
-                        onChange={handleDelete}
-                        isChecked={activitie?.status}
-                        paddingRight="12px"
-                        title={activitie?.status === 1 ? "Marque para alterar o status da atividade para: Pendente" : "Marque para alterar o status da atividade para: Concluída"}
-                    />
-                </Tooltip>
-
-            )}
             <Grid
                 templateColumns="1fr"
                 flex="1"

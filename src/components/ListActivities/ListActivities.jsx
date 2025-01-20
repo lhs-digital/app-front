@@ -1,10 +1,11 @@
 import { Box, Button, Divider, Flex, Heading, List, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, useBreakpointValue } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import ActivitieItem from '../ActivitieItem/ActivitieItem';
 import api from '../../services/api';
 import PieChart from '../PieChart';
 import { formattedPriority, getPriorityColor } from '../../services/utils';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../../contexts/auth';
 
 const ListActivities = () => {
     const [data, setData] = useState([]);
@@ -16,6 +17,8 @@ const ListActivities = () => {
     const [refresh, setRefresh] = useState(false);
     const [status, setStatus] = useState(null);
     const [priority, setPriority] = useState(3);
+    const { user } = useContext(AuthContext);
+    const role = user?.user?.role?.name;
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
@@ -45,23 +48,26 @@ const ListActivities = () => {
                 flexDirection="column"
                 display="flex"
             >
-                <Box
-                    width="100%"
-                    maxWidth="800px"
-                    gap="12px"
-                    flexDirection="column"
-                    display="flex"
-                >
+                {role !== 'super-admin' && (
+                    <Box
+                        width="100%"
+                        maxWidth="800px"
+                        gap="12px"
+                        flexDirection="column"
+                        display="flex"
+                    >
 
-                    <Heading >Gráficos das Atividades</Heading>
-                    <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
-                    <Heading fontSize="lg" fontWeight="regular" color="gray.500">Visualize e acompanhe o status e progresso das atividades em geral</Heading>
+                        <Heading >Gráficos das Atividades</Heading>
+                        <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
+                        <Heading fontSize="lg" fontWeight="regular" color="gray.500">Visualize e acompanhe o status e progresso das atividades em geral</Heading>
 
-                    <PieChart
-                        refresh={refresh}
-                        setRefresh={setRefresh}
-                    />
-                </Box>
+
+                        <PieChart
+                            refresh={refresh}
+                            setRefresh={setRefresh}
+                        />
+                    </Box>
+                )}
 
                 <Box
                     width="100%"

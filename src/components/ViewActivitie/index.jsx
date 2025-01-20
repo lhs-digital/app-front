@@ -4,7 +4,6 @@ import {
     Box,
     Tooltip,
     Text,
-    Divider,
     useBreakpointValue,
     Table,
     Thead,
@@ -12,14 +11,21 @@ import {
     Th,
     Tbody,
     Td,
+    useDisclosure,
 } from '@chakra-ui/react';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
 import { formattedPriority, getPriorityColor } from '../../services/utils';
+import ModalFormClient from '../ModalFormClient';
 
-const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, onClose }) => {
+const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh }) => {
     const formattedDate = (date) => new Date(date).toLocaleDateString('pt-BR');
     const isMobile = useBreakpointValue({ base: true, lg: false });
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const handleView = (index) => {
+        onOpen();
+    };
 
     const handleConfirm = async () => {
         try {
@@ -43,6 +49,7 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, onC
                     </Tr>
                 </Thead>
                 <Tbody>
+
                     {selectedActivitie?.columns.map((col, index) => (
                         <Tr key={index}>
                             <Td fontWeight="bold">{col?.column}</Td>
@@ -69,10 +76,19 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh, onC
             {/* <Box ><b>Auditoria foi realizada em:</b> {formattedDate(selectedActivitie?.created_at)} </Box>
             <Box ><b>Auditoria foi atualizada em:</b> {formattedDate(selectedActivitie?.updated_at)} </Box> */}
             <Box marginTop={4} display="flex" justifyContent="flex-end">
-                <Button colorScheme={status === 1 ? "orange" : "green"} onClick={handleConfirm}>
-                    {status === 1 ? "Marcar como Pendente" : "Concluir Atividade"}
+                <Button colorScheme={status === 1 ? "orange" : "green"} onClick={handleView}>
+                    Corrigir Erros
                 </Button>
             </Box>
+
+            {isOpen && (
+                <ModalFormClient
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    setRefresh={setRefresh}
+                    refresh={refresh}
+                />
+            )}
         </Box>
     );
 };

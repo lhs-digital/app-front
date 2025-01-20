@@ -1,65 +1,64 @@
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import api from '../../services/api';
 import { useEffect, useState } from 'react';
-import { Box, Text, Flex, Select, FormLabel, Icon } from '@chakra-ui/react';
-import { FaArrowRight } from 'react-icons/fa';
+import { Box, Text, Flex, Select, FormLabel } from '@chakra-ui/react';
+import api from '../../services/api'; // Certifique-se de que o arquivo correto esteja importado
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PieChart = ({ refresh }) => {
+const PieChart = () => {
     const [chartsData, setChartsData] = useState([]);
+    const [selectedTable, setSelectedTable] = useState("clientes");
     const [loading, setLoading] = useState(false);
-    const [scrollShadow, setScrollShadow] = useState('none');
 
     useEffect(() => {
-        const getData = async () => {
+        const processData = async () => {
             setLoading(true);
             try {
-                const response = await api.get(`/auditing/summary`);
+                const response = await api.get('/auditing/summary');
                 const fetchedData = response.data;
 
-                const newChartsData = fetchedData.map(item => {
-                    const total = item.status_0 + item.status_1;
-                    const percentage0 = ((item.status_0 / total) * 100).toFixed(3);
-                    const percentage1 = ((item.status_1 / total) * 100).toFixed(3);
+                const tableData = fetchedData.data.tables.find((table) => table.label === selectedTable);
+
+                if (!tableData) {
+                    setChartsData([]);
+                    setLoading(false);
+                    return;
+                }
+
+                const sortedColumns = [...tableData.columns].sort((a, b) => b.errors_count - a.errors_count);
+
+                const newChartsData = sortedColumns.map((column) => {
+                    const total = column.errors_count + column.fixed_errors_count;
+                    const percentageErrors = total > 0 ? ((column.errors_count / total) * 100).toFixed(2) : 0;
+                    const percentageFixed = total > 0 ? ((column.fixed_errors_count / total) * 100).toFixed(2) : 0;
+
                     return {
-                        labels: ['Pendentes', 'Concluídas'],
+                        labels: ['Erros Pendentes', 'Erros Corrigidos'],
                         datasets: [
                             {
-                                label: item.column,
-                                data: [item.status_0, item.status_1],
-                                backgroundColor: ['#FFCE56', '#36A2EB'],
-                                hoverBackgroundColor: ['#FFCE56', '#36A2EB'],
+                                label: column.label,
+                                data: [column.errors_count, column.fixed_errors_count],
+                                backgroundColor: ['#FF6384', '#36A2EB'],
+                                hoverBackgroundColor: ['#FF6384', '#36A2EB'],
                             },
                         ],
-                        percentages: [percentage0, percentage1],
-                        counts: [item.status_0, item.status_1],
+                        percentages: [percentageErrors, percentageFixed],
+                        counts: [column.errors_count, column.fixed_errors_count],
                     };
                 });
 
                 setChartsData(newChartsData);
             } catch (error) {
-                console.error('Erro ao verificar lista de usuários', error);
+                console.error('Erro ao tentar consumir os dados dos gráficos', error);
+                setChartsData([]);
             } finally {
                 setLoading(false);
             }
         };
-        getData();
-    }, [refresh]);
 
-    const handleScroll = (event) => {
-        const element = event.target;
-        const maxScrollLeft = element.scrollWidth - element.clientWidth;
-
-        if (element.scrollLeft > 0 && element.scrollLeft < maxScrollLeft) {
-            setScrollShadow('inset 10px 0 8px -8px rgba(0, 0, 0, 0.2), inset -10px 0 8px -8px rgba(0, 0, 0, 0.2)');
-        } else if (element.scrollLeft === 0) {
-            setScrollShadow('inset -10px 0 8px -8px rgba(0, 0, 0, 0.2)');
-        } else if (element.scrollLeft >= maxScrollLeft) {
-            setScrollShadow('inset 10px 0 8px -8px rgba(0, 0, 0, 0.2)');
-        }
-    };
+        processData();
+    }, [selectedTable]);
 
     if (loading) return <Text>Carregando...</Text>;
 
@@ -67,8 +66,8 @@ const PieChart = ({ refresh }) => {
         <Box display="flex" position="relative" flexDirection="column">
             <Box>
                 <FormLabel fontSize="lg">Selecione a Tabela:</FormLabel>
-                <Select size="lg">
-                    <option>clients</option>
+                <Select size="lg" onChange={(e) => setSelectedTable(e.target.value)}>
+                    <option value="clientes">Clientes</option>
                 </Select>
             </Box>
 
@@ -77,17 +76,21 @@ const PieChart = ({ refresh }) => {
                 paddingBottom="42px"
                 overflowX="auto"
                 overflowY="hidden"
-                boxShadow={scrollShadow}
-                onScroll={handleScroll}
+                alignItems="center"
             >
-                {/* Seta indicativa de scroll */}
                 {chartsData.map((data, index) => (
-                    <Box key={index} width="240px" margin="20px"> {/* Ajuste a largura aqui */}
+                    <Box key={index} width="240px" margin="20px">
                         <Flex direction="column" alignItems="center">
-                            <Text fontSize="lg" fontWeight="bold" mb="2">Coluna: {data.datasets[0].label}</Text>
+                            <Text fontSize="lg" fontWeight="bold" mb="2">
+                                Coluna: {data.datasets[0].label}
+                            </Text>
                             <Pie data={data} />
-                            <Text fontWeight="bold" fontSize="md" color="gray.500">Qtd. Pendentes: {data.counts[0]} ({data.percentages[0]}%)</Text>
-                            <Text fontWeight="bold" fontSize="md" color="gray.500">Qtd. Concluídas: {data.counts[1]} ({data.percentages[1]}%)</Text>
+                            <Text fontWeight="bold" fontSize="md" color="gray.500">
+                                Qtd. Pendentes: {data.counts[0]} ({data.percentages[0]}%)
+                            </Text>
+                            <Text fontWeight="bold" fontSize="md" color="gray.500">
+                                Qtd. Corrigidos: {data.counts[1]} ({data.percentages[1]}%)
+                            </Text>
                         </Flex>
                     </Box>
                 ))}

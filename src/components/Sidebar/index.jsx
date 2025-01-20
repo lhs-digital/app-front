@@ -71,6 +71,10 @@ const Sidebar = ({ active }) => {
                     : null
                 }
 
+                <Link to="/formulario-cliente">
+                    <SidebarItem Icon={FaFolder} Text="Gerenciamento de Clientes" />
+                </Link>
+
                 {hasPermission(defineRules) ?
                     (
                         <Link to="/prioridades">
@@ -88,11 +92,6 @@ const Sidebar = ({ active }) => {
                     )
                     : null
                 }
-
-
-                <Link to="/formulario-cliente">
-                    <SidebarItem Icon={FaFolder} Text="Formulário de Cliente" />
-                </Link>
 
                 <Link to="/my-permissions">
                     <SidebarItem Icon={FaRegSun} Text="Minhas Permissões" />

@@ -10,7 +10,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../../contexts/auth';
 
 const Header = () => {
-    const [sidebar, setSidebar] = useState(false)
+    const [sidebar, setSidebar] = useState(true)
 
     const showSidebar = () => setSidebar(!sidebar)
 

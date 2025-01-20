@@ -41,7 +41,6 @@ const Users = () => {
     const [loading, setLoading] = useState(true);
     const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
 
-
     const { permissions } = useContext(AuthContext);
 
     const isMobile = useBreakpointValue({ base: true, lg: false });
