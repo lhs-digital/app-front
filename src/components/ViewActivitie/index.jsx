@@ -85,6 +85,7 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh }) =
                 <ModalFormClient
                     isOpen={isOpen}
                     onClose={onClose}
+                    selectedActivitie={selectedActivitie}
                     setRefresh={setRefresh}
                     refresh={refresh}
                 />

@@ -24,7 +24,6 @@ const FormClient = () => {
   const [search, setSearch] = useState('');
   const [sortConfig, setSortConfig] = useState(null);
 
-  // Dados mockados
   const mockData = [
     { id: 1, name: 'João Silva', email: 'joao.silva@example.com', role: { name: 'Admin' } },
     { id: 2, name: 'Maria Oliveira', email: 'maria.oliveira@example.com', role: { name: 'User' } },
@@ -34,7 +33,6 @@ const FormClient = () => {
 
   const [data, setData] = useState(mockData);
 
-  // Ordenação
   const handleSort = (key) => {
     let direction = 'ascending';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -49,13 +47,11 @@ const FormClient = () => {
     setData(sortedData);
   };
 
-  // Ícone de ordenação
   const getSortIcon = (key) => {
     if (!sortConfig || sortConfig.key !== key) return null;
     return sortConfig.direction === 'ascending' ? ' 🔼' : ' 🔽';
   };
 
-  // Filtro de busca
   const filteredData = !search
     ? data
     : data.filter((user) =>
@@ -68,8 +64,8 @@ const FormClient = () => {
     <>
       <Header />
       <Title
-        title="Formulário de Cliente"
-        subtitle="Formulário de preenchimento de cadastro/alteração de informações a respeito dos clientes."
+        title="Gerenciamento de Clientes"
+        subtitle="Informações gerais a respeito dos clientes."
       />
       <Flex align="center" justify="center" flexDirection="column" fontSize="20px" fontFamily="Poppins">
         <Box maxW={800} w="100%" py={10} px={2}>

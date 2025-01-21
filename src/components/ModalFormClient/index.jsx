@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../../components/Header';
 import Title from '../../components/Title';
-import { Box, Button, Flex, FormControl, FormLabel, Grid, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, Text, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Divider, Flex, FormControl, FormLabel, Grid, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, Text, useBreakpointValue, useDisclosure } from '@chakra-ui/react';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
 import { validarCNPJ, validarCPF, validarDataNascimento, validarEmail } from '../../services/utils';
@@ -9,6 +9,7 @@ import { validarCNPJ, validarCPF, validarDataNascimento, validarEmail } from '..
 
 const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
     const [fields, setFields] = useState([]);
+    const fieldsWithErrors = selectedActivitie?.columns
 
     const [form, setForm] = useState({
         numero: '',
@@ -28,12 +29,13 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
         nivel: ""
     });
 
+    const isMobile = useBreakpointValue({ base: true, lg: false });
+
     useEffect(() => {
         const getData = async () => {
             try {
                 const response = await (api.get(`/company_tables/all_tables`));
                 setFields(response.data.data[0].columns);
-
             } catch (error) {
                 console.error('Erro ao acessar as tabelas de formulário dos clientes', error);
             }
@@ -76,12 +78,15 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                 <ModalOverlay />
                 <ModalContent maxW={1200} w="100%" py={10} px={2}>
                     <ModalHeader>
-                        Formulário para correção de dados inválidos do Cliente
+                        Formulário para correção de dados inválidos
+                        <Text>ID do Cliente: #{selectedActivitie.id}</Text>
+                        <Text color="gray.500" fontWeight="normal" fontSize="md">Os campos com borda vermelha representam os campos inválidos do Cliente</Text>
+                        <Divider borderColor="gray.300" width="100%" alignSelf="center" borderWidth="1px" marginY={2} />
                     </ModalHeader>
                     <ModalBody>
                         <Box>
                             <FormControl display="flex" flexDirection="column" gap={4}>
-                                <Grid gap={4} templateColumns="1fr 1fr">
+                                <Grid gap={4} templateColumns={isMobile ? "1fr": "1fr 1fr"}>
                                     <Box>
                                         <FormLabel htmlFor="numero">Número da residência *</FormLabel>
                                         <Input
@@ -89,6 +94,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                             type="number"
                                             value={form.numero}
                                             placeholder="Digite o Número da residência"
+                                            border={fieldsWithErrors?.findIndex((field) => field.column === 'Número de Residência') !== -1 ? '1px solid red' : undefined}
                                             onKeyDown={(e) => {
                                                 if (e.key === '-' || e.key === 'e' || e.key === 'E') {
                                                     e.preventDefault();
@@ -103,6 +109,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                         <Input
                                             id="email"
                                             type="email"
+                                            border={fieldsWithErrors?.findIndex((field) => field.column === 'Email') !== -1 ? '1px solid red' : undefined}
                                             value={form.email}
                                             placeholder="Digite o Email"
                                             onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -111,12 +118,13 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                     </Box>
                                 </Grid>
 
-                                <Grid gap={4} templateColumns="1fr 1fr">
+                                <Grid gap={4} templateColumns={isMobile ? "1fr": "1fr 1fr"}>
                                     <Box>
                                         <FormLabel htmlFor="tipo_pessoa">Tipo de Pessoa *</FormLabel>
                                         <Select
                                             id="tipo_pessoa"
                                             value={form.tipo_pessoa}
+                                            border={fieldsWithErrors?.findIndex((field) => field.column === 'Tipo de Pessoa') !== -1 ? '1px solid red' : undefined}
                                             onChange={(e) => setForm({ ...form, tipo_pessoa: e.target.value, cnpj_cpf: '' })}
                                         >
                                             <option value="PF">Pessoa Física</option>
@@ -131,6 +139,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                             type="tel"
                                             value={form.whatsapp}
                                             placeholder="Digite o WhatsApp"
+                                            border={fieldsWithErrors?.findIndex((field) => field.column === 'Whatsapp') !== -1 ? '1px solid red' : undefined}
                                             maxLength={15}
                                             onChange={(e) => {
                                                 const value = e.target.value.replace(/\D/g, '');
@@ -145,12 +154,13 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                     </Box>
                                 </Grid>
 
-                                <Grid gap={4} templateColumns="1fr 1fr">
+                                <Grid gap={4} templateColumns={isMobile ? "1fr": "1fr 1fr"}>
                                     <Box>
                                         <FormLabel htmlFor="data_nascimento">Data de Nascimento *</FormLabel>
                                         <Input
                                             id="data_nascimento"
                                             type="date"
+                                            border={fieldsWithErrors?.findIndex((field) => field.column === 'Data de Nascimento') !== -1 ? '1px solid red' : undefined}
                                             value={form.data_nascimento}
                                             placeholder="Digite a Data de Nascimento"
                                             onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
@@ -163,6 +173,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                             id="cnpj_cpf"
                                             type="text"
                                             value={form.cnpj_cpf}
+                                            border={fieldsWithErrors?.findIndex((field) => field.column === 'CPF' || field.column === 'CNPJ') !== -1 ? '1px solid red' : undefined}
                                             placeholder={form.tipo_pessoa === 'PF' ? 'Digite o CPF' : 'Digite o CNPJ'}
                                             maxLength={form.tipo_pessoa === 'PF' ? 14 : 18}
                                             onChange={(e) => {
@@ -191,12 +202,13 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                     </Box>
                                 </Grid>
 
-                                <Grid gap={4} templateColumns="1fr 1fr">
+                                <Grid gap={4} templateColumns={isMobile ? "1fr": "1fr 1fr"}>
                                     <Box>
                                         <FormLabel htmlFor="referencia">Referência do Endereço *</FormLabel>
                                         <Input
                                             id="referencia"
                                             type="text"
+                                            border={fieldsWithErrors?.findIndex((field) => field.column === 'Referência do Endereço') !== -1 ? '1px solid red' : undefined}
                                             value={form.referencia}
                                             placeholder="Digite a Referência do Endereço"
                                             onChange={(e) => setForm({ ...form, referencia: e.target.value })}
@@ -207,6 +219,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                         <FormLabel htmlFor="contribuinte_icms">Contribuinte de ICMS *</FormLabel>
                                         <Select
                                             id="contribuinte_icms"
+                                            border={fieldsWithErrors?.findIndex((field) => field.column === 'Contribuinte de ICMS') !== -1 ? '1px solid red' : undefined}
                                             value={form.contribuinte_icms}
                                             onChange={(e) => setForm({ ...form, contribuinte_icms: e.target.value })}
                                         >
