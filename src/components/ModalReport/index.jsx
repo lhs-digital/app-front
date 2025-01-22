@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {
     Modal,
     ModalOverlay,
@@ -13,6 +13,7 @@ import {
     Input,
     Box,
     Flex,
+    Select,
 } from "@chakra-ui/react"
 import { AuthContext } from '../../contexts/auth';
 import api from '../../services/api';
@@ -20,15 +21,37 @@ import { toast } from 'react-toastify';
 
 
 
-const ModalReport = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
+const ModalReport = ({ data, isOpen, onClose, setRefresh, refresh }) => {
     const [createdAt, setCreatedAt] = useState([]);
-    const { user, permissions } = useContext(AuthContext)
+    const { user } = useContext(AuthContext)
+    const [company, setCompany] = useState("")
+    const [companyId, setCompanyId] = useState(user?.user?.company?.id)
     const [loading, setLoading] = useState(false)
+    const [companies, setCompanies] = useState([])
+
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                const responseCompany = await (api.get(`/company/get_companies`));
+                setCompanies(responseCompany.data.data);
+            } catch (error) {
+                console.error('Erro ao consumir as empresas do sistema', error);
+            }
+        };
+        getData();
+    }, []);
+
+    const handleCompanyChange = (event) => {
+        setCompany(event.target.value);
+        setCompanyId(event.target.value);
+
+    };
 
     const generateReport = async () => {
         try {
-            const response = await api.get(`/report_generate/2`, {
+            const response = await api.get(`/report_generate`, {
                 params: {
+                    company_id: companyId,
                     start_date: createdAt[0],
                     end_date: createdAt[1],
                 },
@@ -70,6 +93,24 @@ const ModalReport = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
                         <FormControl display="flex" flexDirection="column" gap={4}>
                             <Box>
                                 <FormControl>
+                                    {user?.user?.role?.name === "super-admin" && (
+                                        <Box mb={3}>
+                                            <FormLabel htmlFor='company'>Empresa</FormLabel>
+                                            <Select
+                                                id='company'
+                                                placeholder='Selecione uma opção'
+                                                value={company}
+                                                onChange={handleCompanyChange}
+                                            >
+                                                {
+                                                    companies.map((companyItem) => (
+                                                        <option key={companyItem.id} value={companyItem.id}>{companyItem.name}</option>
+                                                    ))
+                                                }
+                                            </Select>
+                                        </Box>
+                                    )}
+
                                     <FormLabel>Período para gerar o relatório das Auditoria *</FormLabel>
                                     <Flex alignItems="center" gap="6px">
                                         <Input
