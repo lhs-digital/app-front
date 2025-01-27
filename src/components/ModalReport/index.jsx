@@ -32,7 +32,7 @@ const ModalReport = ({ data, isOpen, onClose, setRefresh, refresh }) => {
     useEffect(() => {
         const getData = async () => {
             try {
-                const responseCompany = await (api.get(`/company/get_companies`));
+                const responseCompany = await (api.get(`/companies/get_companies`));
                 setCompanies(responseCompany.data.data);
             } catch (error) {
                 console.error('Erro ao consumir as empresas do sistema', error);

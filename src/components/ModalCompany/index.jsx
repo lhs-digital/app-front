@@ -24,7 +24,7 @@ const ModalCompany = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) 
 
     const saveData = async () => {
         try {
-            await (api.post('/company', {
+            await (api.post('/companies', {
                 name,
                 cnpj
             }));
@@ -39,7 +39,7 @@ const ModalCompany = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) 
 
     const updateUser = async () => {
         try {
-            await (api.put(`/company/${dataEdit.id}`, {
+            await (api.put(`/companies/${dataEdit.id}`, {
                 name,
                 cnpj
             }));

@@ -44,7 +44,7 @@ const AllActivities = () => {
                         }
                     }
                 ));
-
+                
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
                 setData(response.data.data);

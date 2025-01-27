@@ -49,7 +49,7 @@ const Users = () => {
         const getData = async () => {
             setLoading(true);
             try {
-                const response = await (api.get(`/user?page=${currentPage}`));
+                const response = await (api.get(`/users?page=${currentPage}`));
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
                 setData(response.data.data);
@@ -85,7 +85,7 @@ const Users = () => {
 
     const handleRemove = async () => {
         try {
-            await (api.delete(`/user/${deleteId}`));
+            await (api.delete(`/users/${deleteId}`));
             setRefresh(!refresh);
             toast.success('Usuário removido com sucesso!');
             onCloseDelete();
@@ -157,6 +157,10 @@ const Users = () => {
                                         Role
                                         {getSortIcon('role.name')}
                                     </Th>
+                                    <Th maxW={isMobile ? 5 : 100} display={isMobile ? "none" : undefined} fontSize="16px" onClick={() => handleSort('company.name')} cursor="pointer">
+                                        Empresa
+                                        {getSortIcon('company.name')}
+                                    </Th>
                                     <Th p={0}></Th>
                                     <Th p={0}></Th>
                                 </Tr>
@@ -178,6 +182,7 @@ const Users = () => {
                                         <Td maxW={isMobile ? 5 : 100}> {name} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {email} </Td>
                                         <Td maxW={isMobile ? 5 : 100}> {role.name} </Td>
+                                        <Td maxW={isMobile ? 5 : 100} display={isMobile ? "none" : undefined}> {company.name} </Td>
                                         <Td p={0}>
                                             {permissions.some(permissions => permissions.name === 'update_users') &&
                                                 <EditIcon

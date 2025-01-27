@@ -48,14 +48,14 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     useEffect(() => {
         const getData = async () => {
             try {
-                const responseCompany = await (api.get(`/company/get_companies`));
+                const responseCompany = await (api.get(`/companies/get_companies`));
                 setCompanies(responseCompany.data.data);
 
                 const responsePermissions = await (api.get(`/permissions`));
                 setPermissions(responsePermissions.data.data);
 
                 if (dataEdit) {
-                    const responsePermissions = await (api.get(`/role/${dataEdit.id}`));
+                    const responsePermissions = await (api.get(`/roles/${dataEdit.id}`));
                     setRolePermissions(responsePermissions.data.data.permissions.map(permission => permission.id));
                 }
             } catch (error) {
@@ -67,7 +67,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
     const saveData = async () => {
         try {
-            await (api.post('/role', {
+            await (api.post('/roles', {
                 name,
                 nivel,
                 company_id: company,
@@ -88,7 +88,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
     const updateUser = async () => {
         try {
-            await (api.put(`/role/${dataEdit.id}`, {
+            await (api.put(`/roles/${dataEdit.id}`, {
                 name,
                 nivel,
                 company_id: company,
@@ -181,7 +181,6 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                             <Box>
                                 <FormLabel htmlFor='permissions'>Permissões</FormLabel>
                                 <SimpleGrid columns={1} spacing={2}>
-                                    {/* Categoria: Selecionar todas as permissões */}
                                     <Checkbox
                                         id="selectAll"
                                         isChecked={selectAll}
@@ -191,18 +190,15 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                         Selecionar todas as permissões
                                     </Checkbox>
 
-                                    {/* Mapeando as permissões */}
                                     {permissions.map((permission, index) => (
                                         <React.Fragment key={permission.id}>
-                                            {/* Exibir a categoria se for diferente da anterior */}
                                             {permission.category !== permissions[index - 1]?.category && (
                                                 <>
                                                     <Text><b>{permission.category}</b></Text>
-                                                    <Divider />  {/* Separador entre categorias */}
+                                                    <Divider />
                                                 </>
                                             )}
 
-                                            {/* Aqui, criamos o Grid para as permissões de uma categoria */}
                                             <Checkbox
                                                 id={permission?.name}
                                                 isChecked={rolePermissions.includes(permission.id)}

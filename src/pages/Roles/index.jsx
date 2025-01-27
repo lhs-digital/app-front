@@ -46,7 +46,7 @@ const Roles = () => {
     useEffect(() => {
         const getData = async () => {
             try {
-                const response = await (api.get(`/role?page=${currentPage}`));
+                const response = await (api.get(`/roles?page=${currentPage}`));
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
                 setData(response.data.data);
@@ -59,7 +59,7 @@ const Roles = () => {
 
     const handleRemove = async () => {
         try {
-            await (api.delete(`/role/${deleteId}`));
+            await (api.delete(`/roles/${deleteId}`));
             setRefresh(!refresh);
             toast.success('Role removida com sucesso!');
             onCloseDelete();

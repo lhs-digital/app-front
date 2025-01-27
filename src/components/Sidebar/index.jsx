@@ -71,7 +71,7 @@ const Sidebar = ({ active }) => {
                     : null
                 }
 
-                <Link to="/formulario-cliente">
+                <Link to="/clientes">
                     <SidebarItem Icon={FaFolder} Text="Gerenciamento de Clientes" />
                 </Link>
 

@@ -30,10 +30,10 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     useEffect(() => {
         const getData = async () => {
             try {
-                const responseCompany = await (api.get(`/company/get_companies`));
+                const responseCompany = await (api.get(`/companies/get_companies`));
                 setCompanies(responseCompany.data.data);
                 const params = company ? { params: { company_id: company } } : {}
-                const responseRole = await (api.get(`/role/roles_from_company`, params));
+                const responseRole = await (api.get(`/roles/roles_from_company`, params));
                 setRoles(responseRole.data.data);
             } catch (error) {
                 console.error('Erro ao acessar as roles por empresa', error);
@@ -52,7 +52,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
     const saveData = async () => {
         try {
-            await (api.post('/user', {
+            await (api.post('/users', {
                 name,
                 email,
                 company_id: company,
@@ -69,7 +69,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
     const updateUser = async () => {
         try {
-            await (api.put(`/user/${dataEdit.id}`, {
+            await (api.put(`/users/${dataEdit.id}`, {
                 name,
                 email,
                 company_id: company,

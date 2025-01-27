@@ -17,7 +17,7 @@ const ModalViewCompany = ({ selectedCompany, isOpen, onClose }) => {
     useEffect(() => {
         const getData = async () => {
             try {
-                const responseRole = await (api.get(`/role/roles_from_company`, { params: { company_id: selectedCompany.id } }));
+                const responseRole = await (api.get(`/roles/roles_from_company`, { params: { company_id: selectedCompany.id } }));
                 setRoles(responseRole.data.data);
             } catch (error) {
                 console.error('Erro ao acessar as roles por empresa', error);

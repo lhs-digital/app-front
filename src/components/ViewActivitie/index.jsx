@@ -52,8 +52,8 @@ const ViewActivitie = ({ id, status, selectedActivitie, setRefresh, refresh }) =
 
                     {selectedActivitie?.columns.map((col, index) => (
                         <Tr key={index}>
-                            <Td fontWeight="bold">{col?.column}</Td>
-                            <Td>{col?.message}</Td>
+                            <Td fontWeight="bold">{col?.label}</Td>
+                            <Td>{col?.message || "N/A"}</Td>
                             <Td>
                                 <Tooltip label={`Prioridade: ${formattedPriority(+col?.priority)}`} aria-label="Prioridade">
                                     <Text

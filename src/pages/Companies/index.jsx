@@ -49,7 +49,7 @@ const Companies = () => {
         const getData = async () => {
             setLoading(true);
             try {
-                const response = await (api.get(`/company?page=${currentPage}`));
+                const response = await (api.get(`/companies?page=${currentPage}`));
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
                 setData(response.data.data);
@@ -64,7 +64,7 @@ const Companies = () => {
 
     const handleRemove = async () => {
         try {
-            await (api.delete(`/company/${deleteId}`));
+            await (api.delete(`/companies/${deleteId}`));
             setRefresh(!refresh);
             toast.success('Empresa removida com sucesso!');
             onCloseDelete();

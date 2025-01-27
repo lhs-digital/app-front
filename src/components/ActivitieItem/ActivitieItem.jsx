@@ -75,7 +75,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                                         p={1}
                                         rounded="6px"
                                         title={`Prioridade: ${formattedPriority(+col?.priority)}`}
-                                    >{col?.column}</Text>
+                                    >{col?.label}</Text>
                                 </Tooltip>
                             ))}
                         </Text>

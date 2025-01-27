@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     Modal,
     ModalOverlay,
@@ -14,35 +14,61 @@ import {
     Box,
     Checkbox,
     SimpleGrid,
-    Text
+    Tooltip,
+    Icon,
 } from "@chakra-ui/react";
 import { Select } from '@chakra-ui/react';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../../contexts/auth';
+import { InfoOutlineIcon } from "@chakra-ui/icons";
 
 const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
     const [listRules, setListRules] = useState([]);
     const [permissions, setPermissions] = useState([]);
     const [rules, setRules] = useState([]);
     const [checkedRules, setCheckedRules] = useState([]);
-    const [table, setTable] = useState(dataEdit?.company_table_id || "");
+    const [table, setTable] = useState(dataEdit?.company_table_id || 1);
     const [column, setColumn] = useState(dataEdit?.name || "");
     const [columnLabel, setColumnLabel] = useState(dataEdit?.label || "");
     const [priority, setPriority] = useState(dataEdit?.priority || "");
     const [validations, setValidations] = useState(dataEdit?.validations || [])
     const [selectAll, setSelectAll] = useState(false);
 
+    const { user } = useContext(AuthContext)
+    const [company, setCompany] = useState("")
+    const [companyId, setCompanyId] = useState(user?.user?.company?.id)
+    const [companies, setCompanies] = useState([])
+
     const [ruleDetails, setRuleDetails] = useState({});
+
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                const responseCompany = await (api.get(`/companies/get_companies`));
+                setCompanies(responseCompany.data.data);
+            } catch (error) {
+                console.error('Erro ao consumir as empresas do sistema', error);
+            }
+        };
+        getData();
+    }, []);
+
+    const handleCompanyChange = (event) => {
+        setCompany(event.target.value);
+        setCompanyId(event.target.value);
+
+    };
 
     const handleSelectAll = () => {
         if (!selectAll) {
             const allRuleIds = rules.map(rule => rule.id);
             const newRuleDetails = {};
-    
+
             allRuleIds.forEach(id => {
                 newRuleDetails[id] = ruleDetails[id] || { params: "", message: "" };
             });
-    
+
             setListRules(allRuleIds);
             setCheckedRules(allRuleIds);
             setRuleDetails(newRuleDetails);
@@ -53,7 +79,7 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
         }
         setSelectAll(!selectAll);
     };
-    
+
 
     useEffect(() => {
         const getData = async () => {
@@ -111,7 +137,7 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
             }
         } else {
             try {
-                await api.post('/company_tables/1/rules', dataToPost);
+                await api.post(`/company_table_columns/${companyId}/rules`, dataToPost);
                 toast.success('Dados salvos com sucesso!');
                 onClose();
                 setRefresh(!refresh);
@@ -150,7 +176,7 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
             });
         }
     };
-    
+
 
     useEffect(() => {
         if (!dataEdit?.validations?.length || !rules.length) return;
@@ -189,7 +215,36 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
                     <ModalBody>
                         <FormControl display="flex" flexDirection="column" gap={4}>
+                            {user?.user?.role?.name === "super-admin" && (
+                                <Box>
+                                    <FormLabel htmlFor='company'>Empresa</FormLabel>
+                                    <Select
+                                        id='company'
+                                        placeholder='Selecione uma opção'
+                                        value={company}
+                                        onChange={handleCompanyChange}
+                                    >
+                                        {
+                                            companies.map((companyItem) => (
+                                                <option key={companyItem.id} value={companyItem.id}>{companyItem.name}</option>
+                                            ))
+                                        }
+                                    </Select>
+                                </Box>
+                            )}
                             <Box>
+                                <FormLabel htmlFor='company'>Tabela</FormLabel>
+                                <Select
+                                    id='table'
+                                    placeholder='Selecione uma opção'
+                                    value={table}
+                                    disabled
+                                    onChange={(e) => setTable(e.target.value)}
+                                >
+                                    <option key={1} value={1}>clients</option>
+                                </Select>
+                            </Box>
+                            {/* <Box>
                                 <FormLabel htmlFor='table'>Tabela *</FormLabel>
                                 <Input
                                     id="table"
@@ -197,7 +252,7 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                     value={table}
                                     onChange={(e) => setTable(e.target.value)}
                                 />
-                            </Box>
+                            </Box> */}
                             <Box>
                                 <FormLabel htmlFor='column'>Nome da Coluna *</FormLabel>
                                 <Input
@@ -242,9 +297,16 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                                 id={rule?.name}
                                                 isChecked={listRules.includes(rule.id)}
                                                 onChange={(e) => handlePermissions(e, rule.id)}
+                                            >
+                                                <b>{rule?.name}</b>
+                                                <Tooltip
+                                                    label={rule?.description || "Não contém."}
+                                                    fontSize="sm"
+                                                    placement="right"
+                                                    hasArrow
                                                 >
-                                                <b>{rule.name}</b>
-                                                <Text>Descrição: {rule?.description || "Não contém."} </Text>
+                                                    <Icon as={InfoOutlineIcon} color="gray.500" ml={2} cursor="pointer" />
+                                                </Tooltip>
                                             </Checkbox>
 
 

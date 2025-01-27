@@ -16,7 +16,7 @@ const ListActivities = () => {
     const [loading, setLoading] = useState(true);
     const [refresh, setRefresh] = useState(false);
     const [status, setStatus] = useState(null);
-    const [priority, setPriority] = useState(3);
+    const [priority, setPriority] = useState('3');
     const { user } = useContext(AuthContext);
     const role = user?.user?.role?.name;
 
@@ -27,7 +27,7 @@ const ListActivities = () => {
             setLoading(true);
             try {
                 const response = await api.get(`/auditing?per_page=${50}`, {
-                    params: { priority, status }
+                    params: { status }
                 });
                 setData(response.data.data);
             } catch (error) {

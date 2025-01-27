@@ -18,7 +18,7 @@ import Logs from "../pages/Logs";
 import AllActivities from "../pages/AllActivities";
 import Priorities from "../pages/Priorities";
 import ReportsAud from "../pages/ReportsAud";
-import FormClient from "../pages/FormClient";
+import Clients from "../pages/Clients";
 
 
 const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
@@ -73,7 +73,7 @@ const RoutesApp = () => {
                     <Route path="/prioridades" element={<Private Item={Priorities} allowedRoles={['super-admin']} allowedPermissions={['define_rules']}/>} />
                     <Route path="/relatorios" element={<Private Item={ReportsAud} allowedRoles={['super-admin']} allowedPermissions={['view_any_reports', 'report_generate']}/>} />
 
-                    <Route path="/formulario-cliente" element={<Private Item={FormClient} allowedRoles={['super-admin']} />} />
+                    <Route path="/clientes" element={<Private Item={Clients} allowedRoles={['super-admin']} />} />
 
                     <Route path="/users" element={<Private Item={Users} allowedRoles={['super-admin']} allowedPermissions={['view_any_users', 'view_users', 'create_users', 'delete_users', 'update_users']} />} />
                     <Route path="/companies" element={<Private Item={Companies} allowedRoles={['super-admin']} allowedPermissions={['view_any_companies', 'view_companies', 'create_companies', 'delete_companies', 'update_companies']} />} />

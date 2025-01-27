@@ -32,12 +32,7 @@ const Priorities = () => {
         nivel: ""
     });
     const isMobile = useBreakpointValue({ base: true, lg: false });
-    const items = [
-        { value: "a", table: "Tabela A", column: "Coluna A" },
-        { value: "b", table: "Tabela B", column: "Coluna B" },
-        { value: "c", table: "Tabela C", column: "Coluna C" },
-    ];
-
+    
     useEffect(() => {
         const getData = async () => {
             setLoading(true);
@@ -54,7 +49,6 @@ const Priorities = () => {
                 const response = await api.get(`/company_tables?page=${currentPage}`, {
                     params: filteredParams
                 });
-
 
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
@@ -166,8 +160,8 @@ const Priorities = () => {
                                                                             <Tbody>
                                                                                 {column.validations.map((validation) => (
                                                                                     <Tr key={validation.id} cursor="pointer" _hover={{ bg: "gray.100" }}>
-                                                                                        <Td maxW={isMobile ? 5 : 100}>{validation.name}</Td>
-                                                                                        <Td maxW={isMobile ? 5 : 100}>{validation.params}</Td>
+                                                                                        <Td maxW={isMobile ? 5 : 100}>{validation.rule.label}</Td>
+                                                                                        <Td maxW={isMobile ? 5 : 100}>{validation.rule.has_params}</Td>
                                                                                         <Td maxW={isMobile ? 5 : 100}>{validation.message || "N/A"}</Td>
                                                                                     </Tr>
                                                                                 ))}
