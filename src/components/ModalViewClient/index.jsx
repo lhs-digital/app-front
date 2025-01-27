@@ -26,7 +26,7 @@ const ModalClient = ({ selectedUser, isOpen, onClose }) => {
                     <Box><b>Data Nascimento:</b> {selectedUser?.data_nascimento || 'Não disponível'} </Box>
                     <Box><b>Whatsapp:</b> {selectedUser?.whatsapp || 'Não disponível'} </Box>
                     <Box><b>Referência:</b> {selectedUser?.referencia || 'Não disponível'} </Box>
-                    <Box><b>Tipo de Pessoa:</b> {selectedUser?.tipo_pessoa || 'Não disponível'} </Box>
+                    <Box><b>Tipo de Pessoa:</b> {selectedUser?.tipo_pessoa === "F" ? "Física" : "Jurídica"} </Box>
                     <Box><b>Criado em:</b> {dateFormatted(selectedUser?.created_at) || 'Não disponível'} </Box>
                     <Box><b>Atualizado em:</b> {dateFormatted(selectedUser?.created_at) || 'Não disponível'} </Box>
                 </ModalBody>

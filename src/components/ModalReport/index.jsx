@@ -134,12 +134,12 @@ const ModalReport = ({ data, isOpen, onClose, setRefresh, refresh }) => {
                         </FormControl>
                     </ModalBody>
 
-                    <ModalFooter justifyContent="start">
-                        <Button colorScheme="green" mr={3} onClick={generateReport}>
-                            GERAR RELATÓRIO
-                        </Button>
+                    <ModalFooter justifyContent="end">
                         <Button colorScheme="gray" mr={3} onClick={onClose}>
                             VOLTAR
+                        </Button>
+                        <Button colorScheme="green" onClick={generateReport}>
+                            GERAR RELATÓRIO
                         </Button>
                     </ModalFooter>
                 </ModalContent>

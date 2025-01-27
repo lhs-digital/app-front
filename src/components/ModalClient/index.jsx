@@ -85,6 +85,18 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
     }
 
     const handleSave = () => {
+        console.log(
+            {
+                email: email,
+                numero: numero,
+                tipoPessoa: tipoPessoa,
+                whatsapp: whatsapp,
+                dataNascimento: dataNascimento,
+                cnpjCpf: cnpjCpf,
+                referencia: referencia,
+                contribuenteIcms: contribuenteIcms
+            }
+        )
         if (!email || !numero || !tipoPessoa || !whatsapp || !dataNascimento || !cnpjCpf || !referencia || !contribuenteIcms) {
             toast.warning('Preencha os campos obrigatórios!')
             return;
@@ -132,6 +144,29 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
         return false;
     }
 
+    // Função de mascarar whatsapp (82) 99999-9999
+    const maskWhatsapp = (value) => {
+        // Remove qualquer caractere que não seja número
+        value = value.replace(/\D/g, "");
+        // Adiciona parênteses para o DDD
+        value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+        // Adiciona traço para o número
+        value = value.replace(/(\d)(\d{4})$/, "$1-$2");
+        return value;
+    };
+
+    // Função de mascarar cnpj ou cpf de acordo com o tipo de pessoa 
+    const maskCnpjCpf = (value) => {
+        value = value.replace(/\D/g, "");
+        if (tipoPessoa === 'F') {
+            value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+        }
+        if (tipoPessoa === 'J') {
+            value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+        }
+        return value;
+    }
+
     return (
         <>
             <Modal isOpen={isOpen} onClose={onClose}>
@@ -177,6 +212,7 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
                                 <Input
                                     type="text"
                                     value={whatsapp}
+                                    maxLength={15} // Incluindo o espaço, parênteses e o traço
                                     onChange={(e) => setWhatsapp(e.target.value)}
                                 />
                             </Box>
@@ -193,6 +229,7 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
                                 <Input
                                     type="text"
                                     value={cnpjCpf}
+                                    maxLength={tipoPessoa === 'F' ? 14 : 18}
                                     onChange={(e) => setCnpjCpf(e.target.value)}
                                 />
                             </Box>
@@ -218,12 +255,12 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
                         </FormControl>
                     </ModalBody>
 
-                    <ModalFooter justifyContent="start">
-                        <Button colorScheme="green" mr={3} onClick={handleSave}>
-                            SALVAR
-                        </Button>
+                    <ModalFooter justifyContent="end">
                         <Button colorScheme="gray" mr={3} onClick={onClose}>
                             CANCELAR
+                        </Button>
+                        <Button colorScheme="green" onClick={handleSave}>
+                            SALVAR
                         </Button>
                     </ModalFooter>
                 </ModalContent>

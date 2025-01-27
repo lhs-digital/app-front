@@ -38,7 +38,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                 const response = await (api.get(`/company_tables/all_tables`));
                 setFields(response.data.data[0].columns);
                 const responseClient = await (api.get(`/clients/${selectedActivitie?.id}`));
-                console.log("teste", responseClient?.data)
+                console.log("teste", responseClient)
                 setClient(responseClient?.data);
                 setForm({
                     numero: responseClient?.data.numero,

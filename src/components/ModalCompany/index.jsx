@@ -81,6 +81,14 @@ const ModalCompany = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) 
         return false;
     }
 
+    const mascaraValidacaoCNPJ = (cnpj) => {
+        cnpj = cnpj.replace(/\D/g, '');
+        if (cnpj.length === 14) {
+            return true;
+        }
+        return false;
+    }
+
     return (
         <>
             <Modal isOpen={isOpen} onClose={onClose}>
@@ -106,18 +114,26 @@ const ModalCompany = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) 
                                 <Input
                                     type="text"
                                     value={cnpj}
-                                    onChange={(e) => setCnpj(e.target.value)}
+                                    maxLength={18}
+                                    onChange={(e) => {
+                                        if (mascaraValidacaoCNPJ(e.target.value)) {
+                                            setCnpj(e.target.value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'))
+                                        } else {
+                                            setCnpj(e.target.value)
+                                        }
+                                    }
+                                    }
                                 />
                             </Box>
                         </FormControl>
                     </ModalBody>
 
-                    <ModalFooter justifyContent="start">
-                        <Button colorScheme="green" mr={3} onClick={handleSave}>
-                            SALVAR
-                        </Button>
+                    <ModalFooter justifyContent="end">
                         <Button colorScheme="gray" mr={3} onClick={onClose}>
                             CANCELAR
+                        </Button>
+                        <Button colorScheme="green" onClick={handleSave}>
+                            SALVAR
                         </Button>
                     </ModalFooter>
                 </ModalContent>

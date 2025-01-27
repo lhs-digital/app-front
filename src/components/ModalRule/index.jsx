@@ -298,7 +298,7 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                                                 isChecked={listRules.includes(rule.id)}
                                                 onChange={(e) => handlePermissions(e, rule.id)}
                                             >
-                                                <b>{rule?.name}</b>
+                                                <b>{rule.name}</b>
                                                 <Tooltip
                                                     label={rule?.description || "Não contém."}
                                                     fontSize="sm"
@@ -334,12 +334,12 @@ const ModalRule = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                         </FormControl>
                     </ModalBody>
 
-                    <ModalFooter justifyContent="start">
-                        <Button colorScheme="green" mr={3} onClick={handleSave}>
-                            SALVAR
-                        </Button>
+                    <ModalFooter justifyContent="end">
                         <Button colorScheme="gray" mr={3} onClick={onClose}>
                             CANCELAR
+                        </Button>
+                        <Button colorScheme="green" onClick={handleSave}>
+                            SALVAR
                         </Button>
                     </ModalFooter>
                 </ModalContent>

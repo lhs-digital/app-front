@@ -20,8 +20,8 @@ const ModalDelete = ({ isOpen, onClose, onConfirm }) => {
                     <Text>Você tem certeza que deseja excluir este item?</Text>
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="red" onClick={onConfirm}>Confirmar</Button>
                     <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+                    <Button colorScheme="red" onClick={onConfirm}>Confirmar</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>
