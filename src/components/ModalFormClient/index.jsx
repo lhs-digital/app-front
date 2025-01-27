@@ -13,7 +13,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
     const [client, setClient] = useState({});
 
     const [form, setForm] = useState({
-        numero:"",
+        numero: "",
         email: "",
         tipo_pessoa: "",
         whatsapp: "",
@@ -38,16 +38,17 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                 const response = await (api.get(`/company_tables/all_tables`));
                 setFields(response.data.data[0].columns);
                 const responseClient = await (api.get(`/clients/${selectedActivitie?.id}`));
-                setClient(responseClient.data);
+                console.log("teste", responseClient?.data)
+                setClient(responseClient?.data);
                 setForm({
-                    numero: responseClient.data.numero,
-                    email: responseClient.data.email,
-                    tipo_pessoa: responseClient.data.tipo_pessoa,
-                    whatsapp: responseClient.data.whatsapp,
-                    data_nascimento: responseClient.data.data_nascimento,
-                    cnpj_cpf: responseClient.data.cnpj_cpf,
-                    referencia: responseClient.data.referencia,
-                    contribuinte_icms: responseClient.data.contribuinte_icms
+                    numero: responseClient?.data.numero,
+                    email: responseClient?.data.email,
+                    tipo_pessoa: responseClient?.data.tipo_pessoa,
+                    whatsapp: responseClient?.data.whatsapp,
+                    data_nascimento: responseClient?.data.data_nascimento,
+                    cnpj_cpf: responseClient?.data.cnpj_cpf,
+                    referencia: responseClient?.data.referencia,
+                    contribuinte_icms: responseClient?.data.contribuinte_icms
 
                 })
             } catch (error) {
@@ -56,6 +57,26 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
         };
         getData();
     }, []);
+
+    const updateUser = async () => {
+        try {
+            await (api.put(`/clients/${selectedActivitie?.id}`, {
+                numero: form.numero,
+                email: form.email,
+                tipo_pessoa: form.tipo_pessoa,
+                whatsapp: form.whatsapp,
+                data_nascimento: form.data_nascimento,
+                cnpj_cpf: form.cnpj_cpf,
+                referencia: form.referencia,
+                contribuinte_icms: form.contribuinte_icms
+            }));
+
+            toast.success('Cliente editado com sucesso!')
+
+        } catch (error) {
+            console.error('Erro ao editar usuário', error);
+        }
+    }
 
     const handleSave = () => {
         if (!form.numero || !form.email || !form.tipo_pessoa || !form.whatsapp || !form.data_nascimento || !form.cnpj_cpf || !form.referencia || !form.contribuinte_icms) {
@@ -83,7 +104,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
             return;
         }
 
-        console.log(form)
+        updateUser();
     }
 
 
@@ -250,8 +271,8 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                             value={form.contribuinte_icms || client?.contribuinte_icms}
                                             onChange={(e) => setForm({ ...form, contribuinte_icms: e.target.value })}
                                         >
-                                            <option value="0">Não</option>
-                                            <option value="1">Sim</option>
+                                            <option value={0}>Não</option>
+                                            <option value={1}>Sim</option>
                                         </Select>
                                         <Text fontSize="xs" color="gray.500" mt={1}>Exemplo: Sim ou Não</Text>
                                     </Box>

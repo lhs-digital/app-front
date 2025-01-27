@@ -32,19 +32,14 @@ export const validarEmail = (email) => {
 }
 
 export const validarCPF = (cpf) => {
-    const apenasNumeros = cpf.replace(/\D/g, '');
-    
-    const regex = /^\d{11}$/;
-    return regex.test(apenasNumeros);
-}
-
+    const regex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+    return regex.test(cpf);
+};
 
 export const validarCNPJ = (cnpj) => {
-    const apenasNumeros = cnpj.replace(/\D/g, '');
-
-    const regex = /^\d{14}$/;
-    return regex.test(apenasNumeros);
-}
+    const regex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
+    return regex.test(cnpj);
+};
 
 export const validarDataNascimento = (data) => {
     const regex = /^\d{4}-\d{2}-\d{2}$/;

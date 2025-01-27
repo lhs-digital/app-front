@@ -17,6 +17,7 @@ import { useState } from 'react'
 import { Select } from '@chakra-ui/react'
 import api from '../../services/api'
 import { toast } from 'react-toastify'
+import { validarCNPJ, validarCPF, validarDataNascimento, validarEmail } from '../../services/utils'
 
 
 const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
@@ -32,13 +33,14 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
     const saveData = async () => {
         try {
             await (api.post('/clients', {
-                email,
-                tipoPessoa,
-                whatsapp,
-                dataNascimento,
-                cnpjCpf,
-                referencia,
-                contribuenteIcms
+                numero: numero,
+                email: email,
+                tipo_pessoa: tipoPessoa,
+                whatsapp: whatsapp,
+                data_nascimento: dataNascimento,
+                cnpj_cpf: cnpjCpf,
+                referencia: referencia,
+                contribuinte_icms: contribuenteIcms
             }));
 
             setRefresh(!refresh);
@@ -50,15 +52,28 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
     }
 
     const updateUser = async () => {
+        console.log(
+            {
+                numero: numero,
+                email: email,
+                tipo_pessoa: tipoPessoa,
+                whatsapp: whatsapp,
+                data_nascimento: dataNascimento,
+                cnpj_cpf: cnpjCpf,
+                referencia: referencia,
+                contribuinte_icms: contribuenteIcms
+            }
+        )
         try {
             await (api.put(`/clients/${dataEdit.id}`, {
-                email,
-                tipoPessoa,
-                whatsapp,
-                dataNascimento,
-                cnpjCpf,
-                referencia,
-                contribuenteIcms
+                numero: numero,
+                email: email,
+                tipo_pessoa: tipoPessoa,
+                whatsapp: whatsapp,
+                data_nascimento: dataNascimento,
+                cnpj_cpf: cnpjCpf,
+                referencia: referencia,
+                contribuinte_icms: contribuenteIcms
             }));
 
             setRefresh(!refresh);
@@ -75,13 +90,32 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
             return;
         }
 
-
         if (emailAlreadyExists()) {
             toast.warning('E-mail já cadastrado!')
-            return
+            return;
         }
 
-        if (dataEdit.id) {
+        if (!validarEmail(email)) {
+            toast.warning('E-mail inválido')
+            return;
+        }
+
+        if (!validarDataNascimento(dataNascimento)) {
+            toast.warning('Data de nascimento inválida. O cliente deve ser maior de 18 anos.')
+            return;
+        }
+
+        if (tipoPessoa === 'F' && !validarCPF(cnpjCpf)) {
+            toast.warning('CPF inválido')
+            return;
+        }
+
+        if (tipoPessoa === 'J' && !validarCNPJ(cnpjCpf)) {
+            toast.warning('CNPJ inválido')
+            return;
+        }
+
+        if (dataEdit?.id) {
             updateUser()
         } else {
             saveData()
@@ -122,7 +156,7 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
                             <Box>
                                 <FormLabel>Número *</FormLabel>
                                 <Input
-                                    type="text"
+                                    type="number"
                                     value={numero}
                                     onChange={(e) => setNumero(e.target.value)}
                                 />
@@ -177,8 +211,8 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
                                     value={contribuenteIcms}
                                     onChange={(e) => setContribuenteIcms(e.target.value)}
                                 >
-                                    <option value="1">Sim</option>
-                                    <option value="0">Não</option>
+                                    <option value={1}>Sim</option>
+                                    <option value={0}>Não</option>
                                 </Select>
                             </Box>
                         </FormControl>
