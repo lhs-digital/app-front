@@ -63,7 +63,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                     <Divider borderColor="gray.300" width="100%" alignSelf="center" borderWidth="1px" marginY={2} />
                     {!isAccordionOpen && (
                         <Text display="flex" alignItems="center" flexWrap="wrap" gap="6px" fontWeight="bold" fontSize="md">
-                            Campos inválidos:{" "}
+                            Campos inválidos <Text fontSize="sm" color='red.500'>({activitie?.columns.length})</Text>:{" "}
                             {activitie?.columns.map((col, index) => (
                                 <Tooltip label={`Prioridade: ${formattedPriority(+col?.priority)}`} aria-label="Prioridade">
                                     <Text
