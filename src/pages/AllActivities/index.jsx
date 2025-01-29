@@ -44,7 +44,7 @@ const AllActivities = () => {
                         }
                     }
                 ));
-                
+
                 setCurrentPage(response.data.meta.current_page);
                 setLastPage(response.data.meta.last_page);
                 setData(response.data.data);
@@ -281,19 +281,18 @@ const AllActivities = () => {
                         </Flex>
 
                         <List spacing={3}>
-                            {
+                            {data?.length === 0 ? (
+                                <Text textAlign="center" color="gray.500" fontSize="md">Não existem tasks concluídas</Text>
+                            ) : (
                                 data.map((item) => (
-                                    (
-
-                                        <ActivitieItem
-                                            key={item.id}
-                                            activitie={item}
-                                            setRefresh={setRefresh}
-                                            refresh={refresh}
-                                        />
-                                    )
+                                    <ActivitieItem
+                                        key={item.id}
+                                        activitie={item}
+                                        setRefresh={setRefresh}
+                                        refresh={refresh}
+                                    />
                                 ))
-                            }
+                            )}
                         </List>
                         <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
                     </Box>

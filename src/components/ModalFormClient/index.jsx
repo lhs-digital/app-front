@@ -38,19 +38,17 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                 const response = await (api.get(`/company_tables/all_tables`));
                 setFields(response.data.data[0].columns);
                 const responseClient = await (api.get(`/clients/${selectedActivitie?.id}`));
-                console.log("teste", responseClient)
                 setClient(responseClient?.data);
                 setForm({
-                    numero: responseClient?.data.numero,
-                    email: responseClient?.data.email,
-                    tipo_pessoa: responseClient?.data.tipo_pessoa,
-                    whatsapp: responseClient?.data.whatsapp,
-                    data_nascimento: responseClient?.data.data_nascimento,
-                    cnpj_cpf: responseClient?.data.cnpj_cpf,
-                    referencia: responseClient?.data.referencia,
-                    contribuinte_icms: responseClient?.data.contribuinte_icms
-
-                })
+                    numero: responseClient?.data.numero || "",
+                    email: responseClient?.data.email || "",
+                    tipo_pessoa: fieldsWithErrors?.findIndex((field) => field.label === 'Tipo de Pessoa') !== -1 ? "" : responseClient?.data.tipo_pessoa,
+                    whatsapp: responseClient?.data.whatsapp || "",
+                    data_nascimento: responseClient?.data.data_nascimento || "",
+                    cnpj_cpf: responseClient?.data.cnpj_cpf || "",
+                    referencia: responseClient?.data.referencia || "",
+                    contribuinte_icms: fieldsWithErrors?.findIndex((field) => field.label === 'Contribuinte de ICMS') !== -1 ? "" : responseClient?.data.contribuinte_icms,
+                });
             } catch (error) {
                 console.error('Erro ao carregar os dados dos clientes', error);
             }
@@ -170,6 +168,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                             border={fieldsWithErrors?.findIndex((field) => field.label === 'Tipo de Pessoa') !== -1 ? '1px solid red' : undefined}
                                             onChange={(e) => setForm({ ...form, tipo_pessoa: e.target.value, cnpj_cpf: '' })}
                                         >
+                                            <option value="">Selecione uma opção</option>
                                             <option value="F">Pessoa Física</option>
                                             <option value="J">Pessoa Jurídica</option>
                                         </Select>
@@ -265,12 +264,17 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
                                     <Box>
                                         <FormLabel htmlFor="contribuinte_icms">Contribuinte de ICMS *</FormLabel>
                                         <Select
-                                            isDisabled={fieldsWithErrors?.findIndex((field) => field.label === 'Contribuinte de ICMS') !== -1 ? false : true}
+                                            isDisabled={fieldsWithErrors?.findIndex((field) => field.label === 'Contribuinte de ICMS') === -1}
                                             id="contribuinte_icms"
-                                            border={fieldsWithErrors?.findIndex((field) => field.label === 'Contribuinte de ICMS') !== -1 ? '1px solid red' : undefined}
-                                            value={form.contribuinte_icms || client?.contribuinte_icms}
+                                            border={
+                                                fieldsWithErrors?.findIndex((field) => field.label === 'Contribuinte de ICMS') !== -1
+                                                    ? '1px solid red'
+                                                    : undefined
+                                            }
+                                            value={form.contribuinte_icms}
                                             onChange={(e) => setForm({ ...form, contribuinte_icms: e.target.value })}
                                         >
+                                            <option value="">Selecione uma opção</option>
                                             <option value={0}>Não</option>
                                             <option value={1}>Sim</option>
                                         </Select>

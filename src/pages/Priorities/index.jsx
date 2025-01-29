@@ -32,7 +32,7 @@ const Priorities = () => {
         nivel: ""
     });
     const isMobile = useBreakpointValue({ base: true, lg: false });
-    
+
     useEffect(() => {
         const getData = async () => {
             setLoading(true);
@@ -158,13 +158,21 @@ const Priorities = () => {
                                                                                 </Tr>
                                                                             </Thead>
                                                                             <Tbody>
-                                                                                {column.validations.map((validation) => (
-                                                                                    <Tr key={validation.id} cursor="pointer" _hover={{ bg: "gray.100" }}>
-                                                                                        <Td maxW={isMobile ? 5 : 100}>{validation.rule.label}</Td>
-                                                                                        <Td maxW={isMobile ? 5 : 100}>{validation.rule.has_params}</Td>
-                                                                                        <Td maxW={isMobile ? 5 : 100}>{validation.message || "N/A"}</Td>
-                                                                                    </Tr>
-                                                                                ))}
+                                                                                {
+                                                                                    data.length === 0 ? (
+                                                                                        <Tr>
+                                                                                            <Td colSpan={4} textAlign="center">
+                                                                                                Não existem Regras de Auditorias no sistema
+                                                                                            </Td>
+                                                                                        </Tr>
+                                                                                    ) : (
+                                                                                        column.validations.map((validation) => (
+                                                                                            <Tr key={validation.id} cursor="pointer" _hover={{ bg: "gray.100" }}>
+                                                                                                <Td maxW={isMobile ? 5 : 100}>{validation.rule.label}</Td>
+                                                                                                <Td maxW={isMobile ? 5 : 100}>{validation.rule.has_params}</Td>
+                                                                                                <Td maxW={isMobile ? 5 : 100}>{validation.message || "N/A"}</Td>
+                                                                                            </Tr>
+                                                                                        )))}
                                                                             </Tbody>
                                                                         </Table>
                                                                     </AccordionPanel>

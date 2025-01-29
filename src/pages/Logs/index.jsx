@@ -227,6 +227,13 @@ const Logs = () => {
                             </Thead>
                             <Tbody>
                                 {
+                                    data.length === 0 ? (
+                                        <Tr>
+                                            <Td colSpan={4} textAlign="center">
+                                                Não existem logs no sistema
+                                            </Td>
+                                        </Tr>
+                                    ) : (
                                     (!search ? data : data.filter(log =>
                                         log?.ip?.includes(search) ||
                                         log?.email?.includes(search) ||
@@ -253,7 +260,7 @@ const Logs = () => {
                                             <Td > {log.url} </Td>
                                             <Td > {log.table} </Td>
                                         </Tr>
-                                    ))
+                                    )))
                                 }
                             </Tbody>
                         </Table>

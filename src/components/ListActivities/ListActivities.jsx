@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Flex, Heading, List, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Button, Divider, Flex, Heading, List, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, Text, useBreakpointValue } from '@chakra-ui/react'
 import React, { useContext, useEffect, useState } from 'react'
 import ActivitieItem from '../ActivitieItem/ActivitieItem';
 import api from '../../services/api';
@@ -120,14 +120,18 @@ const ListActivities = () => {
                             </TabPanel>
                             <TabPanel paddingX={0}>
                                 <List spacing={3}>
-                                    {data.map((item) => (
-                                        <ActivitieItem
-                                            key={item.id}
-                                            activitie={item}
-                                            setRefresh={setRefresh}
-                                            refresh={refresh}
-                                        />
-                                    ))}
+                                    {data.length === 0 ? (
+                                        <Text textAlign="center" color="gray.500" fontSize="md">Não existem tasks concluídas</Text>
+                                    ) : (
+                                        data.map((item) => (
+                                            <ActivitieItem
+                                                key={item.id}
+                                                activitie={item}
+                                                setRefresh={setRefresh}
+                                                refresh={refresh}
+                                            />
+                                        ))
+                                    )}
                                 </List>
                             </TabPanel>
                         </TabPanels>

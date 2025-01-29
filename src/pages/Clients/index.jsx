@@ -143,51 +143,55 @@ const Clients = () => {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {data
-                                    .filter((client) =>
-                                        [client.id, client.email, client.cnpj_cpf, client.whatsapp]
-                                            .some((field) =>
-                                                field.toString().toLowerCase().includes(search.toLowerCase())
-                                            )
-                                    )
-                                    .map((client, index) => (
-                                        <Tr
-                                            key={client.id}
-                                            cursor="pointer"
-                                            _hover={{ bg: "gray.50" }}
-                                            _odd={{ bg: "gray.100" }}
-                                            _even={{ bg: "white" }}
-                                            onClick={() => handleView(client)}
-                                        >
-                                            <Td maxW={isMobile ? 5 : 100}>{client.id}</Td>
-                                            <Td maxW={isMobile ? 5 : 100}>{client.email}</Td>
-                                            <Td maxW={isMobile ? 5 : 100}>{client.cnpj_cpf}</Td>
-                                            <Td p={0}>
-                                                {permissions.some((perm) => perm.name === 'update_users') && (
-                                                    <EditIcon
-                                                        fontSize={20}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleEdit(client)
-                                                        }}
-                                                        cursor="pointer"
-                                                    />
-                                                )}
-                                            </Td>
-                                            <Td p={0}>
-                                                {permissions.some((perm) => perm.name === 'delete_users') && (
-                                                    <DeleteIcon
-                                                        fontSize={20}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(client?.id)
-                                                        }}
-                                                        cursor="pointer"
-                                                    />
-                                                )}
-                                            </Td>
-                                        </Tr>
-                                    ))}
+                                {(data.length === 0) ? (
+                                    <Tr>
+                                        <Td colSpan="5" textAlign="center">Nenhum cliente encontrado</Td>
+                                    </Tr>
+                                ) : (
+                                    data.filter((client) =>
+                                            [client.id, client.email, client.cnpj_cpf, client.whatsapp]
+                                                .some((field) =>
+                                                    field.toString().toLowerCase().includes(search.toLowerCase())
+                                                )
+                                        )
+                                        .map((client, index) => (
+                                            <Tr
+                                                key={client.id}
+                                                cursor="pointer"
+                                                _hover={{ bg: "gray.50" }}
+                                                _odd={{ bg: "gray.100" }}
+                                                _even={{ bg: "white" }}
+                                                onClick={() => handleView(client)}
+                                            >
+                                                <Td maxW={isMobile ? 5 : 100}>{client.id}</Td>
+                                                <Td maxW={isMobile ? 5 : 100}>{client.email}</Td>
+                                                <Td maxW={isMobile ? 5 : 100}>{client.cnpj_cpf}</Td>
+                                                <Td p={0}>
+                                                    {permissions.some((perm) => perm.name === 'update_users') && (
+                                                        <EditIcon
+                                                            fontSize={20}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEdit(client)
+                                                            }}
+                                                            cursor="pointer"
+                                                        />
+                                                    )}
+                                                </Td>
+                                                <Td p={0}>
+                                                    {permissions.some((perm) => perm.name === 'delete_users') && (
+                                                        <DeleteIcon
+                                                            fontSize={20}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDelete(client?.id)
+                                                            }}
+                                                            cursor="pointer"
+                                                        />
+                                                    )}
+                                                </Td>
+                                            </Tr>
+                                        )))}
                             </Tbody>
                         </Table>
                     </Box>

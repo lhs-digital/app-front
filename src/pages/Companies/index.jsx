@@ -106,7 +106,7 @@ const Companies = () => {
     };
 
     const getSortIcon = (key) => {
-        if (sortConfig.key !== key) return null; 
+        if (sortConfig.key !== key) return null;
         return sortConfig.direction === 'asc' ? <ChevronUpIcon ml={2} /> : <ChevronDownIcon ml={2} />;
     };
 
@@ -153,47 +153,49 @@ const Companies = () => {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {(!search ? data : data.filter(company =>
-                                    company.name.toLowerCase().includes(search.toLowerCase()) ||
-                                    company.cnpj.toLowerCase().includes(search.toLowerCase())
-                                )).map(({ name, cnpj, roles_count, id }, index) => (
-                                    <Tr key={index}
-                                        cursor="pointer"
-                                        _odd={{ bg: "gray.100" }}
-                                        _even={{ bg: "white" }}
-                                        _hover={{ bg: "gray.50" }} onClick={() => handleView(index)}>
-                                        <Td maxW={isMobile ? 5 : 100}> {name} </Td>
-                                        <Td maxW={isMobile ? 5 : 100}> {cnpj} </Td>
-                                        <Td p={0}>
-                                            {permissions.some(permissions => permissions.name === 'update_companies') ?
-                                                (
+                                {data.length === 0 ? (
+                                    <Tr>
+                                        <Td colSpan={4} textAlign="center">
+                                            Não existem empresas cadastradas
+                                        </Td>
+                                    </Tr>
+                                ) : (
+                                    (!search ? data : data.filter(company =>
+                                        company.name.toLowerCase().includes(search.toLowerCase()) ||
+                                        company.cnpj.toLowerCase().includes(search.toLowerCase())
+                                    )).map(({ name, cnpj, roles_count, id }, index) => (
+                                        <Tr key={index}
+                                            cursor="pointer"
+                                            _odd={{ bg: "gray.100" }}
+                                            _even={{ bg: "white" }}
+                                            _hover={{ bg: "gray.50" }} onClick={() => handleView(index)}>
+                                            <Td maxW={isMobile ? 5 : 100}> {name} </Td>
+                                            <Td maxW={isMobile ? 5 : 100}> {cnpj} </Td>
+                                            <Td p={0}>
+                                                {permissions.some(permissions => permissions.name === 'update_companies') ? (
                                                     <EditIcon
                                                         fontSize={20}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handleEdit({ name, cnpj, roles_count, id, index })
+                                                            handleEdit({ name, cnpj, roles_count, id, index });
                                                         }}
                                                     />
-                                                )
-                                                : null
-                                            }
-                                        </Td>
-                                        <Td p={0}>
-                                            {permissions.some(permissions => permissions.name === 'update_companies') ?
-                                                (
+                                                ) : null}
+                                            </Td>
+                                            <Td p={0}>
+                                                {permissions.some(permissions => permissions.name === 'update_companies') ? (
                                                     <DeleteIcon
                                                         fontSize={20}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handleDelete(id)
+                                                            handleDelete(id);
                                                         }}
                                                     />
-                                                )
-                                                : null
-                                            }
-                                        </Td>
-                                    </Tr>
-                                ))}
+                                                ) : null}
+                                            </Td>
+                                        </Tr>
+                                    ))
+                                )}
                             </Tbody>
                         </Table>
                     </Box>

@@ -1,40 +1,80 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
-import "./header.css"
-import { Link, useNavigate } from 'react-router-dom'
-import { Heading } from '@chakra-ui/react';
+import './header.css';
+import { Link, useNavigate } from 'react-router-dom';
+import { Box, Heading, Text, Avatar, VStack, HStack, useBreakpointValue } from '@chakra-ui/react';
 import { Container } from './styles';
-import { FaBars } from 'react-icons/fa'
+import { FaBars } from 'react-icons/fa';
 import Sidebar from '../Sidebar';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/auth';
 
 const Header = () => {
-    const [sidebar, setSidebar] = useState(true)
+    const [sidebar, setSidebar] = useState(false);
+    const { user } = useContext(AuthContext);
 
-    const showSidebar = () => setSidebar(!sidebar)
+    const isMobile = useBreakpointValue({ base: true, lg: false });
 
-    const navigate = useNavigate()
-    const { logout } = useContext(AuthContext)
+    const showSidebar = () => setSidebar(!sidebar);
+
+    const navigate = useNavigate();
+    const { logout } = useContext(AuthContext);
 
     const handleLogout = async () => {
-       logout()
-       navigate('/')
-    }
+        logout();
+        navigate('/');
+    };
 
     return (
         <>
             <Container>
                 <FaBars onClick={showSidebar} />
                 {sidebar && <Sidebar active={setSidebar} />}
-                <Link to='/dashboard'>
-                    <Heading className='white'>App-Provedores</Heading>
+                <Link to="/dashboard">
+                    <Heading className="white">App-Provedores</Heading>
                 </Link>
+
+                <Box
+                    display="flex"
+                    alignItems="center"
+                    bg="#1A202C"
+                    color="white"
+                    borderRadius="md"
+                    p={2}
+                    boxShadow="lg"
+                    position="absolute"
+                    right={isMobile ? -3 : "20px"}
+                    top="50%"
+                    transform="translateY(-50%)"
+                >
+                    <Avatar
+                        name={user?.name}
+                        src={user?.profilePicture || ''}
+                        size="lg"
+                        mr={4}
+                    />
+                    <Box align="flex-start"
+                        display={isMobile ? 'none' : 'flex'}
+                        flexDirection="column" gap="0">
+                        <Text fontWeight="bold" fontSize="lg" color={'white'} marginBottom={-2} padding={0}>
+                            {user?.user?.name}
+                        </Text>
+                        <Text fontSize="sm" color={'gray.400'}>{user?.user?.email}</Text>
+                        <Text fontSize="sm" color="white" marginBottom={-2} padding={0}>
+                            Empresa: {user?.user?.company?.name}
+                        </Text>
+                        <Text fontSize="sm" color="gray.500">
+                            CNPJ: {user?.user?.company?.cnpj}
+                        </Text>
+                    </Box>
+                </Box>
             </Container>
 
-            <button className='logout' onClick={handleLogout}><LogoutIcon /></button>
+            <button className="logout" onClick={handleLogout}>
+                <LogoutIcon />
+            </button>
         </>
-    )
-}
+    );
+};
 
-export default Header
+export default Header;
