@@ -92,7 +92,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
             return;
         }
 
-        if (form.tipo_pessoa === 'F' && !validarCPF(form.cnpj_cpf)) {
+        if (form.tipo_pessoa === 'F' && !validarCPF(form?.cnpj_cpf)) {
             toast.warning('CPF inválido')
             return;
         }
@@ -108,7 +108,6 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
 
     return (
         <>
-        {console.log(selectedActivitie)}
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent maxW={1200} w="100%" py={10} px={2}>

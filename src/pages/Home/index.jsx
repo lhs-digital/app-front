@@ -30,15 +30,6 @@ const Home = () => {
         width="100%"
         paddingX="24px"
       >
-
-        <Stack maxWidth="800px" marginBottom="24px">
-          <Heading >Bem vindo, {user?.user.name}!</Heading>
-          <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
-          <Heading fontSize="lg" fontWeight="regular" color="gray.500">Esta é a primeira versão do sistema de gerenciamento de provedores.
-          Você pode encontrar as funcionalidades disponíveis no sidemenu ao lado esquerdo.</Heading>
-
-        </Stack>
-
         {
           hasPermission(tasksPermissions) ?
             (

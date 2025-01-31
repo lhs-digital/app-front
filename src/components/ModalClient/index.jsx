@@ -52,18 +52,6 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
     }
 
     const updateUser = async () => {
-        console.log(
-            {
-                numero: numero,
-                email: email,
-                tipo_pessoa: tipoPessoa,
-                whatsapp: whatsapp,
-                data_nascimento: dataNascimento,
-                cnpj_cpf: cnpjCpf,
-                referencia: referencia,
-                contribuinte_icms: contribuenteIcms
-            }
-        )
         try {
             await (api.put(`/clients/${dataEdit.id}`, {
                 numero: numero,
@@ -75,6 +63,7 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
                 referencia: referencia,
                 contribuinte_icms: contribuenteIcms
             }));
+            
 
             setRefresh(!refresh);
             toast.success('Usuário editado com sucesso!')
@@ -85,18 +74,6 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
     }
 
     const handleSave = () => {
-        console.log(
-            {
-                email: email,
-                numero: numero,
-                tipoPessoa: tipoPessoa,
-                whatsapp: whatsapp,
-                dataNascimento: dataNascimento,
-                cnpjCpf: cnpjCpf,
-                referencia: referencia,
-                contribuenteIcms: contribuenteIcms
-            }
-        )
         if (!email || !numero || !tipoPessoa || !whatsapp || !dataNascimento || !cnpjCpf || !referencia || !contribuenteIcms) {
             toast.warning('Preencha os campos obrigatórios!')
             return;

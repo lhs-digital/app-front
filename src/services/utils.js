@@ -32,12 +32,12 @@ export const validarEmail = (email) => {
 }
 
 export const validarCPF = (cpf) => {
-    const regex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+    const regex = /^\d{3}\d{3}\d{3}\d{2}$/;
     return regex.test(cpf);
 };
 
 export const validarCNPJ = (cnpj) => {
-    const regex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
+    const regex = /^\d{2}\\d{3}\\d{3}\/\d{4}\d{2}$/;
     return regex.test(cnpj);
 };
 
