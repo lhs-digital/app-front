@@ -212,7 +212,7 @@ const ModalClient = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) =
                                 <Input
                                     type="text"
                                     value={whatsapp}
-                                    maxLength={15} // Incluindo o espaço, parênteses e o traço
+                                    maxLength={15}
                                     onChange={(e) => setWhatsapp(e.target.value)}
                                 />
                             </Box>

@@ -62,11 +62,6 @@ const Sidebar = ({ active }) => {
                 <Link to="/dashboard">
                     <SidebarItem Icon={FaHome} Text="Início" />
                 </Link>
-                {hasPermission(usersPermissions) ? (
-                    <Link to="/users">
-                        <SidebarItem Icon={FaUserAlt} Text="Usuários" />
-                    </Link>
-                ) : null}
                 {hasPermission(companyPermissions) ? (
                     <Link to="/companies">
                         <SidebarItem Icon={FaBriefcase} Text="Empresas" />
@@ -75,6 +70,11 @@ const Sidebar = ({ active }) => {
                 {hasPermission(companyPermissions) ? (
                     <Link to="/roles">
                         <SidebarItem Icon={FaRegFileAlt} Text="Papéis & Permissões" />
+                    </Link>
+                ) : null}
+                {hasPermission(usersPermissions) ? (
+                    <Link to="/users">
+                        <SidebarItem Icon={FaUserAlt} Text="Usuários" />
                     </Link>
                 ) : null}
                 <Link to="/clientes">

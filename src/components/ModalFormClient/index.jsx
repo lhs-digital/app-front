@@ -37,7 +37,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
             try {
                 const response = await (api.get(`/company_tables/all_tables`));
                 setFields(response.data.data[0].columns);
-                const responseClient = await (api.get(`/clients/${selectedActivitie?.id}`));
+                const responseClient = await (api.get(`/clients/${selectedActivitie?.record_id}`));
                 setClient(responseClient?.data);
                 setForm({
                     numero: responseClient?.data.numero || "",
@@ -58,7 +58,7 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
 
     const updateUser = async () => {
         try {
-            await (api.put(`/clients/${selectedActivitie?.id}`, {
+            await (api.put(`/clients/${selectedActivitie?.record_id}`, {
                 numero: form.numero,
                 email: form.email,
                 tipo_pessoa: form.tipo_pessoa,
@@ -108,12 +108,13 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
 
     return (
         <>
+        {console.log(selectedActivitie)}
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent maxW={1200} w="100%" py={10} px={2}>
                     <ModalHeader>
                         Formulário para correção de dados inválidos
-                        <Text>ID do Cliente: #{selectedActivitie.id}</Text>
+                        <Text>ID do Cliente: #{selectedActivitie?.record_id}</Text>
                         <Text color="gray.500" fontWeight="normal" fontSize="md">Os campos com borda vermelha representam os campos inválidos do Cliente</Text>
                         <Divider borderColor="gray.300" width="100%" alignSelf="center" borderWidth="1px" marginY={2} />
                     </ModalHeader>

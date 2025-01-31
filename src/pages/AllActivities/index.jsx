@@ -282,7 +282,7 @@ const AllActivities = () => {
 
                         <List spacing={3}>
                             {data?.length === 0 ? (
-                                <Text textAlign="center" color="gray.500" fontSize="md">Não existem tasks concluídas</Text>
+                                <Text textAlign="center" color="gray.500" fontSize="md">Não há tasks</Text>
                             ) : (
                                 data.map((item) => (
                                     <ActivitieItem
