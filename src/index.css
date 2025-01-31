@@ -1,11 +1,13 @@
-/* @tailwind base;
+@tailwind base;
 @tailwind components;
-@tailwind utilities; */
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap');
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Onest', sans-serif;
 }
 
 * > p {
@@ -21,7 +23,7 @@ body {
     height: 100vh;
     font: 14px;
     background-color: #EFEFEF;
-    font-family: sans-serif;
+    font-family: 'Onest', sans-serif;
     overflow-x: hidden;
 }
 

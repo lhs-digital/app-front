@@ -1,30 +1,20 @@
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import React from 'react';
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    Button,
-    Text
-} from '@chakra-ui/react';
 
 const ModalDelete = ({ isOpen, onClose, onConfirm }) => {
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>Confirmação de Exclusão</ModalHeader>
-                <ModalBody>
-                    <Text>Você tem certeza que deseja excluir este item?</Text>
-                </ModalBody>
-                <ModalFooter>
-                    <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-                    <Button colorScheme="red" onClick={onConfirm}>Confirmar</Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+        <Dialog open={isOpen} onClose={onClose}>
+            <DialogTitle>
+                Excluir item?
+            </DialogTitle>
+            <DialogContent>
+                    Você tem certeza que deseja excluir este item?
+            </DialogContent>
+            <DialogActions>
+                <Button color='error' onClick={onConfirm}>EXCLUIR</Button>
+                <Button onClick={onClose}>Cancelar</Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 

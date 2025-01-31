@@ -1,23 +1,22 @@
-import { Fragment } from "react";
-import { Route, Routes } from "react-router-dom";
-import Home from "../pages/Home";
-import SignIn from "../pages/SignIn";
-import RecoverPassword from "../pages/RecoverPassword";
-import PasswordUpdate from "../pages/PasswordUpdate";
-import { Navigate } from "react-router-dom";
+import { Fragment, useContext } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Users from "../pages/Users";
-import FirstAccess from "../pages/FirstAccess";
-import Companies from "../pages/Companies";
-import Roles from "../pages/Roles";
-import { useContext } from "react";
 import { AuthContext } from "../contexts/auth";
-import MyPermissions from "../pages/MyPermissions";
-import Logs from "../pages/Logs";
-import Priorities from "../pages/Priorities";
-import ReportsAud from "../pages/ReportsAud";
+import Layout from "../layout";
 import Clients from "../pages/Clients";
+import Companies from "../pages/Companies";
+import FirstAccess from "../pages/FirstAccess";
+import Home from "../pages/Home";
+import Logs from "../pages/Logs";
+import MyPermissions from "../pages/MyPermissions";
+import PasswordUpdate from "../pages/PasswordUpdate";
+import Priorities from "../pages/Priorities";
+import RecoverPassword from "../pages/RecoverPassword";
+import ReportsAud from "../pages/ReportsAud";
+import Roles from "../pages/Roles";
+import SignIn from "../pages/SignIn";
+import Users from "../pages/Users";
 
 
 const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
@@ -39,7 +38,9 @@ const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
 
     const hasAccess = signed && hasPermissionAccess;
 
-    return hasAccess ? <Item /> : <Navigate to="/" />;
+    return hasAccess ? <Layout>
+        <Item/>
+    </Layout> : <Navigate to="/" />;
 
 };
 
@@ -78,7 +79,7 @@ const RoutesApp = () => {
                     <Route path="/roles" element={<Private Item={Roles} allowedRoles={['super-admin']} allowedPermissions={['view_any_roles', 'view_roles', 'create_roles', 'delete_roles', 'update_roles']} />} />
                     <Route path="/my-permissions" element={<Private Item={MyPermissions} allowedRoles={['super-admin']} />} />
                     <Route path="/logs" element={<Private Item={Logs} allowedRoles={['super-admin']} allowedPermissions={['view_any_logs']} />} />
-
+                    <Route path="/layout" element={<Layout to="/dashboard" />} />
                     {/* 404 */}
                     <Route path="*" element=
                         {signed ? <Navigate to="/dashboard" /> : <Navigate to="/" />}

@@ -1,32 +1,32 @@
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, TextField } from '@mui/material';
 import React from 'react';
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    Button,
-    Box,
-} from '@chakra-ui/react';
 
 const ModalView = ({ selectedUser, isOpen, onClose }) => {
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>Informações Gerais do Usuário</ModalHeader>
-                <ModalBody>
-                    <Box ><b>Nome:</b> {selectedUser?.name} </Box>
-                    <Box ><b>Email:</b> {selectedUser?.email} </Box>
-                    <Box ><b>Role:</b> {selectedUser?.role?.name} </Box>
-                    <Box ><b>Empresa:</b> {selectedUser?.company?.name} </Box>
-                </ModalBody>
-                <ModalFooter>
-                    <Button variant="ghost" onClick={onClose}>Voltar</Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+        <Dialog open={isOpen} onClose={onClose}>
+            <DialogTitle>{selectedUser?.name}</DialogTitle>
+            <DialogContent className='w-[480px] flex flex-col gap-4'>
+                <div>
+                    <InputLabel htmlFor="name">Nome</InputLabel>
+                    <TextField id="name" value={selectedUser?.name} fullWidth margin="dense" InputProps={{ readOnly: true }} />
+                </div>
+                <div>
+                    <InputLabel htmlFor="email">Email</InputLabel>
+                    <TextField id="email" value={selectedUser?.email} fullWidth margin="dense" InputProps={{ readOnly: true }} />
+                </div>
+                <div>
+                    <InputLabel htmlFor="role">Role</InputLabel>
+                    <TextField id="role" value={selectedUser?.role?.name} fullWidth margin="dense" InputProps={{ readOnly: true }} />
+                </div>
+                <div>
+                    <InputLabel htmlFor="company">Empresa</InputLabel>
+                    <TextField id="company" value={selectedUser?.company?.name} fullWidth margin="dense" InputProps={{ readOnly: true }} />
+                </div>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Voltar</Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 

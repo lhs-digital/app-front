@@ -1,8 +1,8 @@
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box, Checkbox, Divider, Grid, Icon, ListIcon, ListItem, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react'
-import React, { useState } from 'react'
-import ViewActivitie from '../ViewActivitie';
-import ModalCheckActivitie from '../ModalCheckActivitie';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box, Divider, Grid, Text, Tooltip, useBreakpointValue, useDisclosure, useTheme } from '@chakra-ui/react';
+import React, { useState } from 'react';
 import { dateFormatted, formattedPriority, getPriorityColor } from '../../services/utils';
+import ModalCheckActivitie from '../ModalCheckActivitie';
+import ViewActivitie from '../ViewActivitie';
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
     const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
@@ -20,7 +20,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
     };
 
     return (
-        <ListItem
+        <Box
             display="flex"
             alignItems="center"
             justifyContent="center"
@@ -137,7 +137,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                     refresh={refresh}
                 />
             )}
-        </ListItem>
+        </Box>
     )
 }
 

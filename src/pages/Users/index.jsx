@@ -1,30 +1,18 @@
-import React from 'react';
-import { EditIcon, DeleteIcon, ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, ChevronUpIcon, EditIcon } from '@chakra-ui/icons';
 import {
-    Box,
-    Flex,
-    Button,
-    useDisclosure,
-    Table,
-    Thead,
-    Tr,
-    Th,
-    Tbody,
-    Td,
     useBreakpointValue,
-    Input
+    useDisclosure
 } from "@chakra-ui/react";
-import { useEffect, useState } from 'react';
-import ModalComp from '../../components/ModalComp';
-import api from '../../services/api';
+import { Add, Delete, Search } from '@mui/icons-material';
+import { Button, IconButton, InputAdornment, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from '@mui/material';
+import React, { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import Header from '../../components/Header';
+import ModalComp from '../../components/ModalComp';
 import ModalDelete from '../../components/ModalDelete';
 import ModalView from '../../components/ModalView';
-import { useContext } from 'react';
+import PageTitle from '../../components/PageTitle';
 import { AuthContext } from '../../contexts/auth';
-import Title from '../../components/Title';
-import Pagination from '../../components/Pagination';
+import api from '../../services/api';
 
 const Users = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -40,6 +28,8 @@ const Users = () => {
     const [deleteId, setDeleteId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
     const { permissions } = useContext(AuthContext);
 
@@ -79,7 +69,7 @@ const Users = () => {
     };
 
     const getSortIcon = (key) => {
-        if (sortConfig.key !== key) return null; 
+        if (sortConfig.key !== key) return null;
         return sortConfig.direction === 'asc' ? <ChevronUpIcon ml={2} /> : <ChevronDownIcon ml={2} />;
     };
 
@@ -110,140 +100,145 @@ const Users = () => {
         onOpenDelete();
     };
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const renderButtons = () => {
+        if (permissions.some(permissions => permissions.name === 'create_users')) return (
+            <Button onClick={() => [setDataEdit({}), onOpen()]} variant="contained" color="primary" startIcon={<Add />}>
+                CADASTRAR USUÁRIO
+            </Button>
+        )
+        else return null;
+    }
+
+    function defaultLabelDisplayedRows({ from, to, count }) {
+        return `${from}–${to} de ${count !== -1 ? count : `mais que ${to}`}`;
+    }
+
     return (
-        <>
-            <Header />
-
-            <Title title="Gerenciamento de Usuários" subtitle="Administre, edite e remova usuários conforme necessário" />
-
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
-            >
-                <Box maxW={800} w="100%" py={10} px={2}>
-                    {permissions.some(permissions => permissions.name === 'create_users') ?
-                        (
-                            <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
-                                NOVO CADASTRO
-                            </Button>
-                        )
-                        : null
-                    }
-
-                    <Input
-                        mt={4}
-                        placeholder="Buscar usuário"
-                        size="lg"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-
-                    <Box overflowY="auto" height="100%">
-                        <Table mt="6">
-                            <Thead>
-                                <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('name')} cursor="pointer">
-                                        Nome
-                                        {getSortIcon('name')}
-                                    </Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('email')} cursor="pointer">
-                                        E-mail
-                                        {getSortIcon('email')}
-                                    </Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" onClick={() => handleSort('role.name')} cursor="pointer">
-                                        Role
-                                        {getSortIcon('role.name')}
-                                    </Th>
-                                    <Th maxW={isMobile ? 5 : 100} display={isMobile ? "none" : undefined} fontSize="16px" onClick={() => handleSort('company.name')} cursor="pointer">
-                                        Empresa
-                                        {getSortIcon('company.name')}
-                                    </Th>
-                                    <Th p={0}></Th>
-                                    <Th p={0}></Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {(!search ? data : data.filter(user =>
-                                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                                    user.email.toLowerCase().includes(search.toLowerCase()) ||
-                                    user.role.name.toLowerCase().includes(search.toLowerCase())
-                                )).map(({ name, email, role, company, id }, index) => (
-                                    <Tr
-                                        key={index}
-                                        cursor="pointer"
-                                        _hover={{ bg: "gray.50" }}
-                                        _odd={{ bg: "gray.100" }}
-                                        _even={{ bg: "white" }}
-                                        onClick={() => handleView(index)}
-                                    >
-                                        <Td maxW={isMobile ? 5 : 100}> {name} </Td>
-                                        <Td maxW={isMobile ? 5 : 100}> {email} </Td>
-                                        <Td maxW={isMobile ? 5 : 100}> {role.name} </Td>
-                                        <Td maxW={isMobile ? 5 : 100} display={isMobile ? "none" : undefined}> {company.name} </Td>
-                                        <Td p={0}>
-                                            {permissions.some(permissions => permissions.name === 'update_users') &&
-                                                <EditIcon
-                                                    fontSize={20}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleEdit({ name, email, role, company, id, index })
-                                                    }}
-                                                />
-                                            }
-                                        </Td>
-                                        <Td p={0}>
-                                            {permissions.some(permissions => permissions.name === 'delete_users') &&
-                                                <DeleteIcon
-                                                    fontSize={20}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDelete(id)
-                                                    }}
-                                                />
-                                            }
-                                        </Td>
-                                    </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
-                    </Box>
-                </Box>
-
-                {isOpen && (
-                    <ModalComp
-                        isOpen={isOpen}
-                        onClose={onClose}
-                        data={data}
-                        setData={setData}
-                        dataEdit={dataEdit}
-                        setDataEdit={setDataEdit}
-                        setRefresh={setRefresh}
-                        refresh={refresh}
-                    />
-                )}
-
-                {isDeleteOpen && (
-                    <ModalDelete
-                        isOpen={isDeleteOpen}
-                        onClose={onCloseDelete}
-                        onConfirm={handleRemove}
-                    />
-                )}
-
-                {isViewOpen && (
-                    <ModalView
-                        selectedUser={dataView}
-                        isOpen={isViewOpen}
-                        onClose={onCloseView}
-                    />
-                )}
-
-                <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
-            </Flex>
-        </>
+        <div className='flex flex-col gap-6 w-full'>
+            <ModalComp
+                isOpen={isOpen}
+                onClose={onClose}
+                data={data}
+                setData={setData}
+                dataEdit={dataEdit}
+                setDataEdit={setDataEdit}
+                setRefresh={setRefresh}
+                refresh={refresh}
+            />
+            <ModalDelete
+                isOpen={isDeleteOpen}
+                onClose={onCloseDelete}
+                onConfirm={handleRemove}
+            />
+            <ModalView
+                selectedUser={dataView}
+                isOpen={isViewOpen}
+                onClose={onCloseView}
+            />
+            <PageTitle title="Gerenciamento de Usuários" subtitle="Administre, edite e remova usuários conforme necessário" buttons={renderButtons()} />
+            <TextField
+                fullWidth
+                placeholder="Buscar usuário"
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Search />
+                            </InputAdornment>
+                        ),
+                    },
+                }}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+            />
+            <TableContainer>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell sx={{ cursor: 'pointer', maxWidth: isMobile ? 5 : 100 }} onClick={() => handleSort('name')}>
+                                Nome
+                                {getSortIcon('name')}
+                            </TableCell>
+                            <TableCell sx={{ cursor: 'pointer', maxWidth: isMobile ? 5 : 100 }} onClick={() => handleSort('email')}>
+                                E-mail
+                                {getSortIcon('email')}
+                            </TableCell>
+                            <TableCell sx={{ cursor: 'pointer', maxWidth: isMobile ? 5 : 100 }} onClick={() => handleSort('role.name')}>
+                                Cargo
+                                {getSortIcon('role.name')}
+                            </TableCell>
+                            <TableCell sx={{ cursor: 'pointer', maxWidth: isMobile ? 5 : 100, display: isMobile ? "none" : undefined }} onClick={() => handleSort('company.name')}>
+                                Empresa
+                                {getSortIcon('company.name')}
+                            </TableCell>
+                            <TableCell sx={{ padding: 0 }}></TableCell>
+                            <TableCell sx={{ padding: 0 }}></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {(!search ? data : data.filter(user =>
+                            user.name.toLowerCase().includes(search.toLowerCase()) ||
+                            user.email.toLowerCase().includes(search.toLowerCase()) ||
+                            user.role.name.toLowerCase().includes(search.toLowerCase())
+                        )).map(({ name, email, role, company, id }, index) => (
+                            <TableRow
+                                key={index}
+                                style={{ cursor: 'pointer', backgroundColor: index % 2 === 0 ? 'white' : '#f7fafc' }}
+                                onClick={() => handleView(index)}
+                            >
+                                <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}> {name} </TableCell>
+                                <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}> {email} </TableCell>
+                                <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}> {role.name} </TableCell>
+                                <TableCell sx={{ maxWidth: isMobile ? 5 : 100, display: isMobile ? "none" : undefined }}> {company.name} </TableCell>
+                                <TableCell sx={{ padding: 0 }}>
+                                    {permissions.some(permissions => permissions.name === 'update_users') &&
+                                        <IconButton>
+                                            <EditIcon
+                                                fontSize={20}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEdit({ name, email, role, company, id, index })
+                                                }}
+                                            />
+                                        </IconButton>
+                                    }
+                                </TableCell>
+                                <TableCell sx={{ padding: 0 }}>
+                                    {permissions.some(permissions => permissions.name === 'delete_users') &&
+                                        <IconButton onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(id)
+                                        }}>
+                                            <Delete />
+                                        </IconButton>
+                                    }
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={data.length}
+                    labelRowsPerPage="Linhas por página"
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelDisplayedRows={defaultLabelDisplayedRows}
+                />
+            </TableContainer>
+        </div>
     );
 };
 

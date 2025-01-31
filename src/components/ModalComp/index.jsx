@@ -1,22 +1,7 @@
-import React, { useEffect } from 'react'
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
-    Button,
-    FormControl,
-    FormLabel,
-    Input,
-    Box
-} from "@chakra-ui/react"
-import { useState } from 'react'
-import { Select } from '@chakra-ui/react'
-import api from '../../services/api'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, Select, TextField } from "@mui/material"
+import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import api from '../../services/api'
 
 
 const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
@@ -114,77 +99,70 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     }
 
     return (
-        <>
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>
-                        {(dataEdit.id ? 'Editar Usuário' : 'Cadastrar Usuário')}
-                    </ModalHeader>
-                    <ModalCloseButton />
-
-                    <ModalBody>
-                        <FormControl display="flex" flexDirection="column" gap={4}>
-                            <Box>
-                                <FormLabel>Nome *</FormLabel>
-                                <Input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                />
-                            </Box>
-                            <Box>
-                                <FormLabel>E-mail *</FormLabel>
-                                <Input
-                                    type="text"
-                                    value={email}
-                                    disabled={dataEdit?.email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                            </Box>
-                            <Box>
-                                <FormLabel>Empresa</FormLabel>
-                                <Select
-                                    placeholder='Selecione uma opção'
-                                    value={company}
-                                    onChange={handleCompanyChange}
-                                >
-                                    {
-                                        companies.map((companyItem) => (
-                                            <option key={companyItem.id} value={companyItem.id}>{companyItem.name}</option>
-                                        ))
-                                    }
-                                </Select>
-                            </Box>
-                            <Box>
-                                <FormLabel>Role *</FormLabel>
-                                <Select
-                                    placeholder='Selecione uma opção'
-                                    value={role?.id}
-                                    onChange={handleRoleChange}
-                                >
-                                    {
-                                        roles.map((roleItem) => (
-                                            <option key={roleItem.id} value={roleItem.id}>{roleItem.name}</option>
-                                        ))
-                                    }
-                                </Select>
-                            </Box>
-                        </FormControl>
-                    </ModalBody>
-
-                    <ModalFooter justifyContent="end">
-                        <Button colorScheme="gray" mr={3} onClick={onClose}>
-                            CANCELAR
-                        </Button>
-                        <Button colorScheme="green" onClick={handleSave}>
-                            SALVAR
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-
-        </>
+        <Dialog open={isOpen} onClose={onClose}>
+            <DialogTitle>
+                {(dataEdit.id ? 'Editar Usuário' : 'Cadastrar Usuário')}
+            </DialogTitle>
+            <DialogContent className='w-[480px] flex flex-col gap-4'>
+                <Box>
+                    <InputLabel>Nome *</InputLabel>
+                    <TextField
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        fullWidth
+                    />
+                </Box>
+                <Box>
+                    <InputLabel>E-mail *</InputLabel>
+                    <TextField
+                        type="text"
+                        value={email}
+                        disabled={dataEdit?.email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        fullWidth
+                    />
+                </Box>
+                <Box>
+                    <InputLabel>Empresa</InputLabel>
+                    <Select
+                        placeholder='Selecione uma opção'
+                        value={company}
+                        onChange={handleCompanyChange}
+                        fullWidth
+                    >
+                        {
+                            companies.map((companyItem) => (
+                                <option key={companyItem.id} value={companyItem.id}>{companyItem.name}</option>
+                            ))
+                        }
+                    </Select>
+                </Box>
+                <Box>
+                    <InputLabel>Role *</InputLabel>
+                    <Select
+                        placeholder='Selecione uma opção'
+                        value={role?.id}
+                        onChange={handleRoleChange}
+                        fullWidth
+                    >
+                        {
+                            roles.map((roleItem) => (
+                                <option key={roleItem.id} value={roleItem.id}>{roleItem.name}</option>
+                            ))
+                        }
+                    </Select>
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button colorScheme="gray" mr={3} onClick={onClose}>
+                    CANCELAR
+                </Button>
+                <Button colorScheme="green" onClick={handleSave}>
+                    SALVAR
+                </Button>
+            </DialogActions>
+        </Dialog>
     )
 }
 

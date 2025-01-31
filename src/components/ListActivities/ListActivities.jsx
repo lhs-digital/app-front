@@ -1,9 +1,10 @@
-import { Box, Button, ButtonGroup, Divider, Flex, FormControl, FormLabel, Grid, Heading, Input, List, Select, Text, useBreakpointValue } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
+import { Flex } from '@chakra-ui/react';
+import { Box, Button, ButtonGroup, InputLabel, MenuItem, Select, TextField, useMediaQuery } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import ActivitieItem from '../../components/ActivitieItem/ActivitieItem';
-import api from '../../services/api';
+import PageTitle from '../../components/PageTitle';
 import Pagination from '../../components/Pagination';
-import Header from '../../components/Header';
+import api from '../../services/api';
 
 const ListActivities = () => {
     const [data, setData] = useState([]);
@@ -19,7 +20,7 @@ const ListActivities = () => {
     const [per_page, setPer_page] = useState(20);
     const [priority, setPriority] = useState(null);
 
-    const isMobile = useBreakpointValue({ base: true, lg: false });
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
     const [filterParams, setFilterParams] = useState({
         search: '',
@@ -112,193 +113,130 @@ const ListActivities = () => {
     }
 
     return (
-        <>
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
-                mt="20px"
-                gap="24px"
-                width="100%"
-                paddingX="24px"
-            >
-                <Box
-                    width="100%"
-                    maxWidth="800px"
-                    gap="64px"
-                    flexDirection="column"
-                    display="flex"
-                >
-                    <Box
-                        width="100%"
-                        maxWidth="800px"
-                        gap="12px"
-                        flexDirection="column"
-                        display="flex"
+        <div className='flex flex-col w-full gap-6'>
+            <PageTitle title='Lista de Atividades' subtitle='Gerencie todas as suas atividades pendentes e concluídas.' />
+            <div className='grid grid-cols-8 w-full gap-6'>
+                <Box className='col-span-2'>
+                    <InputLabel>Tabela:</InputLabel>
+                    <Select fullWidth value={table} onChange={(e) => setTable(e.target.value)}>
+                        <MenuItem value="clients">clients</MenuItem>
+                    </Select>
+                </Box>
+                <Box className='col-span-6'>
+                    <InputLabel>Pesquise por:</InputLabel>
+                    <TextField
+                        fullWidth
+                        mt="0px"
+                        placeholder="ID do cliente, Campo inválido, Valor do campo inválido e Mensagem de erro"
+                        size="lg"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </Box>
+                <Box className='col-span-2'>
+                    <InputLabel>Data da Auditoria</InputLabel>
+                    <Flex alignItems="center" gap="6px">
+                        <TextField
+                            size="lg"
+                            placeholder='Data de Auditoria'
+                            type='date'
+                            value={createdAt[0] || ""}
+                            onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
+                        />
+                        até
+                        <TextField
+                            size="lg"
+                            placeholder='Data de Auditoria'
+                            type='date'
+                            value={createdAt[1] || ""}
+                            onChange={(e) => setCreatedAt([createdAt[0], e.target.value])}
+                        />
+                    </Flex>
+                </Box>
+                <Box className='col-span-1'>
+                    <InputLabel>Ordem de Prioridade:</InputLabel>
+                    <Select value={priorityOrder} onChange={handlePriorityOrder} fullWidth>
+                        <MenuItem value="desc">Decrescente</MenuItem>
+                        <MenuItem value="asc">Crescente</MenuItem>
+                    </Select>
+                </Box>
+                <Box className='col-span-1'>
+                    <InputLabel fontSize="lg">Status:</InputLabel>
+                    <Select
+                        size="lg"
+                        value={status}
+                        onChange={handleStatusChange}
+                        fullWidth
                     >
-
-
-                        <Heading >Lista de Atividades</Heading>
-                        <Divider borderColor="gray.300" alignSelf="left" borderWidth="2px" />
-                        <Heading fontSize="lg" fontWeight="regular" color="gray.500">
-                            Gerencie todas as suas atividades pendentes e concluídas
-                        </Heading>
-
-                        <FormControl
-                            display="flex" flexDirection="column" gap={4} marginBottom="24px"
-                        >
-                            <Grid
-                                templateColumns={isMobile ? "1fr" : "1fr 3fr"}
-                                gap={4}
-                                alignItems="center"
-                            >
-
-                                <Box>
-                                    <FormLabel fontSize="lg">Selecione a Tabela:</FormLabel>
-                                    <Select size="lg">
-                                        <option>clients</option>
-                                    </Select>
-                                </Box>
-                                <Box>
-                                    <FormLabel fontSize="lg">Pesquise por:</FormLabel>
-                                    <Input
-                                        mt="0px"
-                                        placeholder="ID do cliente, Campo inválido, Valor do campo inválido e Mensagem de erro"
-                                        size="lg"
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                    />
-                                </Box>
-                            </Grid>
-
-                            <Grid
-                                templateColumns="1fr"
-                                gap={4}
-                            >
-                                <Box>
-                                    <FormLabel fontSize="lg">Data da Auditoria</FormLabel>
-                                    <Flex alignItems="center" gap="6px">
-                                        <Input
-                                            size="lg"
-                                            placeholder='Data de Auditoria'
-                                            type='date'
-                                            value={createdAt[0] || ""}
-                                            onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
-                                        />
-                                        até
-                                        <Input
-                                            size="lg"
-                                            placeholder='Data de Auditoria'
-                                            type='date'
-                                            value={createdAt[1] || ""}
-                                            onChange={(e) => setCreatedAt([createdAt[0], e.target.value])}
-                                        />
-                                    </Flex>
-                                </Box>
-                            </Grid>
-
-                            <Grid
-                                templateColumns={isMobile ? "1fr" : "1fr 1fr 1fr"}
-                                gap={4}
-                            >
-
-                                <Box>
-                                    <FormLabel fontSize="lg">Selecione a Ordem de Prioridade:</FormLabel>
-                                    <Select size="lg" value={priorityOrder} onChange={handlePriorityOrder}>
-                                        <option value="desc">Decrescente</option>
-                                        <option value="asc">Crescente</option>
-                                    </Select>
-                                </Box>
-
-                                <Box>
-                                    <FormLabel fontSize="lg">Selecione o Status:</FormLabel>
-                                    <Select
-                                        size="lg"
-                                        value={status}
-                                        onChange={handleStatusChange}
-                                    >
-                                        <option value={null}>Todos</option>
-                                        <option value={0}>Pendentes</option>
-                                        <option value={1}>Concluídas</option>
-                                    </Select>
-                                </Box>
-
-                                <Box>
-                                    <FormLabel fontSize="lg">Selecione a Prioridade:</FormLabel>
-                                    <Select
-                                        size="lg"
-                                        value={priority}
-                                        onChange={(e) => setPriority(e.target.value)}
-                                    >
-                                        <option value={null}>Todas</option>
-                                        <option value={1}>Baixa</option>
-                                        <option value={2}>Moderada</option>
-                                        <option value={3}>Urgente</option>
-                                    </Select>
-                                </Box>
-                            </Grid>
-
-                            <Flex
-                                justifyContent="space-between"
-                                alignItems="center"
-                                flexDirection="row"
-                            >
-                                <Select
-                                    value={per_page}
-                                    width="150px"
-                                    onChange={handlePerPageChange}
-                                >
-                                    <option value={10}>10 por página</option>
-                                    <option value={20}>20 por página</option>
-                                    <option value={30}>30 por página</option>
-                                    <option value={50}>50 por página</option>
-                                </Select>
-                                <Box>
-                                    <ButtonGroup>
-                                        <Button onClick={handleClean}>Limpar Filtro</Button>
-                                        <Button colorScheme="blue" onClick={handleFilter}>Filtrar</Button>
-                                    </ButtonGroup>
-                                </Box>
-                            </Flex>
-                        </FormControl>
-
-
-                        <Flex alignItems="center" justifyContent="space-between">
-                            <Flex alignItems="center" gap={3}>
-                                <Flex alignItems="center">
-                                    <Box width="12px" height="12px" bg="orange.500" borderRadius="30%" mr={2} />
-                                    <Text fontSize="sm" color="gray.500">Pendentes</Text>
-                                </Flex>
-                                <Flex alignItems="center">
-                                    <Box width="12px" height="12px" bg="green.500" borderRadius="30%" mr={2} />
-                                    <Text fontSize="sm" color="gray.500">Concluídas</Text>
-                                </Flex>
-                            </Flex>
-
-                        </Flex>
-
-                        <List spacing={3}>
-                            {data?.length === 0 ? (
-                                <Text textAlign="center" color="gray.500" fontSize="md">Não há tasks</Text>
-                            ) : (
-                                data.map((item) => (
-                                    <ActivitieItem
-                                        key={item.id}
-                                        activitie={item}
-                                        setRefresh={setRefresh}
-                                        refresh={refresh}
-                                    />
-                                ))
-                            )}
-                        </List>
-                        <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
+                        <MenuItem value={null}>Todos</MenuItem>
+                        <MenuItem value={0}>Pendentes</MenuItem>
+                        <MenuItem value={1}>Concluídas</MenuItem>
+                    </Select>
+                </Box>
+                <Box className='col-span-1'>
+                    <InputLabel fontSize="lg">Prioridade:</InputLabel>
+                    <Select
+                        size="lg"
+                        value={priority}
+                        onChange={(e) => setPriority(e.target.value)}
+                        fullWidth
+                    >
+                        <MenuItem value={null}>Todas</MenuItem>
+                        <MenuItem value={1}>Baixa</MenuItem>
+                        <MenuItem value={2}>Moderada</MenuItem>
+                        <MenuItem value={3}>Urgente</MenuItem>
+                    </Select>
+                </Box>
+                <Box className='col-span-1'>
+                    <InputLabel fontSize="lg">Paginação:</InputLabel>
+                    <Select
+                        value={per_page}
+                        fullWidth
+                        onChange={handlePerPageChange}
+                    >
+                        <MenuItem value={10}>10 por página</MenuItem>
+                        <MenuItem value={20}>20 por página</MenuItem>
+                        <MenuItem value={30}>30 por página</MenuItem>
+                        <MenuItem value={50}>50 por página</MenuItem>
+                    </Select>
+                </Box>
+                <Box className='col-span-2'>
+                    <InputLabel fontSize="lg">Ações</InputLabel>
+                        <ButtonGroup size='large' variant='contained' color='info' fullWidth>
+                            <Button className="h-14" onClick={handleClean}>Limpar Filtro</Button>
+                            <Button onClick={handleFilter}>Filtrar</Button>
+                        </ButtonGroup>
                     </Box>
-                </Box >
-            </Flex >
+            </div>
+            <Flex alignItems="center" justifyContent="space-between">
+                <Flex alignItems="center" gap={4}>
+                    <Flex alignItems="center" gap={1}>
+                        <Box width="12px" height="12px" borderRadius="30%" className="bg-orange-500"/>
+                        <p>Pendentes</p>
+                    </Flex>
+                    <Flex alignItems="center" gap={1}>
+                        <Box width="12px" height="12px" borderRadius="30%" className="bg-green-500" />
+                        <p>Concluídas</p>
+                    </Flex>
+                </Flex>
 
-        </>
+            </Flex>
+            <Flex gap={4} direction='column'>
+                {data?.length === 0 ? (
+                    <p>Não há tasks</p>
+                ) : (
+                    data.map((item) => (
+                        <ActivitieItem
+                            key={item.id}
+                            activitie={item}
+                            setRefresh={setRefresh}
+                            refresh={refresh}
+                        />
+                    ))
+                )}
+            </Flex>
+            <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
+        </div>
     )
 }
 
