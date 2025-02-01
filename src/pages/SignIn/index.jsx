@@ -1,11 +1,9 @@
-import React, { useState, useContext } from 'react'
-import './signin.css'
-import logo from '../../assets/Logo_1.svg'
-import { Link } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+import { Button, Checkbox, TextField, Tooltip } from '@mui/material'
+import React, { useContext, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import Lighthouse from '../../assets/favicon_neutral.svg'
 import { AuthContext } from '../../contexts/auth'
-import { Checkbox, Heading, Text } from '@chakra-ui/react'
 
 const SignIn = () => {
   const [email, setEmail] = useState('')
@@ -37,46 +35,45 @@ const SignIn = () => {
   }
 
   return (
-    <div className='container-center'>
-      <div className="login">
-          <img src={logo} alt="Logo do App Provedores" />
-        <div className="login-area">
-          <Heading marginTop="">App Provedores</Heading>
-          <Text color="white">Sistema de Gerenciamento de Provedores</Text>
+    <div className='relative bg-black flex flex-col items-center justify-center h-screen gap-8'>
+      <div className="absolute login-bg top-0 left-0 w-screen h-screen opacity-40 grayscale" />
+      <form onSubmit={Login} className='z-20 bg-white shadow-lg shadow-white/50 flex flex-col gap-4 w-[95vw] sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/3 border p-8 rounded-lg'>
+        <h1 className='text-2xl'>Entrar</h1>
+        <TextField
+          fullWidth
+          type="email"
+          placeholder="Digite o seu email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete='email'
+        />
+        <TextField
+          fullWidth
+          type="password"
+          placeholder="********"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete='current-password'
+        />
+        <div className='flex flex-row items-center'>
+          <Checkbox
+            id='rememberMe'
+            checked={rememberMe}
+            onChange={handleRememberMeChange}
+          />
+          <label className='mt-0.5' htmlFor='rememberMe'>Mantenha-me conectado por 7 dias</label>
         </div>
-
-        <form onSubmit={Login}>
-          <input
-            type="email"
-            placeholder="Digite o seu email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete='email'
-          />
-
-          <input
-            type="password"
-            placeholder="********"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete='current-password'
-          />
-
-          <div className='remember-me'>
-          
-            <Checkbox
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={handleRememberMeChange}
-            >Lembrar-me por 7 dias</Checkbox>
-          </div>
-
-          <button type='submit'>ENTRAR</button>
-        </form>
-
-        <Link to="/recover-password">Esqueceu sua senha? Recuperar senha</Link>
-
+        <Button variant='contained' fullWidth type='submit'>ENTRAR</Button>
+        <Link to="/recover-password" className='mt-4 text-center'>Esqueceu sua senha? <span className="underline">Recuperar senha</span></Link>
+      </form>
+      <div className='absolute bottom-2 text-xs text-white'>
+        &copy; {new Date().getFullYear()} Lighthouse
       </div>
+      <Tooltip title='Powered by Lighthouse Software Systems' arrow placement='left'>
+        <div className='absolute shadow-md shadow-white/50 flex flex-col items-center justify-center bottom-10 right-10 text-white bg-white aspect-square px-3 rounded-full'>
+          <img src={Lighthouse} alt="Lighthouse" className='w-8 h-8 mb-1' />
+        </div>
+      </Tooltip>
     </div>
   )
 }

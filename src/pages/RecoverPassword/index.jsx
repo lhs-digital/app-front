@@ -1,10 +1,9 @@
+import { Heading, Text } from '@chakra-ui/react'
 import React, { useState } from 'react'
-import '../SignIn/signin.css'
-import logo from '../../assets/Logo_1.svg'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import logo from '../../assets/Logo_1.svg'
 import api from '../../services/api'
-import { Heading, Text } from '@chakra-ui/react'
 
 const RecoverPassword = () => {
   const [email, setEmail] = useState('')

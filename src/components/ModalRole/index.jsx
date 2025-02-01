@@ -1,34 +1,23 @@
-import React, { useEffect } from 'react'
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
-    Button,
-    FormControl,
-    FormLabel,
-    Input,
-    Box,
-    Checkbox,
-    SimpleGrid,
+    Box, Button, Checkbox,
+    Dialog, DialogActions, DialogContent, DialogTitle,
     Divider,
-    Text,
     Grid,
-    Flex
-} from "@chakra-ui/react"
-import { useState } from 'react'
-import { Select } from '@chakra-ui/react'
-import api from '../../services/api'
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    Typography
+} from "@mui/material"
+import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import api from '../../services/api'
 
 
-const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => {
-    const [name, setName] = useState(dataEdit?.name || "")
-    const [nivel, setNivel] = useState(dataEdit?.nivel)
-    const [company, setCompany] = useState(dataEdit.company?.id || "")
+const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
+    const [name, setName] = useState(data?.name || "")
+    const [nivel, setNivel] = useState(data?.nivel)
+    const [company, setCompany] = useState(data.company?.id || "")
     const [rolePermissions, setRolePermissions] = useState([])
     const [permissions, setPermissions] = useState([])
     const [companies, setCompanies] = useState([])
@@ -54,16 +43,18 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
                 const responsePermissions = await (api.get(`/permissions`));
                 setPermissions(responsePermissions.data.data);
 
-                if (dataEdit) {
-                    const responsePermissions = await (api.get(`/roles/${dataEdit.id}`));
+                if (data) {
+                    const responsePermissions = await (api.get(`/roles/${data.id}`));
                     setRolePermissions(responsePermissions.data.data.permissions.map(permission => permission.id));
                 }
             } catch (error) {
                 console.error('Erro ao acessar as roles por empresa', error);
             }
         };
-        getData();
-    }, [dataEdit]);
+        if (isOpen && data) {
+            getData();
+        }
+    }, [data]);
 
     const saveData = async () => {
         try {
@@ -88,7 +79,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
 
     const updateUser = async () => {
         try {
-            await (api.put(`/roles/${dataEdit.id}`, {
+            await (api.put(`/roles/${data.id}`, {
                 name,
                 nivel,
                 company_id: company,
@@ -109,7 +100,7 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
             return;
         }
 
-        if (dataEdit.id) {
+        if (data.id) {
             updateUser()
         } else {
             saveData()
@@ -133,98 +124,89 @@ const ModalRole = ({ data, dataEdit, isOpen, onClose, setRefresh, refresh }) => 
     }
 
     return (
-        <>
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>
-                        {(dataEdit.id ? 'Editar Role' : 'Cadastrar Role')}
-                    </ModalHeader>
-                    <ModalCloseButton />
-
-                    <ModalBody>
-                        <FormControl display="flex" flexDirection="column" gap={4}>
-                            <Box>
-                                <FormLabel htmlFor='name'>Nome *</FormLabel>
-                                <Input
-                                    id="name"
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
+        <Dialog open={isOpen} onClose={onClose}>
+            <DialogTitle>
+                {(data.id ? 'Editar Role' : 'Cadastrar Role')}
+            </DialogTitle>
+            <DialogContent>
+                    <Box>
+                        <InputLabel htmlFor='name'>Nome *</InputLabel>
+                        <TextField
+                            id="name"
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </Box>
+                    <Box>
+                        <InputLabel htmlFor='nivel'>Nível *</InputLabel>
+                        <TextField
+                            id="nivel"
+                            type="number"
+                            value={nivel}
+                            onChange={(e) => setNivel(e.target.value)}
+                        />
+                    </Box>
+                    <Box>
+                        <InputLabel htmlFor='company'>Empresa</InputLabel>
+                        <Select
+                            id='company'
+                            label="Empresa"
+                            value={company}
+                            disabled={data.company?.id}
+                            onChange={handleCompanyChange}
+                        >
+                            {
+                                companies.map((companyItem) => (
+                                    <MenuItem key={companyItem.id} value={companyItem.id}>{companyItem.name}</MenuItem>
+                                ))
+                            }
+                        </Select>
+                    </Box>
+                    <Box>
+                        <InputLabel htmlFor='permissions'>Permissões</InputLabel>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <Checkbox
+                                    id="selectAll"
+                                    isChecked={selectAll}
+                                    onChange={handleSelectAll}
+                                    width="100%"
                                 />
-                            </Box>
-                            <Box>
-                                <FormLabel htmlFor='nivel'>Nível *</FormLabel>
-                                <Input
-                                    id="nivel"
-                                    type="number"
-                                    value={nivel}
-                                    onChange={(e) => setNivel(e.target.value)}
-                                />
-                            </Box>
-                            <Box>
-                                <FormLabel htmlFor='company'>Empresa</FormLabel>
-                                <Select
-                                    id='company'
-                                    placeholder='Selecione uma opção'
-                                    value={company}
-                                    disabled={dataEdit.company?.id}
-                                    onChange={handleCompanyChange}
-                                >
-                                    {
-                                        companies.map((companyItem) => (
-                                            <option key={companyItem.id} value={companyItem.id}>{companyItem.name}</option>
-                                        ))
-                                    }
-                                </Select>
-                            </Box>
-                            <Box>
-                                <FormLabel htmlFor='permissions'>Permissões</FormLabel>
-                                <SimpleGrid columns={1} spacing={2}>
-                                    <Checkbox
-                                        id="selectAll"
-                                        isChecked={selectAll}
-                                        onChange={handleSelectAll}
-                                        width="100%"
-                                    >
-                                        Selecionar todas as permissões
-                                    </Checkbox>
+                                <Typography component="span">Selecionar todas as permissões</Typography>
+                            </Grid>
 
-                                    {permissions.map((permission, index) => (
-                                        <React.Fragment key={permission.id}>
-                                            {permission.category !== permissions[index - 1]?.category && (
-                                                <>
-                                                    <Text><b>{permission.category}</b></Text>
-                                                    <Divider />
-                                                </>
-                                            )}
+                            {permissions.map((permission, index) => (
+                                <React.Fragment key={permission.id}>
+                                    {permission.category !== permissions[index - 1]?.category && (
+                                        <>
+                                            <Typography><b>{permission.category}</b></Typography>
+                                            <Divider />
+                                        </>
+                                    )}
 
-                                            <Checkbox
-                                                id={permission?.name}
-                                                isChecked={rolePermissions.includes(permission.id)}
-                                                onChange={(e) => handlePermissions(e, permission.id)}
-                                            >
-                                                {permission.label}
-                                            </Checkbox>
-                                        </React.Fragment>
-                                    ))}
-                                </SimpleGrid>
-                            </Box>
-                        </FormControl>
-                    </ModalBody>
-
-                    <ModalFooter justifyContent="end">
-                        <Button colorScheme="gray" mr={3} onClick={onClose}>
-                            CANCELAR
-                        </Button>
-                        <Button colorScheme="green" onClick={handleSave}>
-                            SALVAR
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal >
-
-        </>
+                                    <Grid item xs={12}>
+                                        <Checkbox
+                                            id={permission?.name}
+                                            isChecked={rolePermissions.includes(permission.id)}
+                                            onChange={(e) => handlePermissions(e, permission.id)}
+                                        />
+                                        <Typography component="span">{permission.label}</Typography>
+                                    </Grid>
+                                </React.Fragment>
+                            ))}
+                        </Grid>
+                    </Box>
+            </DialogContent>
+            <DialogActions  >
+                <Button color="inherit" onClick={onClose}>
+                    CANCELAR
+                </Button>
+                <Button color="primary" onClick={handleSave}>
+                    SALVAR
+                </Button>
+            </DialogActions>
+        </Dialog>
     )
 }
 

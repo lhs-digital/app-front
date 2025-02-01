@@ -1,35 +1,31 @@
-import React from 'react';
-import { EditIcon, DeleteIcon, ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { Add, Delete, Edit, KeyboardArrowDown, KeyboardArrowUp, Search } from '@mui/icons-material';
 import {
-    Box,
-    Flex,
     Button,
-    useDisclosure,
+    IconButton,
+    InputAdornment,
     Table,
-    Thead,
-    Tr,
-    Th,
-    Tbody,
-    Td,
-    useBreakpointValue,
-    Input,
-} from "@chakra-ui/react";
-import { useEffect, useState } from 'react';
-import api from '../../services/api';
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    TextField
+} from '@mui/material';
+import React, { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import Header from '../../components/Header';
 import ModalDelete from '../../components/ModalDelete';
 import ModalRole from '../../components/ModalRole';
 import ModalViewRole from '../../components/ModalViewRole';
-import { useContext } from 'react';
+import PageTitle from '../../components/PageTitle';
 import { AuthContext } from '../../contexts/auth';
-import Title from '../../components/Title'
-import Pagination from '../../components/Pagination';
+import api from '../../services/api';
+import { defaultLabelDisplayedRows } from '../../utils';
 
 const Roles = () => {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
-    const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
+    const [viewOpen, setViewOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);  
+    const [deleteOpen, setDeleteOpen] = useState(false);
     const [data, setData] = useState([]);
     const [dataEdit, setDataEdit] = useState({});
     const [dataView, setDataView] = useState({});
@@ -40,8 +36,8 @@ const Roles = () => {
     const [deleteId, setDeleteId] = useState(null);
     const { permissions } = useContext(AuthContext);
     const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
-
-    const isMobile = useBreakpointValue({ base: true, lg: false });
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
     useEffect(() => {
         const getData = async () => {
@@ -55,6 +51,13 @@ const Roles = () => {
             }
         };
         getData();
+        return () => {
+            setData([]);
+            setCurrentPage(1);
+            setViewOpen(false);
+            setModalOpen(false);
+            setDeleteOpen(false);
+        }
     }, [setData, currentPage, lastPage, refresh]);
 
     const handleRemove = async () => {
@@ -62,26 +65,32 @@ const Roles = () => {
             await (api.delete(`/roles/${deleteId}`));
             setRefresh(!refresh);
             toast.success('Role removida com sucesso!');
-            onCloseDelete();
+            setDeleteOpen(false);
         } catch (error) {
             console.error('Erro ao verificar lista de usuários', error);
         }
     };
+    
+    const handleCreate = () => {
+        console.log('handleCreate');
+        setDataEdit({});
+        setModalOpen(true);
+    };
 
     const handleEdit = (user) => {
         setDataEdit(user);
-        onOpen();
+        setModalOpen(true);
     };
 
     const handleView = (index) => {
         const selectedRole = data;
         setDataView(selectedRole[index]);
-        onOpenView();
+        setViewOpen(true);
     };
 
     const handleDelete = (id) => {
         setDeleteId(id);
-        onOpenDelete();
+        setDeleteOpen(true);
     };
 
     const handleSort = (key) => {
@@ -101,133 +110,145 @@ const Roles = () => {
     };
 
     const getSortIcon = (key) => {
-        if (sortConfig.key !== key) return null; 
-        return sortConfig.direction === 'asc' ? <ChevronUpIcon ml={2} /> : <ChevronDownIcon ml={2} />;
+        if (sortConfig.key !== key) return null;
+        return sortConfig.direction === 'asc' ? <KeyboardArrowUp ml={2} /> : <KeyboardArrowDown ml={2} />;
+    };
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
     };
 
     return (
-        <>
-            <Header />
+        <div className='flex flex-col gap-6 w-full'>
+            <ModalRole
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                data={data}
+                setData={setData}
+                dataEdit={dataEdit || null}
+                setDataEdit={setDataEdit}
+                setRefresh={setRefresh}
+                refresh={refresh}
+            />
+            <ModalDelete
+                isOpen={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
+                onConfirm={handleRemove}
+            />
+            <ModalViewRole
+                selectedRole={dataView}
+                isOpen={viewOpen}
+                onClose={() => setViewOpen(false)}
+            />
 
-            <Title title="Gerenciamento de Roles" subtitle="Administração e atribuição de permissões e funções de usuários" />
+            <PageTitle
+                title="Gerenciamento de Roles"
+                subtitle="Administração e atribuição de permissões e funções de usuários"
+                buttons={
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<Add />}
+                        onClick={handleCreate}
+                    >
+                        NOVO CARGO
+                    </Button>
+                }
+            />
 
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
-            >
-                <Box maxW={800} w="100%" py={10} px={2}>
-                    {permissions.some(permissions => permissions.name === 'create_roles') ?
-                        (
-                            <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
-                                NOVO CADASTRO
-                            </Button>
-                        )
-                        : null
-                    }
+            <TextField
+                fullWidth
+                placeholder="Buscar role"
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <Search />
+                        </InputAdornment>
+                    ),
+                }}
+                size="lg"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+            />
 
-                    <Input
-                        mt={4}
-                        placeholder="Buscar role"
-                        size="lg"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-
-                    <Box overflowY="auto" height="100%">
-                        <Table mt="6">
-                            <Thead>
-                                <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('name')}>Nome {getSortIcon('name')}</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('company.name')}>Empresa {getSortIcon('company.name')}</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('permissions_count')}>Qtd Permissões {getSortIcon('permissions_count')}</Th>
-                                    <Th p={0}></Th>
-                                    <Th p={0}></Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {(!search ? data : data.filter(role =>
-                                    role.name.toLowerCase().includes(search.toLowerCase()) ||
-                                    role.company?.name.toLowerCase().includes(search.toLowerCase())
-                                )).map(({ name, nivel, company, permissions_count, id }, index) => (
-                                    <Tr key={index} cursor="pointer"
-                                        _hover={{ bg: "gray.50" }}
-                                        _odd={{ bg: "gray.100" }}
-                                        _even={{ bg: "white" }}
-                                        onClick={() => handleView(index)}>
-                                        <Td maxW={isMobile ? 5 : 100}> {name} </Td>
-                                        <Td maxW={isMobile ? 5 : 100}> {company?.name} </Td>
-                                        <Td maxW={isMobile ? 5 : 100}> {permissions_count} </Td>
-                                        <Td p={0}>
-                                            {permissions.some(permissions => permissions.name === 'update_roles') ?
-                                                (
-                                                    <EditIcon
-                                                        fontSize={20}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleEdit({ name, nivel, company, id, index })
-                                                        }}
-                                                    />
-                                                )
-                                                : null
-                                            }
-                                        </Td>
-                                        <Td p={0}>
-                                            {permissions.some(permissions => permissions.name === 'delete_roles') ?
-                                                (
-                                                    <DeleteIcon
-                                                        fontSize={20}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(id)
-                                                        }}
-                                                    />
-                                                )
-                                                : null
-                                            }
-
-                                        </Td>
-                                    </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
-                    </Box>
-                </Box>
-
-                {isOpen && (
-                    <ModalRole
-                        isOpen={isOpen}
-                        onClose={onClose}
-                        data={data}
-                        setData={setData}
-                        dataEdit={dataEdit}
-                        setDataEdit={setDataEdit}
-                        setRefresh={setRefresh}
-                        refresh={refresh}
-                    />
-                )}
-
-                {isDeleteOpen && (
-                    <ModalDelete
-                        isOpen={isDeleteOpen}
-                        onClose={onCloseDelete}
-                        onConfirm={handleRemove}
-                    />
-                )}
-
-                {isViewOpen && (
-                    <ModalViewRole
-                        selectedRole={dataView}
-                        isOpen={isViewOpen}
-                        onClose={onCloseView}
-                    />
-                )}
-
-                <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
-            </Flex>
-        </>
+            <TableContainer>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell onClick={() => handleSort('name')}>
+                                Nome
+                                {getSortIcon('name')}
+                            </TableCell>
+                            <TableCell onClick={() => handleSort('company.name')}>
+                                Empresa
+                                {getSortIcon('company.name')}
+                            </TableCell>
+                            <TableCell onClick={() => handleSort('permissions_count')}>
+                                Qtd Permissões
+                                {getSortIcon('permissions_count')}
+                            </TableCell>
+                            <TableCell>Ações</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {(!search ? data : data.filter(role =>
+                            role.name.toLowerCase().includes(search.toLowerCase()) ||
+                            role.company?.name.toLowerCase().includes(search.toLowerCase())
+                        )).map(({ name, nivel, company, permissions_count, id }, index) => (
+                            <TableRow
+                                key={index}
+                                style={{ cursor: 'pointer', backgroundColor: index % 2 === 0 ? 'white' : '#f7fafc' }}
+                                onClick={() => handleView(index)}
+                            >
+                                <TableCell>{name}</TableCell>
+                                <TableCell>{company?.name}</TableCell>
+                                <TableCell>{permissions_count}</TableCell>
+                                <TableCell>
+                                    <div className="flex flex-row">
+                                        {permissions.some(permissions => permissions.name === 'update_roles') && (
+                                            <IconButton
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEdit({ name, nivel, company, id, index });
+                                                }}
+                                            >
+                                                <Edit fontSize="small" />
+                                            </IconButton>
+                                        )}
+                                        {permissions.some(permissions => permissions.name === 'delete_roles') && (
+                                            <IconButton
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(id);
+                                                }}
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        )}
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={data.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Linhas por página"
+                    labelDisplayedRows={defaultLabelDisplayedRows}
+                />
+            </TableContainer>
+        </div>
     );
 };
 

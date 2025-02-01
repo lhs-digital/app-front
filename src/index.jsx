@@ -8,10 +8,10 @@ import './index.css';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: "#5A939F",
-      light: "#8BC8D4",
-      dark: "#214E61",
-      contrastText: "#FFF",
+      main: "#000000",
+      light: "#dfdfeb",
+      dark: "#2b2b30",
+      contrastText: "#fff",
     },
     secondary: {
       main: "#EDDEA3",
@@ -53,14 +53,14 @@ export const theme = createTheme({
     MuiInput: {
       styleOverrides: {
         root: {
-          borderRadius: "0.5rem",
+          borderRadius: "1rem",
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: "0.5rem",
+          borderRadius: "0.75rem",
           overflow: "clip",
         },
       },
@@ -71,9 +71,9 @@ export const theme = createTheme({
 const root = createRoot(document.getElementById('root'))
 
 root.render(
-    <ChakraProvider>
-        <ThemeProvider theme={theme}>
-            <App />
-        </ThemeProvider>
-    </ChakraProvider>
+  <ChakraProvider>
+    <ThemeProvider theme={theme}>
+      <App />
+    </ThemeProvider>
+  </ChakraProvider>
 )

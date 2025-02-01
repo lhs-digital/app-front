@@ -116,13 +116,13 @@ const ListActivities = () => {
         <div className='flex flex-col w-full gap-6'>
             <PageTitle title='Lista de Atividades' subtitle='Gerencie todas as suas atividades pendentes e concluídas.' />
             <div className='grid grid-cols-8 w-full gap-6'>
-                <Box className='col-span-2'>
+                <Box className='col-span-1'>
                     <InputLabel>Tabela:</InputLabel>
                     <Select fullWidth value={table} onChange={(e) => setTable(e.target.value)}>
                         <MenuItem value="clients">clients</MenuItem>
                     </Select>
                 </Box>
-                <Box className='col-span-6'>
+                <Box className='col-span-4'>
                     <InputLabel>Pesquise por:</InputLabel>
                     <TextField
                         fullWidth
@@ -133,13 +133,14 @@ const ListActivities = () => {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </Box>
-                <Box className='col-span-2'>
+                <Box className='col-span-3'>
                     <InputLabel>Data da Auditoria</InputLabel>
                     <Flex alignItems="center" gap="6px">
                         <TextField
                             size="lg"
                             placeholder='Data de Auditoria'
                             type='date'
+                            fullWidth
                             value={createdAt[0] || ""}
                             onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
                         />
@@ -148,12 +149,13 @@ const ListActivities = () => {
                             size="lg"
                             placeholder='Data de Auditoria'
                             type='date'
+                            fullWidth
                             value={createdAt[1] || ""}
                             onChange={(e) => setCreatedAt([createdAt[0], e.target.value])}
                         />
                     </Flex>
                 </Box>
-                <Box className='col-span-1'>
+                <Box className='col-span-2'>
                     <InputLabel>Ordem de Prioridade:</InputLabel>
                     <Select value={priorityOrder} onChange={handlePriorityOrder} fullWidth>
                         <MenuItem value="desc">Decrescente</MenuItem>
@@ -187,7 +189,7 @@ const ListActivities = () => {
                         <MenuItem value={3}>Urgente</MenuItem>
                     </Select>
                 </Box>
-                <Box className='col-span-1'>
+                <Box className='col-span-2'>
                     <InputLabel fontSize="lg">Paginação:</InputLabel>
                     <Select
                         value={per_page}
@@ -202,8 +204,8 @@ const ListActivities = () => {
                 </Box>
                 <Box className='col-span-2'>
                     <InputLabel fontSize="lg">Ações</InputLabel>
-                        <ButtonGroup size='large' variant='contained' color='info' fullWidth>
-                            <Button className="h-14" onClick={handleClean}>Limpar Filtro</Button>
+                        <ButtonGroup size='large' variant='text' color='info' fullWidth>
+                            <Button className="h-14" onClick={handleClean}>Limpar</Button>
                             <Button onClick={handleFilter}>Filtrar</Button>
                         </ButtonGroup>
                     </Box>

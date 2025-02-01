@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import '../SignIn/signin.css'
 import logo from '../../assets/Logo_1.svg'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'

@@ -39,6 +39,10 @@ button {
     cursor: pointer;
 }
 
+.login-bg {
+    background-image: url('https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=900');
+}
+
 /* Aplica a customização do scroll no WebKit */
 ::-webkit-scrollbar {
     width: 6px; /* Define a largura da barra de rolagem */
