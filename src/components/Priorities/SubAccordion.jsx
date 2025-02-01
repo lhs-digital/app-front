@@ -12,7 +12,9 @@ import {
   useMediaQuery,
 } from "@mui/material";
 
-const SubAccordion = (column, data, handleEdit, handleDelete) => {
+const SubAccordion = ({ column, data, handleEdit, handleDelete }) => {
+  console.log("column", column);
+
   const isMobile = useMediaQuery("(max-width: 768px)");
   return (
     <Accordion key={column.id}>
@@ -62,8 +64,8 @@ const SubAccordion = (column, data, handleEdit, handleDelete) => {
               <TableCell maxW={isMobile ? 5 : 100} fontSize="16px">
                 Mensagem
               </TableCell>
-              <TableCell p={0}></TableCell>
-              <TableCell p={0}></TableCell>
+              <TableCell p={0} />
+              <TableCell p={0} />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -74,6 +76,7 @@ const SubAccordion = (column, data, handleEdit, handleDelete) => {
                 </TableCell>
               </TableRow>
             ) : (
+              column.validations &&
               column.validations.map((validation) => (
                 <TableRow
                   key={validation.id}

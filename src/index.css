@@ -1,61 +1,66 @@
+@import url("https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap');
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Onest', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Onest", sans-serif;
 }
 
 * > p {
-    color: #1A202C;
+  color: #1a202c;
 }
 
-html,body, #root {
-    height: 100%;
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
-    width: 100vw;
-    height: 100vh;
-    font: 14px;
-    background-color: #EFEFEF;
-    font-family: 'Onest', sans-serif;
-    overflow-x: hidden;
+  width: 100vw;
+  height: 100vh;
+  font: 14px;
+  background-color: #fff;
+  font-family: "Onest", sans-serif;
+  overflow-x: hidden;
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 ul {
-    list-style: none;
+  list-style: none;
 }
 
 button {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .login-bg {
-    background-image: url('https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=900');
+  background-image: url("https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=900");
+}
+
+.MuiAccordion-region {
+  border-radius: 2rem;
 }
 
 /* Aplica a customização do scroll no WebKit */
 ::-webkit-scrollbar {
-    width: 6px; /* Define a largura da barra de rolagem */
-    height: 6px;
+  width: 6px; /* Define a largura da barra de rolagem */
+  height: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #adb6bf; /* Cor do thumb (a parte que se move) */
-    border-radius: 10px; /* Deixa a barra mais arredondada */
+  background-color: #adb6bf; /* Cor do thumb (a parte que se move) */
+  border-radius: 10px; /* Deixa a barra mais arredondada */
 }
 
 ::-webkit-scrollbar-track {
-
-    background-color: transparent; /* Cor do fundo da barra de rolagem */
+  background-color: transparent; /* Cor do fundo da barra de rolagem */
 }
-

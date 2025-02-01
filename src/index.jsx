@@ -1,4 +1,3 @@
-import { ChakraProvider } from "@chakra-ui/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { createRoot } from "react-dom/client";
 import App from "./App";
@@ -48,6 +47,11 @@ export const theme = createTheme({
         disableElevation: true,
         size: "large",
       },
+      styleOverrides: {
+        root: {
+          borderRadius: "0.5rem",
+        },
+      },
     },
     MuiInput: {
       styleOverrides: {
@@ -64,15 +68,21 @@ export const theme = createTheme({
         },
       },
     },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          borderRadius: "0.5rem",
+          overflow: "clip",
+        },
+      },
+    },
   },
 });
 
 const root = createRoot(document.getElementById("root"));
 
 root.render(
-  <ChakraProvider>
-    <ThemeProvider theme={theme}>
-      <App />
-    </ThemeProvider>
-  </ChakraProvider>,
+  <ThemeProvider theme={theme}>
+    <App />
+  </ThemeProvider>,
 );

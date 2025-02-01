@@ -1,5 +1,5 @@
 import { ChevronDownIcon, ChevronUpIcon, EditIcon } from "@chakra-ui/icons";
-import { useBreakpointValue, useDisclosure } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import { Add, Delete, Search } from "@mui/icons-material";
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   TablePagination,
   TableRow,
   TextField,
+  useMediaQuery,
 } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -54,7 +55,7 @@ const Users = () => {
 
   const { permissions } = useContext(AuthContext);
 
-  const isMobile = useBreakpointValue({ base: true, lg: false });
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     const getData = async () => {
