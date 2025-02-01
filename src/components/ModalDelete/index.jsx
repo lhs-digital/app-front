@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import React from "react";
 
 const ModalDelete = ({ isOpen, onClose, onConfirm }) => {
   return (

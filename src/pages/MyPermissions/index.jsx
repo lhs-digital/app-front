@@ -1,18 +1,8 @@
-import React from "react";
-import Header from "../../components/Header";
-import {
-  Box,
-  Checkbox,
-  Divider,
-  Flex,
-  Grid,
-  Heading,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Checkbox, Flex, Text } from "@chakra-ui/react";
 import { useContext } from "react";
-import { AuthContext } from "../../contexts/auth";
+import Header from "../../components/Header";
 import Title from "../../components/Title";
+import { AuthContext } from "../../contexts/auth";
 
 const MyPermissions = () => {
   const { permissions } = useContext(AuthContext);

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import logo from "../../assets/Logo_1.svg";
+import { Heading, Text } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import logo from "../../assets/Logo_1.svg";
 import api from "../../services/api";
-import { Heading, Text } from "@chakra-ui/react";
 
 const FirstAccess = () => {
   const [password, setPassword] = useState("");

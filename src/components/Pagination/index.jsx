@@ -1,7 +1,7 @@
 import { Box, Button, Icon, Text } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
+import { useEffect, useState } from "react";
 
 const Pagination = ({ lastPage, currentPage, setCurrentPage }) => {
   const [localPage, setLocalPage] = useState(currentPage);

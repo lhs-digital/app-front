@@ -1,239 +1,263 @@
-import React from 'react';
-import { EditIcon, DeleteIcon, ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import {
-    Box,
-    Flex,
-    Button,
-    useDisclosure,
-    Table,
-    Thead,
-    Tr,
-    Th,
-    Tbody,
-    Td,
-    useBreakpointValue,
-    Input
-} from "@chakra-ui/react";
-import { useEffect, useState } from 'react';
-import api from '../../services/api';
-import { toast } from 'react-toastify';
-import Header from '../../components/Header';
-import ModalDelete from '../../components/ModalDelete';
-import ModalViewCompany from '../../components/ModalViewCompany';
-import ModalCompany from '../../components/ModalCompany';
-import { useContext } from 'react';
-import { AuthContext } from '../../contexts/auth';
-import Title from '../../components/Title';
-import Pagination from '../../components/Pagination';
+  Add,
+  Delete,
+  Edit,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  Search,
+} from "@mui/icons-material";
+import {
+  Button,
+  IconButton,
+  InputAdornment,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+} from "@mui/material";
+import { useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import ModalCompany from "../../components/ModalCompany";
+import ModalDelete from "../../components/ModalDelete";
+import ModalViewCompany from "../../components/ModalViewCompany";
+import PageTitle from "../../components/PageTitle";
+import { AuthContext } from "../../contexts/auth";
+import api from "../../services/api";
 
 const Companies = () => {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
-    const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
-    const [data, setData] = useState([]);
-    const [dataEdit, setDataEdit] = useState({});
-    const [dataView, setDataView] = useState({});
-    const [currentPage, setCurrentPage] = useState(1);
-    const [lastPage, setLastPage] = useState(null);
-    const [refresh, setRefresh] = useState(false);
-    const [search, setSearch] = useState('');
-    const [deleteId, setDeleteId] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [data, setData] = useState([]);
+  const [dataEdit, setDataEdit] = useState({});
+  const [dataView, setDataView] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+  const [search, setSearch] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
+  //eslint-disable-next-line
+  const [loading, setLoading] = useState(true);
+  const [sortConfig, setSortConfig] = useState({
+    key: "name",
+    direction: "asc",
+  });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    const { permissions } = useContext(AuthContext);
+  const { permissions } = useContext(AuthContext);
 
-    const isMobile = useBreakpointValue({ base: true, lg: false });
-
-    useEffect(() => {
-        const getData = async () => {
-            setLoading(true);
-            try {
-                const response = await (api.get(`/companies?page=${currentPage}`));
-                setCurrentPage(response.data.meta.current_page);
-                setLastPage(response.data.meta.last_page);
-                setData(response.data.data);
-            } catch (error) {
-                console.error('Erro ao verificar lista de usuários', error);
-            } finally {
-                setLoading(false)
-            }
-        };
-        getData();
-    }, [setData, currentPage, lastPage, refresh]);
-
-    const handleRemove = async () => {
-        try {
-            await (api.delete(`/companies/${deleteId}`));
-            setRefresh(!refresh);
-            toast.success('Empresa removida com sucesso!');
-            onCloseDelete();
-        } catch (error) {
-            console.error('Erro ao verificar lista de usuários', error);
-        }
+  useEffect(() => {
+    const getData = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get(`/companies?page=${currentPage}`);
+        setCurrentPage(response.data.meta.current_page);
+        setLastPage(response.data.meta.last_page);
+        setData(response.data.data);
+      } catch (error) {
+        console.error("Erro ao verificar lista de usuários", error);
+      } finally {
+        setLoading(false);
+      }
     };
+    getData();
+  }, [setData, currentPage, lastPage, refresh]);
 
-    const handleEdit = (company) => {
-        setDataEdit(company);
-        onOpen();
-    };
+  const handleRemove = async () => {
+    try {
+      await api.delete(`/companies/${deleteId}`);
+      setRefresh(!refresh);
+      toast.success("Empresa removida com sucesso!");
+      setDeleteOpen(false);
+    } catch (error) {
+      console.error("Erro ao verificar lista de usuários", error);
+    }
+  };
 
-    const handleView = (index) => {
-        const selectedUser = data;
-        setDataView(selectedUser[index]);
-        onOpenView();
-    };
+  const handleEdit = (company) => {
+    setDataEdit(company);
+    setModalOpen(true);
+  };
 
-    const handleDelete = (id) => {
-        setDeleteId(id);
-        onOpenDelete();
-    };
+  const handleView = (index) => {
+    const selectedUser = data;
+    setDataView(selectedUser[index]);
+    setViewOpen(true);
+  };
 
-    const handleSort = (key) => {
-        const direction = sortConfig.direction === 'asc' && sortConfig.key === key ? 'desc' : 'asc';
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setDeleteOpen(true);
+  };
 
-        const sortedData = [...data].sort((a, b) => {
-            const aKey = key.split('.').reduce((acc, part) => acc && acc[part], a);
-            const bKey = key.split('.').reduce((acc, part) => acc && acc[part], b);
+  const handleSort = (key) => {
+    const direction =
+      sortConfig.direction === "asc" && sortConfig.key === key ? "desc" : "asc";
 
-            if (aKey < bKey) return direction === 'asc' ? -1 : 1;
-            if (aKey > bKey) return direction === 'asc' ? 1 : -1;
-            return 0;
-        });
+    const sortedData = [...data].sort((a, b) => {
+      const aKey = key.split(".").reduce((acc, part) => acc && acc[part], a);
+      const bKey = key.split(".").reduce((acc, part) => acc && acc[part], b);
 
-        setSortConfig({ key, direction });
-        setData(sortedData);
-    };
+      if (aKey < bKey) return direction === "asc" ? -1 : 1;
+      if (aKey > bKey) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
 
-    const getSortIcon = (key) => {
-        if (sortConfig.key !== key) return null;
-        return sortConfig.direction === 'asc' ? <ChevronUpIcon ml={2} /> : <ChevronDownIcon ml={2} />;
-    };
+    setSortConfig({ key, direction });
+    setData(sortedData);
+  };
 
-    return (
-        <>
-            <Header />
-
-            <Title title="Gerenciamento de Empresas" subtitle="Administração e supervisão das informações empresariais" />
-
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
-            >
-                <Box maxW={800} w="100%" py={10} px={2}>
-                    {permissions.some(permissions => permissions.name === 'create_companies') ?
-                        (
-                            <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
-                                NOVO CADASTRO
-                            </Button>
-                        )
-                        : null
-                    }
-
-
-                    <Input
-                        mt={4}
-                        placeholder="Buscar empresa"
-                        size="lg"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-
-                    <Box overflowY="auto" height="100%">
-                        <Table mt="6">
-                            <Thead>
-                                <Tr>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('name')}>Nome {getSortIcon('name')}</Th>
-                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px" cursor="pointer" onClick={() => handleSort('cnpj')}>CNPJ {getSortIcon('cnpj')}</Th>
-                                    <Th p={0}></Th>
-                                    <Th p={0}></Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {data.length === 0 ? (
-                                    <Tr>
-                                        <Td colSpan={4} textAlign="center">
-                                            Não existem empresas cadastradas
-                                        </Td>
-                                    </Tr>
-                                ) : (
-                                    (!search ? data : data.filter(company =>
-                                        company.name.toLowerCase().includes(search.toLowerCase()) ||
-                                        company.cnpj.toLowerCase().includes(search.toLowerCase())
-                                    )).map(({ name, cnpj, roles_count, id }, index) => (
-                                        <Tr key={index}
-                                            cursor="pointer"
-                                            _odd={{ bg: "gray.100" }}
-                                            _even={{ bg: "white" }}
-                                            _hover={{ bg: "gray.50" }} onClick={() => handleView(index)}>
-                                            <Td maxW={isMobile ? 5 : 100}> {name} </Td>
-                                            <Td maxW={isMobile ? 5 : 100}> {cnpj} </Td>
-                                            <Td p={0}>
-                                                {permissions.some(permissions => permissions.name === 'update_companies') ? (
-                                                    <EditIcon
-                                                        fontSize={20}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleEdit({ name, cnpj, roles_count, id, index });
-                                                        }}
-                                                    />
-                                                ) : null}
-                                            </Td>
-                                            <Td p={0}>
-                                                {permissions.some(permissions => permissions.name === 'update_companies') ? (
-                                                    <DeleteIcon
-                                                        fontSize={20}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(id);
-                                                        }}
-                                                    />
-                                                ) : null}
-                                            </Td>
-                                        </Tr>
-                                    ))
-                                )}
-                            </Tbody>
-                        </Table>
-                    </Box>
-                </Box>
-
-                {isOpen && (
-                    <ModalCompany
-                        isOpen={isOpen}
-                        onClose={onClose}
-                        data={data}
-                        setData={setData}
-                        dataEdit={dataEdit}
-                        setDataEdit={setDataEdit}
-                        setRefresh={setRefresh}
-                        refresh={refresh}
-                    />
-                )}
-
-                {isDeleteOpen && (
-                    <ModalDelete
-                        isOpen={isDeleteOpen}
-                        onClose={onCloseDelete}
-                        onConfirm={handleRemove}
-                    />
-                )}
-
-                {isViewOpen && (
-                    <ModalViewCompany
-                        selectedCompany={dataView}
-                        isOpen={isViewOpen}
-                        onClose={onCloseView}
-                    />
-                )}
-
-                <Pagination currentPage={currentPage} lastPage={lastPage} setCurrentPage={setCurrentPage} />
-            </Flex>
-        </>
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return null;
+    return sortConfig.direction === "asc" ? (
+      <KeyboardArrowUp />
+    ) : (
+      <KeyboardArrowDown />
     );
+  };
+
+  return (
+    <div className="flex flex-col gap-6 w-full">
+      <ModalCompany
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        data={data}
+        setData={setData}
+        dataEdit={dataEdit}
+        setDataEdit={setDataEdit}
+        setRefresh={setRefresh}
+        refresh={refresh}
+      />
+      <ModalDelete
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleRemove}
+      />
+      <ModalViewCompany
+        selectedCompany={dataView}
+        isOpen={viewOpen}
+        onClose={() => setViewOpen(false)}
+      />
+      <PageTitle
+        title="Gerenciamento de Empresas"
+        subtitle="Administração e supervisão das informações empresariais"
+        buttons={
+          permissions.some((per) => per.name === "create_companies") && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => [setDataEdit({}), setModalOpen(true)]}
+              startIcon={<Add />}
+            >
+              NOVA EMPRESA
+            </Button>
+          )
+        }
+      />
+      <TextField
+        fullWidth
+        placeholder="Buscar empresa"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search />
+            </InputAdornment>
+          ),
+        }}
+        size="lg"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell onClick={() => handleSort("name")}>
+                Nome {getSortIcon("name")}
+              </TableCell>
+              <TableCell onClick={() => handleSort("cnpj")}>
+                CNPJ {getSortIcon("cnpj")}
+              </TableCell>
+              <TableCell>Ações</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} style={{ textAlign: "center" }}>
+                  Não existem empresas cadastradas
+                </TableCell>
+              </TableRow>
+            ) : (
+              (!search
+                ? data
+                : data.filter(
+                    (company) =>
+                      company.name
+                        .toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                      company.cnpj.toLowerCase().includes(search.toLowerCase()),
+                  )
+              ).map(({ name, cnpj, roles_count, id }, index) => (
+                <TableRow
+                  key={index}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleView(index)}
+                >
+                  <TableCell> {name} </TableCell>
+                  <TableCell> {cnpj} </TableCell>
+                  <TableCell>
+                    {permissions.some(
+                      (permissions) => permissions.name === "update_companies",
+                    ) ? (
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit({ name, cnpj, roles_count, id, index });
+                        }}
+                      >
+                        <Edit />
+                      </IconButton>
+                    ) : null}
+                    {permissions.some(
+                      (permissions) => permissions.name === "update_companies",
+                    ) ? (
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    ) : null}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(event, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          labelRowsPerPage="Linhas por página"
+        />
+      </TableContainer>
+    </div>
+  );
 };
 
 export default Companies;

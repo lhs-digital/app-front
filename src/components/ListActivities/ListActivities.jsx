@@ -7,9 +7,8 @@ import {
   MenuItem,
   Select,
   TextField,
-  useMediaQuery,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ActivitieItem from "../../components/ActivitieItem/ActivitieItem";
 import PageTitle from "../../components/PageTitle";
 import Pagination from "../../components/Pagination";
@@ -17,6 +16,7 @@ import api from "../../services/api";
 
 const ListActivities = () => {
   const [data, setData] = useState([]);
+  //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(null);
@@ -28,8 +28,6 @@ const ListActivities = () => {
   const [createdAt, setCreatedAt] = useState([]);
   const [per_page, setPer_page] = useState(20);
   const [priority, setPriority] = useState(null);
-
-  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [filterParams, setFilterParams] = useState({
     search: "",

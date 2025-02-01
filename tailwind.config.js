@@ -1,9 +1,5 @@
-const { background } = require("@chakra-ui/react");
-
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -48,9 +44,10 @@ module.exports = {
         "gray-background": "var(--gray-background)",
       },
       backgroundImage: {
-        "login": "url('https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260')",
+        login:
+          "url('https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260')",
       },
     },
   },
   plugins: [],
-}
+};

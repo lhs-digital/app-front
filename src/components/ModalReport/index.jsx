@@ -1,30 +1,29 @@
-import React, { useContext, useEffect, useState } from "react";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
+  Box,
   Button,
+  Flex,
   FormControl,
   FormLabel,
   Input,
-  Box,
-  Flex,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Select,
 } from "@chakra-ui/react";
+import { useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
-import { toast } from "react-toastify";
 
-const ModalReport = ({ data, isOpen, onClose, setRefresh, refresh }) => {
+const ModalReport = ({ isOpen, onClose }) => {
   const [createdAt, setCreatedAt] = useState([]);
   const { user } = useContext(AuthContext);
   const [company, setCompany] = useState("");
   const [companyId, setCompanyId] = useState(user?.user?.company?.id);
-  const [loading, setLoading] = useState(false);
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
@@ -71,8 +70,6 @@ const ModalReport = ({ data, isOpen, onClose, setRefresh, refresh }) => {
       toast.success("Relatório gerado com sucesso!");
     } catch (error) {
       console.error("Erro ao gerar relatório", error);
-    } finally {
-      setLoading(false);
     }
   };
 

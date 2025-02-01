@@ -1,5 +1,5 @@
 import { Heading, Text } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import logo from "../../assets/Logo_1.svg";

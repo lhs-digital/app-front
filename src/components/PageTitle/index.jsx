@@ -1,5 +1,3 @@
-import React from "react";
-
 const Index = ({ title, subtitle = "", buttons = <></> }) => {
   return (
     <div className="flex flex-row items-center justify-between w-full">

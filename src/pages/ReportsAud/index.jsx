@@ -1,37 +1,15 @@
-import React, { useContext, useState } from "react";
+import { Box, Button, Flex, useDisclosure } from "@chakra-ui/react";
+import { useContext } from "react";
 import Header from "../../components/Header";
-import Title from "../../components/Title";
-import {
-  Avatar,
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  Grid,
-  Input,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  useBreakpointValue,
-  useDisclosure,
-} from "@chakra-ui/react";
 import ModalReport from "../../components/ModalReport";
-import { DeleteIcon, DownloadIcon, EditIcon, ViewIcon } from "@chakra-ui/icons";
-import Pagination from "../../components/Pagination";
+import Title from "../../components/Title";
 import { AuthContext } from "../../contexts/auth";
 
 const ReportsAud = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [refresh, setRefresh] = useState(false);
-  const isMobile = useBreakpointValue({ base: true, lg: false });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(null);
+  // const [refresh, setRefresh] = useState(false);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [lastPage, setLastPage] = useState(null);
 
   const { permissions } = useContext(AuthContext);
 

@@ -5,7 +5,6 @@ import {
   Stack,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import React from "react";
 
 const Title = ({ title, subtitle }) => {
   const isMobile = useBreakpointValue({ base: true, lg: false });

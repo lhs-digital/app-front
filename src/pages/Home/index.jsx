@@ -1,9 +1,9 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import ListActivities from "../../components/ListActivities/ListActivities";
 import { AuthContext } from "../../contexts/auth";
 
 const Home = () => {
-  const { user, permissions } = useContext(AuthContext);
+  const { permissions } = useContext(AuthContext);
   const tasksPermissions = ["view_any_tasks", "update_tasks"];
 
   const hasPermission = (thePermissions) => {

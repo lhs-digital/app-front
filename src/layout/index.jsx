@@ -10,7 +10,7 @@ import {
   styled,
 } from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import {
   FaBook,
   FaBriefcase,

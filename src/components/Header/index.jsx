@@ -1,21 +1,18 @@
-import React, { useState } from "react";
-import LogoutIcon from "@mui/icons-material/Logout";
-import "./header.css";
-import { Link, useNavigate } from "react-router-dom";
 import {
+  Avatar,
   Box,
   Heading,
   Text,
-  Avatar,
-  VStack,
-  HStack,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import { Container } from "./styles";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useContext, useState } from "react";
 import { FaBars } from "react-icons/fa";
-import Sidebar from "../Sidebar";
-import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/auth";
+import Sidebar from "../Sidebar";
+import "./header.css";
+import { Container } from "./styles";
 
 const Header = () => {
   const [sidebar, setSidebar] = useState(false);

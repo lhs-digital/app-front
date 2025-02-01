@@ -1,22 +1,21 @@
-import React, { useEffect } from "react";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
+  Box,
   Button,
   FormControl,
   FormLabel,
   Input,
-  Box,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Select,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { Select } from "@chakra-ui/react";
-import api from "../../services/api";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 import {
   validarCNPJ,
   validarCPF,
@@ -144,31 +143,31 @@ const ModalClient = ({
     return false;
   };
 
-  // Função de mascarar whatsapp (82) 99999-9999
-  const maskWhatsapp = (value) => {
-    // Remove qualquer caractere que não seja número
-    value = value.replace(/\D/g, "");
-    // Adiciona parênteses para o DDD
-    value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
-    // Adiciona traço para o número
-    value = value.replace(/(\d)(\d{4})$/, "$1-$2");
-    return value;
-  };
+  // // Função de mascarar whatsapp (82) 99999-9999
+  // const maskWhatsapp = (value) => {
+  //   // Remove qualquer caractere que não seja número
+  //   value = value.replace(/\D/g, "");
+  //   // Adiciona parênteses para o DDD
+  //   value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+  //   // Adiciona traço para o número
+  //   value = value.replace(/(\d)(\d{4})$/, "$1-$2");
+  //   return value;
+  // };
 
-  // Função de mascarar cnpj ou cpf de acordo com o tipo de pessoa
-  const maskCnpjCpf = (value) => {
-    value = value.replace(/\D/g, "");
-    if (tipoPessoa === "F") {
-      value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    }
-    if (tipoPessoa === "J") {
-      value = value.replace(
-        /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-        "$1.$2.$3/$4-$5",
-      );
-    }
-    return value;
-  };
+  // // Função de mascarar cnpj ou cpf de acordo com o tipo de pessoa
+  // const maskCnpjCpf = (value) => {
+  //   value = value.replace(/\D/g, "");
+  //   if (tipoPessoa === "F") {
+  //     value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  //   }
+  //   if (tipoPessoa === "J") {
+  //     value = value.replace(
+  //       /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+  //       "$1.$2.$3/$4-$5",
+  //     );
+  //   }
+  //   return value;
+  // };
 
   return (
     <>
