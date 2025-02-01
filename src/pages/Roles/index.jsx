@@ -46,29 +46,21 @@ const Roles = () => {
     key: "name",
     direction: "asc",
   });
-  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await api.get(`/roles?page=${currentPage}`);
+        const response = await api.get(`/roles?page=${currentPage}&per_page=${rowsPerPage}`);
         setCurrentPage(response.data.meta.current_page);
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
       } catch (error) {
-        console.error("Erro ao verificar lista de usuários", error);
+        console.error("Erro ao verificar lista de roles", error);
       }
     };
     getData();
-    return () => {
-      setData([]);
-      setCurrentPage(1);
-      setViewOpen(false);
-      setModalOpen(false);
-      setDeleteOpen(false);
-    };
-  }, [setData, currentPage, lastPage, refresh]);
+  }, [currentPage, rowsPerPage, refresh]);
 
   const handleRemove = async () => {
     try {
@@ -77,7 +69,7 @@ const Roles = () => {
       toast.success("Role removida com sucesso!");
       setDeleteOpen(false);
     } catch (error) {
-      console.error("Erro ao verificar lista de usuários", error);
+      console.error("Erro ao verificar lista de roles", error);
     }
   };
 
@@ -86,8 +78,8 @@ const Roles = () => {
     setModalOpen(true);
   };
 
-  const handleEdit = (user) => {
-    setDataEdit(user);
+  const handleEdit = (role) => {
+    setDataEdit(role);
     setModalOpen(true);
   };
 
@@ -129,12 +121,14 @@ const Roles = () => {
   };
 
   const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+    setCurrentPage(newPage + 1);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+    setRefresh((prev) => !prev);
   };
 
   return (
@@ -192,15 +186,15 @@ const Roles = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell onClick={() => handleSort("name")}>
+              <TableCell onClick={() => handleSort("name")} style={{ cursor: "pointer" }}>
                 Nome
                 {getSortIcon("name")}
               </TableCell>
-              <TableCell onClick={() => handleSort("company.name")}>
+              <TableCell onClick={() => handleSort("company.name")} style={{ cursor: "pointer" }}>
                 Empresa
                 {getSortIcon("company.name")}
               </TableCell>
-              <TableCell onClick={() => handleSort("permissions_count")}>
+              <TableCell onClick={() => handleSort("permissions_count")} style={{ cursor: "pointer" }}>
                 Qtd Permissões
                 {getSortIcon("permissions_count")}
               </TableCell>
@@ -264,12 +258,12 @@ const Roles = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={data.length}
+          count={lastPage * rowsPerPage}
+          labelRowsPerPage="Linhas por página"
           rowsPerPage={rowsPerPage}
-          page={page}
+          page={currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Linhas por página"
           labelDisplayedRows={defaultLabelDisplayedRows}
         />
       </TableContainer>

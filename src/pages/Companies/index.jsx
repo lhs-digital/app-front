@@ -187,10 +187,10 @@ const Companies = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell onClick={() => handleSort("name")}>
+              <TableCell onClick={() => handleSort("name")} style={{ cursor: "pointer" }}>
                 Nome {getSortIcon("name")}
               </TableCell>
-              <TableCell onClick={() => handleSort("cnpj")}>
+              <TableCell onClick={() => handleSort("cnpj")} style={{ cursor: "pointer" }}>
                 CNPJ {getSortIcon("cnpj")}
               </TableCell>
               <TableCell>Ações</TableCell>
@@ -226,7 +226,7 @@ const Companies = () => {
                       (permissions) => permissions.name === "update_companies",
                     ) ? (
                       <IconButton
-                        onClick={(e) => {
+                        onClick={(e) => { 
                           e.stopPropagation();
                           handleEdit({ name, cnpj, roles_count, id, index });
                         }}

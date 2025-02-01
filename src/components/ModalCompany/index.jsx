@@ -63,6 +63,11 @@ const ModalCompany = ({
       return;
     }
 
+    if (cnpj.length !== 18) {
+      toast.warning("CNPJ inválido!");
+      return;
+    }
+
     if (cnpjAlreadyExists()) {
       toast.warning("CNPJ já cadastrado!");
       return;
@@ -135,6 +140,7 @@ const ModalCompany = ({
           margin="dense"
           inputProps={{
             maxLength: 18,
+            minLength: 18,
             number: true
           }}
         />
