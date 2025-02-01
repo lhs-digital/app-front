@@ -1,70 +1,68 @@
-import React, { useEffect, useState } from 'react'
-import logo from '../../assets/Logo_1.svg'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import api from '../../services/api'
-import { Heading, Text } from '@chakra-ui/react'
+import React, { useEffect, useState } from "react";
+import logo from "../../assets/Logo_1.svg";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import api from "../../services/api";
+import { Heading, Text } from "@chakra-ui/react";
 
 const FirstAccess = () => {
-  const [password, setPassword] = useState('')
-  const [passwordConfirmation, setPasswordConfirmation] = useState('')
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const { token } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        const response = await (api.get(`/password-reset/${token}`));
+        const response = await api.get(`/password-reset/${token}`);
 
         if (response.data.token !== token) {
-          navigate('/')
-
+          navigate("/");
         }
       } catch (error) {
-        console.error('Erro ao verificar token:', error);
-        navigate('/')
-      };
-    }
+        console.error("Erro ao verificar token:", error);
+        navigate("/");
+      }
+    };
 
     verifyToken();
   }, [token, navigate]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!password || !passwordConfirmation) {
-      toast.warning('Preencha os campos para definir uma nova senha!')
-      return
+      toast.warning("Preencha os campos para definir uma nova senha!");
+      return;
     }
 
     if (password.length < 8) {
-      toast.warning('A senha deve conter no mínimo 8 caracteres!')
-      return
+      toast.warning("A senha deve conter no mínimo 8 caracteres!");
+      return;
     }
 
     if (password !== passwordConfirmation) {
-      toast.warning('Senhas não conferem!')
-      return
+      toast.warning("Senhas não conferem!");
+      return;
     }
-
 
     try {
       await api.post(`/password-update`, {
         token,
         password,
-        password_confirmation: passwordConfirmation
+        password_confirmation: passwordConfirmation,
       });
 
-      toast.success('Senha alterada com sucesso!')
+      toast.success("Senha alterada com sucesso!");
 
-      navigate('/')
+      navigate("/");
     } catch (error) {
       toast.error("Erro ao tentar alterar a senha");
     }
-  }
+  };
 
   return (
-    <div className='container-center'>
+    <div className="container-center">
       <div className="login">
         <img src={logo} alt="Logo do App Provedores" />
         <div className="login-area">
@@ -87,14 +85,13 @@ const FirstAccess = () => {
             onChange={(e) => setPasswordConfirmation(e.target.value)}
           />
 
-          <button type='submit'>Salvar Senha</button>
+          <button type="submit">Salvar Senha</button>
         </form>
 
         <Link to="/">Já possui uma conta? Acessar</Link>
-
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FirstAccess
+export default FirstAccess;

@@ -1,9 +1,9 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const Container = styled.div`
   display: flex;
   align-items: center;
-  background-color: #1A202C; 
+  background-color: #1a202c;
   font-size: 20px;
   color: white;
   padding: 10px;

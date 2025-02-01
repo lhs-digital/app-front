@@ -1,9 +1,8 @@
-import { ChakraProvider } from '@chakra-ui/react';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { createRoot } from 'react-dom/client';
-import App from './App';
-import './index.css';
-
+import { ChakraProvider } from "@chakra-ui/react";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./index.css";
 
 export const theme = createTheme({
   palette: {
@@ -68,12 +67,12 @@ export const theme = createTheme({
   },
 });
 
-const root = createRoot(document.getElementById('root'))
+const root = createRoot(document.getElementById("root"));
 
 root.render(
   <ChakraProvider>
     <ThemeProvider theme={theme}>
       <App />
     </ThemeProvider>
-  </ChakraProvider>
-)
+  </ChakraProvider>,
+);
