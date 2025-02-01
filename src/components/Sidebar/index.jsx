@@ -1,21 +1,21 @@
-import React, { useEffect, useRef, useContext } from "react";
-import { Container, Content } from "./styles";
+import { useContext, useEffect, useRef } from "react";
 import {
-  FaTimes,
-  FaHome,
-  FaRegSun,
-  FaUserAlt,
-  FaBriefcase,
-  FaRegFileAlt,
-  FaBook,
   FaAngleDoubleUp,
-  FaPaperclip,
+  FaBook,
+  FaBriefcase,
   FaFolder,
+  FaHome,
+  FaPaperclip,
+  FaRegFileAlt,
+  FaRegSun,
+  FaTimes,
+  FaUserAlt,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { Container, Content } from "./styles";
 
-import SidebarItem from "../SidebarItem";
 import { AuthContext } from "../../contexts/auth";
+import SidebarItem from "../SidebarItem";
 
 const Sidebar = ({ active }) => {
   const { permissions } = useContext(AuthContext);
@@ -31,12 +31,14 @@ const Sidebar = ({ active }) => {
     "update_companies",
     "delete_companies",
   ];
+  //eslint-disable-next-line
   const rolesPermissions = [
     "view_roles",
     "view_any_roles",
     "update_roles",
     "delete_roles",
   ];
+  //eslint-disable-next-line
   const auditoriaPermissions = ["view_any_tasks", "update_tasks"];
   const relatorioPermissions = ["view_any_reports", "report_generate"];
   const defineRules = ["define_rules"];

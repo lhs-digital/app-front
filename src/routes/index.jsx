@@ -35,6 +35,7 @@ const Private = ({ Item, allowedRoles = [], allowedPermissions = [] }) => {
       allowedPermissions.includes(permission.name),
     );
 
+  //eslint-disable-next-line
   const hasRoleAccess =
     allowedRoles.length === 0 || allowedRoles.includes(user.role?.name);
 

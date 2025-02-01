@@ -14,7 +14,7 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalComp from "../../components/ModalComp";
 import ModalDelete from "../../components/ModalDelete";
@@ -43,6 +43,7 @@ const Users = () => {
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
+  //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
     key: "name",
@@ -230,8 +231,8 @@ const Users = () => {
                 Empresa
                 {getSortIcon("company.name")}
               </TableCell>
-              <TableCell sx={{ padding: 0 }}></TableCell>
-              <TableCell sx={{ padding: 0 }}></TableCell>
+              <TableCell sx={{ padding: 0 }} />
+              <TableCell sx={{ padding: 0 }} />
             </TableRow>
           </TableHead>
           <TableBody>

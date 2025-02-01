@@ -1,5 +1,5 @@
 import { Button, Checkbox, TextField, Tooltip } from "@mui/material";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Lighthouse from "../../assets/favicon_neutral.svg";

@@ -18,7 +18,7 @@ import {
   SimpleGrid,
   Tooltip,
 } from "@chakra-ui/react";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
@@ -31,6 +31,7 @@ const ModalRule = ({
   refresh,
 }) => {
   const [listRules, setListRules] = useState([]);
+  //eslint-disable-next-line
   const [permissions, setPermissions] = useState([]);
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
@@ -38,6 +39,7 @@ const ModalRule = ({
   const [column, setColumn] = useState(dataEdit?.name || "");
   const [columnLabel, setColumnLabel] = useState(dataEdit?.label || "");
   const [priority, setPriority] = useState(dataEdit?.priority || "");
+  //eslint-disable-next-line
   const [validations, setValidations] = useState(dataEdit?.validations || []);
   const [selectAll, setSelectAll] = useState(false);
 

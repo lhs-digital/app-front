@@ -14,7 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 
@@ -182,7 +182,7 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
             </Grid>
 
             {permissions.map((permission, index) => (
-              <React.Fragment key={permission.id}>
+              <Fragment key={permission.id}>
                 {permission.category !== permissions[index - 1]?.category && (
                   <>
                     <Typography>
@@ -200,7 +200,7 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
                   />
                   <Typography component="span">{permission.label}</Typography>
                 </Grid>
-              </React.Fragment>
+              </Fragment>
             ))}
           </Grid>
         </Box>

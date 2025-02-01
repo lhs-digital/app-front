@@ -19,7 +19,7 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalClient from "../../components/ModalClient";
 import ModalDeleteClient from "../../components/ModalDeleteClient";
@@ -37,10 +37,12 @@ const Clients = () => {
   const [dataEdit, setDataEdit] = useState({});
   const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  //eslint-disable-next-line
   const [lastPage, setLastPage] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
+  //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
 
@@ -177,8 +179,8 @@ const Clients = () => {
               <TableCell onClick={() => handleSort("cnpj_cpf")}>
                 CNPJ/CPF {getSortIcon("cnpj_cpf")}
               </TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
+              <TableCell />
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -203,7 +205,7 @@ const Clients = () => {
                       .includes(search.toLowerCase()),
                   ),
                 )
-                .map((client, index) => (
+                .map((client) => (
                   <TableRow
                     key={client.id}
                     cursor="pointer"

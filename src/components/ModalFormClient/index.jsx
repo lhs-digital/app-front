@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from "react";
-import Header from "../../components/Header";
-import Title from "../../components/Title";
 import {
   Box,
   Button,
   Divider,
-  Flex,
   FormControl,
   FormLabel,
   Grid,
@@ -19,10 +15,10 @@ import {
   Select,
   Text,
   useBreakpointValue,
-  useDisclosure,
 } from "@chakra-ui/react";
-import api from "../../services/api";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 import {
   validarCNPJ,
   validarCPF,
@@ -30,7 +26,8 @@ import {
   validarEmail,
 } from "../../services/utils";
 
-const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
+const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
+  //eslint-disable-next-line
   const [fields, setFields] = useState([]);
   const fieldsWithErrors = selectedActivitie?.columns;
   const [client, setClient] = useState({});
@@ -46,12 +43,12 @@ const ModalFormClient = ({ isOpen, onOpen, onClose, selectedActivitie }) => {
     contribuinte_icms: "",
   });
 
-  const [filterParams, setFilterParams] = useState({
-    search: "",
-    method: "",
-    createdAt: [],
-    nivel: "",
-  });
+  // const [filterParams, setFilterParams] = useState({
+  //   search: "",
+  //   method: "",
+  //   createdAt: [],
+  //   nivel: "",
+  // });
 
   const isMobile = useBreakpointValue({ base: true, lg: false });
 

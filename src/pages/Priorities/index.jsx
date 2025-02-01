@@ -1,217 +1,249 @@
-import React, { useEffect, useState } from 'react'
-import Header from '../../components/Header';
-import Title from '../../components/Title';
-import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Box, Button, Flex, Input, Stack, Table, Tbody, Td, Text, Th, Thead, Tr, useBreakpointValue, useDisclosure } from '@chakra-ui/react';
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import api from '../../services/api';
-import ModalRule from '../../components/ModalRule';
-import { toast } from 'react-toastify';
-import ModalRuleDelete from '../../components/ModalRuleDelete';
+/* eslint-disable */
+import { Delete, Edit, ExpandMore } from "@mui/icons-material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  useMediaQuery,
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import ModalRule from "../../components/ModalRule";
+import ModalRuleDelete from "../../components/ModalRuleDelete";
+import PageTitle from "../../components/PageTitle";
+import SubAccordion from "../../components/Priorities/SubAccordion";
+import api from "../../services/api";
 
 const Priorities = () => {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const { isOpen: isDeleteOpen, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
-    const { isOpen: isViewOpen, onOpen: onOpenView, onClose: onCloseView } = useDisclosure();
-    const [data, setData] = useState([]);
-    const [dataEdit, setDataEdit] = useState({});
-    const [deleteId, setDeleteId] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [search, setSearch] = useState('');
-    const [lastPage, setLastPage] = useState(null);
-    const [createdAt, setCreatedAt] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [table, setTable] = useState('');
-    const [method, setMethod] = useState("");
-    const [nivel, setNivel] = useState("");
-    const [refresh, setRefresh] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [data, setData] = useState([]);
+  const [dataEdit, setDataEdit] = useState({});
+  const [deleteId, setDeleteId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [lastPage, setLastPage] = useState(null);
+  const [createdAt, setCreatedAt] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [table, setTable] = useState("");
+  const [method, setMethod] = useState("");
+  const [nivel, setNivel] = useState("");
+  const [refresh, setRefresh] = useState(false);
 
-    const [filterParams, setFilterParams] = useState({
-        search: '',
-        method: '',
-        createdAt: [],
-        nivel: ""
-    });
-    const isMobile = useBreakpointValue({ base: true, lg: false });
+  const [filterParams, setFilterParams] = useState({
+    search: "",
+    method: "",
+    createdAt: [],
+    nivel: "",
+  });
 
-    useEffect(() => {
-        const getData = async () => {
-            setLoading(true);
-            try {
-                const params = {
-                    search: filterParams?.search || undefined,
-                    method: filterParams?.method || undefined,
-                    nivel: filterParams?.nivel || undefined,
-                    created_at: filterParams?.createdAt && filterParams?.createdAt.length > 0 ? [filterParams.createdAt[0], filterParams.createdAt[1]] : undefined
-                };
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
-                const filteredParams = Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== undefined));
-
-                const response = await api.get(`/company_tables?page=${currentPage}`, {
-                    params: filteredParams
-                });
-
-                setCurrentPage(response.data.meta.current_page);
-                setLastPage(response.data.meta.last_page);
-                setData(response.data.data);
-            } catch (error) {
-                console.error('Erro ao verificar lista de usuários', error);
-            } finally {
-                setLoading(false)
-            }
+  useEffect(() => {
+    const getData = async () => {
+      setLoading(true);
+      try {
+        const params = {
+          search: filterParams?.search || undefined,
+          method: filterParams?.method || undefined,
+          nivel: filterParams?.nivel || undefined,
+          created_at:
+            filterParams?.createdAt && filterParams?.createdAt.length > 0
+              ? [filterParams.createdAt[0], filterParams.createdAt[1]]
+              : undefined,
         };
-        getData();
-    }, [currentPage, refresh, filterParams]);
 
-    const handleEdit = (column) => {
-        setDataEdit(column);
-        onOpen();
+        const filteredParams = Object.fromEntries(
+          Object.entries(params).filter(([_, v]) => v !== undefined),
+        );
+
+        const response = await api.get(`/company_tables?page=${currentPage}`, {
+          params: filteredParams,
+        });
+
+        setCurrentPage(response.data.meta.current_page);
+        setLastPage(response.data.meta.last_page);
+        setData(response.data.data);
+      } catch (error) {
+        console.error("Erro ao verificar lista de usuários", error);
+      } finally {
+        setLoading(false);
+      }
     };
+    getData();
+  }, [currentPage, refresh, filterParams]);
 
-    const handleDelete = (id) => {
-        setDeleteId(id);
-        onOpenDelete();
-    };
+  const handleEdit = (column) => {
+    setDataEdit(column);
+    setIsOpen(true);
+  };
 
-    const handleRemove = async () => {
-        try {
-            await (api.delete(`/company_table_columns/${deleteId}`));
-            setRefresh(!refresh);
-            toast.success('Regra removida com sucesso!');
-            onCloseDelete();
-        } catch (error) {
-            console.error('Erro ao remover regra', error);
-        }
-    };
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setIsDeleteOpen(true);
+  };
 
+  const handleRemove = async () => {
+    try {
+      await api.delete(`/company_table_columns/${deleteId}`);
+      setRefresh(!refresh);
+      toast.success("Regra removida com sucesso!");
+      setIsDeleteOpen(false);
+    } catch (error) {
+      console.error("Erro ao remover regra", error);
+    }
+  };
+
+  const renderNestedAccordion = (column) => {
     return (
-        <>
-            <Header />
+      <Accordion key={column.id}>
+        <AccordionSummary
+          id={column.id}
+          aria-controls={`${column.id}-content`}
+          expandIcon={<ExpandMore />}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            Coluna: {column.label}
+            <div style={{ display: "flex", gap: "12px" }}>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit(column);
+                }}
+              >
+                <Edit />
+              </IconButton>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(column.id);
+                }}
+              >
+                <Delete />
+              </IconButton>
+            </div>
+          </div>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell maxW={isMobile ? 5 : 100} fontSize="16px">
+                  Nome
+                </TableCell>
+                <TableCell maxW={isMobile ? 5 : 100} fontSize="16px">
+                  Parâmetros
+                </TableCell>
+                <TableCell maxW={isMobile ? 5 : 100} fontSize="16px">
+                  Mensagem
+                </TableCell>
+                <TableCell p={0} />
+                <TableCell p={0} />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} textAlign="center">
+                    Não existem Regras de Auditorias no sistema
+                  </TableCell>
+                </TableRow>
+              ) : (
+                column.validations.map((validation) => (
+                  <TableRow
+                    key={validation.id}
+                    cursor="pointer"
+                    _hover={{ bg: "gray.100" }}
+                  >
+                    <TableCell maxW={isMobile ? 5 : 100}>
+                      {validation.rule.label}
+                    </TableCell>
+                    <TableCell maxW={isMobile ? 5 : 100}>
+                      {validation.rule.has_params}
+                    </TableCell>
+                    <TableCell maxW={isMobile ? 5 : 100}>
+                      {validation.message || "N/A"}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </AccordionDetails>
+      </Accordion>
+    );
+  };
 
-            <Title title="Regras de Auditorias" subtitle="Administração e supervisão das regras das auditorias" />
-
-            <Flex
-                align="center"
-                justify="center"
-                flexDirection="column"
-                fontSize="20px"
-                fontFamily="poppins"
+  return (
+    <div className="flex flex-col gap-6 w-full">
+      <ModalRule
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        data={data}
+        setData={setData}
+        dataEdit={dataEdit}
+        setDataEdit={setDataEdit}
+        setRefresh={setRefresh}
+        refresh={refresh}
+      />
+      <ModalRuleDelete
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleRemove}
+      />
+      <PageTitle
+        title="Regras de Auditorias"
+        subtitle="Administração e supervisão das regras das auditorias"
+        buttons={
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => [setDataEdit({}), setIsOpen(true)]}
+          >
+            ADICIONAR COLUNA NA AUDITORIA
+          </Button>
+        }
+      />
+      <Accordion>
+        {data.map((table) => (
+          <Accordion key={table.id}>
+            <AccordionSummary
+              expandIcon={<ExpandMore />}
+              id={table.id}
+              aria-controls={`${table.id}-content`}
             >
-                <Box maxW={800} w="100%" py={10} px={2}>
+              Tabela: {table.label}
+            </AccordionSummary>
+            <AccordionDetails>
+              {table.columns.map((column) => (
+                <SubAccordion
+                  key={column.id}
+                  column={column}
+                  data={data}
+                  handleEdit={handleEdit}
+                  handleDelete={handleDelete}
+                />
+              ))}
+            </AccordionDetails>
+          </Accordion>
+        ))}
+      </Accordion>
+    </div>
+  );
+};
 
-                    <Button colorScheme='blue' onClick={() => [setDataEdit({}), onOpen()]}>
-                        ADICIONAR COLUNA NA AUDITORIA
-                    </Button>
-
-                    <Box overflowY="auto" height="100%" marginTop="12px">
-                        <Accordion allowMultiple>
-                            {data.map((table) => (
-                                <AccordionItem key={table.id}>
-                                    {({ isExpanded }) => (
-                                        <>
-                                            <h2>
-                                                <AccordionButton
-                                                    _expanded={{ bg: '#1A202C', color: 'white' }}
-                                                    bg={isExpanded ? '#1A202C' : 'gray.100'}
-                                                >
-                                                    <Box flex="1" textAlign="left">
-                                                        Tabela: {table.label}
-                                                    </Box>
-                                                </AccordionButton>
-                                            </h2>
-                                            <AccordionPanel pb={4}>
-                                                <Accordion allowMultiple>
-                                                    {table.columns.map((column) => (
-                                                        <AccordionItem key={column.id}>
-                                                            {({ isExpanded }) => (
-                                                                <>
-                                                                    <h3>
-                                                                        <AccordionButton
-                                                                            _expanded={{ bg: 'green.500', color: 'white' }}
-                                                                            bg={isExpanded ? 'green.500' : 'gray.100'}
-                                                                        >
-                                                                            <Box display="flex" width="100%" justifyContent="space-between" alignItems="center">
-                                                                                Coluna: {column.label}
-                                                                                <Box display="flex" justifyContent="space-between" alignItems="center" gap="12px">
-                                                                                    <EditIcon fontSize={20}
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            handleEdit(column)
-                                                                                        }}
-                                                                                    />
-                                                                                    <DeleteIcon fontSize={20} onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        handleDelete(column.id)
-                                                                                    }} />
-                                                                                </Box>
-                                                                            </Box>
-                                                                        </AccordionButton>
-                                                                    </h3>
-                                                                    <AccordionPanel pb={4}>
-                                                                        <Table variant="simple">
-                                                                            <Thead>
-                                                                                <Tr>
-                                                                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Nome</Th>
-                                                                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Parâmetros</Th>
-                                                                                    <Th maxW={isMobile ? 5 : 100} fontSize="16px">Mensagem</Th>
-                                                                                    <Th p={0}></Th>
-                                                                                    <Th p={0}></Th>
-                                                                                </Tr>
-                                                                            </Thead>
-                                                                            <Tbody>
-                                                                                {
-                                                                                    data.length === 0 ? (
-                                                                                        <Tr>
-                                                                                            <Td colSpan={4} textAlign="center">
-                                                                                                Não existem Regras de Auditorias no sistema
-                                                                                            </Td>
-                                                                                        </Tr>
-                                                                                    ) : (
-                                                                                        column.validations.map((validation) => (
-                                                                                            <Tr key={validation.id} cursor="pointer" _hover={{ bg: "gray.100" }}>
-                                                                                                <Td maxW={isMobile ? 5 : 100}>{validation.rule.label}</Td>
-                                                                                                <Td maxW={isMobile ? 5 : 100}>{validation.rule.has_params}</Td>
-                                                                                                <Td maxW={isMobile ? 5 : 100}>{validation.message || "N/A"}</Td>
-                                                                                            </Tr>
-                                                                                        )))}
-                                                                            </Tbody>
-                                                                        </Table>
-                                                                    </AccordionPanel>
-                                                                </>
-                                                            )}
-                                                        </AccordionItem>
-                                                    ))}
-                                                </Accordion>
-                                            </AccordionPanel>
-                                        </>
-                                    )}
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                    </Box>
-                </Box>
-                {isOpen && (
-                    <ModalRule
-                        isOpen={isOpen}
-                        onClose={onClose}
-                        data={data}
-                        setData={setData}
-                        dataEdit={dataEdit}
-                        setDataEdit={setDataEdit}
-                        setRefresh={setRefresh}
-                        refresh={refresh}
-                    />
-                )}
-
-                {isDeleteOpen && (
-                    <ModalRuleDelete
-                        isOpen={isDeleteOpen}
-                        onClose={onCloseDelete}
-                        onConfirm={handleRemove}
-                    />
-                )}
-            </Flex>
-        </>
-    )
-}
-
-export default Priorities
+export default Priorities;

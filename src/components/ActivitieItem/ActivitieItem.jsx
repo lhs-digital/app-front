@@ -13,7 +13,7 @@ import {
   useDisclosure,
   useTheme,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   dateFormatted,
   formattedPriority,
@@ -23,18 +23,10 @@ import ModalCheckActivitie from "../ModalCheckActivitie";
 import ViewActivitie from "../ViewActivitie";
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
-  const {
-    isOpen: isDeleteOpen,
-    onOpen: onOpenDelete,
-    onClose: onCloseDelete,
-  } = useDisclosure();
+  const { isOpen: isDeleteOpen, onClose: onCloseDelete } = useDisclosure();
   const [dataView, setDataView] = useState(activitie);
   const isMobile = useBreakpointValue({ base: true, lg: false });
   const theme = useTheme();
-
-  const handleDelete = () => {
-    onOpenDelete();
-  };
 
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const toggleAccordion = () => {
@@ -117,6 +109,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
               :{" "}
               {activitie?.columns.map((col, index) => (
                 <Tooltip
+                  key={index}
                   label={`Prioridade: ${formattedPriority(+col?.priority)}`}
                   aria-label="Prioridade"
                 >

@@ -1,20 +1,18 @@
-import React from "react";
 import {
-  Button,
   Box,
-  Tooltip,
-  Text,
-  useBreakpointValue,
+  Button,
   Table,
-  Thead,
-  Tr,
-  Th,
   Tbody,
   Td,
+  Text,
+  Th,
+  Thead,
+  Tooltip,
+  Tr,
   useDisclosure,
 } from "@chakra-ui/react";
-import api from "../../services/api";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 import { formattedPriority, getPriorityColor } from "../../services/utils";
 import ModalFormClient from "../ModalFormClient";
 
@@ -25,14 +23,15 @@ const ViewActivitie = ({
   setRefresh,
   refresh,
 }) => {
+  //eslint-disable-next-line
   const formattedDate = (date) => new Date(date).toLocaleDateString("pt-BR");
-  const isMobile = useBreakpointValue({ base: true, lg: false });
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const handleView = (index) => {
+  const handleView = () => {
     onOpen();
   };
 
+  //eslint-disable-next-line
   const handleConfirm = async () => {
     try {
       await api.put(`/auditing/${id}/toggle_status`);
