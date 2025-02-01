@@ -82,7 +82,6 @@ const Roles = () => {
   };
 
   const handleCreate = () => {
-    console.log("handleCreate");
     setDataEdit({});
     setModalOpen(true);
   };

@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   InputLabel,
+  MenuItem,
   Select,
   TextField,
 } from "@mui/material";
@@ -19,12 +20,11 @@ const ModalComp = ({
   isOpen,
   onClose,
   setRefresh,
-  refresh,
 }) => {
-  const [name, setName] = useState(dataEdit?.name || "");
-  const [email, setEmail] = useState(dataEdit?.email || "");
-  const [role, setRole] = useState(dataEdit?.role || "");
-  const [company, setCompany] = useState(dataEdit.company?.id || "");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
+  const [company, setCompany] = useState("");
   const [companies, setCompanies] = useState([]);
   const [roles, setRoles] = useState([]);
 
@@ -32,19 +32,35 @@ const ModalComp = ({
     const getData = async () => {
       try {
         const responseCompany = await api.get(`/companies/get_companies`);
-        setCompanies(responseCompany.data.data);
-        const params = company ? { params: { company_id: company } } : {};
-        const responseRole = await api.get(`/roles/roles_from_company`, params);
-        setRoles(responseRole.data.data);
+        setCompanies(responseCompany?.data?.data);
+
+        const responseRole = await api.get(`/roles/roles_from_company`, {
+          params: { company_id: dataEdit.company.id },
+        });
+        setRoles(responseRole?.data?.data);
       } catch (error) {
         console.error("Erro ao acessar as roles por empresa", error);
       }
     };
+
     getData();
-  }, [setRoles, company]);
+  }, [company]);
+
+  const rolesFromCompany = async (companyId) => {
+    try {
+      const response = await api.get(`/roles/roles_from_company`, {
+        params: { company_id: companyId
+        },
+      });
+      setRoles(response?.data?.data);
+    } catch (error) {
+      console.error("Erro ao acessar as roles por empresa", error);
+    }
+  };
 
   const handleCompanyChange = (event) => {
     setCompany(event.target.value);
+    rolesFromCompany(event.target.value);
   };
 
   const handleRoleChange = (event) => {
@@ -60,27 +76,12 @@ const ModalComp = ({
         role_id: role,
       });
 
-      setRefresh(!refresh);
+      setRefresh((prev) => !prev);
       toast.success("Usuário cadastrado com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar usuário", error);
     }
-  };
 
-  const updateUser = async () => {
-    try {
-      await api.put(`/users/${dataEdit.id}`, {
-        name,
-        email,
-        company_id: company,
-        role_id: role.id,
-      });
-
-      setRefresh(!refresh);
-      toast.success("Usuário editado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao editar usuário", error);
-    }
   };
 
   const handleSave = () => {
@@ -94,17 +95,14 @@ const ModalComp = ({
       return;
     }
 
-    if (dataEdit.id) {
-      updateUser();
-    } else {
-      saveData();
-    }
+    saveData();
 
+    setRefresh((prev) => !prev);
     onClose();
   };
 
   const emailAlreadyExists = () => {
-    if (dataEdit.email !== email && data?.length) {
+    if (data?.length) {
       return data.find((item) => item.email === email);
     }
 
@@ -114,7 +112,7 @@ const ModalComp = ({
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <DialogTitle>
-        {dataEdit.id ? "Editar Usuário" : "Cadastrar Usuário"}
+        {"Cadastrar Usuário"}
       </DialogTitle>
       <DialogContent className="w-[480px] flex flex-col gap-4">
         <Box>
@@ -145,9 +143,9 @@ const ModalComp = ({
             fullWidth
           >
             {companies.map((companyItem) => (
-              <option key={companyItem.id} value={companyItem.id}>
+              <MenuItem key={companyItem.id} value={companyItem.id}>
                 {companyItem.name}
-              </option>
+              </MenuItem>
             ))}
           </Select>
         </Box>
@@ -160,9 +158,9 @@ const ModalComp = ({
             fullWidth
           >
             {roles.map((roleItem) => (
-              <option key={roleItem.id} value={roleItem.id}>
+              <MenuItem key={roleItem.id} value={roleItem.id}>
                 {roleItem.name}
-              </option>
+              </MenuItem>
             ))}
           </Select>
         </Box>
