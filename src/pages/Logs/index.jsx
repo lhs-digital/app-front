@@ -32,8 +32,8 @@ const Logs = () => {
   const [loading, setLoading] = useState(false);
   //eslint-disable-next-line
   const [table, setTable] = useState("");
-  const [method, setMethod] = useState("");
-  const [nivel, setNivel] = useState("");
+  const [method, setMethod] = useState(-1);
+  const [nivel, setNivel] = useState(-1);
   const [refresh, setRefresh] = useState(false);
   const [sortConfig, setSortConfig] = useState({
     key: "created_at",
@@ -42,9 +42,9 @@ const Logs = () => {
 
   const [filterParams, setFilterParams] = useState({
     search: "",
-    method: "",
+    method: -1,
     createdAt: [],
-    nivel: "",
+    nivel: -1,
   });
 
   useEffect(() => {
@@ -53,8 +53,8 @@ const Logs = () => {
       try {
         const params = {
           search: filterParams?.search || undefined,
-          method: filterParams?.method || undefined,
-          nivel: filterParams?.nivel || undefined,
+          method: filterParams?.method === -1 ? undefined : filterParams?.method,
+          nivel: filterParams?.nivel === -1 ? undefined : filterParams?.nivel,
           created_at:
             filterParams?.createdAt && filterParams?.createdAt.length > 0
               ? [filterParams.createdAt[0], filterParams.createdAt[1]]
@@ -66,7 +66,7 @@ const Logs = () => {
           Object.entries(params).filter(([_, v]) => v !== undefined),
         );
 
-        const response = await api.get(`/logs?page=${currentPage}`, {
+        const response = await api.get(`/logs?page=${currentPage}&per_page=${10}`, {
           params: filteredParams,
         });
 
@@ -88,11 +88,13 @@ const Logs = () => {
     setCreatedAt([null, null]);
     setFilterParams({
       search: "",
-      method: "",
-      nivel: "",
+      method: -1,
+      nivel: -1,
       createdAt: [],
     });
     setCurrentPage(1);
+    setMethod(-1);
+    setNivel(-1);
     setRefresh(!refresh);
   };
 
@@ -138,7 +140,7 @@ const Logs = () => {
       <Box display="flex" alignItems="center" gap={2}>
         <Box flexGrow={1}>
           <InputLabel>Tabela</InputLabel>
-          <Select fullWidth>
+          <Select value="clients" fullWidth>
             <MenuItem value="clients">clients</MenuItem>
           </Select>
         </Box>
@@ -149,7 +151,7 @@ const Logs = () => {
             value={method}
             onChange={(e) => setMethod(e.target.value)}
           >
-            <MenuItem value="">Todos</MenuItem>
+            <MenuItem value={-1}>Todos</MenuItem>
             <MenuItem value="POST">POST</MenuItem>
             <MenuItem value="GET">GET</MenuItem>
           </Select>
@@ -161,7 +163,7 @@ const Logs = () => {
             value={nivel}
             onChange={(e) => setNivel(e.target.value)}
           >
-            <MenuItem value="">Todos</MenuItem>
+            <MenuItem value={-1}>Todos</MenuItem>
             <MenuItem value="info">Info</MenuItem>
             <MenuItem value="warning">Warning</MenuItem>
             <MenuItem value="error">Error</MenuItem>
@@ -374,7 +376,7 @@ const Logs = () => {
             {data.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} textAlign="center">
-                  Não existem Regras de Auditorias no sistema
+                  Não há Logs
                 </TableCell>
               </TableRow>
             ) : (

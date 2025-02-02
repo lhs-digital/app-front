@@ -41,7 +41,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
     setIsAccordionOpen((prevState) => !prevState);
   };
 
-  console.log(activitie);
 
   return (
     <Box

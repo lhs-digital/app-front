@@ -1,4 +1,3 @@
-import { InfoOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -11,59 +10,47 @@ import {
   MenuItem,
   Select,
   TextField,
-  Tooltip,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 const ModalRule = ({
-  dataEdit = null,
+  dataEdit,
   isOpen,
   onClose,
   setRefresh,
-  refresh,
 }) => {
   const [listRules, setListRules] = useState([]);
-  //eslint-disable-next-line
+  // eslint-disable-next-line no-unused-vars
   const [permissions, setPermissions] = useState([]);
   const [rules, setRules] = useState([]);
   const [checkedRules, setCheckedRules] = useState([]);
-  const [table, setTable] = useState(dataEdit?.company_table_id || 1);
-  const [column, setColumn] = useState(dataEdit?.name || "");
-  const [columnLabel, setColumnLabel] = useState(dataEdit?.label || "");
-  const [priority, setPriority] = useState(dataEdit?.priority || "");
-  //eslint-disable-next-line
-  const [validations, setValidations] = useState(dataEdit?.validations || []);
+  const [column, setColumn] = useState("");
+  const [columnLabel, setColumnLabel] = useState("");
+  const [priority, setPriority] = useState("");
+  // eslint-disable-next-line no-unused-vars
+  const [validations, setValidations] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-
-  const { user } = useContext(AuthContext);
-  const [company, setCompany] = useState("");
-  const [companyId, setCompanyId] = useState(user?.user?.company?.id);
-  const [companies, setCompanies] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [rulesLoaded, setRulesLoaded] = useState(false);
 
   const [ruleDetails, setRuleDetails] = useState({});
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const responseCompany = await api.get(`/companies/get_companies`);
-        setCompanies(responseCompany.data.data);
-      } catch (error) {
-        console.error("Erro ao consumir as empresas do sistema", error);
-      }
-    };
-
     if (dataEdit) {
-      getData();
+      setColumn(dataEdit.name);
+      setColumnLabel(dataEdit.label);
+      setPriority(dataEdit.priority);
+      setValidations(dataEdit.validations);
+    } else {
+      setColumn("");
+      setColumnLabel("");
+      setPriority("");
+      setValidations([]);
+      setSelectAll(false);
     }
-  }, []);
-
-  const handleCompanyChange = (event) => {
-    setCompany(event.target.value);
-    setCompanyId(event.target.value);
-  };
+  }, [dataEdit]);
 
   const handleSelectAll = () => {
     if (!selectAll) {
@@ -90,15 +77,42 @@ const ModalRule = ({
       try {
         const responsePermissions = await api.get(`/permissions`);
         setPermissions(responsePermissions.data.data);
-
+  
         const responseRules = await api.get(`/rules`);
         setRules(responseRules.data.data);
+        setRulesLoaded(true); // Marca que as regras foram carregadas
       } catch (error) {
         console.error("Erro ao acessar as roles por empresa", error);
       }
     };
     getData();
   }, [dataEdit]);
+
+  useEffect(() => {
+    if (!dataEdit?.validations?.length || !rules.length) return;
+
+    const updatedRuleDetails = {};
+    const updatedCheckedRules = [];
+    const updatedListRules = [];
+  
+    dataEdit?.validations.forEach((validation) => {
+      const rule = rules?.find((r) => r.name === validation.name);
+      
+      if (rule) {
+        updatedRuleDetails[rule.id] = {
+          params: validation.params || "",
+          message: validation.message || "",
+        };
+        updatedCheckedRules.push(rule.id);
+        updatedListRules.push(rule.id);
+      }
+    });
+  
+    setRuleDetails(updatedRuleDetails);
+    setCheckedRules(updatedCheckedRules);
+    setListRules(updatedListRules);
+  }, [dataEdit, rules]);
+  
 
   const handleRuleChange = (ruleId, field, value) => {
     setRuleDetails((prev) => ({
@@ -136,112 +150,82 @@ const ModalRule = ({
           dataToPost,
         );
         toast.success("Dados editados com sucesso!");
-        onClose();
-        setRefresh(!refresh);
+
       } catch (error) {
         console.error("Erro ao editar os dados", error);
         toast.error("Erro ao editar os dados");
       }
     } else {
       try {
-        await api.post(`/company_table_columns/${companyId}/rules`, dataToPost);
+        await api.post(`/company_table_columns/${1}/rules`, dataToPost);
         toast.success("Dados salvos com sucesso!");
-        onClose();
-        setRefresh(!refresh);
       } catch (error) {
         console.error("Erro ao salvar os dados", error);
         toast.error("Erro ao salvar os dados");
       }
     }
 
-    onClose();
   };
 
   const handleSave = () => {
-    if (!table || !column || !priority || !listRules.length) {
-      toast.warning(
-        "Preencha os campos obrigatórios: Tabela, coluna, prioridade e regras",
-      );
-      return;
-    }
+    // if (!column || !priority || !listRules.length) {
+    //   toast.warning(
+    //     "Preencha os campos obrigatórios: Tabela, coluna, prioridade e regras",
+    //   );
+    //   return;
+    // }
     saveData();
+
+    cleanFields();
+
+    onClose();
+    setRefresh(prev => !prev);
   };
 
   const handlePermissions = (e, ruleId) => {
+    let updatedCheckedRules;
     if (e.target.checked) {
-      setListRules((prev) => [...prev, ruleId]);
-      setCheckedRules((prev) => [...prev, ruleId]);
-      setRuleDetails((prev) => ({
-        ...prev,
-        [ruleId]: prev[ruleId] || { params: "", message: "" },
-      }));
+      updatedCheckedRules = [...checkedRules, ruleId];
     } else {
-      setListRules((prev) => prev.filter((id) => id !== ruleId));
-      setCheckedRules((prev) => prev.filter((id) => id !== ruleId));
-      setRuleDetails((prev) => {
-        const updated = { ...prev };
-        delete updated[ruleId];
-        return updated;
-      });
+      updatedCheckedRules = checkedRules.filter((id) => id !== ruleId);
     }
+    setCheckedRules(updatedCheckedRules);
+    setListRules(updatedCheckedRules);
+    setRuleDetails((prev) => {
+      const updated = { ...prev };
+      if (e.target.checked) {
+        updated[ruleId] = prev[ruleId] || { params: "", message: "" };
+      } else {
+        delete updated[ruleId];
+      }
+      return updated;
+    });
+    setSelectAll(updatedCheckedRules.length === rules.length);
   };
 
-  useEffect(() => {
-    if (!dataEdit?.validations?.length || !rules.length) return;
-
-    const updatedRuleDetails = {};
-    const updatedCheckedRules = [];
-    const updatedListRules = [];
-
-    dataEdit.validations.forEach((validation) => {
-      const rule = rules.find((r) => r.name === validation.name);
-      if (rule) {
-        updatedRuleDetails[rule.id] = {
-          params: validation.params || "",
-          message: validation.message || "",
-        };
-        updatedCheckedRules.push(rule.id);
-        updatedListRules.push(rule.id);
-      }
-    });
-
-    setRuleDetails(updatedRuleDetails);
-    setCheckedRules(updatedCheckedRules);
-    setListRules(updatedListRules);
-  }, [dataEdit, rules]);
+  const cleanFields = () => {
+    setColumn("");
+    setColumnLabel("");
+    setPriority("");
+    setSelectAll(false);
+  };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} fullWidth>
+    <Dialog open={isOpen} onClose={() => {
+      cleanFields();
+      onClose();
+    }} fullWidth>
       <DialogTitle>
-        {dataEdit.id
+        {dataEdit?.id
           ? "Editar coluna na auditoria"
           : "Adicionar coluna na auditoria"}
       </DialogTitle>
       <DialogContent className="flex flex-col gap-4">
-        {user?.user?.role?.name === "super-admin" && (
-          <Box>
-            <InputLabel htmlFor="company">Empresa</InputLabel>
-            <Select
-              id="company"
-              value={company}
-              onChange={handleCompanyChange}
-              fullWidth
-            >
-              {companies.map((companyItem) => (
-                <MenuItem key={companyItem.id} value={companyItem.id}>
-                  {companyItem.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
-        )}
         <Box>
           <InputLabel htmlFor="table">Tabela</InputLabel>
           <Select
             id="table"
-            value={table}
-            disabled
-            onChange={(e) => setTable(e.target.value)}
+            value={1}
             fullWidth
           >
             <MenuItem key={1} value={1}>
@@ -269,13 +253,16 @@ const ModalRule = ({
         </Box>
         <Box>
           <InputLabel htmlFor="priority">Prioridade *</InputLabel>
-          <TextField
+          <Select
             id="priority"
-            type="number"
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
             fullWidth
-          />
+          >
+            <MenuItem value={0}>Alto</MenuItem>
+            <MenuItem value={1}>Moderada</MenuItem>
+            <MenuItem value={2}>Baixa</MenuItem>
+          </Select>
         </Box>
         <Box>
           <InputLabel htmlFor="permissions" className="mb-1">
@@ -298,31 +285,25 @@ const ModalRule = ({
                     checked={listRules.includes(rule.id)}
                     onChange={(e) => handlePermissions(e, rule.id)}
                   />
-                  {rule.name}
-                  <Tooltip
-                    title={rule.description || "Não contém."}
-                    placement="right"
-                    arrow
-                  >
-                    <InfoOutlined
-                      fontSize="small"
-                      className="ml-1 mb-0.5"
-                      color="action"
-                    />
-                  </Tooltip>
+                  {rule.label}
+                  <div className="text-gray-400 text-sm ml-2">
+                    <b>Descrição:</b> {rule.description}
+                  </div>
                 </label>
                 {checkedRules.includes(rule.id) && (
                   <Box mt={2}>
-                    <TextField
-                      placeholder="Parâmetros"
-                      size="small"
-                      value={ruleDetails[rule.id]?.params || ""}
-                      onChange={(e) =>
-                        handleRuleChange(rule.id, "params", e.target.value)
-                      }
-                      fullWidth
-                      margin="dense"
-                    />
+                    {rule?.has_params !== 0 && (
+                      <TextField
+                        placeholder="Parâmetros"
+                        size="small"
+                        value={ruleDetails[rule.id]?.params || ""}
+                        onChange={(e) =>
+                          handleRuleChange(rule.id, "params", e.target.value)
+                        }
+                        fullWidth
+                        margin="dense"
+                      />
+                    )}
                     <TextField
                       placeholder="Mensagem"
                       size="small"
@@ -341,7 +322,13 @@ const ModalRule = ({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="info">
+        <Button
+          onClick={() => {
+            cleanFields();
+            onClose();
+          }}
+          color="info"
+        >
           CANCELAR
         </Button>
         <Button onClick={handleSave} color="primary">

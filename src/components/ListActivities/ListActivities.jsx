@@ -26,12 +26,12 @@ const ListActivities = () => {
   const [lastPage, setLastPage] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
-  const [table, setTable] = useState("");
+  const [table, setTable] = useState("clients");
   const [priorityOrder, setPriorityOrder] = useState("desc");
-  const [status, setStatus] = useState(null);
+  const [status, setStatus] = useState(0);
   const [createdAt, setCreatedAt] = useState([]);
   const [per_page, setPer_page] = useState(20);
-  const [priority, setPriority] = useState(null);
+  const [priority, setPriority] = useState("");
 
   const isMobile = useMediaQuery("(max-width: 600px)");
 
@@ -52,9 +52,9 @@ const ListActivities = () => {
           {
             params: {
               search: filterParams?.search,
-              priority_order: filterParams?.priorityOrder,
+              // priority_order: "",
               ...(status !== null && { status: status }),
-              priority: filterParams?.priority,
+              // priority: "",
               created_at: [
                 filterParams?.createdAt[0],
                 filterParams?.createdAt[1],
@@ -67,7 +67,7 @@ const ListActivities = () => {
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
       } catch (error) {
-        console.error("Erro ao verificar lista de usuários", error);
+        console.error("Erro ao filtrar as tasks", error);
       } finally {
         setLoading(false);
       }
@@ -202,7 +202,7 @@ const ListActivities = () => {
             onChange={(e) => setPriority(e.target.value)}
             fullWidth
           >
-            <MenuItem value={null}>Todas</MenuItem>
+            <MenuItem value={""}>Todas</MenuItem>
             <MenuItem value={1}>Muito Baixa</MenuItem>
             <MenuItem value={2}>Baixa</MenuItem>
             <MenuItem value={3}>Urgente</MenuItem>
