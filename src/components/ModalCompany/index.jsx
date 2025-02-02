@@ -79,7 +79,6 @@ const ModalCompany = ({
       saveData();
     }
 
-
     cleanFields();
 
     onClose();

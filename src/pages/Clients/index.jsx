@@ -38,7 +38,7 @@ const Clients = () => {
   const [deleteId, setDeleteId] = useState(null);
   //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "desc" });
 
   const { permissions } = useContext(AuthContext);
 
@@ -49,7 +49,8 @@ const Clients = () => {
         const response = await api.get(
           `/clients?page=${currentPage}&per_page=10`,
         );
-        setData(response.data.data);
+        const sortedData = response.data.data.sort((a, b) => b.id - a.id);
+        setData(sortedData);
         setCurrentPage(response.data.current_page);
         setLastPage(response.data.last_page);
       } catch (error) {

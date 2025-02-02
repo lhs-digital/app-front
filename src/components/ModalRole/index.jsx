@@ -19,13 +19,21 @@ import { toast } from "react-toastify";
 import api from "../../services/api";
 
 const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
-  const [name, setName] = useState(dataEdit?.name || "");
-  const [nivel, setNivel] = useState(dataEdit?.nivel || "");
-  const [company, setCompany] = useState(dataEdit?.company?.id || "");
+  const [name, setName] = useState("");
+  const [nivel, setNivel] = useState("");
+  const [company, setCompany] = useState("");
   const [rolePermissions, setRolePermissions] = useState([]);
   const [permissions, setPermissions] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+
+  useEffect(() => {
+    if (dataEdit) {
+      setName(dataEdit?.name || "");
+      setNivel(dataEdit?.nivel !== undefined ? dataEdit.nivel : "");
+      setCompany(dataEdit?.company?.id || "");
+    }
+  }, [dataEdit]);
 
   const handleSelectAll = () => {
     if (!selectAll) {
@@ -71,14 +79,6 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
     }
   }, [rolePermissions, permissions]);
 
-  useEffect(() => {
-    if (dataEdit) {
-      setName(dataEdit.name || "");
-      setNivel(dataEdit.nivel || "");
-      setCompany(dataEdit.company?.id || "");
-    }
-  }, [dataEdit]);
-
   const saveData = async () => {
     try {
       await api.post("/roles", {
@@ -116,7 +116,7 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
   };
 
   const handleSave = () => {
-    if (!name || !nivel) {
+    if (!name || nivel === "") {
       toast.warning("Preencha os campos obrigatórios: Nome, Nível e Empresa");
       return;
     }
@@ -150,6 +150,7 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
     setNivel("");
     setCompany("");
     setRolePermissions([]);
+    setSelectAll(false);
   };
 
   return (
@@ -175,9 +176,9 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
             fullWidth
             displayEmpty
           >
-            <MenuItem value={1}>Baixo</MenuItem>
-            <MenuItem value={2}>Médio</MenuItem>
-            <MenuItem value={3}>Alto</MenuItem>
+            <MenuItem value={2}>Baixo</MenuItem>
+            <MenuItem value={1}>Médio</MenuItem>
+            <MenuItem value={0}>Alto</MenuItem>
           </Select>
         </Box>
         <Box>

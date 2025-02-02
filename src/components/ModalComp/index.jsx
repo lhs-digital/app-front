@@ -145,6 +145,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
             placeholder="Selecione uma opção"
             value={role?.id}
             onChange={handleRoleChange}
+            disabled={!company}
             fullWidth
           >
             {roles.map((roleItem) => (

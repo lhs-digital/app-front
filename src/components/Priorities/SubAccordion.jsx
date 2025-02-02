@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 
 const SubAccordion = ({ column, data, handleEdit, handleDelete }) => {
-  console.log("column", column);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
   return (

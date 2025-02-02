@@ -24,7 +24,7 @@ import {
   validarEmail,
 } from "../../services/utils";
 
-const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
+const ModalFormClient = ({ isOpen, onClose, selectedActivitie, setRefresh }) => {
   //eslint-disable-next-line
   const [fields, setFields] = useState([]);
   const fieldsWithErrors = selectedActivitie?.columns;
@@ -56,7 +56,7 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
           tipo_pessoa:
             fieldsWithErrors?.findIndex(
               (field) => field.label === "Tipo de Pessoa",
-            ) !== -1
+            ) !== -1 && selectedActivitie?.status === 0
               ? ""
               : responseClient?.data.tipo_pessoa,
           whatsapp: responseClient?.data.whatsapp || "",
@@ -66,7 +66,7 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
           contribuinte_icms:
             fieldsWithErrors?.findIndex(
               (field) => field.label === "Contribuinte de ICMS",
-            ) !== -1
+            ) !== -1 && selectedActivitie?.status === 0
               ? ""
               : responseClient?.data.contribuinte_icms,
         });
@@ -90,7 +90,13 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
         contribuinte_icms: form.contribuinte_icms,
       });
 
-      toast.success("Cliente editado com sucesso!");
+      toast.success("Correção de dados do cliente concluída com sucesso!");
+
+      await api.put(`auditing/${selectedActivitie?.id}/toggle_status`);
+
+      setRefresh((prev) => !prev);
+      onClose();
+
     } catch (error) {
       console.error("Erro ao editar usuário", error);
     }
@@ -161,12 +167,12 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                   disabled={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Numero da residência",
-                    ) === -1
+                    ) === -1 || selectedActivitie?.status
                   }
                   error={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Numero da residência",
-                    ) !== -1
+                    ) !== -1 || selectedActivitie?.status
                   }
                   onKeyDown={(e) => {
                     if (e.key === "-" || e.key === "e" || e.key === "E") {
@@ -189,12 +195,12 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                   disabled={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Email",
-                    ) === -1
+                    ) === -1 || selectedActivitie?.status
                   }
                   error={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Email",
-                    ) !== -1
+                    ) !== -1 || selectedActivitie?.status
                   }
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
@@ -213,12 +219,12 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                   disabled={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Tipo de Pessoa",
-                    ) === -1
+                    ) === -1 || selectedActivitie?.status
                   }
                   error={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Tipo de Pessoa",
-                    ) !== -1
+                    ) !== -1 || selectedActivitie?.status
                   }
                   onChange={(e) =>
                     setForm({
@@ -228,7 +234,6 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                     })
                   }
                 >
-                  <MenuItem value="">Selecione uma opção</MenuItem>
                   <MenuItem value="F">Pessoa Física</MenuItem>
                   <MenuItem value="J">Pessoa Jurídica</MenuItem>
                 </Select>
@@ -246,12 +251,12 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                   disabled={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Whatsapp",
-                    ) === -1
+                    ) === -1 || selectedActivitie?.status
                   }
                   error={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Whatsapp",
-                    ) !== -1
+                    ) !== -1 || selectedActivitie?.status
                   }
                   maxLength={15}
                   onChange={(e) => {
@@ -282,12 +287,12 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                   disabled={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Data de Nascimento",
-                    ) === -1
+                    ) === -1 || selectedActivitie?.status
                   }
                   error={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Data de Nascimento",
-                    ) !== -1
+                    ) !== -1 || selectedActivitie?.status
                   }
                   onChange={(e) =>
                     setForm({ ...form, data_nascimento: e.target.value })
@@ -312,13 +317,13 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                     fieldsWithErrors?.findIndex(
                       (field) =>
                         field.label === "CPF" || field.column === "CNPJ",
-                    ) === -1
+                    ) === -1 || selectedActivitie?.status
                   }
                   error={
                     fieldsWithErrors?.findIndex(
                       (field) =>
                         field.label === "CPF" || field.column === "CNPJ",
-                    ) !== -1
+                    ) !== -1 || selectedActivitie?.status
                   }
                   maxLength={form.tipo_pessoa === "F" ? 14 : 18}
                   onChange={(e) => {
@@ -368,12 +373,12 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                   disabled={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Referência do Endereço",
-                    ) === -1
+                    ) === -1 || selectedActivitie?.status
                   }
                   error={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Referência do Endereço",
-                    ) !== -1
+                    ) !== -1 || selectedActivitie?.status
                   }
                   onChange={(e) =>
                     setForm({ ...form, referencia: e.target.value })
@@ -389,22 +394,21 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
                 </FormLabel>
                 <Select
                   id="contribuinte_icms"
-                  value={form.contribuinte_icms}
+                  value={form?.contribuinte_icms}
                   disabled={
-                    fieldsWithErrors?.findIndex(
+                    (fieldsWithErrors?.findIndex(
                       (field) => field.label === "Contribuinte de ICMS",
-                    ) === -1
+                    ) === -1) || selectedActivitie?.status
                   }
                   error={
                     fieldsWithErrors?.findIndex(
                       (field) => field.label === "Contribuinte de ICMS",
-                    ) !== -1
+                    ) !== -1 || selectedActivitie?.status
                   }
                   onChange={(e) =>
                     setForm({ ...form, contribuinte_icms: e.target.value })
                   }
                 >
-                  <MenuItem value="">Selecione uma opção</MenuItem>
                   <MenuItem value={0}>Não</MenuItem>
                   <MenuItem value={1}>Sim</MenuItem>
                 </Select>
@@ -418,7 +422,7 @@ const ModalFormClient = ({ isOpen, onClose, selectedActivitie }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Voltar</Button>
-        <Button variant="contained" color="primary" onClick={handleSave}>
+        <Button variant="contained" color="primary" onClick={handleSave} disabled={selectedActivitie?.status}>
           Atualizar Dados
         </Button>
       </DialogActions>

@@ -88,7 +88,7 @@ const Priorities = () => {
   const handleRemove = async () => {
     try {
       await api.delete(`/company_table_columns/${deleteId}`);
-      setRefresh(!refresh);
+      setRefresh(prev => !prev);
       toast.success("Regra removida com sucesso!");
       setIsDeleteOpen(false);
     } catch (error) {
@@ -101,8 +101,6 @@ const Priorities = () => {
       <ModalRule
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        data={data}
-        setData={setData}
         dataEdit={dataEdit}
         setDataEdit={setDataEdit}
         setRefresh={setRefresh}

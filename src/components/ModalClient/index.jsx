@@ -10,7 +10,7 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import {
@@ -19,6 +19,7 @@ import {
   validarDataNascimento,
   validarEmail,
 } from "../../services/utils";
+import InputMask from "react-input-mask";
 
 const ModalClient = ({
   data,
@@ -26,20 +27,31 @@ const ModalClient = ({
   isOpen,
   onClose,
   setRefresh,
-  refresh,
 }) => {
-  const [email, setEmail] = useState(dataEdit?.email || "");
-  const [numero, setNumero] = useState(dataEdit?.numero || "");
-  const [tipoPessoa, setTipoPessoa] = useState(dataEdit?.tipo_pessoa || "");
-  const [whatsapp, setWhatsapp] = useState(dataEdit?.whatsapp || "");
+  const [email, setEmail] = useState("");
+  const [numero, setNumero] = useState("");
+  const [tipoPessoa, setTipoPessoa] = useState(-1);
+  const [whatsapp, setWhatsapp] = useState("");
   const [dataNascimento, setDataNascimento] = useState(
-    dataEdit?.data_nascimento || "",
+    "",
   );
-  const [cnpjCpf, setCnpjCpf] = useState(dataEdit?.cnpj_cpf || "");
-  const [referencia, setReferencia] = useState(dataEdit?.referencia || "");
+  const [cnpjCpf, setCnpjCpf] = useState("");
+  const [referencia, setReferencia] = useState("");
   const [contribuenteIcms, setContribuenteIcms] = useState(
-    dataEdit?.contribuinte_icms || "",
+    -1,
   );
+
+  useEffect(() => {
+    setEmail(dataEdit?.email || "");
+    setNumero(dataEdit?.numero || "");
+    setTipoPessoa(dataEdit?.tipo_pessoa || -1);
+    setWhatsapp(dataEdit?.whatsapp || "");
+    setDataNascimento(dataEdit?.data_nascimento || "");
+    setCnpjCpf(dataEdit?.cnpj_cpf || "");
+    setReferencia(dataEdit?.referencia || "");
+    setContribuenteIcms(dataEdit?.contribuinte_icms || -1);
+  }, [dataEdit]);
+
 
   const saveData = async () => {
     try {
@@ -54,10 +66,11 @@ const ModalClient = ({
         contribuinte_icms: contribuenteIcms,
       });
 
-      setRefresh(!refresh);
-      toast.success("Usuário cadastrado com sucesso!");
+      setRefresh((prev) => !prev);
+
+      toast.success("Cliente cadastrado com sucesso!");
     } catch (error) {
-      console.error("Erro ao salvar usuário", error);
+      console.error("Erro ao salvar cliente", error);
     }
   };
 
@@ -74,23 +87,24 @@ const ModalClient = ({
         contribuinte_icms: contribuenteIcms,
       });
 
-      setRefresh(!refresh);
-      toast.success("Usuário editado com sucesso!");
+      setRefresh((prev) => !prev);
+
+      toast.success("Cliente editado com sucesso!");
     } catch (error) {
-      console.error("Erro ao editar usuário", error);
+      console.error("Erro ao editar Cliente", error);
     }
   };
 
   const handleSave = () => {
-    if (
+     if (
       !email ||
       !numero ||
-      !tipoPessoa ||
+      tipoPessoa === -1 ||
       !whatsapp ||
       !dataNascimento ||
       !cnpjCpf ||
       !referencia ||
-      !contribuenteIcms
+      contribuenteIcms === -1
     ) {
       toast.warning("Preencha os campos obrigatórios!");
       return;
@@ -129,7 +143,20 @@ const ModalClient = ({
       saveData();
     }
 
+    cleanFields();
+
     onClose();
+  };
+
+  const cleanFields = () => {
+    setEmail("");
+    setNumero("");
+    setTipoPessoa("");
+    setWhatsapp("");
+    setDataNascimento("");
+    setCnpjCpf("");
+    setReferencia("");
+    setContribuenteIcms("");
   };
 
   const emailAlreadyExists = () => {
@@ -155,29 +182,39 @@ const ModalClient = ({
               type="text"
               value={email}
               disabled={dataEdit?.email}
+              placeholder="Digite o E-mail"
               onChange={(e) => setEmail(e.target.value)}
               fullWidth
             />
           </Box>
           <Box display={{ xs: "block", md: "flex" }} gap={2}>
             <Box flexBasis={{ xs: "100%", md: "50%" }}>
-              <InputLabel>Número *</InputLabel>
+              <InputLabel>Número da Residência*</InputLabel>
               <TextField
                 type="number"
                 value={numero}
+                placeholder="Digite o Número da residência"
                 onChange={(e) => setNumero(e.target.value)}
                 fullWidth
               />
             </Box>
             <Box flexBasis={{ xs: "100%", md: "50%" }}>
               <InputLabel>Whatsapp *</InputLabel>
-              <TextField
-                type="text"
+              <InputMask
+                mask="(99) 99999-9999"
                 value={whatsapp}
-                maxLength={15}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                fullWidth
-              />
+                onChange={(e) => setWhatsapp(e.target.value.replace(/\D/g, ""))}
+              >
+                {(inputProps) => (
+                  <TextField
+                    {...inputProps}
+                    id="whatsapp"
+                    fullWidth
+                    type="tel"
+                    placeholder="Digite o WhatsApp"
+                  />
+                )}
+              </InputMask>
             </Box>
           </Box>
           <Box display={{ xs: "block", md: "flex" }} gap={2}>
@@ -185,9 +222,10 @@ const ModalClient = ({
               <InputLabel>Tipo de Pessoa *</InputLabel>
               <Select
                 value={tipoPessoa}
-                onChange={(e) => setTipoPessoa(e.target.value)}
+                onChange={(e) => (setTipoPessoa(e.target.value), setCnpjCpf(""))}
                 fullWidth
               >
+                <MenuItem value={-1} disabled>Selecione</MenuItem>
                 <MenuItem value="F">Física</MenuItem>
                 <MenuItem value="J">Jurídica</MenuItem>
               </Select>
@@ -199,6 +237,7 @@ const ModalClient = ({
                 onChange={(e) => setContribuenteIcms(e.target.value)}
                 fullWidth
               >
+                <MenuItem value={-1} disabled>Selecione</MenuItem>
                 <MenuItem value={1}>Sim</MenuItem>
                 <MenuItem value={0}>Não</MenuItem>
               </Select>
@@ -212,16 +251,44 @@ const ModalClient = ({
                 value={dataNascimento}
                 onChange={(e) => setDataNascimento(e.target.value)}
                 fullWidth
+                inputProps={{ max: new Date().toISOString().split("T")[0] }}
               />
             </Box>
             <Box flexGrow={1}>
-              <InputLabel>CNPJ/CPF *</InputLabel>
+              <InputLabel>{tipoPessoa === "F" ? "CPF" : tipoPessoa === "J" ? "CNPJ" : "CPF/CNPJ"} *</InputLabel>
               <TextField
-                type="text"
-                value={cnpjCpf}
-                maxLength={tipoPessoa === "F" ? 14 : 18}
-                onChange={(e) => setCnpjCpf(e.target.value)}
-                fullWidth
+                 id="cnpj_cpf"
+                 type="text"
+                 value={cnpjCpf}
+                 fullWidth
+                 inputProps={tipoPessoa === "F" ? { maxLength: 14 } : { maxLength: 18 }}
+                 placeholder={
+                  tipoPessoa === "F" ? "Digite o CPF" : "Digite o CNPJ"
+                 }
+                 onChange={(e) => {
+                   const value = e.target.value.replace(/\D/g, "");
+                   let formatted = value;
+
+                   if (tipoPessoa === "F") {
+                     formatted = value
+                       .replace(/(\d{3})(\d)/, "$1.$2")
+                       .replace(/(\d{3})(\d)/, "$1.$2")
+                       .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                   } else {
+                     formatted = value
+                       .replace(/(\d{2})(\d)/, "$1.$2")
+                       .replace(/(\d{3})(\d)/, "$1.$2")
+                       .replace(/(\d{3})(\d)/, "$1/$2")
+                       .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+                   }
+
+                   setCnpjCpf(
+                     formatted.slice(
+                       0,
+                       tipoPessoa === "F" ? 14 : 18,
+                     ),
+                   );
+                 }}
               />
             </Box>
           </Box>
