@@ -1,22 +1,40 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Ver mais em https://help.github.com/articles/ignoring-files/
 
-# dependencies
+# Dependências
 /node_modules
 /.pnp
 .pnp.js
+package-lock.json
+yarn.lock
 
-# testing
+# Build
+/build
+/dist
+/.next
+/.vite
+/.parcel-cache
+
+# Testes
 /coverage
 
-# production
-
-# misc
+# Configurações do Ambiente
 .DS_Store
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Caches e Linting
+/.eslintcache
+
+# Configuração de IDEs e Editores
+.vscode/
+.idea/
+*.swp
+*.swo
