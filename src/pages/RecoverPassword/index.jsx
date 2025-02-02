@@ -1,4 +1,3 @@
-import { Heading, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -18,9 +17,7 @@ const RecoverPassword = () => {
     }
 
     try {
-      const response = await api.post(`/password-email`, {
-        email,
-      });
+      const response = await api.post(`/password-email`, { email });
 
       if (response.data.status !== "error") {
         toast.success("Código de recuperação enviado com sucesso!");
@@ -41,8 +38,8 @@ const RecoverPassword = () => {
       <div className="login">
         <img src={logo} alt="Logo do App Provedores" />
         <div className="login-area">
-          <Heading>App Provedores</Heading>
-          <Text color="white">Sistema de Gerenciamento de Provedores</Text>
+          <h1>App Provedores</h1>
+          <p>Sistema de Gerenciamento de Provedores</p>
         </div>
 
         <form onSubmit={handleSubmit}>
