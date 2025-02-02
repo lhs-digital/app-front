@@ -18,14 +18,13 @@ import { Fragment, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 
-const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
-  const [name, setName] = useState(data?.name || "");
-  const [nivel, setNivel] = useState(data?.nivel);
-  const [company, setCompany] = useState(data.company?.id || "");
+const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
+  const [name, setName] = useState(dataEdit?.name || "");
+  const [nivel, setNivel] = useState(dataEdit?.nivel || "");
+  const [company, setCompany] = useState(dataEdit?.company?.id || "");
   const [rolePermissions, setRolePermissions] = useState([]);
   const [permissions, setPermissions] = useState([]);
   const [companies, setCompanies] = useState([]);
-
   const [selectAll, setSelectAll] = useState(false);
 
   const handleSelectAll = () => {
@@ -47,10 +46,10 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
         const responsePermissions = await api.get(`/permissions`);
         setPermissions(responsePermissions.data.data);
 
-        if (data) {
-          const responsePermissions = await api.get(`/roles/${data.id}`);
+        if (dataEdit) {
+          const responseRolePermissions = await api.get(`/roles/${dataEdit.id}`);
           setRolePermissions(
-            responsePermissions.data.data.permissions.map(
+            responseRolePermissions.data.data.permissions.map(
               (permission) => permission.id,
             ),
           );
@@ -59,10 +58,26 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
         console.error("Erro ao acessar as roles por empresa", error);
       }
     };
-    if (isOpen && data) {
+    if (isOpen) {
       getData();
     }
-  }, [data]);
+  }, [isOpen, dataEdit]);
+
+  useEffect(() => {
+    if (rolePermissions.length === permissions.length) {
+      setSelectAll(true);
+    } else {
+      setSelectAll(false);
+    }
+  }, [rolePermissions, permissions]);
+
+  useEffect(() => {
+    if (dataEdit) {
+      setName(dataEdit.name || "");
+      setNivel(dataEdit.nivel || "");
+      setCompany(dataEdit.company?.id || "");
+    }
+  }, [dataEdit]);
 
   const saveData = async () => {
     try {
@@ -86,7 +101,7 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
 
   const updateUser = async () => {
     try {
-      await api.put(`/roles/${data.id}`, {
+      await api.put(`/roles/${dataEdit.id}`, {
         name,
         nivel,
         company_id: company,
@@ -106,11 +121,13 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
       return;
     }
 
-    if (data.id) {
+    if (dataEdit?.id) {
       updateUser();
     } else {
       saveData();
     }
+
+    cleanData();
 
     onClose();
   };
@@ -128,10 +145,17 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
     }
   };
 
+  const cleanData = () => {
+    setName("");
+    setNivel("");
+    setCompany("");
+    setRolePermissions([]);
+  };
+
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle>{data.id ? "Editar Role" : "Cadastrar Role"}</DialogTitle>
-      <DialogContent>
+      <DialogTitle>{dataEdit?.id ? "Editar Role" : "Cadastrar Role"}</DialogTitle>
+      <DialogContent className="w-[480px] flex flex-col gap-4">
         <Box>
           <InputLabel htmlFor="name">Nome *</InputLabel>
           <TextField
@@ -139,16 +163,22 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            fullWidth
           />
         </Box>
         <Box>
           <InputLabel htmlFor="nivel">Nível *</InputLabel>
-          <TextField
+          <Select
             id="nivel"
-            type="number"
             value={nivel}
             onChange={(e) => setNivel(e.target.value)}
-          />
+            fullWidth
+            displayEmpty
+          >
+            <MenuItem value={1}>Baixo</MenuItem>
+            <MenuItem value={2}>Médio</MenuItem>
+            <MenuItem value={3}>Alto</MenuItem>
+          </Select>
         </Box>
         <Box>
           <InputLabel htmlFor="company">Empresa</InputLabel>
@@ -156,8 +186,9 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
             id="company"
             label="Empresa"
             value={company}
-            disabled={data.company?.id}
+            disabled={dataEdit?.company?.id}
             onChange={handleCompanyChange}
+            fullWidth
           >
             {companies.map((companyItem) => (
               <MenuItem key={companyItem.id} value={companyItem.id}>
@@ -168,13 +199,14 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
         </Box>
         <Box>
           <InputLabel htmlFor="permissions">Permissões</InputLabel>
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             <Grid item xs={12}>
               <Checkbox
                 id="selectAll"
-                isChecked={selectAll}
+                checked={selectAll}
                 onChange={handleSelectAll}
                 width="100%"
+                inputProps={{ "aria-label": "Selecionar todas as permissões" }}
               />
               <Typography component="span">
                 Selecionar todas as permissões
@@ -182,11 +214,11 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
             </Grid>
 
             {permissions.map((permission, index) => (
-              <Fragment key={permission.id}>
-                {permission.category !== permissions[index - 1]?.category && (
+              <Fragment key={permission?.id}>
+                {permission?.category !== permissions[index - 1]?.category && (
                   <>
-                    <Typography>
-                      <b>{permission.category}</b>
+                    <Typography marginLeft={1}>
+                      <b>{permission?.category}</b>
                     </Typography>
                     <Divider />
                   </>
@@ -195,10 +227,10 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
                 <Grid item xs={12}>
                   <Checkbox
                     id={permission?.name}
-                    isChecked={rolePermissions.includes(permission.id)}
-                    onChange={(e) => handlePermissions(e, permission.id)}
+                    checked={rolePermissions.includes(permission?.id)}
+                    onChange={(e) => handlePermissions(e, permission?.id)}
                   />
-                  <Typography component="span">{permission.label}</Typography>
+                  <Typography component="span">{permission?.label}</Typography>
                 </Grid>
               </Fragment>
             ))}
@@ -206,7 +238,7 @@ const ModalRole = ({ data, isOpen, onClose, setRefresh, refresh }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button color="inherit" onClick={onClose}>
+        <Button color="inherit" onClick={() => { onClose(); cleanData(); }}>
           CANCELAR
         </Button>
         <Button color="primary" onClick={handleSave}>

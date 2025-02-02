@@ -81,11 +81,6 @@ const sidebarItems = [
     icon: <FaHome size={18} />,
   },
   {
-    label: "Usuários",
-    url: "/users",
-    icon: <FaUser size={18} />,
-  },
-  {
     label: "Empresas",
     url: "/companies",
     icon: <FaBriefcase size={18} />,
@@ -94,6 +89,11 @@ const sidebarItems = [
     label: "Papéis & Permissões",
     url: "/roles",
     icon: <FaLock size={18} />,
+  },
+  {
+    label: "Usuários",
+    url: "/users",
+    icon: <FaUser size={18} />,
   },
   {
     label: "Clientes",

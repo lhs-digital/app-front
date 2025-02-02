@@ -38,11 +38,14 @@ const ModalViewCompany = ({ selectedCompany, isOpen, onClose }) => {
         </Box>
         <Box>
           <b>Roles:</b>
-          {roles?.map((role) => (
-            <Box key={role.id} ml="4">
-              {role.name}
-            </Box>
-          ))}
+          {
+            roles.length === 0 ? (
+              <Box>Nenhuma role foi encontrada</Box>
+            ) : roles?.map((role) => (
+                <Box key={role.id} ml="4">
+                  {role.name}
+                </Box>
+              ))}
         </Box>
       </DialogContent>
       <DialogActions>

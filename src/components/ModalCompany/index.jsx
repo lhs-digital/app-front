@@ -6,7 +6,7 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 
@@ -18,8 +18,16 @@ const ModalCompany = ({
   setRefresh,
   refresh,
 }) => {
-  const [name, setName] = useState(dataEdit.name || "");
-  const [cnpj, setCnpj] = useState(dataEdit.cnpj || "");
+  const [name, setName] = useState("");
+  const [cnpj, setCnpj] = useState("");
+
+  useEffect(() => {
+    if (dataEdit.id) {
+      setName(dataEdit.name);
+      setCnpj(dataEdit.cnpj);
+    }
+  }, [dataEdit]);
+
 
   const saveData = async () => {
     try {
@@ -55,6 +63,11 @@ const ModalCompany = ({
       return;
     }
 
+    if (cnpj.length !== 18) {
+      toast.warning("CNPJ inválido!");
+      return;
+    }
+
     if (cnpjAlreadyExists()) {
       toast.warning("CNPJ já cadastrado!");
       return;
@@ -66,8 +79,16 @@ const ModalCompany = ({
       saveData();
     }
 
+
+    cleanFields();
+
     onClose();
   };
+
+  const cleanFields = () => {
+    setName("");
+    setCnpj("");
+  }
 
   const cnpjAlreadyExists = () => {
     if (dataEdit.cnpj !== cnpj && data?.length) {
@@ -117,10 +138,15 @@ const ModalCompany = ({
           }}
           fullWidth
           margin="dense"
+          inputProps={{
+            maxLength: 18,
+            minLength: 18,
+            number: true
+          }}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={() => { onClose(); cleanFields(); }} color="secondary">
           CANCELAR
         </Button>
         <Button onClick={handleSave} color="primary">

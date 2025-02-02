@@ -46,7 +46,6 @@ const Companies = () => {
     key: "name",
     direction: "asc",
   });
-  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const { permissions } = useContext(AuthContext);
@@ -55,7 +54,7 @@ const Companies = () => {
     const getData = async () => {
       setLoading(true);
       try {
-        const response = await api.get(`/companies?page=${currentPage}`);
+        const response = await api.get(`/companies?page=${currentPage}&per_page=${rowsPerPage}`);
         setCurrentPage(response.data.meta.current_page);
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
@@ -121,6 +120,17 @@ const Companies = () => {
     );
   };
 
+  const handleChangePage = (event, newPage) => {
+    setCurrentPage(newPage + 1);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+    setRefresh((prev) => !prev);
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <ModalCompany
@@ -177,10 +187,10 @@ const Companies = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell onClick={() => handleSort("name")}>
+              <TableCell onClick={() => handleSort("name")} style={{ cursor: "pointer" }}>
                 Nome {getSortIcon("name")}
               </TableCell>
-              <TableCell onClick={() => handleSort("cnpj")}>
+              <TableCell onClick={() => handleSort("cnpj")} style={{ cursor: "pointer" }}>
                 CNPJ {getSortIcon("cnpj")}
               </TableCell>
               <TableCell>Ações</TableCell>
@@ -216,7 +226,7 @@ const Companies = () => {
                       (permissions) => permissions.name === "update_companies",
                     ) ? (
                       <IconButton
-                        onClick={(e) => {
+                        onClick={(e) => { 
                           e.stopPropagation();
                           handleEdit({ name, cnpj, roles_count, id, index });
                         }}
@@ -245,14 +255,11 @@ const Companies = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={data.length}
+          count={lastPage * rowsPerPage}
           rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={(event, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
+          page={currentPage - 1}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage="Linhas por página"
         />
       </TableContainer>

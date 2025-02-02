@@ -203,8 +203,8 @@ const ListActivities = () => {
             fullWidth
           >
             <MenuItem value={null}>Todas</MenuItem>
-            <MenuItem value={1}>Baixa</MenuItem>
-            <MenuItem value={2}>Moderada</MenuItem>
+            <MenuItem value={1}>Muito Baixa</MenuItem>
+            <MenuItem value={2}>Baixa</MenuItem>
             <MenuItem value={3}>Urgente</MenuItem>
           </Select>
         </Box>

@@ -25,6 +25,7 @@ import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 const Users = () => {
+  const [viewOnly, setViewOnly] = useState(false); 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: isDeleteOpen,
@@ -50,7 +51,6 @@ const Users = () => {
     key: "name",
     direction: "asc",
   });
-  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const { permissions } = useContext(AuthContext);
@@ -61,7 +61,7 @@ const Users = () => {
     const getData = async () => {
       setLoading(true);
       try {
-        const response = await api.get(`/users?page=${currentPage}`);
+        const response = await api.get(`/users?page=${currentPage}&per_page=${rowsPerPage}`);
         setCurrentPage(response.data.meta.current_page);
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
@@ -72,7 +72,7 @@ const Users = () => {
       }
     };
     getData();
-  }, [setData, currentPage, lastPage, refresh]);
+  }, [setData, currentPage, refresh]);
 
   const handleSort = (key) => {
     const direction =
@@ -111,14 +111,17 @@ const Users = () => {
     }
   };
 
-  const handleEdit = (user) => {
-    setDataEdit(user);
-    onOpen();
+  const handleEdit = (index) => {
+    const selectedUser = data;
+    setDataView(selectedUser[index]);
+    setViewOnly(false);
+    onOpenView();
   };
 
   const handleView = (index) => {
     const selectedUser = data;
     setDataView(selectedUser[index]);
+    setViewOnly(true);
     onOpenView();
   };
 
@@ -128,12 +131,14 @@ const Users = () => {
   };
 
   const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+    setCurrentPage(newPage + 1);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+    setRefresh((prev) => !prev);
   };
 
   const renderButtons = () => {
@@ -161,25 +166,28 @@ const Users = () => {
         isOpen={isOpen}
         onClose={onClose}
         data={data}
-        setData={setData}
-        dataEdit={dataEdit}
-        setDataEdit={setDataEdit}
         setRefresh={setRefresh}
         refresh={refresh}
-      />
+        setData={setData}
+        />
       <ModalDelete
         isOpen={isDeleteOpen}
         onClose={onCloseDelete}
         onConfirm={handleRemove}
-      />
+        />
       <ModalView
+        dataEdit={dataEdit}
+        viewOnly={viewOnly}
+        setDataEdit={setDataEdit}
         selectedUser={dataView}
         isOpen={isViewOpen}
+        setRefresh={setRefresh}
+        refresh={refresh}
         onClose={onCloseView}
       />
       <PageTitle
         title="Gerenciamento de Usuários"
-        subtitle="Administre, edite e remova usuários conforme necessário"
+        subtitle="Administre, edite e remova usuários conforme necessário."
         buttons={renderButtons()}
       />
       <TextField
@@ -284,7 +292,7 @@ const Users = () => {
                         fontSize={20}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleEdit({ name, email, role, company, id, index });
+                          handleEdit(index);
                         }}
                       />
                     </IconButton>
@@ -311,10 +319,10 @@ const Users = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={data.length}
+          count={lastPage * rowsPerPage}
           labelRowsPerPage="Linhas por página"
           rowsPerPage={rowsPerPage}
-          page={page}
+          page={currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelDisplayedRows={defaultLabelDisplayedRows}
