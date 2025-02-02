@@ -186,7 +186,7 @@ const Users = () => {
       />
       <PageTitle
         title="Gerenciamento de Usuários"
-        subtitle="Administre, edite e remova usuários conforme necessário"
+        subtitle="Administre, edite e remova usuários conforme necessário."
         buttons={renderButtons()}
       />
       <TextField
