@@ -21,7 +21,7 @@ import ModalViewRole from "../../components/ModalViewRole";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
-import { defaultLabelDisplayedRows } from "../../utils";
+import { defaultLabelDisplayedRows } from "../../services/utils";
 
 const Roles = () => {
   const [viewOpen, setViewOpen] = useState(false);

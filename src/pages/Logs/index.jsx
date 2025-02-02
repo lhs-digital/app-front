@@ -20,8 +20,7 @@ import {
 import { useEffect, useState } from "react";
 import PageTitle from "../../components/PageTitle";
 import api from "../../services/api";
-import { dateFormatted } from "../../services/utils";
-import { defaultLabelDisplayedRows } from "../../utils";
+import { dateFormatted, defaultLabelDisplayedRows } from "../../services/utils";
 
 const Logs = () => {
   const [data, setData] = useState([]);

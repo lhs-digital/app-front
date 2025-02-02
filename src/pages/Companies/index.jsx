@@ -27,7 +27,7 @@ import ModalViewCompany from "../../components/ModalViewCompany";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
-import { defaultLabelDisplayedRows } from "../../utils";
+import { defaultLabelDisplayedRows } from "../../services/utils";
 
 const Companies = () => {
   const [modalOpen, setModalOpen] = useState(false);

@@ -23,6 +23,7 @@ import ModalView from "../../components/ModalView";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
+import { defaultLabelDisplayedRows } from "../../services/utils";
 
 const Users = () => {
   const [viewOnly, setViewOnly] = useState(false);
@@ -152,10 +153,6 @@ const Users = () => {
       );
     else return null;
   };
-
-  function defaultLabelDisplayedRows({ from, to, count }) {
-    return `${from}–${to} de ${count !== -1 ? count : `mais que ${to}`}`;
-  }
 
   return (
     <div className="flex flex-col gap-6 w-full">
