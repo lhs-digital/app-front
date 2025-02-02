@@ -6,6 +6,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
+  FormGroup,
+  FormHelperText,
+  FormLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -15,12 +19,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 
-const ModalRule = ({
-  dataEdit,
-  isOpen,
-  onClose,
-  setRefresh,
-}) => {
+const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
   const [listRules, setListRules] = useState([]);
   // eslint-disable-next-line no-unused-vars
   const [permissions, setPermissions] = useState([]);
@@ -77,10 +76,9 @@ const ModalRule = ({
       try {
         const responsePermissions = await api.get(`/permissions`);
         setPermissions(responsePermissions.data.data);
-  
         const responseRules = await api.get(`/rules`);
         setRules(responseRules.data.data);
-        setRulesLoaded(true); // Marca que as regras foram carregadas
+        setRulesLoaded(true);
       } catch (error) {
         console.error("Erro ao acessar as roles por empresa", error);
       }
@@ -91,13 +89,19 @@ const ModalRule = ({
   useEffect(() => {
     if (!dataEdit?.validations?.length || !rules.length) return;
 
+    console.log("validations", dataEdit.validations);
+    console.log("rules", rules);
+
+    console.log("Started handling rules and arrays.");
+
     const updatedRuleDetails = {};
     const updatedCheckedRules = [];
     const updatedListRules = [];
-  
+
     dataEdit?.validations.forEach((validation) => {
-      const rule = rules?.find((r) => r.name === validation.name);
-      
+      const rule = rules?.find((r) => r.name === validation.rule.name);
+      console.log("rule", rule);
+
       if (rule) {
         updatedRuleDetails[rule.id] = {
           params: validation.params || "",
@@ -107,12 +111,15 @@ const ModalRule = ({
         updatedListRules.push(rule.id);
       }
     });
-  
+
+    console.log("Updated rule details", updatedRuleDetails);
+    console.log("Updated checked rules", updatedCheckedRules);
+    console.log("Updated list rules", updatedListRules);
+
     setRuleDetails(updatedRuleDetails);
     setCheckedRules(updatedCheckedRules);
     setListRules(updatedListRules);
   }, [dataEdit, rules]);
-  
 
   const handleRuleChange = (ruleId, field, value) => {
     setRuleDetails((prev) => ({
@@ -150,7 +157,6 @@ const ModalRule = ({
           dataToPost,
         );
         toast.success("Dados editados com sucesso!");
-
       } catch (error) {
         console.error("Erro ao editar os dados", error);
         toast.error("Erro ao editar os dados");
@@ -164,7 +170,6 @@ const ModalRule = ({
         toast.error("Erro ao salvar os dados");
       }
     }
-
   };
 
   const handleSave = () => {
@@ -179,7 +184,7 @@ const ModalRule = ({
     cleanFields();
 
     onClose();
-    setRefresh(prev => !prev);
+    setRefresh((prev) => !prev);
   };
 
   const handlePermissions = (e, ruleId) => {
@@ -211,10 +216,14 @@ const ModalRule = ({
   };
 
   return (
-    <Dialog open={isOpen} onClose={() => {
-      cleanFields();
-      onClose();
-    }} fullWidth>
+    <Dialog
+      open={isOpen}
+      onClose={() => {
+        cleanFields();
+        onClose();
+      }}
+      fullWidth
+    >
       <DialogTitle>
         {dataEdit?.id
           ? "Editar coluna na auditoria"
@@ -223,11 +232,7 @@ const ModalRule = ({
       <DialogContent className="flex flex-col gap-4">
         <Box>
           <InputLabel htmlFor="table">Tabela</InputLabel>
-          <Select
-            id="table"
-            value={1}
-            fullWidth
-          >
+          <Select id="table" value={1} fullWidth>
             <MenuItem key={1} value={1}>
               clients
             </MenuItem>
@@ -264,62 +269,54 @@ const ModalRule = ({
             <MenuItem value={2}>Baixa</MenuItem>
           </Select>
         </Box>
-        <Box>
-          <InputLabel htmlFor="permissions" className="mb-1">
+        <FormGroup className="flex flex-col gap-4">
+          <FormLabel htmlFor="permissions" className="mb-1">
             Regras
-          </InputLabel>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <label htmlFor="selectAll">
-              <Checkbox
-                id="selectAll"
-                checked={selectAll}
-                onChange={handleSelectAll}
+          </FormLabel>
+          <FormControlLabel
+            checked={selectAll}
+            onChange={handleSelectAll}
+            control={<Checkbox id="selectAll" />}
+            label={"Selecionar todas as regras"}
+          />
+          {rules.map((rule) => (
+            <Box key={rule.id}>
+              <FormControlLabel
+                checked={listRules.includes(rule.id)}
+                onChange={(e) => handlePermissions(e, rule.id)}
+                control={<Checkbox id={rule.name} />}
+                label={rule.label}
               />
-              Selecionar todas as regras
-            </label>
-            {rules.map((rule) => (
-              <Box key={rule.id}>
-                <label htmlFor={rule.name}>
-                  <Checkbox
-                    id={rule.name}
-                    checked={listRules.includes(rule.id)}
-                    onChange={(e) => handlePermissions(e, rule.id)}
-                  />
-                  {rule.label}
-                  <div className="text-gray-400 text-sm ml-2">
-                    <b>Descrição:</b> {rule.description}
-                  </div>
-                </label>
-                {checkedRules.includes(rule.id) && (
-                  <Box mt={2}>
-                    {rule?.has_params !== 0 && (
-                      <TextField
-                        placeholder="Parâmetros"
-                        size="small"
-                        value={ruleDetails[rule.id]?.params || ""}
-                        onChange={(e) =>
-                          handleRuleChange(rule.id, "params", e.target.value)
-                        }
-                        fullWidth
-                        margin="dense"
-                      />
-                    )}
+              <FormHelperText>{rule.description}</FormHelperText>
+              {checkedRules.includes(rule.id) && (
+                <Box mt={2}>
+                  {rule?.has_params !== 0 && (
                     <TextField
-                      placeholder="Mensagem"
+                      placeholder="Parâmetros"
                       size="small"
-                      value={ruleDetails[rule.id]?.message || ""}
+                      value={ruleDetails[rule.id]?.params || ""}
                       onChange={(e) =>
-                        handleRuleChange(rule.id, "message", e.target.value)
+                        handleRuleChange(rule.id, "params", e.target.value)
                       }
                       fullWidth
                       margin="dense"
                     />
-                  </Box>
-                )}
-              </Box>
-            ))}
-          </Box>
-        </Box>
+                  )}
+                  <TextField
+                    placeholder="Mensagem"
+                    size="small"
+                    value={ruleDetails[rule.id]?.message || ""}
+                    onChange={(e) =>
+                      handleRuleChange(rule.id, "message", e.target.value)
+                    }
+                    fullWidth
+                    margin="dense"
+                  />
+                </Box>
+              )}
+            </Box>
+          ))}
+        </FormGroup>
       </DialogContent>
       <DialogActions>
         <Button
