@@ -1,35 +1,22 @@
 import {
   Box,
-  Button,
+  Chip,
   Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Tooltip,
-  Tr,
-  useDisclosure,
-} from "@chakra-ui/react";
+  Typography,
+} from "@mui/material";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import { formattedPriority, getPriorityColor } from "../../services/utils";
-import ModalFormClient from "../ModalFormClient";
 
-const ViewActivitie = ({
-  id,
-  status,
-  selectedActivitie,
-  setRefresh,
-  refresh,
-}) => {
+const ViewActivitie = ({ id, selectedActivitie, setRefresh, refresh }) => {
   //eslint-disable-next-line
   const formattedDate = (date) => new Date(date).toLocaleDateString("pt-BR");
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const handleView = () => {
-    onOpen();
-  };
 
   //eslint-disable-next-line
   const handleConfirm = async () => {
@@ -44,74 +31,41 @@ const ViewActivitie = ({
   };
 
   return (
-    <Box
-      width="100%"
-      maxWidth="800px"
-      gap="12px"
-      flexDirection="column"
-      display="flex"
-    >
-      <Table
-        variant="striped"
-        size="sm"
-        width="100%"
-        borderColor="gray.200"
-        borderRadius="md"
-      >
-        <Thead bg="gray.100">
-          <Tr>
-            <Th>Campo</Th>
-            <Th>Sugestão</Th>
-            <Th>Prioridade</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {selectedActivitie?.columns.map((col, index) => (
-            <Tr key={index}>
-              <Td fontWeight="bold">{col?.label}</Td>
-              <Td>{col?.message || "N/A"}</Td>
-              <Td>
-                <Tooltip
-                  label={`Prioridade: ${formattedPriority(+col?.priority)}`}
-                  aria-label="Prioridade"
-                >
-                  <Text
-                    fontSize="sm"
-                    fontWeight="bold"
-                    color={getPriorityColor(+col?.priority).textColor}
-                    bg={getPriorityColor(+col?.priority).bgColor}
-                    p={1}
-                    rounded="md"
-                    textAlign="center"
+    <Box gap="12px" flexDirection="column" display="flex">
+      <TableContainer>
+        <Table variant="striped" size="small" width="100%">
+          <TableHead>
+            <TableRow>
+              <TableCell>Campo</TableCell>
+              <TableCell>Sugestão</TableCell>
+              <TableCell>Prioridade</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {selectedActivitie?.columns.map((col, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <Typography fontWeight="bold">{col?.label}</Typography>
+                </TableCell>
+                <TableCell>{col?.message || "N/A"}</TableCell>
+                <TableCell>
+                  <Tooltip
+                    title={`Prioridade: ${formattedPriority(+col?.priority)}`}
+                    aria-label="Prioridade"
                   >
-                    {formattedPriority(+col?.priority)}
-                  </Text>
-                </Tooltip>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
+                    <Chip
+                      label={formattedPriority(+col?.priority)}
+                      sx={getPriorityColor(col?.priority)}
+                    />
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       {/* <Box ><b>Auditoria foi realizada em:</b> {formattedDate(selectedActivitie?.created_at)} </Box>
             <Box ><b>Auditoria foi atualizada em:</b> {formattedDate(selectedActivitie?.updated_at)} </Box> */}
-      <Box marginTop={4} display="flex" justifyContent="flex-end">
-        <Button
-          colorScheme={status === 1 ? "orange" : "green"}
-          onClick={handleView}
-        >
-          Corrigir Erros
-        </Button>
-      </Box>
-
-      {isOpen && (
-        <ModalFormClient
-          isOpen={isOpen}
-          onClose={onClose}
-          selectedActivitie={selectedActivitie}
-          setRefresh={setRefresh}
-          refresh={refresh}
-        />
-      )}
     </Box>
   );
 };

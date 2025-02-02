@@ -1,3 +1,11 @@
+import { colors } from "@mui/material";
+
+export const priorities = [
+  { value: 1, label: "Baixa" },
+  { value: 2, label: "Moderada" },
+  { value: 3, label: "Urgente" },
+];
+
 export const formattedPriority = (priority) => {
   switch (priority) {
     case 1:
@@ -14,13 +22,13 @@ export const formattedPriority = (priority) => {
 export const getPriorityColor = (priority) => {
   switch (priority) {
     case 1:
-      return { textColor: "gray.600", bgColor: "gray.100" };
+      return { color: colors.grey[700], backgroundColor: colors.grey[200] };
     case 2:
-      return { textColor: "blue.600", bgColor: "blue.100" };
+      return { color: colors.blue[600], backgroundColor: colors.blue[100] };
     case 3:
-      return { textColor: "red.600", bgColor: "red.100" };
+      return { color: colors.red[600], backgroundColor: colors.red[100] };
     default:
-      return { textColor: "black", bgColor: "gray.300" };
+      return { color: colors.grey[600], backgroundColor: colors.grey[100] };
   }
 };
 
