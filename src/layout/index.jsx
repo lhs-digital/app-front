@@ -1,4 +1,16 @@
-import { Logout, Menu } from "@mui/icons-material";
+import {
+  BusinessOutlined,
+  DescriptionOutlined,
+  HomeOutlined,
+  LockOutlined,
+  Logout,
+  Menu,
+  PersonOutline,
+  RuleFolderOutlined,
+  SettingsOutlined,
+  Subject,
+  WorkOutline,
+} from "@mui/icons-material";
 import {
   Avatar,
   IconButton,
@@ -11,17 +23,6 @@ import {
 } from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
 import { useContext, useState } from "react";
-import {
-  FaBook,
-  FaBriefcase,
-  FaCog,
-  FaFile,
-  FaFolder,
-  FaHome,
-  FaLock,
-  FaScroll,
-  FaUser,
-} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import lighthouse from "../assets/favicon_neutral.svg";
 import { AuthContext } from "../contexts/auth";
@@ -78,47 +79,47 @@ const sidebarItems = [
   {
     label: "Início",
     url: "/dashboard",
-    icon: <FaHome size={18} />,
+    icon: <HomeOutlined fontSize="small" />,
   },
   {
     label: "Empresas",
     url: "/companies",
-    icon: <FaBriefcase size={18} />,
+    icon: <BusinessOutlined fontSize="small" />,
   },
   {
     label: "Papéis & Permissões",
     url: "/roles",
-    icon: <FaLock size={18} />,
+    icon: <LockOutlined fontSize="small" />,
   },
   {
     label: "Usuários",
     url: "/users",
-    icon: <FaUser size={18} />,
+    icon: <PersonOutline fontSize="small" />,
   },
   {
     label: "Clientes",
     url: "/clientes",
-    icon: <FaFolder size={18} />,
+    icon: <WorkOutline fontSize="small" />,
   },
   {
     label: "Regras de Auditorias",
     url: "/prioridades",
-    icon: <FaScroll size={18} />,
+    icon: <RuleFolderOutlined fontSize="small" />,
   },
   {
     label: "Relatórios de Auditorias",
     url: "/relatorios",
-    icon: <FaFile size={18} />,
+    icon: <DescriptionOutlined fontSize="small" />,
   },
   {
     label: "Minhas Permissões",
     url: "/my-permissions",
-    icon: <FaCog size={18} />,
+    icon: <SettingsOutlined fontSize="small" />,
   },
   {
     label: "Logs",
     url: "/logs",
-    icon: <FaBook size={18} />,
+    icon: <Subject fontSize="small" />,
   },
 ];
 
@@ -166,7 +167,11 @@ const Index = ({ children }) => {
         </List>
         {open ? (
           <div className="p-4">
-            <div className="p-2 flex flex-row items-center border rounded-lg gap-2">
+            <button
+              aria-label="Perfil"
+              onClick={() => navigate("/my-permissions")}
+              className="w-full text-left p-2 flex flex-row items-center border rounded-lg gap-2 hover:bg-gray-50"
+            >
               <Avatar
                 src={user?.user?.avatar}
                 alt="Avatar"
@@ -176,7 +181,7 @@ const Index = ({ children }) => {
                 <p className="font-medium">{user?.user?.name}</p>
                 <p className="text-sm">{user?.user?.company?.name}</p>
               </div>
-            </div>
+            </button>
           </div>
         ) : (
           <div className="p-2 mx-auto">
@@ -191,7 +196,7 @@ const Index = ({ children }) => {
       <div className="grow flex flex-col">
         <div className="h-16 border-b flex flex-row items-center justify-between px-4">
           <img src={lighthouse} alt="Lighthouse" className="h-10 mb-1" />
-          <IconButton variant="outlined" color="info" onClick={handleLogout}>
+          <IconButton color="info" onClick={handleLogout}>
             <Logout />
           </IconButton>
         </div>

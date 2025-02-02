@@ -1,11 +1,4 @@
-import {
-  Add,
-  Delete,
-  Edit,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  Search,
-} from "@mui/icons-material";
+import { Add, Delete, Edit, Search } from "@mui/icons-material";
 import {
   Button,
   IconButton,
@@ -17,16 +10,18 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   TextField,
 } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalClient from "../../components/ModalClient";
-import ModalDeleteClient from "../../components/ModalDeleteClient";
+import ModalDelete from "../../components/ModalDelete";
 import ModalViewClient from "../../components/ModalViewClient";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
+import { defaultLabelDisplayedRows } from "../../utils";
 
 const Clients = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -81,13 +76,8 @@ const Clients = () => {
     setData(sortedData);
   };
 
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return null;
-    return sortConfig.direction === "asc" ? (
-      <KeyboardArrowUp />
-    ) : (
-      <KeyboardArrowDown />
-    );
+  const createSortHandler = (key) => () => {
+    handleSort(key);
   };
 
   const handleRemove = async () => {
@@ -128,7 +118,7 @@ const Clients = () => {
         refresh={refresh}
         setRefresh={setRefresh}
       />
-      <ModalDeleteClient
+      <ModalDelete
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleRemove}
@@ -158,27 +148,66 @@ const Clients = () => {
         size="lg"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        startAdornment={
-          <InputAdornment position="start">
-            <Search />
-          </InputAdornment>
-        }
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          },
+        }}
       />
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell onClick={() => handleSort("id")}>
-                ID {getSortIcon("id")}
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "id" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "id"}
+                  direction={
+                    sortConfig.key === "id" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("id")}
+                >
+                  ID
+                </TableSortLabel>
               </TableCell>
-              <TableCell onClick={() => handleSort("email")}>
-                Email {getSortIcon("email")}
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "email" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "email"}
+                  direction={
+                    sortConfig.key === "email" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("email")}
+                >
+                  Email
+                </TableSortLabel>
               </TableCell>
-              <TableCell onClick={() => handleSort("cnpj_cpf")}>
-                CNPJ/CPF {getSortIcon("cnpj_cpf")}
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "cnpj_cpf" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "cnpj_cpf"}
+                  direction={
+                    sortConfig.key === "cnpj_cpf" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("cnpj_cpf")}
+                >
+                  CNPJ/CPF
+                </TableSortLabel>
               </TableCell>
-              <TableCell />
-              <TableCell />
+              <TableCell>Ações</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -207,15 +236,12 @@ const Clients = () => {
                   <TableRow
                     key={client.id}
                     cursor="pointer"
-                    _hover={{ bg: "gray.50" }}
-                    _odd={{ bg: "gray.100" }}
-                    _even={{ bg: "white" }}
                     onClick={() => handleView(client)}
                   >
                     <TableCell>{client.id}</TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.cnpj_cpf}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
                       {permissions.some(
                         (perm) => perm.name === "update_users",
                       ) && (
@@ -228,8 +254,6 @@ const Clients = () => {
                           <Edit fontSize="small" />
                         </IconButton>
                       )}
-                    </TableCell>
-                    <TableCell>
                       {permissions.some(
                         (perm) => perm.name === "delete_users",
                       ) && (
@@ -250,10 +274,11 @@ const Clients = () => {
         </Table>
         <TablePagination
           component="div"
-          count={data.length}
+          count={lastPage * 10}
           page={currentPage - 1}
           onPageChange={(event, newPage) => setCurrentPage(newPage + 1)}
           rowsPerPage={10}
+          labelDisplayedRows={defaultLabelDisplayedRows}
           rowsPerPageOptions={[10]}
         />
       </TableContainer>

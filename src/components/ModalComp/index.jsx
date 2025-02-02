@@ -14,13 +14,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 
-const ModalComp = ({
-  data,
-  dataEdit,
-  isOpen,
-  onClose,
-  setRefresh,
-}) => {
+const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
@@ -49,8 +43,7 @@ const ModalComp = ({
   const rolesFromCompany = async (companyId) => {
     try {
       const response = await api.get(`/roles/roles_from_company`, {
-        params: { company_id: companyId
-        },
+        params: { company_id: companyId },
       });
       setRoles(response?.data?.data);
     } catch (error) {
@@ -81,7 +74,6 @@ const ModalComp = ({
     } catch (error) {
       console.error("Erro ao salvar usuário", error);
     }
-
   };
 
   const handleSave = () => {
@@ -111,9 +103,7 @@ const ModalComp = ({
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle>
-        {"Cadastrar Usuário"}
-      </DialogTitle>
+      <DialogTitle>{"Cadastrar Usuário"}</DialogTitle>
       <DialogContent className="w-[480px] flex flex-col gap-4">
         <Box>
           <InputLabel>Nome *</InputLabel>
@@ -166,10 +156,10 @@ const ModalComp = ({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button colorScheme="gray" mr={3} onClick={onClose}>
+        <Button color="info" mr={3} onClick={onClose}>
           CANCELAR
         </Button>
-        <Button colorScheme="green" onClick={handleSave}>
+        <Button color="primary" onClick={handleSave}>
           SALVAR
         </Button>
       </DialogActions>

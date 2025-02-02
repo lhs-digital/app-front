@@ -27,6 +27,7 @@ import ModalViewCompany from "../../components/ModalViewCompany";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
+import { defaultLabelDisplayedRows } from "../../utils";
 
 const Companies = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -54,7 +55,9 @@ const Companies = () => {
     const getData = async () => {
       setLoading(true);
       try {
-        const response = await api.get(`/companies?page=${currentPage}&per_page=${rowsPerPage}`);
+        const response = await api.get(
+          `/companies?page=${currentPage}&per_page=${rowsPerPage}`,
+        );
         setCurrentPage(response.data.meta.current_page);
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
@@ -187,10 +190,16 @@ const Companies = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell onClick={() => handleSort("name")} style={{ cursor: "pointer" }}>
+              <TableCell
+                onClick={() => handleSort("name")}
+                style={{ cursor: "pointer" }}
+              >
                 Nome {getSortIcon("name")}
               </TableCell>
-              <TableCell onClick={() => handleSort("cnpj")} style={{ cursor: "pointer" }}>
+              <TableCell
+                onClick={() => handleSort("cnpj")}
+                style={{ cursor: "pointer" }}
+              >
                 CNPJ {getSortIcon("cnpj")}
               </TableCell>
               <TableCell>Ações</TableCell>
@@ -221,12 +230,12 @@ const Companies = () => {
                 >
                   <TableCell> {name} </TableCell>
                   <TableCell> {cnpj} </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
                     {permissions.some(
                       (permissions) => permissions.name === "update_companies",
                     ) ? (
                       <IconButton
-                        onClick={(e) => { 
+                        onClick={(e) => {
                           e.stopPropagation();
                           handleEdit({ name, cnpj, roles_count, id, index });
                         }}
@@ -260,6 +269,7 @@ const Companies = () => {
           page={currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelDisplayedRows={defaultLabelDisplayedRows}
           labelRowsPerPage="Linhas por página"
         />
       </TableContainer>

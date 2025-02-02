@@ -1,12 +1,11 @@
-import { Box, Button, Flex, useDisclosure } from "@chakra-ui/react";
-import { useContext } from "react";
-import Header from "../../components/Header";
+import { Box, Button } from "@mui/material";
+import { useContext, useState } from "react";
 import ModalReport from "../../components/ModalReport";
-import Title from "../../components/Title";
+import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 
 const ReportsAud = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   // const [refresh, setRefresh] = useState(false);
   // const [currentPage, setCurrentPage] = useState(1);
   // const [lastPage, setLastPage] = useState(null);
@@ -14,20 +13,21 @@ const ReportsAud = () => {
   const { permissions } = useContext(AuthContext);
 
   return (
-    <>
-      <Header />
-
-      <Title
+    <div className="flex flex-col gap-4 w-full">
+      <PageTitle
         title="Relatórios de Auditorias"
         subtitle="Administração e gerenciamento dos relatórios das auditorias"
       />
 
-      <Flex
-        align="center"
-        justify="center"
+      <Box
+        display="flex"
+        justifyContent="center"
         flexDirection="column"
         fontSize="20px"
-        fontFamily="poppins"
+        mt="20px"
+        gap="24px"
+        width="100%"
+        px={2}
       >
         <Box maxW={800} w="100%" py={4} px={2}>
           {permissions.some(
@@ -36,16 +36,15 @@ const ReportsAud = () => {
             <Button
               colorScheme="blue"
               marginBottom="6px"
-              onClick={() => onOpen()}
+              onClick={() => setIsOpen(true)}
             >
               GERAR RELATÓRIO
             </Button>
           ) : null}
         </Box>
-      </Flex>
-
-      {isOpen && <ModalReport isOpen={isOpen} onClose={onClose} />}
-    </>
+      </Box>
+      <ModalReport isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </div>
   );
 };
 

@@ -1,6 +1,5 @@
-import { ChevronDownIcon, ChevronUpIcon, EditIcon } from "@chakra-ui/icons";
 import { useDisclosure } from "@chakra-ui/react";
-import { Add, Delete, Search } from "@mui/icons-material";
+import { Add, Delete, Edit, Search } from "@mui/icons-material";
 import {
   Button,
   IconButton,
@@ -12,6 +11,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   TextField,
   useMediaQuery,
 } from "@mui/material";
@@ -25,7 +25,7 @@ import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 const Users = () => {
-  const [viewOnly, setViewOnly] = useState(false); 
+  const [viewOnly, setViewOnly] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: isDeleteOpen,
@@ -61,7 +61,9 @@ const Users = () => {
     const getData = async () => {
       setLoading(true);
       try {
-        const response = await api.get(`/users?page=${currentPage}&per_page=${rowsPerPage}`);
+        const response = await api.get(
+          `/users?page=${currentPage}&per_page=${rowsPerPage}`,
+        );
         setCurrentPage(response.data.meta.current_page);
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
@@ -91,13 +93,8 @@ const Users = () => {
     setData(sortedData);
   };
 
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return null;
-    return sortConfig.direction === "asc" ? (
-      <ChevronUpIcon ml={2} />
-    ) : (
-      <ChevronDownIcon ml={2} />
-    );
+  const createSortHandler = (key) => () => {
+    handleSort(key);
   };
 
   const handleRemove = async () => {
@@ -169,12 +166,12 @@ const Users = () => {
         setRefresh={setRefresh}
         refresh={refresh}
         setData={setData}
-        />
+      />
       <ModalDelete
         isOpen={isDeleteOpen}
         onClose={onCloseDelete}
         onConfirm={handleRemove}
-        />
+      />
       <ModalView
         dataEdit={dataEdit}
         viewOnly={viewOnly}
@@ -193,12 +190,14 @@ const Users = () => {
       <TextField
         fullWidth
         placeholder="Buscar usuário"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          },
         }}
         size="lg"
         value={search}
@@ -209,39 +208,75 @@ const Users = () => {
           <TableHead>
             <TableRow>
               <TableCell
-                sx={{ cursor: "pointer", maxWidth: isMobile ? 5 : 100 }}
-                onClick={() => handleSort("name")}
+                sortDirection={
+                  sortConfig.key === "name" ? sortConfig.direction : false
+                }
               >
-                Nome
-                {getSortIcon("name")}
+                <TableSortLabel
+                  active={sortConfig.key === "name"}
+                  direction={
+                    sortConfig.key === "name" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("name")}
+                >
+                  Nome
+                </TableSortLabel>
               </TableCell>
               <TableCell
-                sx={{ cursor: "pointer", maxWidth: isMobile ? 5 : 100 }}
-                onClick={() => handleSort("email")}
+                sortDirection={
+                  sortConfig.key === "email" ? sortConfig.direction : false
+                }
               >
-                E-mail
-                {getSortIcon("email")}
+                <TableSortLabel
+                  active={sortConfig.key === "email"}
+                  direction={
+                    sortConfig.key === "email" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("email")}
+                >
+                  E-mail
+                </TableSortLabel>
               </TableCell>
               <TableCell
-                sx={{ cursor: "pointer", maxWidth: isMobile ? 5 : 100 }}
-                onClick={() => handleSort("role.name")}
+                sortDirection={
+                  sortConfig.key === "role.name" ? sortConfig.direction : false
+                }
               >
-                Cargo
-                {getSortIcon("role.name")}
+                <TableSortLabel
+                  active={sortConfig.key === "role.name"}
+                  direction={
+                    sortConfig.key === "role.name"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("role.name")}
+                >
+                  Cargo
+                </TableSortLabel>
               </TableCell>
               <TableCell
+                sortDirection={
+                  sortConfig.key === "company.name"
+                    ? sortConfig.direction
+                    : false
+                }
                 sx={{
-                  cursor: "pointer",
-                  maxWidth: isMobile ? 5 : 100,
                   display: isMobile ? "none" : undefined,
                 }}
-                onClick={() => handleSort("company.name")}
               >
-                Empresa
-                {getSortIcon("company.name")}
+                <TableSortLabel
+                  active={sortConfig.key === "company.name"}
+                  direction={
+                    sortConfig.key === "company.name"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("company.name")}
+                >
+                  Empresa
+                </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ padding: 0 }} />
-              <TableCell sx={{ padding: 0 }} />
+              <TableCell sx={{ padding: 0 }}>Ações</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -258,7 +293,6 @@ const Users = () => {
                 key={index}
                 style={{
                   cursor: "pointer",
-                  backgroundColor: index % 2 === 0 ? "white" : "#f7fafc",
                 }}
                 onClick={() => handleView(index)}
               >
@@ -287,18 +321,15 @@ const Users = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
-                    <IconButton>
-                      <EditIcon
-                        fontSize={20}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(index);
-                        }}
-                      />
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(index);
+                      }}
+                    >
+                      <Edit fontSize="small" />
                     </IconButton>
                   )}
-                </TableCell>
-                <TableCell sx={{ padding: 0 }}>
                   {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
@@ -308,7 +339,7 @@ const Users = () => {
                         handleDelete(id);
                       }}
                     >
-                      <Delete />
+                      <Delete fontSize="small" />
                     </IconButton>
                   )}
                 </TableCell>

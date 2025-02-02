@@ -1,70 +1,66 @@
 import {
   Box,
   Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-} from "@chakra-ui/react";
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import { dateFormatted } from "../../services/utils";
 
-const ModalClient = ({ selectedUser, isOpen, onClose }) => {
+const ModalViewClient = ({ selectedUser, isOpen, onClose }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Informações Gerais do Usuário</ModalHeader>
-        <ModalBody>
-          <Box>
-            <b>Id:</b> {selectedUser?.id || "Não disponível"}{" "}
-          </Box>
-          <Box>
-            <b>Número:</b> {selectedUser?.numero || "Não disponível"}{" "}
-          </Box>
-          <Box>
-            <b>Email:</b> {selectedUser?.email || "Não disponível"}{" "}
-          </Box>
-          <Box>
-            <b>Cnpj/Cpf:</b> {selectedUser?.cnpj_cpf || "Não disponível"}{" "}
-          </Box>
-          <Box>
+    <Dialog open={isOpen} onClose={onClose}>
+      <DialogTitle>Informações Gerais do Usuário</DialogTitle>
+      <DialogContent>
+        <Box display="flex" flexDirection="column" gap={2}>
+          <p>
+            <b>Id:</b> {selectedUser?.id || "Não disponível"}
+          </p>
+          <p>
+            <b>Número:</b> {selectedUser?.numero || "Não disponível"}
+          </p>
+          <p>
+            <b>Email:</b> {selectedUser?.email || "Não disponível"}
+          </p>
+          <p>
+            <b>Cnpj/Cpf:</b> {selectedUser?.cnpj_cpf || "Não disponível"}
+          </p>
+          <p>
             <b>Contribuinte Icms:</b>{" "}
-            {selectedUser?.contribuinte_icms === "1" ? "Sim" : "Não"}{" "}
-          </Box>
-          <Box>
+            {selectedUser?.contribuinte_icms === "1" ? "Sim" : "Não"}
+          </p>
+          <p>
             <b>Data Nascimento:</b>{" "}
-            {selectedUser?.data_nascimento || "Não disponível"}{" "}
-          </Box>
-          <Box>
-            <b>Whatsapp:</b> {selectedUser?.whatsapp || "Não disponível"}{" "}
-          </Box>
-          <Box>
-            <b>Referência:</b> {selectedUser?.referencia || "Não disponível"}{" "}
-          </Box>
-          <Box>
+            {selectedUser?.data_nascimento || "Não disponível"}
+          </p>
+          <p>
+            <b>Whatsapp:</b> {selectedUser?.whatsapp || "Não disponível"}
+          </p>
+          <p>
+            <b>Referência:</b> {selectedUser?.referencia || "Não disponível"}
+          </p>
+          <p>
             <b>Tipo de Pessoa:</b>{" "}
-            {selectedUser?.tipo_pessoa === "F" ? "Física" : "Jurídica"}{" "}
-          </Box>
-          <Box>
+            {selectedUser?.tipo_pessoa === "F" ? "Física" : "Jurídica"}
+          </p>
+          <p>
             <b>Criado em:</b>{" "}
-            {dateFormatted(selectedUser?.created_at) || "Não disponível"}{" "}
-          </Box>
-          <Box>
+            {dateFormatted(selectedUser?.created_at) || "Não disponível"}
+          </p>
+          <p>
             <b>Atualizado em:</b>{" "}
-            {dateFormatted(selectedUser?.created_at) || "Não disponível"}{" "}
-          </Box>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button variant="ghost" onClick={onClose}>
-            Voltar
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+            {dateFormatted(selectedUser?.created_at) || "Não disponível"}
+          </p>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="primary">
+          Voltar
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
-export default ModalClient;
+export default ModalViewClient;

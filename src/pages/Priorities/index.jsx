@@ -9,8 +9,8 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import ModalDelete from "../../components/ModalDelete";
 import ModalRule from "../../components/ModalRule";
-import ModalRuleDelete from "../../components/ModalRuleDelete";
 import PageTitle from "../../components/PageTitle";
 import SubAccordion from "../../components/Priorities/SubAccordion";
 import api from "../../services/api";
@@ -108,7 +108,7 @@ const Priorities = () => {
         setRefresh={setRefresh}
         refresh={refresh}
       />
-      <ModalRuleDelete
+      <ModalDelete
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={handleRemove}

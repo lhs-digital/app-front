@@ -1,11 +1,4 @@
-import {
-  Add,
-  Delete,
-  Edit,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  Search,
-} from "@mui/icons-material";
+import { Add, Delete, Edit, Search } from "@mui/icons-material";
 import {
   Button,
   IconButton,
@@ -17,6 +10,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   TextField,
 } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
@@ -51,7 +45,9 @@ const Roles = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await api.get(`/roles?page=${currentPage}&per_page=${rowsPerPage}`);
+        const response = await api.get(
+          `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
+        );
         setCurrentPage(response.data.meta.current_page);
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
@@ -111,13 +107,8 @@ const Roles = () => {
     setData(sortedData);
   };
 
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return null;
-    return sortConfig.direction === "asc" ? (
-      <KeyboardArrowUp ml={2} />
-    ) : (
-      <KeyboardArrowDown ml={2} />
-    );
+  const createSortHandler = (key) => () => {
+    handleSort(key);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -186,17 +177,58 @@ const Roles = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell onClick={() => handleSort("name")} style={{ cursor: "pointer" }}>
-                Nome
-                {getSortIcon("name")}
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "name" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "name"}
+                  direction={
+                    sortConfig.key === "name" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("name")}
+                >
+                  Nome
+                </TableSortLabel>
               </TableCell>
-              <TableCell onClick={() => handleSort("company.name")} style={{ cursor: "pointer" }}>
-                Empresa
-                {getSortIcon("company.name")}
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "company.name"
+                    ? sortConfig.direction
+                    : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "company.name"}
+                  direction={
+                    sortConfig.key === "company.name"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("company.name")}
+                >
+                  Empresa
+                </TableSortLabel>
               </TableCell>
-              <TableCell onClick={() => handleSort("permissions_count")} style={{ cursor: "pointer" }}>
-                Qtd Permissões
-                {getSortIcon("permissions_count")}
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "permissions_count"
+                    ? sortConfig.direction
+                    : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "permissions_count"}
+                  direction={
+                    sortConfig.key === "permissions_count"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("permissions_count")}
+                >
+                  Qtd Permissões
+                </TableSortLabel>
               </TableCell>
               <TableCell>Ações</TableCell>
             </TableRow>
@@ -216,40 +248,37 @@ const Roles = () => {
                 key={index}
                 style={{
                   cursor: "pointer",
-                  backgroundColor: index % 2 === 0 ? "white" : "#f7fafc",
                 }}
                 onClick={() => handleView(index)}
               >
                 <TableCell>{name}</TableCell>
                 <TableCell>{company?.name}</TableCell>
                 <TableCell>{permissions_count}</TableCell>
-                <TableCell>
-                  <div className="flex flex-row">
-                    {permissions.some(
-                      (permissions) => permissions.name === "update_roles",
-                    ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit({ name, nivel, company, id, index });
-                        }}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    )}
-                    {permissions.some(
-                      (permissions) => permissions.name === "delete_roles",
-                    ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(id);
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                    )}
-                  </div>
+                <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
+                  {permissions.some(
+                    (permissions) => permissions.name === "update_roles",
+                  ) && (
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit({ name, nivel, company, id, index });
+                      }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
+                  {permissions.some(
+                    (permissions) => permissions.name === "delete_roles",
+                  ) && (
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(id);
+                      }}
+                    >
+                      <Delete />
+                    </IconButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

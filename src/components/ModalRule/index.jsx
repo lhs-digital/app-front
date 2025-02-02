@@ -1,23 +1,18 @@
-import { InfoOutlineIcon } from "@chakra-ui/icons";
+import { InfoOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
   Checkbox,
-  FormControl,
-  FormLabel,
-  Icon,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  InputLabel,
+  MenuItem,
   Select,
-  SimpleGrid,
+  TextField,
   Tooltip,
-} from "@chakra-ui/react";
+} from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/auth";
@@ -216,167 +211,144 @@ const ModalRule = ({
   }, [dataEdit, rules]);
 
   return (
-    <>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            {dataEdit.id
-              ? "Editar coluna na auditoria"
-              : "Adicionar coluna na auditoria"}
-          </ModalHeader>
-          <ModalCloseButton />
-
-          <ModalBody>
-            <FormControl display="flex" flexDirection="column" gap={4}>
-              {user?.user?.role?.name === "super-admin" && (
-                <Box>
-                  <FormLabel htmlFor="company">Empresa</FormLabel>
-                  <Select
-                    id="company"
-                    placeholder="Selecione uma opção"
-                    value={company}
-                    onChange={handleCompanyChange}
-                  >
-                    {companies.map((companyItem) => (
-                      <option key={companyItem.id} value={companyItem.id}>
-                        {companyItem.name}
-                      </option>
-                    ))}
-                  </Select>
-                </Box>
-              )}
-              <Box>
-                <FormLabel htmlFor="company">Tabela</FormLabel>
-                <Select
-                  id="table"
-                  placeholder="Selecione uma opção"
-                  value={table}
-                  disabled
-                  onChange={(e) => setTable(e.target.value)}
-                >
-                  <option key={1} value={1}>
-                    clients
-                  </option>
-                </Select>
-              </Box>
-              {/* <Box>
-                                <FormLabel htmlFor='table'>Tabela *</FormLabel>
-                                <Input
-                                    id="table"
-                                    type="text"
-                                    value={table}
-                                    onChange={(e) => setTable(e.target.value)}
-                                />
-                            </Box> */}
-              <Box>
-                <FormLabel htmlFor="column">Nome da Coluna *</FormLabel>
-                <Input
-                  id="column"
-                  type="text"
-                  value={column}
-                  onChange={(e) => setColumn(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel htmlFor="columnLabel">Label da Coluna *</FormLabel>
-                <Input
-                  id="columnLabel"
-                  type="text"
-                  value={columnLabel}
-                  onChange={(e) => setColumnLabel(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel htmlFor="priority">Prioridade *</FormLabel>
-                <Input
-                  id="priority"
-                  type="number"
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel htmlFor="permissions">Regras</FormLabel>
-                <SimpleGrid columns={1} spacing={5}>
+    <Dialog open={isOpen} onClose={onClose} fullWidth>
+      <DialogTitle>
+        {dataEdit.id
+          ? "Editar coluna na auditoria"
+          : "Adicionar coluna na auditoria"}
+      </DialogTitle>
+      <DialogContent className="flex flex-col gap-4">
+        {user?.user?.role?.name === "super-admin" && (
+          <Box>
+            <InputLabel htmlFor="company">Empresa</InputLabel>
+            <Select
+              id="company"
+              value={company}
+              onChange={handleCompanyChange}
+              fullWidth
+            >
+              {companies.map((companyItem) => (
+                <MenuItem key={companyItem.id} value={companyItem.id}>
+                  {companyItem.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+        )}
+        <Box>
+          <InputLabel htmlFor="table">Tabela</InputLabel>
+          <Select
+            id="table"
+            value={table}
+            disabled
+            onChange={(e) => setTable(e.target.value)}
+            fullWidth
+          >
+            <MenuItem key={1} value={1}>
+              clients
+            </MenuItem>
+          </Select>
+        </Box>
+        <Box>
+          <InputLabel htmlFor="column">Nome da Coluna *</InputLabel>
+          <TextField
+            id="column"
+            value={column}
+            onChange={(e) => setColumn(e.target.value)}
+            fullWidth
+          />
+        </Box>
+        <Box>
+          <InputLabel htmlFor="columnLabel">Label da Coluna *</InputLabel>
+          <TextField
+            id="columnLabel"
+            value={columnLabel}
+            onChange={(e) => setColumnLabel(e.target.value)}
+            fullWidth
+          />
+        </Box>
+        <Box>
+          <InputLabel htmlFor="priority">Prioridade *</InputLabel>
+          <TextField
+            id="priority"
+            type="number"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+            fullWidth
+          />
+        </Box>
+        <Box>
+          <InputLabel htmlFor="permissions" className="mb-1">
+            Regras
+          </InputLabel>
+          <Box display="flex" flexDirection="column" gap={1}>
+            <label htmlFor="selectAll">
+              <Checkbox
+                id="selectAll"
+                checked={selectAll}
+                onChange={handleSelectAll}
+              />
+              Selecionar todas as regras
+            </label>
+            {rules.map((rule) => (
+              <Box key={rule.id}>
+                <label htmlFor={rule.name}>
                   <Checkbox
-                    id="selectAll"
-                    isChecked={selectAll}
-                    onChange={handleSelectAll}
-                    width="100%"
+                    id={rule.name}
+                    checked={listRules.includes(rule.id)}
+                    onChange={(e) => handlePermissions(e, rule.id)}
+                  />
+                  {rule.name}
+                  <Tooltip
+                    title={rule.description || "Não contém."}
+                    placement="right"
+                    arrow
                   >
-                    Selecionar todas as regras
-                  </Checkbox>
-                  {rules.map((rule) => (
-                    <Box key={rule.id} mb={4}>
-                      <Checkbox
-                        id={rule?.name}
-                        isChecked={listRules.includes(rule.id)}
-                        onChange={(e) => handlePermissions(e, rule.id)}
-                      >
-                        <b>{rule.name}</b>
-                        <Tooltip
-                          label={rule?.description || "Não contém."}
-                          fontSize="sm"
-                          placement="right"
-                          hasArrow
-                        >
-                          <Icon
-                            as={InfoOutlineIcon}
-                            color="gray.500"
-                            ml={2}
-                            cursor="pointer"
-                          />
-                        </Tooltip>
-                      </Checkbox>
-
-                      {checkedRules.includes(rule.id) && (
-                        <Box mt={2}>
-                          <Input
-                            placeholder="Parâmetros"
-                            size="sm"
-                            value={ruleDetails[rule.id]?.params || ""}
-                            mb={2}
-                            onChange={(e) =>
-                              handleRuleChange(
-                                rule.id,
-                                "params",
-                                e.target.value,
-                              )
-                            }
-                          />
-                          <Input
-                            placeholder="Mensagem"
-                            size="sm"
-                            value={ruleDetails[rule.id]?.message || ""}
-                            onChange={(e) =>
-                              handleRuleChange(
-                                rule.id,
-                                "message",
-                                e.target.value,
-                              )
-                            }
-                          />
-                        </Box>
-                      )}
-                    </Box>
-                  ))}
-                </SimpleGrid>
+                    <InfoOutlined
+                      fontSize="small"
+                      className="ml-1 mb-0.5"
+                      color="action"
+                    />
+                  </Tooltip>
+                </label>
+                {checkedRules.includes(rule.id) && (
+                  <Box mt={2}>
+                    <TextField
+                      placeholder="Parâmetros"
+                      size="small"
+                      value={ruleDetails[rule.id]?.params || ""}
+                      onChange={(e) =>
+                        handleRuleChange(rule.id, "params", e.target.value)
+                      }
+                      fullWidth
+                      margin="dense"
+                    />
+                    <TextField
+                      placeholder="Mensagem"
+                      size="small"
+                      value={ruleDetails[rule.id]?.message || ""}
+                      onChange={(e) =>
+                        handleRuleChange(rule.id, "message", e.target.value)
+                      }
+                      fullWidth
+                      margin="dense"
+                    />
+                  </Box>
+                )}
               </Box>
-            </FormControl>
-          </ModalBody>
-
-          <ModalFooter justifyContent="end">
-            <Button colorScheme="gray" mr={3} onClick={onClose}>
-              CANCELAR
-            </Button>
-            <Button colorScheme="green" onClick={handleSave}>
-              SALVAR
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+            ))}
+          </Box>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="info">
+          CANCELAR
+        </Button>
+        <Button onClick={handleSave} color="primary">
+          SALVAR
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

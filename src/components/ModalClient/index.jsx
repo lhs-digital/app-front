@@ -1,18 +1,15 @@
 import {
   Box,
   Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  InputLabel,
+  MenuItem,
   Select,
-} from "@chakra-ui/react";
+  TextField,
+} from "@mui/material";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
@@ -143,133 +140,111 @@ const ModalClient = ({
     return false;
   };
 
-  // // Função de mascarar whatsapp (82) 99999-9999
-  // const maskWhatsapp = (value) => {
-  //   // Remove qualquer caractere que não seja número
-  //   value = value.replace(/\D/g, "");
-  //   // Adiciona parênteses para o DDD
-  //   value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
-  //   // Adiciona traço para o número
-  //   value = value.replace(/(\d)(\d{4})$/, "$1-$2");
-  //   return value;
-  // };
-
-  // // Função de mascarar cnpj ou cpf de acordo com o tipo de pessoa
-  // const maskCnpjCpf = (value) => {
-  //   value = value.replace(/\D/g, "");
-  //   if (tipoPessoa === "F") {
-  //     value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-  //   }
-  //   if (tipoPessoa === "J") {
-  //     value = value.replace(
-  //       /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-  //       "$1.$2.$3/$4-$5",
-  //     );
-  //   }
-  //   return value;
-  // };
-
   return (
-    <>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            {dataEdit.id
-              ? `Editar Cliente com ID: ${dataEdit?.id}`
-              : "Cadastrar Cliente"}
-          </ModalHeader>
-          <ModalCloseButton />
-
-          <ModalBody>
-            <FormControl display="flex" flexDirection="column" gap={4}>
-              <Box>
-                <FormLabel>E-mail *</FormLabel>
-                <Input
-                  type="text"
-                  value={email}
-                  disabled={dataEdit?.email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel>Número *</FormLabel>
-                <Input
-                  type="number"
-                  value={numero}
-                  onChange={(e) => setNumero(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel>Tipo de Pessoa *</FormLabel>
-                <Select
-                  placeholder="Selecione uma opção"
-                  value={tipoPessoa}
-                  onChange={(e) => setTipoPessoa(e.target.value)}
-                >
-                  <option value="F">Física</option>
-                  <option value="J">Jurídica</option>
-                </Select>
-              </Box>
-              <Box>
-                <FormLabel>Whatsapp *</FormLabel>
-                <Input
-                  type="text"
-                  value={whatsapp}
-                  maxLength={15}
-                  onChange={(e) => setWhatsapp(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel>Data de Nascimento *</FormLabel>
-                <Input
-                  type="date"
-                  value={dataNascimento}
-                  onChange={(e) => setDataNascimento(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel>CNPJ/CPF *</FormLabel>
-                <Input
-                  type="text"
-                  value={cnpjCpf}
-                  maxLength={tipoPessoa === "F" ? 14 : 18}
-                  onChange={(e) => setCnpjCpf(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel>Referência *</FormLabel>
-                <Input
-                  type="text"
-                  value={referencia}
-                  onChange={(e) => setReferencia(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <FormLabel>Contribuinte ICMS *</FormLabel>
-                <Select
-                  placeholder="Selecione uma opção"
-                  value={contribuenteIcms}
-                  onChange={(e) => setContribuenteIcms(e.target.value)}
-                >
-                  <option value={1}>Sim</option>
-                  <option value={0}>Não</option>
-                </Select>
-              </Box>
-            </FormControl>
-          </ModalBody>
-
-          <ModalFooter justifyContent="end">
-            <Button colorScheme="gray" mr={3} onClick={onClose}>
-              CANCELAR
-            </Button>
-            <Button colorScheme="green" onClick={handleSave}>
-              SALVAR
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+    <Dialog open={isOpen} onClose={onClose} fullWidth>
+      <DialogTitle>
+        {dataEdit.id
+          ? `Editar Cliente com ID: ${dataEdit?.id}`
+          : "Cadastrar Cliente"}
+      </DialogTitle>
+      <DialogContent>
+        <Box display="flex" flexDirection="column" gap={2}>
+          <Box>
+            <InputLabel>E-mail *</InputLabel>
+            <TextField
+              type="text"
+              value={email}
+              disabled={dataEdit?.email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+            />
+          </Box>
+          <Box display={{ xs: "block", md: "flex" }} gap={2}>
+            <Box flexBasis={{ xs: "100%", md: "50%" }}>
+              <InputLabel>Número *</InputLabel>
+              <TextField
+                type="number"
+                value={numero}
+                onChange={(e) => setNumero(e.target.value)}
+                fullWidth
+              />
+            </Box>
+            <Box flexBasis={{ xs: "100%", md: "50%" }}>
+              <InputLabel>Whatsapp *</InputLabel>
+              <TextField
+                type="text"
+                value={whatsapp}
+                maxLength={15}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                fullWidth
+              />
+            </Box>
+          </Box>
+          <Box display={{ xs: "block", md: "flex" }} gap={2}>
+            <Box flexBasis={{ xs: "100%", md: "50%" }}>
+              <InputLabel>Tipo de Pessoa *</InputLabel>
+              <Select
+                value={tipoPessoa}
+                onChange={(e) => setTipoPessoa(e.target.value)}
+                fullWidth
+              >
+                <MenuItem value="F">Física</MenuItem>
+                <MenuItem value="J">Jurídica</MenuItem>
+              </Select>
+            </Box>
+            <Box flexBasis={{ xs: "100%", md: "50%" }}>
+              <InputLabel>Contribuinte ICMS *</InputLabel>
+              <Select
+                value={contribuenteIcms}
+                onChange={(e) => setContribuenteIcms(e.target.value)}
+                fullWidth
+              >
+                <MenuItem value={1}>Sim</MenuItem>
+                <MenuItem value={0}>Não</MenuItem>
+              </Select>
+            </Box>
+          </Box>
+          <Box display={{ xs: "block", md: "flex" }} gap={2}>
+            <Box flexBasis={{ xs: "100%", md: "35%" }}>
+              <InputLabel>Data de Nascimento *</InputLabel>
+              <TextField
+                type="date"
+                value={dataNascimento}
+                onChange={(e) => setDataNascimento(e.target.value)}
+                fullWidth
+              />
+            </Box>
+            <Box flexGrow={1}>
+              <InputLabel>CNPJ/CPF *</InputLabel>
+              <TextField
+                type="text"
+                value={cnpjCpf}
+                maxLength={tipoPessoa === "F" ? 14 : 18}
+                onChange={(e) => setCnpjCpf(e.target.value)}
+                fullWidth
+              />
+            </Box>
+          </Box>
+          <Box>
+            <InputLabel>Referência *</InputLabel>
+            <TextField
+              type="text"
+              value={referencia}
+              onChange={(e) => setReferencia(e.target.value)}
+              fullWidth
+            />
+          </Box>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="info">
+          CANCELAR
+        </Button>
+        <Button onClick={handleSave} color="primary">
+          SALVAR
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

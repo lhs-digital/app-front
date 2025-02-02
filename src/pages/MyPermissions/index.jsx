@@ -1,60 +1,79 @@
-import { Box, Checkbox, Flex, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Checkbox,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import { useContext } from "react";
-import Header from "../../components/Header";
-import Title from "../../components/Title";
+import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 
 const MyPermissions = () => {
   const { permissions } = useContext(AuthContext);
 
   return (
-    <>
-      <Header />
-      <Title
+    <div className="flex flex-col gap-4 w-full">
+      <PageTitle
         title="Minhas Permissões"
         subtitle="Visualização das suas permissões"
       />
-      <Flex
-        fontSize="20px"
-        mt="20px"
-        marginX="auto"
-        maxWidth="800px"
-        padding="0 12px"
-      >
-        <Box textAlign="justify" px={2}>
-          {permissions.length > 0 ? (
-            permissions
-              .reduce((acc, permission) => {
-                const categoryExists = acc.find(
-                  (cat) => cat.category === permission.category,
-                );
-                if (!categoryExists) {
-                  acc.push({ category: permission.category, items: [] });
-                }
-                acc
-                  .find((cat) => cat.category === permission.category)
-                  ?.items.push(permission);
-                return acc;
-              }, [])
-              .map((group, index) => (
-                <Box key={index} mb={4} width="100%">
-                  <b>{group.category}</b>
-                  <Flex wrap="wrap" gap={2} mt={2}>
-                    {group.items.map((permission, idx) => (
-                      <Flex key={idx} alignItems="center" gap={2}>
-                        <Checkbox isChecked={true} disabled />
-                        <Text>{permission.label}</Text>
-                      </Flex>
-                    ))}
-                  </Flex>
-                </Box>
-              ))
-          ) : (
-            <span>Você não possui permissões</span>
-          )}
-        </Box>
-      </Flex>
-    </>
+      <Box>
+        {permissions.length > 0 ? (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Categoria</TableCell>
+                  <TableCell>Permissão</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {permissions
+                  .reduce((acc, permission) => {
+                    const categoryExists = acc.find(
+                      (cat) => cat.category === permission.category,
+                    );
+                    if (!categoryExists) {
+                      acc.push({ category: permission.category, items: [] });
+                    }
+                    acc
+                      .find((cat) => cat.category === permission.category)
+                      ?.items.push(permission);
+                    return acc;
+                  }, [])
+                  .map((group, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <p className="font-bold">{group.category}</p>
+                      </TableCell>
+                      <TableCell>
+                        {group.items.map((permission, idx) => (
+                          <Box
+                            key={idx}
+                            display="flex"
+                            alignItems="center"
+                            gap={2}
+                          >
+                            <Checkbox checked={true} disabled />
+                            <p>{permission.label}</p>
+                          </Box>
+                        ))}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Typography>Você não possui permissões</Typography>
+        )}
+      </Box>
+    </div>
   );
 };
 

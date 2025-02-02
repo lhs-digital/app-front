@@ -1,30 +1,29 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { FilterAlt, FilterAltOff, Search } from "@mui/icons-material";
 import {
   Box,
   Button,
   ButtonGroup,
-  Flex,
-  FormLabel,
-  Grid,
-  Input,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
   Select,
   Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useBreakpointValue,
-} from "@chakra-ui/react";
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  TextField,
+} from "@mui/material";
 import { useEffect, useState } from "react";
-import Header from "../../components/Header";
-import Pagination from "../../components/Pagination";
-import Title from "../../components/Title";
+import PageTitle from "../../components/PageTitle";
 import api from "../../services/api";
 import { dateFormatted } from "../../services/utils";
+import { defaultLabelDisplayedRows } from "../../utils";
 
 const Logs = () => {
-  const isMobile = useBreakpointValue({ base: true, lg: false });
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -127,240 +126,301 @@ const Logs = () => {
     setData(sortedData);
   };
 
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return null;
-    return sortConfig.direction === "asc" ? (
-      <ChevronUpIcon ml={2} />
-    ) : (
-      <ChevronDownIcon ml={2} />
-    );
+  const createSortHandler = (key) => () => {
+    handleSort(key);
   };
 
   return (
-    <>
-      <Header />
-
-      <Title
+    <div className="flex flex-col gap-4 w-full">
+      <PageTitle
         title="Logs do Sistema"
         subtitle="Registro detalhado de atividades e eventos do sistema"
       />
-
-      <Flex
-        align="center"
-        justify="center"
-        flexDirection="column"
-        fontSize="20px"
-        fontFamily="poppins"
-      >
-        <Box maxW={800} w="100%" py={10}>
-          <Grid
-            templateColumns={isMobile ? "1fr" : "1fr 1fr 1fr"}
-            gap={4}
-            alignItems="center"
+      <Box display="flex" alignItems="center" gap={2}>
+        <Box flexGrow={1}>
+          <InputLabel>Tabela</InputLabel>
+          <Select fullWidth>
+            <MenuItem value="clients">clients</MenuItem>
+          </Select>
+        </Box>
+        <Box flexGrow={1}>
+          <InputLabel>Operação</InputLabel>
+          <Select
+            fullWidth
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
           >
-            <Box mb={2}>
-              <FormLabel fontSize="lg">Selecione a Tabela:</FormLabel>
-              <Select size="lg">
-                <option>clients</option>
-              </Select>
-            </Box>
-            <Box mb={2}>
-              <FormLabel fontSize="lg">Selecione a Operação:</FormLabel>
-              <Select
-                size="lg"
-                value={method}
-                onChange={(e) => setMethod(e.target.value)}
-              >
-                <option value="">Todos</option>
-                <option value="POST">POST</option>
-                <option value="GET">GET</option>
-              </Select>
-            </Box>
-            <Box mb={2}>
-              <FormLabel fontSize="lg">Selecione o Nível:</FormLabel>
-              <Select
-                value={nivel}
-                onChange={(e) => setNivel(e.target.value)}
-                size="lg"
-              >
-                <option value="">Todos</option>
-                <option value="info">Info</option>
-                <option value="warning">Warning</option>
-                <option value="error">Error</option>
-              </Select>
-            </Box>
-          </Grid>
-          <Box mb={2}>
-            <FormLabel fontSize="lg">Pesquise por:</FormLabel>
-            <Input
-              mt="0px"
-              placeholder="IP, tipo e URL"
-              size="lg"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+            <MenuItem value="">Todos</MenuItem>
+            <MenuItem value="POST">POST</MenuItem>
+            <MenuItem value="GET">GET</MenuItem>
+          </Select>
+        </Box>
+        <Box flexGrow={1}>
+          <InputLabel>Nível</InputLabel>
+          <Select
+            fullWidth
+            value={nivel}
+            onChange={(e) => setNivel(e.target.value)}
+          >
+            <MenuItem value="">Todos</MenuItem>
+            <MenuItem value="info">Info</MenuItem>
+            <MenuItem value="warning">Warning</MenuItem>
+            <MenuItem value="error">Error</MenuItem>
+          </Select>
+        </Box>
+        <Box flexBasis="50%">
+          <InputLabel>Período</InputLabel>
+          <Box display="flex" alignItems="center" gap="6px">
+            <TextField
+              type="date"
+              value={createdAt[0] || ""}
+              onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
+              fullWidth
+            />
+            até
+            <TextField
+              type="date"
+              value={createdAt[1] || ""}
+              onChange={(e) => setCreatedAt([createdAt[0], e.target.value])}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              fullWidth
             />
           </Box>
-
-          <Grid templateColumns="1fr" gap={4}>
-            <Box>
-              <FormLabel fontSize="lg">Período</FormLabel>
-              <Flex alignItems="center" gap="6px">
-                <Input
-                  size="lg"
-                  placeholder="Data de Auditoria"
-                  type="date"
-                  value={createdAt[0] || ""}
-                  onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
-                />
-                até
-                <Input
-                  size="lg"
-                  placeholder="Data de Auditoria"
-                  type="date"
-                  value={createdAt[1] || ""}
-                  onChange={(e) => setCreatedAt([createdAt[0], e.target.value])}
-                />
-              </Flex>
-              <Flex
-                justifyContent="flex-end"
-                alignItems="center"
-                flexDirection="row"
-                marginTop={4}
-              >
-                <Box>
-                  <ButtonGroup>
-                    <Button onClick={handleClean}>Limpar Filtro</Button>
-                    <Button colorScheme="blue" onClick={handleFilter}>
-                      Filtrar
-                    </Button>
-                  </ButtonGroup>
-                </Box>
-              </Flex>
-            </Box>
-          </Grid>
-          <Box overflowX="auto" height="100%">
-            <Table mt="6" overflowX="auto">
-              <Thead>
-                <Tr>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("created_at")}
-                    cursor="pointer"
-                  >
-                    Data de Registro {getSortIcon("created_at")}
-                  </Th>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("log.ip")}
-                    cursor="pointer"
-                  >
-                    Endereço IP {getSortIcon("log.ip")}
-                  </Th>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("log.email")}
-                    cursor="pointer"
-                  >
-                    E-mail {getSortIcon("log.email")}
-                  </Th>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("log.user")}
-                    cursor="pointer"
-                  >
-                    Usuário {getSortIcon("log.user")}
-                  </Th>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("log.method")}
-                    cursor="pointer"
-                  >
-                    Operação {getSortIcon("log.method")}
-                  </Th>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("log.nivel")}
-                    cursor="pointer"
-                  >
-                    Nível {getSortIcon("log.nivel")}
-                  </Th>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("log.type")}
-                    cursor="pointer"
-                  >
-                    Tipo {getSortIcon("log.type")}
-                  </Th>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("log.url")}
-                    cursor="pointer"
-                  >
-                    URL {getSortIcon("log.url")}
-                  </Th>
-                  <Th
-                    fontSize="16px"
-                    onClick={() => handleSort("log.table")}
-                    cursor="pointer"
-                  >
-                    Tabela {getSortIcon("log.table")}
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {data.length === 0 ? (
-                  <Tr>
-                    <Td colSpan={4} textAlign="center">
-                      Não existem logs no sistema
-                    </Td>
-                  </Tr>
-                ) : (
-                  (!search
-                    ? data
-                    : data.filter(
-                        (log) =>
-                          log?.ip?.includes(search) ||
-                          log?.email?.includes(search) ||
-                          log?.nivel?.includes(search) ||
-                          log?.type?.includes(search) ||
-                          log?.method?.includes(search) ||
-                          log?.url?.includes(search) ||
-                          log?.table?.includes(search) ||
-                          log?.object_id?.includes(search) ||
-                          log?.created_at?.includes(search),
-                      )
-                  ).map((log, index) => (
-                    <Tr
-                      key={index}
-                      cursor="pointer"
-                      _odd={{ bg: "gray.100" }}
-                      _even={{ bg: "white" }}
-                      _hover={{ bg: "gray.50" }}
-                    >
-                      <Td> {dateFormatted(log.created_at)} </Td>
-                      <Td> {log.ip} </Td>
-                      <Td> {log.email} </Td>
-                      <Td> {log.object_id} </Td>
-                      <Td> {log.method} </Td>
-                      <Td> {log.nivel} </Td>
-                      <Td> {log.type} </Td>
-                      <Td> {log.url} </Td>
-                      <Td> {log.table} </Td>
-                    </Tr>
-                  ))
-                )}
-              </Tbody>
-            </Table>
-          </Box>
         </Box>
+      </Box>
 
-        <Pagination
-          currentPage={currentPage}
-          lastPage={lastPage}
-          setCurrentPage={setCurrentPage}
+      <Box display="flex" gap={2} alignItems="end">
+        <Box flexGrow={1}>
+          <InputLabel>Pesquise por:</InputLabel>
+          <TextField
+            fullWidth
+            placeholder="IP, tipo e URL"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </Box>
+        <ButtonGroup className="h-14">
+          <Button onClick={handleClean} startIcon={<FilterAltOff />}>
+            Limpar
+          </Button>
+          <Button
+            color="primary"
+            onClick={handleFilter}
+            startIcon={<FilterAlt />}
+          >
+            Filtrar
+          </Button>
+        </ButtonGroup>
+      </Box>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "created_at" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "created_at"}
+                  direction={
+                    sortConfig.key === "created_at"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("created_at")}
+                >
+                  Data de Registro
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "log.ip" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "log.ip"}
+                  direction={
+                    sortConfig.key === "log.ip" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("log.ip")}
+                >
+                  Endereço IP
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "log.email" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "log.email"}
+                  direction={
+                    sortConfig.key === "log.email"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("log.email")}
+                >
+                  E-mail
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "log.user" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "log.user"}
+                  direction={
+                    sortConfig.key === "log.user" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("log.user")}
+                >
+                  Usuário
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "log.method" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "log.method"}
+                  direction={
+                    sortConfig.key === "log.method"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("log.method")}
+                >
+                  Operação
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "log.nivel" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "log.nivel"}
+                  direction={
+                    sortConfig.key === "log.nivel"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("log.nivel")}
+                >
+                  Nível
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "log.type" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "log.type"}
+                  direction={
+                    sortConfig.key === "log.type" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("log.type")}
+                >
+                  Tipo
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "log.url" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "log.url"}
+                  direction={
+                    sortConfig.key === "log.url" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("log.url")}
+                >
+                  URL
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "log.table" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "log.table"}
+                  direction={
+                    sortConfig.key === "log.table"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("log.table")}
+                >
+                  Tabela
+                </TableSortLabel>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} textAlign="center">
+                  Não existem Regras de Auditorias no sistema
+                </TableCell>
+              </TableRow>
+            ) : (
+              (!search
+                ? data
+                : data.filter(
+                    (log) =>
+                      log?.ip?.includes(search) ||
+                      log?.email?.includes(search) ||
+                      log?.nivel?.includes(search) ||
+                      log?.type?.includes(search) ||
+                      log?.method?.includes(search) ||
+                      log?.url?.includes(search) ||
+                      log?.table?.includes(search) ||
+                      log?.object_id?.includes(search) ||
+                      log?.created_at?.includes(search),
+                  )
+              ).map((log, index) => (
+                <TableRow key={index}>
+                  <TableCell>{dateFormatted(log.created_at)}</TableCell>
+                  <TableCell>{log.ip}</TableCell>
+                  <TableCell>{log.email}</TableCell>
+                  <TableCell>{log.object_id}</TableCell>
+                  <TableCell>{log.method}</TableCell>
+                  <TableCell>{log.nivel}</TableCell>
+                  <TableCell>{log.type}</TableCell>
+                  <TableCell>{log.url}</TableCell>
+                  <TableCell>{log.table}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        <TablePagination
+          component="div"
+          count={lastPage * 10}
+          page={currentPage - 1}
+          onPageChange={(event, newPage) => setCurrentPage(newPage + 1)}
+          labelRowsPerPage="Linhas por página"
+          rowsPerPage={10}
+          rowsPerPageOptions={[10]}
+          labelDisplayedRows={defaultLabelDisplayedRows}
         />
-      </Flex>
-    </>
+      </TableContainer>
+    </div>
   );
 };
 
