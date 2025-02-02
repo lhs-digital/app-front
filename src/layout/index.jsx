@@ -131,7 +131,8 @@ const Index = ({ children }) => {
     navigate("/");
   };
 
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="flex flex-row h-screen w-full">
       <Drawer
@@ -196,9 +197,11 @@ const Index = ({ children }) => {
       <div className="grow flex flex-col">
         <div className="h-16 border-b flex flex-row items-center justify-between px-4">
           <img src={lighthouse} alt="Lighthouse" className="h-10 mb-1" />
-          <IconButton color="info" onClick={handleLogout}>
-            <Logout />
-          </IconButton>
+          <div className="flex flex-row gap-2">
+            <IconButton color="info" onClick={handleLogout}>
+              <Logout />
+            </IconButton>
+          </div>
         </div>
         <div className="max-h-[calc(100vh-4rem)] p-8 overflow-y-scroll">
           {children}
