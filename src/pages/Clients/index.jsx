@@ -27,7 +27,6 @@ const Clients = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
-
   const [data, setData] = useState([]);
   const [dataEdit, setDataEdit] = useState({});
   const [dataView, setDataView] = useState({});
@@ -47,9 +46,11 @@ const Clients = () => {
     const fetchClients = async () => {
       setLoading(true);
       try {
-        const response = await api.get(`/clients?page=${currentPage}`);
+        const response = await api.get(
+          `/clients?page=${currentPage}&per_page=10`,
+        );
         setData(response.data.data);
-        setCurrentPage(response.data.from);
+        setCurrentPage(response.data.current_page);
         setLastPage(response.data.last_page);
       } catch (error) {
         console.error("Erro ao buscar clientes:", error);
@@ -280,6 +281,7 @@ const Clients = () => {
           rowsPerPage={10}
           labelDisplayedRows={defaultLabelDisplayedRows}
           rowsPerPageOptions={[10]}
+          onRowsPerPageChange={() => {}}
         />
       </TableContainer>
     </div>
