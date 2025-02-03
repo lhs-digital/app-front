@@ -6,8 +6,6 @@
 .pnp.js
 
 # Build
-/build
-/dist
 /.next
 /.vite
 /.parcel-cache
