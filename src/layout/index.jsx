@@ -21,6 +21,7 @@ import {
   ListItemIcon,
   ListItemText,
   styled,
+  Tooltip,
 } from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
 import { useContext, useState } from "react";
@@ -155,44 +156,51 @@ const Index = ({ children }) => {
         </div>
         <List className="grow">
           {sidebarItems.map((item, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton
-                onClick={() => navigate(item.url)}
-                selected={window.location.pathname === item.url}
-                sx={[
-                  {
-                    minHeight: 48,
-                    px: 3,
-                  },
-                  open
-                    ? {
-                        justifyContent: "initial",
-                      }
-                    : {
-                        justifyContent: "center",
-                      },
-                ]}
-              >
-                <ListItemIcon
+            <Tooltip
+              title={item.label}
+              key={index}
+              hidden={!open}
+              placement="right"
+            >
+              <ListItem key={index} disablePadding>
+                <ListItemButton
+                  onClick={() => navigate(item.url)}
+                  selected={window.location.pathname === item.url}
                   sx={[
                     {
-                      minWidth: 0,
-                      justifyContent: "center",
+                      minHeight: 48,
+                      px: 3,
                     },
                     open
                       ? {
-                          mr: 3,
+                          justifyContent: "initial",
                         }
                       : {
-                          mr: "auto",
+                          justifyContent: "center",
                         },
                   ]}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                {open && <ListItemText primary={item.label} />}
-              </ListItemButton>
-            </ListItem>
+                  <ListItemIcon
+                    sx={[
+                      {
+                        minWidth: 0,
+                        justifyContent: "center",
+                      },
+                      open
+                        ? {
+                            mr: 3,
+                          }
+                        : {
+                            mr: "auto",
+                          },
+                    ]}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  {open && <ListItemText primary={item.label} />}
+                </ListItemButton>
+              </ListItem>
+            </Tooltip>
           ))}
         </List>
         {open ? (
