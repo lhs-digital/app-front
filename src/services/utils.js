@@ -24,7 +24,7 @@ export const getPriorityColor = (priority) => {
     case 1:
       return { color: colors.grey[700], backgroundColor: colors.grey[200] };
     case 2:
-      return { color: colors.blue[600], backgroundColor: colors.blue[100] };
+      return { color: colors.amber[600], backgroundColor: colors.amber[100] };
     case 3:
       return { color: colors.red[600], backgroundColor: colors.red[100] };
     default:
@@ -42,7 +42,7 @@ export const validarEmail = (email) => {
 
 export const validarCPF = (cpf) => {
   // eslint-disable-next-line
-  const regex = /^\d{3}\.\d{3}\.\d{3}\-\d{2}$/; 
+  const regex = /^\d{3}\.\d{3}\.\d{3}\-\d{2}$/;
   return regex.test(cpf);
 };
 
@@ -72,4 +72,3 @@ export const validarDataNascimento = (data) => {
 export const defaultLabelDisplayedRows = ({ from, to, count }) => {
   return `${from}–${to} de ${count !== -1 ? count : `mais que ${to}`}`;
 };
-

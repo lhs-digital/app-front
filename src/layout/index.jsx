@@ -1,4 +1,5 @@
 import {
+  BuildOutlined,
   BusinessOutlined,
   DescriptionOutlined,
   HomeOutlined,
@@ -80,6 +81,11 @@ const sidebarItems = [
     label: "Início",
     url: "/dashboard",
     icon: <HomeOutlined fontSize="small" />,
+  },
+  {
+    label: "Auditorias",
+    url: "/audits",
+    icon: <BuildOutlined fontSize="small" />,
   },
   {
     label: "Empresas",

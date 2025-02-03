@@ -38,7 +38,10 @@ const Clients = () => {
   const [deleteId, setDeleteId] = useState(null);
   //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "desc" });
+  const [sortConfig, setSortConfig] = useState({
+    key: "id",
+    direction: "desc",
+  });
 
   const { permissions } = useContext(AuthContext);
 
