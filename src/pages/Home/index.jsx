@@ -1,35 +1,23 @@
 import HomeIcon from "@mui/icons-material/Home";
-import { Masonry } from "@mui/lab";
-import { colors } from "@mui/material";
-import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { useContext, useEffect } from "react";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import AuditSection from "./AuditSection";
-import MiscSection from "./MiscSection";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+export const completionData = [
+  { id: 0, value: Math.floor(Math.random() * 41), label: "Pendentes" },
+  { id: 1, value: Math.floor(Math.random() * 42), label: "Corrigidos" },
+];
 
-export const completionData = {
-  labels: ["Pendentes", "Corrigidos"],
-  datasets: [
-    {
-      label: "Clientes",
-      data: [10, 20],
-      backgroundColor: [colors.grey[600], colors.grey[400]],
-    },
-  ],
-};
+export const priorityData = [
+  { id: 0, value: Math.floor(Math.random() * 41), label: "Baixa" },
+  { id: 1, value: Math.floor(Math.random() * 42), label: "Média" },
+  { id: 2, value: Math.floor(Math.random() * 43), label: "Urgente" },
+];
 
-export const priorityData = {
-  labels: ["Baixa", "Média", "Urgente"],
-  datasets: [
-    {
-      label: "Prioridades",
-      data: [10, 40, 20],
-      backgroundColor: [colors.grey[300], colors.grey[500], colors.grey[800]],
-    },
-  ],
+export const stats = {
+  audittedEntities: Math.floor(Math.random() * 100),
+  latestAudit: new Date(Date.now()).toLocaleDateString("pt-BR"),
 };
 
 const Home = () => {
@@ -47,24 +35,11 @@ const Home = () => {
         icon={<HomeIcon />}
         subtitle={`Bem vindo, ${user.name}`}
       />
-      <Masonry
-        columns={{
-          xs: 1,
-          lg: 2,
-          xl: 3,
-        }}
-        spacing={2}
-        width="100%"
-      >
-        <AuditSection
-          completionData={completionData}
-          priorityData={priorityData}
-        />
-        <MiscSection
-          completionData={completionData}
-          priorityData={priorityData}
-        />
-      </Masonry>
+      <AuditSection
+        completionData={completionData}
+        priorityData={priorityData}
+        stats={stats}
+      />
     </div>
   );
 };
