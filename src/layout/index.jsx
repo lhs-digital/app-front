@@ -1,19 +1,27 @@
 import {
+  Build,
   BuildOutlined,
+  Business,
   BusinessOutlined,
-  DescriptionOutlined,
+  Home,
   HomeOutlined,
+  Lock,
   LockOutlined,
   Logout,
   Menu,
+  Person,
   PersonOutline,
+  RuleFolder,
   RuleFolderOutlined,
+  Settings,
   SettingsOutlined,
   Subject,
+  Work,
   WorkOutline,
 } from "@mui/icons-material";
 import {
   Avatar,
+  colors,
   IconButton,
   List,
   ListItem,
@@ -82,63 +90,68 @@ const sidebarItems = [
     label: "Início",
     url: "/dashboard",
     icon: <HomeOutlined fontSize="small" />,
+    activeIcon: <Home fontSize="small" />,
   },
   {
     label: "Auditorias",
     url: "/audits",
     icon: <BuildOutlined fontSize="small" />,
+    activeIcon: <Build fontSize="small" />,
   },
   {
     label: "Empresas",
     url: "/companies",
     icon: <BusinessOutlined fontSize="small" />,
+    activeIcon: <Business fontSize="small" />,
   },
   {
     label: "Papéis & Permissões",
     url: "/roles",
     icon: <LockOutlined fontSize="small" />,
+    activeIcon: <Lock fontSize="small" />,
   },
   {
     label: "Usuários",
     url: "/users",
     icon: <PersonOutline fontSize="small" />,
+    activeIcon: <Person fontSize="small" />,
   },
   {
     label: "Clientes",
     url: "/clientes",
     icon: <WorkOutline fontSize="small" />,
+    activeIcon: <Work fontSize="small" />,
   },
   {
     label: "Regras de Auditorias",
     url: "/prioridades",
     icon: <RuleFolderOutlined fontSize="small" />,
-  },
-  {
-    label: "Relatórios de Auditorias",
-    url: "/relatorios",
-    icon: <DescriptionOutlined fontSize="small" />,
+    activeIcon: <RuleFolder fontSize="small" />,
   },
   {
     label: "Minhas Permissões",
     url: "/my-permissions",
     icon: <SettingsOutlined fontSize="small" />,
+    activeIcon: <Settings fontSize="small" />,
   },
   {
     label: "Logs",
     url: "/logs",
     icon: <Subject fontSize="small" />,
+    activeIcon: <Subject fontSize="small" />,
   },
 ];
 
 const Index = ({ children }) => {
-  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const isActive = (url) => window.location.pathname === url;
+
   const handleLogout = async () => {
     logout();
     navigate("/");
   };
-
-  const [open, setOpen] = useState(false);
 
   return (
     <div className="flex flex-row h-screen w-full">
@@ -165,7 +178,7 @@ const Index = ({ children }) => {
               <ListItem key={index} disablePadding>
                 <ListItemButton
                   onClick={() => navigate(item.url)}
-                  selected={window.location.pathname === item.url}
+                  selected={isActive(item.url)}
                   sx={[
                     {
                       minHeight: 48,
@@ -193,9 +206,12 @@ const Index = ({ children }) => {
                         : {
                             mr: "auto",
                           },
+                      isActive(item.url) && {
+                        color: colors.grey[900],
+                      },
                     ]}
                   >
-                    {item.icon}
+                    {isActive(item.url) ? item.activeIcon : item.icon}
                   </ListItemIcon>
                   {open && <ListItemText primary={item.label} />}
                 </ListItemButton>
