@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import {
@@ -146,7 +147,7 @@ const ModalFormClient = ({
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onClose={onClose} width="lg" fullWidth>
       <DialogTitle>
         Formulário para correção de dados inválidos
         <Typography>ID do Cliente: #{selectedActivitie?.record_id}</Typography>
@@ -233,11 +234,10 @@ const ModalFormClient = ({
         </Box>
         <Box>
           <InputLabel>WhatsApp *</InputLabel>
-          <TextField
-            type="tel"
+          <InputMask
+            mask="(99) 99999-9999"
             value={form.whatsapp}
-            placeholder="Digite o WhatsApp"
-            helperText="Exemplo: (99) 99999-9999"
+            onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Whatsapp",
@@ -248,17 +248,17 @@ const ModalFormClient = ({
                 (field) => field.label === "Whatsapp",
               ) !== -1 || selectedActivitie?.status
             }
-            maxLength={15}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "");
-              const formatted = value
-                .replace(/^(\d{2})(\d)/, "($1) $2")
-                .replace(/(\d{5})(\d)/, "$1-$2")
-                .slice(0, 15);
-              setForm({ ...form, whatsapp: formatted });
-            }}
-            fullWidth
-          />
+          >
+            {(inputProps) => (
+              <TextField
+                {...inputProps}
+                placeholder="Digite o WhatsApp"
+                helperText="Exemplo: (99) 99999-9999"
+                maxLength={15}
+                fullWidth
+              />
+            )}
+          </InputMask>
         </Box>
         <Box>
           <InputLabel>Data de Nascimento *</InputLabel>
@@ -285,16 +285,11 @@ const ModalFormClient = ({
         </Box>
         <Box>
           <InputLabel>{form.tipo_pessoa === "F" ? "CPF" : "CNPJ"} *</InputLabel>
-          <TextField
-            type="text"
+          <InputMask
             value={form.cnpj_cpf}
-            placeholder={
-              form.tipo_pessoa === "F" ? "Digite o CPF" : "Digite o CNPJ"
-            }
-            helperText={
-              form.tipo_pessoa === "F"
-                ? "Exemplo: 000.000.000-00"
-                : "Exemplo: 00.000.000/0000-00"
+            onChange={(e) => setForm({ ...form, cnpj_cpf: e.target.value })}
+            mask={
+              form.tipo_pessoa === "F" ? "999.999.999-99" : "99.999.999/9999-99"
             }
             disabled={
               fieldsWithErrors?.findIndex(
@@ -306,32 +301,19 @@ const ModalFormClient = ({
                 (field) => field.label === "CPF/CNPJ",
               ) !== -1 || selectedActivitie?.status
             }
-            maxLength={form.tipo_pessoa === "F" ? 14 : 18}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "");
-              let formatted = value;
-              if (form.tipo_pessoa === "F") {
-                formatted = value
-                  .replace(/(\d{3})(\d)/, "$1.$2")
-                  .replace(/(\d{3})(\d)/, "$1.$2")
-                  .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-              } else {
-                formatted = value
-                  .replace(/(\d{2})(\d)/, "$1.$2")
-                  .replace(/(\d{3})(\d)/, "$1.$2")
-                  .replace(/(\d{3})(\d)/, "$1/$2")
-                  .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
-              }
-              setForm({
-                ...form,
-                cnpj_cpf: formatted.slice(
-                  0,
-                  form.tipo_pessoa === "F" ? 14 : 18,
-                ),
-              });
-            }}
-            fullWidth
-          />
+          >
+            {(inputProps) => (
+              <TextField
+                {...inputProps}
+                type="text"
+                placeholder={
+                  form.tipo_pessoa === "F" ? "Digite o CPF" : "Digite o CNPJ"
+                }
+                maxLength={form.tipo_pessoa === "F" ? 14 : 18}
+                fullWidth
+              />
+            )}
+          </InputMask>
         </Box>
         <Box>
           <InputLabel>Referência do Endereço *</InputLabel>
