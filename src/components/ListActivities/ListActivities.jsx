@@ -31,7 +31,7 @@ const ListActivities = () => {
   const [status, setStatus] = useState(0);
   const [createdAt, setCreatedAt] = useState([]);
   const [per_page, setPer_page] = useState(20);
-  const [priority, setPriority] = useState("");
+  const [priority, setPriority] = useState(-1);
 
   const isMobile = useMediaQuery("(max-width: 600px)");
 
@@ -40,7 +40,7 @@ const ListActivities = () => {
     priorityOrder: "desc",
     createdAt: [],
     status: null,
-    priority: null,
+    priority: -1,
   });
 
   useEffect(() => {
@@ -52,9 +52,9 @@ const ListActivities = () => {
           {
             params: {
               search: filterParams?.search,
-              // priority_order: "",
+              priority_order: "",
               ...(status !== null && { status: status }),
-              // priority: "",
+              priority: priority === -1 ? undefined : priority,
               created_at: [
                 filterParams?.createdAt[0],
                 filterParams?.createdAt[1],
@@ -91,25 +91,26 @@ const ListActivities = () => {
       search: "",
       status: null,
       priorityOrder: newOrder,
-      priority: null,
+      priority: -1,
       createdAt: [],
     });
   };
 
   const handleClean = () => {
     setSearch("");
-    setTable("");
+    setTable("clients");
     setPriorityOrder("desc");
     setCreatedAt([null, null]);
+    setPriority(-1);
     setFilterParams({
       search: "",
       priorityOrder: "desc",
-      status: null,
-      priority: null,
       createdAt: [],
+      status: null,
+      priority: -1,
     });
     setCurrentPage(1);
-    setRefresh(!refresh);
+    setRefresh(prev => !prev);
   };
 
   const handleFilter = () => {
@@ -122,7 +123,7 @@ const ListActivities = () => {
     });
 
     setCurrentPage(1);
-    setRefresh(!refresh);
+    setRefresh(prev => !prev);
   };
 
   const handlePerPageChange = (e) => {
@@ -202,10 +203,10 @@ const ListActivities = () => {
             onChange={(e) => setPriority(e.target.value)}
             fullWidth
           >
-            <MenuItem value={""}>Todas</MenuItem>
-            <MenuItem value={1}>Muito Baixa</MenuItem>
-            <MenuItem value={2}>Baixa</MenuItem>
+            <MenuItem value={-1}>Todas</MenuItem>
             <MenuItem value={3}>Urgente</MenuItem>
+            <MenuItem value={2}>Moderada</MenuItem>
+            <MenuItem value={1}>Baixa</MenuItem>
           </Select>
         </Box>
         <Box className="col-span-2">
