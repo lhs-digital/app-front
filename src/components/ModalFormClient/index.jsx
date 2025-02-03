@@ -298,12 +298,12 @@ const ModalFormClient = ({
             }
             disabled={
               fieldsWithErrors?.findIndex(
-                (field) => field.label === "CPF" || field.column === "CNPJ",
+                (field) => field.label === "CPF/CNPJ",
               ) === -1 || selectedActivitie?.status
             }
             error={
               fieldsWithErrors?.findIndex(
-                (field) => field.label === "CPF" || field.column === "CNPJ",
+                (field) => field.label === "CPF/CNPJ",
               ) !== -1 || selectedActivitie?.status
             }
             maxLength={form.tipo_pessoa === "F" ? 14 : 18}
