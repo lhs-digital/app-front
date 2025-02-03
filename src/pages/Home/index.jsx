@@ -1,19 +1,20 @@
-import { Box, colors } from "@mui/material";
+import { Masonry } from "@mui/lab";
+import { colors } from "@mui/material";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
-import { useContext } from "react";
-import { Pie } from "react-chartjs-2";
-import PageTitle from "../../components/PageTitle";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../../contexts/auth";
+import AuditSection from "./AuditSection";
+import MiscSection from "./MiscSection";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export const completionData = {
-  labels: ["Erros Pendentes", "Erros Corrigidos"],
+  labels: ["Pendentes", "Corrigidos"],
   datasets: [
     {
       label: "Clientes",
       data: [10, 20],
-      backgroundColor: [colors.orange[400], colors.lightGreen[400]],
+      backgroundColor: [colors.grey[600], colors.grey[400]],
     },
   ],
 };
@@ -24,11 +25,7 @@ export const priorityData = {
     {
       label: "Prioridades",
       data: [10, 40, 20],
-      backgroundColor: [
-        colors.grey[400],
-        colors.deepOrange[300],
-        colors.red[400],
-      ],
+      backgroundColor: [colors.grey[300], colors.grey[500], colors.grey[800]],
     },
   ],
 };
@@ -37,20 +34,33 @@ const Home = () => {
   const { user } = useContext(AuthContext).user;
   console.log(user);
 
+  useEffect(() => {
+    document.title = "LHS - Home";
+  }, []);
+
   return (
-    <div className="flex flex-col">
-      <PageTitle title="Home" />
+    <div className="flex flex-col gap-8">
       <h2>
         Bem vindo, <b>{user.name}</b>.
       </h2>
-      <Box display={{ xs: "block", md: "flex" }} gap={2}>
-        <Box flexBasis="25%">
-          <Pie data={completionData} />
-        </Box>
-        <Box flexBasis="25%">
-          <Pie data={priorityData} />
-        </Box>
-      </Box>
+      <Masonry
+        columns={{
+          xs: 1,
+          lg: 2,
+          xl: 3,
+        }}
+        spacing={2}
+        width="100%"
+      >
+        <AuditSection
+          completionData={completionData}
+          priorityData={priorityData}
+        />
+        <MiscSection
+          completionData={completionData}
+          priorityData={priorityData}
+        />
+      </Masonry>
     </div>
   );
 };
