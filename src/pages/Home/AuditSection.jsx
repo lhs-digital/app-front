@@ -24,14 +24,15 @@ const AuditSection = ({ completionData, priorityData }) => {
         width="100%"
       >
         <Card className="p-4 flex flex-col gap-2" variant="outlined">
-          <p>Entidades auditadas</p>
-          <p className="text-lg lg:text-2xl font-bold">124</p>
-        </Card>
-        <Card className="p-4 flex flex-col gap-2" variant="outlined">
-          <p>Última auditoria</p>
-          <p className="text-lg lg:text-2xl font-bold">
-            {new Date(Date.now()).toLocaleDateString("pt-BR")}
-          </p>
+          <p>Relatório disponível</p>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setIsOpen(true)}
+            startIcon={<Description />}
+          >
+            GERAR
+          </Button>
         </Card>
         <Card className="p-4 flex flex-col gap-2" variant="outlined">
           <p>Regras de auditoria</p>
@@ -43,6 +44,16 @@ const AuditSection = ({ completionData, priorityData }) => {
           >
             VISUALIZAR
           </Button>
+        </Card>
+        <Card className="p-4 flex flex-col gap-2" variant="outlined">
+          <p>Entidades auditadas</p>
+          <p className="text-lg lg:text-2xl font-bold">124</p>
+        </Card>
+        <Card className="p-4 flex flex-col gap-2" variant="outlined">
+          <p>Última auditoria</p>
+          <p className="text-lg lg:text-2xl font-bold">
+            {new Date(Date.now()).toLocaleDateString("pt-BR")}
+          </p>
         </Card>
         <Card
           variant="outlined"
@@ -77,17 +88,6 @@ const AuditSection = ({ completionData, priorityData }) => {
               },
             }}
           />
-        </Card>
-        <Card className="p-4 flex flex-col gap-2" variant="outlined">
-          <p>Relatório disponível</p>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setIsOpen(true)}
-            startIcon={<Description />}
-          >
-            GERAR
-          </Button>
         </Card>
       </Masonry>
       <ModalReport isOpen={isOpen} onClose={() => setIsOpen(false)} />
