@@ -1,19 +1,46 @@
-import { useContext } from "react";
-import ListActivities from "../../components/ListActivities/ListActivities";
+import HomeIcon from "@mui/icons-material/Home";
+import { useContext, useEffect } from "react";
+import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
+import AuditSection from "./AuditSection";
+
+export const completionData = [
+  { id: 0, value: Math.floor(Math.random() * 41), label: "Pendentes" },
+  { id: 1, value: Math.floor(Math.random() * 42), label: "Corrigidos" },
+];
+
+export const priorityData = [
+  { id: 0, value: Math.floor(Math.random() * 41), label: "Baixa" },
+  { id: 1, value: Math.floor(Math.random() * 42), label: "Média" },
+  { id: 2, value: Math.floor(Math.random() * 43), label: "Urgente" },
+];
+
+export const stats = {
+  audittedEntities: Math.floor(Math.random() * 100),
+  latestAudit: new Date(Date.now()).toLocaleDateString("pt-BR"),
+};
 
 const Home = () => {
-  const { permissions } = useContext(AuthContext);
-  const tasksPermissions = ["view_any_tasks", "update_tasks"];
+  const { user } = useContext(AuthContext).user;
+  console.log(user);
 
-  const hasPermission = (thePermissions) => {
-    return permissions.some((permission) =>
-      thePermissions.includes(permission.name),
-    );
-  };
+  useEffect(() => {
+    document.title = "LHS - Home";
+  }, []);
 
   return (
-    <div>{hasPermission(tasksPermissions) ? <ListActivities /> : null}</div>
+    <div className="flex flex-col gap-8">
+      <PageTitle
+        title="Dashboard"
+        icon={<HomeIcon />}
+        subtitle={`Bem vindo, ${user.name}`}
+      />
+      <AuditSection
+        completionData={completionData}
+        priorityData={priorityData}
+        stats={stats}
+      />
+    </div>
   );
 };
 

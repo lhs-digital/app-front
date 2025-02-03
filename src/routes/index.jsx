@@ -8,6 +8,7 @@ import Clients from "../pages/Clients";
 import Companies from "../pages/Companies";
 import FirstAccess from "../pages/FirstAccess";
 import Home from "../pages/Home";
+import ListActivities from "../pages/ListActivities";
 import Logs from "../pages/Logs";
 import MyPermissions from "../pages/MyPermissions";
 import PasswordUpdate from "../pages/PasswordUpdate";
@@ -78,15 +79,25 @@ const RoutesApp = () => {
           />
           <Route
             path="/first-access/:token"
-            element={<Public Item={FirstAccess} />}
+            element={
+              <Public
+                Item={FirstAccess}
+                allowedRoles={["super-admin"]}
+                allowedPermissions={["view_any_tasks", "update_tasks"]}
+              />
+            }
           />
-
           <Route
-            exact
             path="/dashboard"
             element={<Private Item={Home} allowedRoles={["super-admin"]} />}
           />
-
+          <Route
+            exact
+            path="/audits"
+            element={
+              <Private Item={ListActivities} allowedRoles={["super-admin"]} />
+            }
+          />
           <Route
             path="/prioridades"
             element={

@@ -1,4 +1,4 @@
-import { Search } from "@mui/icons-material";
+import { List, Search } from "@mui/icons-material";
 import Masonry from "@mui/lab/Masonry";
 import {
   Box,
@@ -7,14 +7,13 @@ import {
   colors,
   InputLabel,
   MenuItem,
+  Pagination,
   Select,
   TextField,
-  useMediaQuery,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import ActivitieItem from "../../components/ActivitieItem/ActivitieItem";
 import PageTitle from "../../components/PageTitle";
-import Pagination from "../../components/Pagination";
 import api from "../../services/api";
 import { getPriorityColor, priorities } from "../../services/utils";
 
@@ -32,8 +31,6 @@ const ListActivities = () => {
   const [createdAt, setCreatedAt] = useState([]);
   const [per_page, setPer_page] = useState(20);
   const [priority, setPriority] = useState(-1);
-
-  const isMobile = useMediaQuery("(max-width: 600px)");
 
   const [filterParams, setFilterParams] = useState({
     search: "",
@@ -110,7 +107,7 @@ const ListActivities = () => {
       priority: -1,
     });
     setCurrentPage(1);
-    setRefresh(prev => !prev);
+    setRefresh((prev) => !prev);
   };
 
   const handleFilter = () => {
@@ -123,7 +120,7 @@ const ListActivities = () => {
     });
 
     setCurrentPage(1);
-    setRefresh(prev => !prev);
+    setRefresh((prev) => !prev);
   };
 
   const handlePerPageChange = (e) => {
@@ -131,8 +128,9 @@ const ListActivities = () => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-6">
+    <div className="flex flex-col w-full gap-6 items-center">
       <PageTitle
+        icon={<List fontSize="small" />}
         title="Lista de Atividades"
         subtitle="Gerencie todas as suas atividades pendentes e concluídas."
       />
@@ -178,7 +176,7 @@ const ListActivities = () => {
           </Box>
         </Box>
         <Box className="col-span-2">
-          <InputLabel>Ordem de Prioridade:</InputLabel>
+          <InputLabel>Ordem de Prioridade</InputLabel>
           <Select
             value={priorityOrder}
             onChange={handlePriorityOrder}
@@ -189,7 +187,7 @@ const ListActivities = () => {
           </Select>
         </Box>
         <Box className="col-span-1">
-          <InputLabel>Status:</InputLabel>
+          <InputLabel>Status</InputLabel>
           <Select value={status} onChange={handleStatusChange} fullWidth>
             <MenuItem value={null}>Todos</MenuItem>
             <MenuItem value={0}>Pendentes</MenuItem>
@@ -197,7 +195,7 @@ const ListActivities = () => {
           </Select>
         </Box>
         <Box className="col-span-1">
-          <InputLabel>Prioridade:</InputLabel>
+          <InputLabel>Prioridade</InputLabel>
           <Select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
@@ -210,7 +208,7 @@ const ListActivities = () => {
           </Select>
         </Box>
         <Box className="col-span-2">
-          <InputLabel>Paginação:</InputLabel>
+          <InputLabel>Paginação</InputLabel>
           <Select value={per_page} fullWidth onChange={handlePerPageChange}>
             <MenuItem value={10}>10 por página</MenuItem>
             <MenuItem value={20}>20 por página</MenuItem>
@@ -228,7 +226,14 @@ const ListActivities = () => {
           </ButtonGroup>
         </Box>
       </Box>
-      <Box display="flex" alignItems="center" justifyContent="space-between">
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        width={"100%"}
+        gap={2}
+        mt={2}
+      >
         <Box display="flex" alignItems="center" alignSelf="end" gap={2}>
           <Box display="flex" alignItems="center" gap={1}>
             <Box
@@ -266,7 +271,15 @@ const ListActivities = () => {
         </Box>
       </Box>
       <Box className="w-full flex flex-col items-center px-2 py-4 border rounded-md">
-        <Masonry columns={isMobile ? 1 : 2} spacing={2} width="100%">
+        <Masonry
+          columns={{
+            xs: 1,
+            lg: 2,
+            xl: 3,
+          }}
+          spacing={2}
+          width="100%"
+        >
           {data?.length === 0 ? (
             <p>Não há tasks</p>
           ) : (
@@ -282,9 +295,9 @@ const ListActivities = () => {
         </Masonry>
       </Box>
       <Pagination
-        currentPage={currentPage}
-        lastPage={lastPage}
-        setCurrentPage={setCurrentPage}
+        page={currentPage}
+        count={lastPage}
+        onChange={(e, v) => setCurrentPage(v)}
       />
     </div>
   );
