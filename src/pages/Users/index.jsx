@@ -180,7 +180,7 @@ const Users = () => {
         onClose={onCloseView}
       />
       <PageTitle
-        title="Gerenciamento de Usuários"
+        title="Usuários"
         subtitle="Administre, edite e remova usuários conforme necessário."
         buttons={renderButtons()}
       />

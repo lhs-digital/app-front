@@ -157,7 +157,7 @@ const Companies = () => {
         onClose={() => setViewOpen(false)}
       />
       <PageTitle
-        title="Gerenciamento de Empresas"
+        title="Empresas"
         subtitle="Administração e supervisão das informações empresariais"
         buttons={
           permissions.some((per) => per.name === "create_companies") && (

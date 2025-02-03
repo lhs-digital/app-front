@@ -146,7 +146,7 @@ const Roles = () => {
       />
 
       <PageTitle
-        title="Gerenciamento de Roles"
+        title="Papéis e permissões"
         subtitle="Administração e atribuição de permissões e funções de usuários"
         buttons={
           <Button

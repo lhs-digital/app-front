@@ -1,7 +1,9 @@
+import HomeIcon from "@mui/icons-material/Home";
 import { Masonry } from "@mui/lab";
 import { colors } from "@mui/material";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { useContext, useEffect } from "react";
+import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import AuditSection from "./AuditSection";
 import MiscSection from "./MiscSection";
@@ -40,9 +42,11 @@ const Home = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <h2>
-        Bem vindo, <b>{user.name}</b>.
-      </h2>
+      <PageTitle
+        title="Dashboard"
+        icon={<HomeIcon />}
+        subtitle={`Bem vindo, ${user.name}`}
+      />
       <Masonry
         columns={{
           xs: 1,

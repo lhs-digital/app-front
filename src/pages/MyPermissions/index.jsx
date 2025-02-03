@@ -1,3 +1,4 @@
+import { PersonOutline } from "@mui/icons-material";
 import {
   Box,
   Checkbox,
@@ -19,6 +20,7 @@ const MyPermissions = () => {
   return (
     <div className="flex flex-col gap-4 w-full">
       <PageTitle
+        icon={<PersonOutline />}
         title="Minhas Permissões"
         subtitle="Visualização das suas permissões"
       />

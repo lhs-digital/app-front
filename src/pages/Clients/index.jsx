@@ -134,7 +134,7 @@ const Clients = () => {
         selectedUser={dataView}
       />
       <PageTitle
-        title="Gerenciamento de Clientes"
+        title="Clientes"
         subtitle="Administre, edite e remova clientes conforme necessário"
         buttons={
           <Button

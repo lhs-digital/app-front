@@ -1,4 +1,4 @@
-import { Search } from "@mui/icons-material";
+import { List, Search } from "@mui/icons-material";
 import Masonry from "@mui/lab/Masonry";
 import {
   Box,
@@ -130,6 +130,7 @@ const ListActivities = () => {
   return (
     <div className="flex flex-col w-full gap-6 items-center">
       <PageTitle
+        icon={<List fontSize="small" />}
         title="Lista de Atividades"
         subtitle="Gerencie todas as suas atividades pendentes e concluídas."
       />
