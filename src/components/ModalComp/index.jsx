@@ -89,9 +89,18 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
 
     saveData();
 
+    cleanFields();
+
     setRefresh((prev) => !prev);
     onClose();
   };
+
+  const cleanFields = () => {
+    setName("");
+    setEmail("");
+    setCompany("");
+    setRole("");
+  }
 
   const emailAlreadyExists = () => {
     if (data?.length) {
@@ -157,7 +166,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button color="info" mr={3} onClick={onClose}>
+        <Button color="info" mr={3} onClick={() => {onClose(), cleanFields()}}>
           CANCELAR
         </Button>
         <Button color="primary" onClick={handleSave}>
