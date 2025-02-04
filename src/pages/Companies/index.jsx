@@ -62,7 +62,7 @@ const Companies = () => {
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
       } catch (error) {
-        console.error("Erro ao verificar lista de usuários", error);
+        console.error("Erro ao verificar lista de empresas", error);
       } finally {
         setLoading(false);
       }
@@ -77,7 +77,7 @@ const Companies = () => {
       toast.success("Empresa removida com sucesso!");
       setDeleteOpen(false);
     } catch (error) {
-      console.error("Erro ao verificar lista de usuários", error);
+      console.error("Erro ao remover a empresa", error);
     }
   };
 

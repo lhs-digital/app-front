@@ -11,15 +11,19 @@ import {
   TableRow,
   useMediaQuery,
 } from "@mui/material";
+import { useEffect } from "react";
 
-const SubAccordion = ({ column, data, handleEdit, handleDelete }) => {
+const SubAccordion = ({ column, data, handleEdit, handleDelete, refresh }) => {
+
+  useEffect(() => {
+  }, [refresh]);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
   return (
     <Accordion key={column.id}>
       <AccordionSummary
-        id={column.id}
-        aria-controls={`${column.id}-content`}
+        id={column?.id}
+        aria-controls={`${column?.id}-content`}
         expandIcon={<ExpandMore />}
       >
         <div
@@ -29,7 +33,7 @@ const SubAccordion = ({ column, data, handleEdit, handleDelete }) => {
             width: "100%",
           }}
         >
-          Coluna: {column.label}
+          Coluna: {column?.label}
           <div style={{ display: "flex", gap: "12px" }}>
             <IconButton
               onClick={(e) => {
@@ -42,7 +46,7 @@ const SubAccordion = ({ column, data, handleEdit, handleDelete }) => {
             <IconButton
               onClick={(e) => {
                 e.stopPropagation();
-                handleDelete(column.id);
+                handleDelete(column?.id);
               }}
             >
               <Delete />
@@ -68,28 +72,28 @@ const SubAccordion = ({ column, data, handleEdit, handleDelete }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.length === 0 ? (
+            {data?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} textAlign="center">
                   Não existem Regras de Auditorias no sistema
                 </TableCell>
               </TableRow>
             ) : (
-              column.validations &&
-              column.validations.map((validation) => (
+              column?.validations &&
+              column?.validations.map((validation) => (
                 <TableRow
-                  key={validation.id}
+                  key={validation?.id}
                   cursor="pointer"
                   _hover={{ bg: "gray.100" }}
                 >
                   <TableCell maxW={isMobile ? 5 : 100}>
-                    {validation.rule.label}
+                    {validation?.rule.label}
                   </TableCell>
                   <TableCell maxW={isMobile ? 5 : 100}>
-                    {validation.rule.has_params}
+                    {validation?.rule.has_params}
                   </TableCell>
                   <TableCell maxW={isMobile ? 5 : 100}>
-                    {validation.message || "N/A"}
+                    {validation?.message || "N/A"}
                   </TableCell>
                 </TableRow>
               ))

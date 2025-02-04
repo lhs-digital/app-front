@@ -2,7 +2,7 @@ import { Box, Flex, FormLabel, Select, Text } from "@chakra-ui/react";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { useEffect, useState } from "react";
 import { Pie } from "react-chartjs-2";
-import api from "../../services/api"; // Certifique-se de que o arquivo correto esteja importado
+import api from "../../services/api";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 

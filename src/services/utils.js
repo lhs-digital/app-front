@@ -41,9 +41,9 @@ export const validarEmail = (email) => {
 };
 
 export const validarCPF = (cpf) => {
-  cpf = cpf.replace(/[^\d]/g, ""); // Remove caracteres não numéricos
+  cpf = cpf.replace(/[^\d]/g, "");
 
-  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false; // Verifica se todos os dígitos são iguais
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false; 
 
   let soma = 0, resto;
 
@@ -62,9 +62,9 @@ export const validarCPF = (cpf) => {
 };
 
 export const validarCNPJ = (cnpj) => {
-  cnpj = cnpj.replace(/[^\d]/g, ""); // Remove caracteres não numéricos
+  cnpj = cnpj.replace(/[^\d]/g, "");
 
-  if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false; // Impede números repetidos
+  if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
 
   let tamanho = cnpj.length - 2;
   let numeros = cnpj.substring(0, tamanho);

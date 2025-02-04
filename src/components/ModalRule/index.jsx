@@ -89,18 +89,12 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
   useEffect(() => {
     if (!dataEdit?.validations?.length || !rules.length) return;
 
-    console.log("validations", dataEdit.validations);
-    console.log("rules", rules);
-
-    console.log("Started handling rules and arrays.");
-
     const updatedRuleDetails = {};
     const updatedCheckedRules = [];
     const updatedListRules = [];
 
     dataEdit?.validations.forEach((validation) => {
       const rule = rules?.find((r) => r.name === validation.rule.name);
-      console.log("rule", rule);
 
       if (rule) {
         updatedRuleDetails[rule.id] = {
@@ -111,10 +105,6 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
         updatedListRules.push(rule.id);
       }
     });
-
-    console.log("Updated rule details", updatedRuleDetails);
-    console.log("Updated checked rules", updatedCheckedRules);
-    console.log("Updated list rules", updatedListRules);
 
     setRuleDetails(updatedRuleDetails);
     setCheckedRules(updatedCheckedRules);
@@ -157,6 +147,8 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
           dataToPost,
         );
         toast.success("Dados editados com sucesso!");
+        setRefresh((prev) => !prev);
+
       } catch (error) {
         console.error("Erro ao editar os dados", error);
         toast.error("Erro ao editar os dados");
@@ -165,6 +157,8 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
       try {
         await api.post(`/company_table_columns/${1}/rules`, dataToPost);
         toast.success("Dados salvos com sucesso!");
+        setRefresh((prev) => !prev);
+
       } catch (error) {
         console.error("Erro ao salvar os dados", error);
         toast.error("Erro ao salvar os dados");
@@ -173,18 +167,17 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
   };
 
   const handleSave = () => {
-    // if (!column || !priority || !listRules.length) {
-    //   toast.warning(
-    //     "Preencha os campos obrigatórios: Tabela, coluna, prioridade e regras",
-    //   );
-    //   return;
-    // }
+    if (!column || priority === null || listRules.length === 0) {
+      toast.warning(
+        "Preencha os campos obrigatórios: Tabela, coluna, prioridade e regras",
+      );
+      return;
+    }
     saveData();
 
     cleanFields();
 
     onClose();
-    setRefresh((prev) => !prev);
   };
 
   const handlePermissions = (e, ruleId) => {
@@ -213,6 +206,10 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
     setColumnLabel("");
     setPriority("");
     setSelectAll(false);
+    setListRules([]);
+    setCheckedRules([]);
+    setRuleDetails({});
+
   };
 
   return (
