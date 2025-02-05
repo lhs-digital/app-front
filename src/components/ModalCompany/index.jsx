@@ -43,15 +43,13 @@ const ModalCompany = ({
     }
   };
 
-  function validarCNPJ(cnpj) {
-    cnpj = cnpj.replace(/[^\d]/g, ""); // Remove caracteres não numéricos
+  const validarCNPJ = (cnpj) => {
+    cnpj = cnpj.replace(/[^\d]/g, "");
 
     if (cnpj.length !== 14) return false;
 
-    // Elimina CNPJs inválidos conhecidos (todos os dígitos iguais)
     if (/^(\d)\1{13}$/.test(cnpj)) return false;
 
-    // Cálculo dos dígitos verificadores
     let tamanho = cnpj.length - 2;
     let numeros = cnpj.substring(0, tamanho);
     let digitos = cnpj.substring(tamanho);
@@ -129,12 +127,15 @@ const ModalCompany = ({
   }
 
   const cnpjAlreadyExists = () => {
-    if (dataEdit.cnpj !== cnpj && data?.length) {
-      return data.find((item) => item.cnpj === cnpj);
+    const cleanCnpj = (cnpj) => (cnpj ? cnpj.replace(/\D/g, "") : "");
+  
+    if (cleanCnpj(dataEdit.cnpj) !== cleanCnpj(cnpj) && data?.length) {
+      return data.find((item) => cleanCnpj(item.cnpj) === cleanCnpj(cnpj));
     }
-
+  
     return false;
   };
+  
 
   const mascaraValidacaoCNPJ = (cnpj) => {
     cnpj = cnpj.replace(/\D/g, "");

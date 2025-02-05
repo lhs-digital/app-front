@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material";
 
 const lightPalette = {
-  mode: "light", // default mode
+  mode: "light",
   primary: {
     main: "#000000",
     light: "#DFDFEB",

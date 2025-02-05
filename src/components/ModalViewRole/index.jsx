@@ -6,6 +6,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -65,12 +67,18 @@ const ModalViewRole = ({ selectedRole, isOpen, onClose }) => {
                 }, [])
                 .map((group, index) => (
                   <Box key={index} mb={4} width="100%">
-                    <b>{group.category}</b>
+                    <b>{group?.category}</b>
                     <div className="flex flex-row flex-wrap gap-4">
-                      {group.items.map((permission) => (
-                        <Checkbox key={permission.id} isChecked isDisabled>
-                          {permission.label}
-                        </Checkbox>
+                      {group?.items?.map((permission) => (
+                        <Grid key={permission?.id} item xs={12}>
+                          <Checkbox
+                            checked={true}
+                            disabled
+                            color="primary"
+                          />
+                          <Typography component="span">{permission?.label}</Typography>
+                        </Grid>
+
                       ))}
                     </div>
                   </Box>

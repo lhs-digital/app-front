@@ -140,6 +140,7 @@ const Priorities = () => {
                 key={column.id}
                 column={column}
                 data={data}
+                refresh={refresh}
                 handleEdit={handleEdit}
                 handleDelete={handleDelete}
               />

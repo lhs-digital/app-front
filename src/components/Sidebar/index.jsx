@@ -43,7 +43,7 @@ const Sidebar = ({ active }) => {
   const relatorioPermissions = ["view_any_reports", "report_generate"];
   const defineRules = ["define_rules"];
 
-  const sidebarRef = useRef(); // Ref para o container do sidebar
+  const sidebarRef = useRef();
 
   const hasPermission = (thePermissions) => {
     return permissions.some((permission) =>
@@ -56,17 +56,14 @@ const Sidebar = ({ active }) => {
   };
 
   const handleClickOutside = (event) => {
-    // Verifica se o clique foi fora do sidebar
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
       closeSidebar();
     }
   };
 
   useEffect(() => {
-    // Adiciona o evento de clique ao montar o componente
     document.addEventListener("mousedown", handleClickOutside);
 
-    // Remove o evento ao desmontar o componente
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };

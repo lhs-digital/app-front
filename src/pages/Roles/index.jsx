@@ -65,7 +65,7 @@ const Roles = () => {
       toast.success("Role removida com sucesso!");
       setDeleteOpen(false);
     } catch (error) {
-      console.error("Erro ao verificar lista de roles", error);
+      console.error("Erro ao remover role", error);
     }
   };
 

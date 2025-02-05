@@ -6,9 +6,6 @@ import { AuthContext } from "../../contexts/auth";
 
 const ReportsAud = () => {
   const [isOpen, setIsOpen] = useState(false);
-  // const [refresh, setRefresh] = useState(false);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [lastPage, setLastPage] = useState(null);
 
   const { permissions } = useContext(AuthContext);
 

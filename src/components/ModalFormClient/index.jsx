@@ -238,6 +238,7 @@ const ModalFormClient = ({
             mask="(99) 99999-9999"
             value={form.whatsapp}
             onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+            maskChar=""
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Whatsapp",
@@ -291,6 +292,7 @@ const ModalFormClient = ({
             mask={
               form.tipo_pessoa === "F" ? "999.999.999-99" : "99.999.999/9999-99"
             }
+            maskChar=""
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "CPF/CNPJ",
