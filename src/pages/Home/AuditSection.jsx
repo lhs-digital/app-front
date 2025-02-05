@@ -17,17 +17,17 @@ const AuditSection = ({ completionData, priorityData, stats }) => {
   const quickActions = [
     {
       icon: <Build fontSize="small" />,
-      fn: () => navigate("/atividades"),
+      fn: () => navigate("/audits"),
       label: "Atividades",
     },
     {
       icon: <Work fontSize="small" />,
-      fn: () => navigate("/atividades"),
+      fn: () => navigate("/clientes"),
       label: "Clientes",
     },
     {
       icon: <Person fontSize="small" />,
-      fn: () => navigate("/atividades"),
+      fn: () => navigate("/users"),
       label: "Usuários",
     },
   ];
