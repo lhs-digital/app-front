@@ -244,7 +244,7 @@ const Companies = () => {
                       </IconButton>
                     ) : null}
                     {permissions.some(
-                      (permissions) => permissions.name === "update_companies",
+                      (permissions) => permissions.name === "delete_companies",
                     ) ? (
                       <IconButton
                         onClick={(e) => {

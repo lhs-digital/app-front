@@ -145,18 +145,22 @@ const Roles = () => {
         onClose={() => setViewOpen(false)}
       />
 
+      {console.log(permissions)}
       <PageTitle
         title="Papéis e permissões"
         subtitle="Administração e atribuição de permissões e funções de usuários"
         buttons={
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={handleCreate}
-          >
-            NOVO CARGO
-          </Button>
+          permissions.some((per) => per.name === "create_roles") && (
+
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={handleCreate}
+            >
+              NOVO CARGO
+            </Button>
+          )
         }
       />
       <TextField
@@ -237,12 +241,12 @@ const Roles = () => {
             {(!search
               ? data
               : data.filter(
-                  (role) =>
-                    role.name.toLowerCase().includes(search.toLowerCase()) ||
-                    role.company?.name
-                      .toLowerCase()
-                      .includes(search.toLowerCase()),
-                )
+                (role) =>
+                  role.name.toLowerCase().includes(search.toLowerCase()) ||
+                  role.company?.name
+                    .toLowerCase()
+                    .includes(search.toLowerCase()),
+              )
             ).map(({ name, nivel, company, permissions_count, id }, index) => (
               <TableRow
                 key={index}
@@ -258,27 +262,27 @@ const Roles = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_roles",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit({ name, nivel, company, id, index });
-                      }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit({ name, nivel, company, id, index });
+                        }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_roles",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(id);
-                      }}
-                    >
-                      <Delete />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    )}
                 </TableCell>
               </TableRow>
             ))}
