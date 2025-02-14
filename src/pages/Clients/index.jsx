@@ -58,7 +58,6 @@ const Clients = () => {
         setCurrentPage(response.data.current_page);
         setLastPage(response.data.last_page);
         setTotalCount(response.data.total);
-        console.log(response)
       } catch (error) {
         console.error("Erro ao buscar clientes:", error);
         toast.error("Erro ao carregar a lista de clientes.");

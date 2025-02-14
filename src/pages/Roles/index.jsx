@@ -144,7 +144,6 @@ const Roles = () => {
         onClose={() => setViewOpen(false)}
       />
 
-      {console.log(permissions)}
       <PageTitle
         title="Papéis e permissões"
         subtitle="Administração e atribuição de permissões e funções de usuários"
