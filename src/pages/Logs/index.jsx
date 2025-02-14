@@ -20,13 +20,12 @@ import {
 import { useEffect, useState } from "react";
 import PageTitle from "../../components/PageTitle";
 import api from "../../services/api";
-import { dateFormatted, defaultLabelDisplayedRows } from "../../services/utils";
+import { dateFormatted } from "../../services/utils";
 
 const Logs = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [lastPage, setLastPage] = useState(null);
   const [createdAt, setCreatedAt] = useState([]);
   //eslint-disable-next-line
   const [loading, setLoading] = useState(false);
@@ -39,6 +38,8 @@ const Logs = () => {
     key: "created_at",
     direction: "asc",
   });
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [filterParams, setFilterParams] = useState({
     search: "",
@@ -66,13 +67,13 @@ const Logs = () => {
           Object.entries(params).filter(([_, v]) => v !== undefined),
         );
 
-        const response = await api.get(`/logs?page=${currentPage}&per_page=${10}`, {
+        const response = await api.get(`/logs?page=${currentPage}&per_page=${rowsPerPage}`, {
           params: filteredParams,
         });
 
         setCurrentPage(response.data.meta.current_page);
-        setLastPage(response.data.meta.last_page);
         setData(response.data.data);
+        setTotalCount(response.data.meta.total);
       } catch (error) {
         console.error("Erro ao verificar lista de usuários", error);
       } finally {
@@ -130,6 +131,18 @@ const Logs = () => {
   const createSortHandler = (key) => () => {
     handleSort(key);
   };
+
+  const handleChangePage = (event, newPage) => {
+    setCurrentPage(newPage + 1);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+    setRefresh((prev) => !prev);
+  };
+
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -411,14 +424,17 @@ const Logs = () => {
           </TableBody>
         </Table>
         <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={lastPage * 10}
-          page={currentPage - 1}
-          onPageChange={(event, newPage) => setCurrentPage(newPage + 1)}
+          count={totalCount}
           labelRowsPerPage="Linhas por página"
-          rowsPerPage={10}
-          rowsPerPageOptions={[10]}
-          labelDisplayedRows={defaultLabelDisplayedRows}
+          rowsPerPage={rowsPerPage}
+          page={currentPage - 1}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
+          }
         />
       </TableContainer>
     </div>

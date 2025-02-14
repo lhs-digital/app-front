@@ -27,7 +27,6 @@ import ModalViewCompany from "../../components/ModalViewCompany";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
-import { defaultLabelDisplayedRows } from "../../services/utils";
 
 const Companies = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -37,7 +36,6 @@ const Companies = () => {
   const [dataEdit, setDataEdit] = useState({});
   const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
@@ -48,6 +46,7 @@ const Companies = () => {
     direction: "asc",
   });
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
 
   const { permissions } = useContext(AuthContext);
 
@@ -59,8 +58,8 @@ const Companies = () => {
           `/companies?page=${currentPage}&per_page=${rowsPerPage}`,
         );
         setCurrentPage(response.data.meta.current_page);
-        setLastPage(response.data.meta.last_page);
         setData(response.data.data);
+        setTotalCount(response.data.meta.total);
       } catch (error) {
         console.error("Erro ao verificar lista de empresas", error);
       } finally {
@@ -68,7 +67,7 @@ const Companies = () => {
       }
     };
     getData();
-  }, [setData, currentPage, lastPage, refresh]);
+  }, [setData, currentPage, refresh]);
 
   const handleRemove = async () => {
     try {
@@ -244,7 +243,7 @@ const Companies = () => {
                       </IconButton>
                     ) : null}
                     {permissions.some(
-                      (permissions) => permissions.name === "update_companies",
+                      (permissions) => permissions.name === "delete_companies",
                     ) ? (
                       <IconButton
                         onClick={(e) => {
@@ -264,13 +263,15 @@ const Companies = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={lastPage * rowsPerPage}
+          count={totalCount}
+          labelRowsPerPage="Linhas por página"
           rowsPerPage={rowsPerPage}
           page={currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelDisplayedRows={defaultLabelDisplayedRows}
-          labelRowsPerPage="Linhas por página"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
+          }
         />
       </TableContainer>
     </div>

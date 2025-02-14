@@ -7,13 +7,14 @@ import {
   Button,
   useMediaQuery,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import ModalRule from "../../components/ModalRule";
 import PageTitle from "../../components/PageTitle";
 import SubAccordion from "../../components/Priorities/SubAccordion";
 import api from "../../services/api";
+import { AuthContext } from "../../contexts/auth";
 
 const Priorities = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,6 +32,7 @@ const Priorities = () => {
   const [method, setMethod] = useState("");
   const [nivel, setNivel] = useState("");
   const [refresh, setRefresh] = useState(false);
+  const { permissions } = useContext(AuthContext);
 
   const [filterParams, setFilterParams] = useState({
     search: "",
@@ -115,14 +117,16 @@ const Priorities = () => {
         title="Regras de Auditorias"
         subtitle="Administração e supervisão das regras das auditorias"
         buttons={
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => [setDataEdit({}), setIsOpen(true)]}
-            startIcon={<Add />}
-          >
-            NOVA REGRA
-          </Button>
+          permissions.some((per) => per.name === "define_rules") && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => [setDataEdit({}), setIsOpen(true)]}
+              startIcon={<Add />}
+            >
+              NOVA REGRA
+            </Button>
+          )
         }
       />
       {data.map((table) => (

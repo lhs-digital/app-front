@@ -26,7 +26,6 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
   const [permissions, setPermissions] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     if (dataEdit) {
@@ -55,11 +54,6 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
         const responsePermissions = await api.get(`/permissions`);
         setPermissions(responsePermissions.data.data);
 
-        const responseRole = await api.get(`/roles/roles_from_company`, {
-          params: { company_id: dataEdit.company.id },
-        });
-        setRoles(responseRole?.data?.data);
-
         if (dataEdit) {
           const responseRolePermissions = await api.get(`/roles/${dataEdit.id}`);
           setRolePermissions(
@@ -70,6 +64,11 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
         }
       } catch (error) {
         console.error("Erro ao acessar as roles por empresa", error);
+
+        if (error.response?.data?.message) {
+          toast.error(error.response.data.message);
+          return;
+        }
       }
     };
     if (isOpen) {
@@ -98,6 +97,11 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
       toast.success("Role cadastrada com sucesso!");
     } catch (error) {
       console.error("Erro ao cadastrar Role", error);
+
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+        return;
+      }
     }
   };
 
@@ -124,18 +128,6 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
   const handleSave = () => {
     if (!name || nivel === "") {
       toast.warning("Preencha os campos obrigatórios: Nome, Nível e Empresa");
-      return;
-    }
-
-    const roleExists = roles.some(
-      (role) =>
-        role.name.toLowerCase() === name.toLowerCase() &&
-        role.company_id === company &&
-        (!dataEdit || role.id !== dataEdit.id)
-    );
-
-    if (roleExists) {
-      toast.error("Já existe uma role com este nome para a mesma empresa!");
       return;
     }
 

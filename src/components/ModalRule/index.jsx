@@ -161,7 +161,11 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
 
       } catch (error) {
         console.error("Erro ao salvar os dados", error);
-        toast.error("Erro ao salvar os dados");
+        
+        if (error.response?.data?.message) {
+          toast.error(error.response.data.message);
+          return;
+        }
       }
     }
   };
@@ -261,7 +265,7 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
             onChange={(e) => setPriority(e.target.value)}
             fullWidth
           >
-            <MenuItem value={0}>Alto</MenuItem>
+            <MenuItem value={0}>Alta</MenuItem>
             <MenuItem value={1}>Moderada</MenuItem>
             <MenuItem value={2}>Baixa</MenuItem>
           </Select>

@@ -11,7 +11,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   dateFormatted,
   formattedPriority,
@@ -20,12 +20,13 @@ import {
 import ModalCheckActivitie from "../ModalCheckActivitie";
 import ModalFormClient from "../ModalFormClient";
 import ViewActivitie from "../ViewActivitie";
+import { AuthContext } from "../../contexts/auth";
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [dataView, setDataView] = useState(activitie);
   const isMobile = useMediaQuery("(max-width: 768px)");
-
+  const { permissions } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
 
   const handleView = () => {
@@ -94,15 +95,19 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
               }
             />
           </Tooltip>
-          <Tooltip title="Corrigir" aria-label="Corrigir">
-            <button
-              onClick={handleView}
-              className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
-              style={getPriorityColor(activitie?.priority)}
-            >
-              <Build fontSize="small" />
-            </button>
-          </Tooltip>
+          {
+            permissions.some((per) => per.name === "update_tasks") && (
+              <Tooltip title="Corrigir" aria-label="Corrigir">
+                <button
+                  onClick={handleView}
+                  className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
+                  style={getPriorityColor(activitie?.priority)}
+                >
+                  <Build fontSize="small" />
+                </button>
+              </Tooltip>
+            )
+          }
         </Box>
       </Box>
       <Divider
@@ -184,7 +189,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             </Typography>
           ) : (
             <Typography variant="body2" color="textSecondary">
-              Auditorado em: {dateFormatted(activitie?.created_at)}
+              Auditado em: {dateFormatted(activitie?.created_at)}
             </Typography>
           )}
         </Box>

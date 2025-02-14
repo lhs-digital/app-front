@@ -21,7 +21,6 @@ import ModalViewRole from "../../components/ModalViewRole";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
-import { defaultLabelDisplayedRows } from "../../services/utils";
 
 const Roles = () => {
   const [viewOpen, setViewOpen] = useState(false);
@@ -31,7 +30,6 @@ const Roles = () => {
   const [dataEdit, setDataEdit] = useState({});
   const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
@@ -41,6 +39,7 @@ const Roles = () => {
     direction: "asc",
   });
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     const getData = async () => {
@@ -49,7 +48,7 @@ const Roles = () => {
           `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
         );
         setCurrentPage(response.data.meta.current_page);
-        setLastPage(response.data.meta.last_page);
+        setTotalCount(response.data.meta.total);
         setData(response.data.data);
       } catch (error) {
         console.error("Erro ao verificar lista de roles", error);
@@ -145,18 +144,22 @@ const Roles = () => {
         onClose={() => setViewOpen(false)}
       />
 
+      {console.log(permissions)}
       <PageTitle
         title="Papéis e permissões"
         subtitle="Administração e atribuição de permissões e funções de usuários"
         buttons={
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={handleCreate}
-          >
-            NOVO CARGO
-          </Button>
+          permissions.some((per) => per.name === "create_roles") && (
+
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={handleCreate}
+            >
+              NOVO CARGO
+            </Button>
+          )
         }
       />
       <TextField
@@ -237,12 +240,12 @@ const Roles = () => {
             {(!search
               ? data
               : data.filter(
-                  (role) =>
-                    role.name.toLowerCase().includes(search.toLowerCase()) ||
-                    role.company?.name
-                      .toLowerCase()
-                      .includes(search.toLowerCase()),
-                )
+                (role) =>
+                  role.name.toLowerCase().includes(search.toLowerCase()) ||
+                  role.company?.name
+                    .toLowerCase()
+                    .includes(search.toLowerCase()),
+              )
             ).map(({ name, nivel, company, permissions_count, id }, index) => (
               <TableRow
                 key={index}
@@ -258,27 +261,27 @@ const Roles = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_roles",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit({ name, nivel, company, id, index });
-                      }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit({ name, nivel, company, id, index });
+                        }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_roles",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(id);
-                      }}
-                    >
-                      <Delete />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    )}
                 </TableCell>
               </TableRow>
             ))}
@@ -287,13 +290,15 @@ const Roles = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={lastPage * rowsPerPage}
+          count={totalCount}
           labelRowsPerPage="Linhas por página"
           rowsPerPage={rowsPerPage}
           page={currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelDisplayedRows={defaultLabelDisplayedRows}
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
+          }
         />
       </TableContainer>
     </div>

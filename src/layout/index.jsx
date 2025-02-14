@@ -85,63 +85,6 @@ const Drawer = styled(MuiDrawer, {
   ],
 }));
 
-const sidebarItems = [
-  {
-    label: "Início",
-    url: "/dashboard",
-    icon: <HomeOutlined fontSize="small" />,
-    activeIcon: <Home fontSize="small" />,
-  },
-  {
-    label: "Auditorias",
-    url: "/audits",
-    icon: <BuildOutlined fontSize="small" />,
-    activeIcon: <Build fontSize="small" />,
-  },
-  {
-    label: "Empresas",
-    url: "/companies",
-    icon: <BusinessOutlined fontSize="small" />,
-    activeIcon: <Business fontSize="small" />,
-  },
-  {
-    label: "Papéis & Permissões",
-    url: "/roles",
-    icon: <LockOutlined fontSize="small" />,
-    activeIcon: <Lock fontSize="small" />,
-  },
-  {
-    label: "Usuários",
-    url: "/users",
-    icon: <PersonOutline fontSize="small" />,
-    activeIcon: <Person fontSize="small" />,
-  },
-  {
-    label: "Clientes",
-    url: "/clientes",
-    icon: <WorkOutline fontSize="small" />,
-    activeIcon: <Work fontSize="small" />,
-  },
-  {
-    label: "Regras de Auditorias",
-    url: "/prioridades",
-    icon: <RuleFolderOutlined fontSize="small" />,
-    activeIcon: <RuleFolder fontSize="small" />,
-  },
-  {
-    label: "Minhas Permissões",
-    url: "/my-permissions",
-    icon: <SettingsOutlined fontSize="small" />,
-    activeIcon: <Settings fontSize="small" />,
-  },
-  {
-    label: "Logs",
-    url: "/logs",
-    icon: <Subject fontSize="small" />,
-    activeIcon: <Subject fontSize="small" />,
-  },
-];
-
 const Index = ({ children }) => {
   const [open, setOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
@@ -152,6 +95,113 @@ const Index = ({ children }) => {
     logout();
     navigate("/");
   };
+
+
+  const { permissions } = useContext(AuthContext);
+  const usersPermissions = [
+    "view_users",
+    "view_any_users",
+    "create_users",
+    "update_users",
+    "delete_users",
+  ];
+  const clientsPermissions = [
+    "view_clients",
+    "view_any_clients",
+    "create_clients",
+    "update_clients",
+    "delete_clients",
+  ];
+  const companyPermissions = [
+    "view_companies",
+    "view_any_companies",
+    "create_companies",
+    "update_companies",
+    "delete_companies",
+  ];
+  //eslint-disable-next-line
+  const rolesPermissions = [
+    "view_roles",
+    "view_any_roles",
+    "create_roles",
+    "update_roles",
+    "delete_roles",
+  ];
+  //eslint-disable-next-line
+  const auditoriaPermissions = ["view_any_tasks", "update_tasks"];
+  const defineRules = ["define_rules"];
+
+  const hasPermission = (thePermissions) => {
+    return permissions.some((permission) =>
+      thePermissions.includes(permission.name)
+    );
+  };
+
+  const sidebarItems = [
+    {
+      label: "Início",
+      url: "/dashboard",
+      icon: <HomeOutlined fontSize="small" />,
+      activeIcon: <Home fontSize="small" />,
+      permissions: [],
+    },
+    {
+      label: "Auditorias",
+      url: "/audits",
+      icon: <BuildOutlined fontSize="small" />,
+      activeIcon: <Build fontSize="small" />,
+      permissions: auditoriaPermissions,
+    },
+    {
+      label: "Empresas",
+      url: "/companies",
+      icon: <BusinessOutlined fontSize="small" />,
+      activeIcon: <Business fontSize="small" />,
+      permissions: companyPermissions,
+    },
+    {
+      label: "Papéis & Permissões",
+      url: "/roles",
+      icon: <LockOutlined fontSize="small" />,
+      activeIcon: <Lock fontSize="small" />,
+      permissions: rolesPermissions,
+    },
+    {
+      label: "Usuários",
+      url: "/users",
+      icon: <PersonOutline fontSize="small" />,
+      activeIcon: <Person fontSize="small" />,
+      permissions: usersPermissions,
+    },
+    {
+      label: "Clientes",
+      url: "/clientes",
+      icon: <WorkOutline fontSize="small" />,
+      activeIcon: <Work fontSize="small" />,
+      permissions: clientsPermissions, 
+    },
+    {
+      label: "Regras de Auditorias",
+      url: "/prioridades",
+      icon: <RuleFolderOutlined fontSize="small" />,
+      activeIcon: <RuleFolder fontSize="small" />,
+      permissions: defineRules,
+    },
+    {
+      label: "Minhas Permissões",
+      url: "/my-permissions",
+      icon: <SettingsOutlined fontSize="small" />,
+      activeIcon: <Settings fontSize="small" />,
+      permissions: [],
+    },
+    {
+      label: "Logs",
+      url: "/logs",
+      icon: <Subject fontSize="small" />,
+      activeIcon: <Subject fontSize="small" />,
+      permissions: "view_any_logs",
+    },
+  ];
 
   return (
     <div className="flex flex-row h-screen w-full">
@@ -168,56 +218,37 @@ const Index = ({ children }) => {
           </IconButton>
         </div>
         <List className="grow">
-          {sidebarItems.map((item, index) => (
-            <Tooltip
-              title={item.label}
-              key={index}
-              hidden={!open}
-              placement="right"
-            >
-              <ListItem key={index} disablePadding>
-                <ListItemButton
-                  onClick={() => navigate(item.url)}
-                  selected={isActive(item.url)}
-                  sx={[
-                    {
-                      minHeight: 48,
-                      px: 3,
-                    },
-                    open
-                      ? {
-                          justifyContent: "initial",
-                        }
-                      : {
-                          justifyContent: "center",
-                        },
-                  ]}
-                >
-                  <ListItemIcon
+          {sidebarItems.map((item, index) => {
+            if (item.permissions && item.permissions.length > 0 && !hasPermission(item.permissions)) {
+              return null;
+            }
+
+            return (
+              <Tooltip title={item.label} key={index} hidden={!open} placement="right">
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => navigate(item.url)}
+                    selected={isActive(item.url)}
                     sx={[
-                      {
-                        minWidth: 0,
-                        justifyContent: "center",
-                      },
-                      open
-                        ? {
-                            mr: 3,
-                          }
-                        : {
-                            mr: "auto",
-                          },
-                      isActive(item.url) && {
-                        color: colors.grey[900],
-                      },
+                      { minHeight: 48, px: 3 },
+                      open ? { justifyContent: "initial" } : { justifyContent: "center" },
                     ]}
                   >
-                    {isActive(item.url) ? item.activeIcon : item.icon}
-                  </ListItemIcon>
-                  {open && <ListItemText primary={item.label} />}
-                </ListItemButton>
-              </ListItem>
-            </Tooltip>
-          ))}
+                    <ListItemIcon
+                      sx={[
+                        { minWidth: 0, justifyContent: "center" },
+                        open ? { mr: 3 } : { mr: "auto" },
+                        isActive(item.url) && { color: colors.grey[900] },
+                      ]}
+                    >
+                      {isActive(item.url) ? item.activeIcon : item.icon}
+                    </ListItemIcon>
+                    {open && <ListItemText primary={item.label} />}
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+            );
+          })}
         </List>
         {open ? (
           <div className="p-4">
