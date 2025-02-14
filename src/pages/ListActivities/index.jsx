@@ -286,7 +286,7 @@ const ListActivities = () => {
       </Box>
       <Box display="flex" justifyContent="flex-end" width="100%">
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[5, 10, 20]}
           component="div"
           count={totalCount}
           labelRowsPerPage="Linhas por página"
