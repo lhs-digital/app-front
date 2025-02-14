@@ -7,9 +7,9 @@ import {
   colors,
   InputLabel,
   MenuItem,
-  Pagination,
   Select,
   TextField,
+  TablePagination,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import ActivitieItem from "../../components/ActivitieItem/ActivitieItem";
@@ -22,7 +22,6 @@ const ListActivities = () => {
   //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [table, setTable] = useState("clients");
@@ -31,12 +30,13 @@ const ListActivities = () => {
   const [createdAt, setCreatedAt] = useState([]);
   const [per_page, setPer_page] = useState(20);
   const [priority, setPriority] = useState(-1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [filterParams, setFilterParams] = useState({
     search: "",
     priorityOrder: "desc",
     createdAt: [],
-    status: null,
+    status: -1,
     priority: -1,
   });
 
@@ -50,7 +50,7 @@ const ListActivities = () => {
             params: {
               search: filterParams?.search,
               priority_order: "",
-              ...(status !== null && { status: status }),
+              status: status === -1 ? undefined : status,
               priority: priority === -1 ? undefined : priority,
               created_at: [
                 filterParams?.createdAt[0],
@@ -61,8 +61,8 @@ const ListActivities = () => {
         );
 
         setCurrentPage(response.data.meta.current_page);
-        setLastPage(response.data.meta.last_page);
         setData(response.data.data);
+        setTotalCount(response.data.meta.total);
       } catch (error) {
         console.error("Erro ao filtrar as tasks", error);
       } finally {
@@ -70,28 +70,7 @@ const ListActivities = () => {
       }
     };
     getData();
-  }, [currentPage, refresh, filterParams, per_page, status]);
-
-  const handleStatusChange = (e) => {
-    const newStatus = e.target.value;
-    setStatus(newStatus);
-    setFilterParams((prev) => ({
-      ...prev,
-      status: newStatus,
-    }));
-  };
-
-  const handlePriorityOrder = (event) => {
-    const newOrder = event.target.value;
-    setPriorityOrder(newOrder);
-    setFilterParams({
-      search: "",
-      status: null,
-      priorityOrder: newOrder,
-      priority: -1,
-      createdAt: [],
-    });
-  };
+  }, [currentPage, refresh, filterParams, per_page]);
 
   const handleClean = () => {
     setSearch("");
@@ -125,6 +104,17 @@ const ListActivities = () => {
 
   const handlePerPageChange = (e) => {
     setPer_page(e.target.value);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setCurrentPage(newPage + 1);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setPer_page(newRowsPerPage);
+    setCurrentPage(1);
+    setRefresh((prev) => !prev);
   };
 
   return (
@@ -179,7 +169,7 @@ const ListActivities = () => {
           <InputLabel>Ordem de Prioridade</InputLabel>
           <Select
             value={priorityOrder}
-            onChange={handlePriorityOrder}
+            onChange={(e) => setPriorityOrder(e.target.value)}
             fullWidth
           >
             <MenuItem value="desc">Decrescente</MenuItem>
@@ -188,8 +178,8 @@ const ListActivities = () => {
         </Box>
         <Box className="col-span-1">
           <InputLabel>Status</InputLabel>
-          <Select value={status} onChange={handleStatusChange} fullWidth>
-            <MenuItem value={null}>Todos</MenuItem>
+          <Select value={status} onChange={(e) => setStatus(e.target.value)} fullWidth>
+            <MenuItem value={-1}>Todos</MenuItem>
             <MenuItem value={0}>Pendentes</MenuItem>
             <MenuItem value={1}>Concluídas</MenuItem>
           </Select>
@@ -294,11 +284,21 @@ const ListActivities = () => {
           )}
         </Masonry>
       </Box>
-      <Pagination
-        page={currentPage}
-        count={lastPage}
-        onChange={(e, v) => setCurrentPage(v)}
-      />
+      <Box display="flex" justifyContent="flex-end" width="100%">
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={totalCount}
+          labelRowsPerPage="Linhas por página"
+          rowsPerPage={per_page}
+          page={currentPage - 1}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
+          }
+        />
+      </Box>
     </div>
   );
 };

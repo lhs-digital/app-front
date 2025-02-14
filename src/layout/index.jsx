@@ -101,12 +101,21 @@ const Index = ({ children }) => {
   const usersPermissions = [
     "view_users",
     "view_any_users",
+    "create_users",
     "update_users",
     "delete_users",
+  ];
+  const clientsPermissions = [
+    "view_clients",
+    "view_any_clients",
+    "create_clients",
+    "update_clients",
+    "delete_clients",
   ];
   const companyPermissions = [
     "view_companies",
     "view_any_companies",
+    "create_companies",
     "update_companies",
     "delete_companies",
   ];
@@ -114,18 +123,15 @@ const Index = ({ children }) => {
   const rolesPermissions = [
     "view_roles",
     "view_any_roles",
+    "create_roles",
     "update_roles",
     "delete_roles",
   ];
   //eslint-disable-next-line
   const auditoriaPermissions = ["view_any_tasks", "update_tasks"];
-  const relatorioPermissions = ["view_any_reports", "report_generate"];
   const defineRules = ["define_rules"];
 
   const hasPermission = (thePermissions) => {
-    console.log("Verificando permissões:", permissions);
-    console.log("Necessárias para o item:", thePermissions);
-
     return permissions.some((permission) =>
       thePermissions.includes(permission.name)
     );
@@ -137,7 +143,7 @@ const Index = ({ children }) => {
       url: "/dashboard",
       icon: <HomeOutlined fontSize="small" />,
       activeIcon: <Home fontSize="small" />,
-      permissions: [], // Disponível para todos
+      permissions: [],
     },
     {
       label: "Auditorias",
@@ -172,7 +178,7 @@ const Index = ({ children }) => {
       url: "/clientes",
       icon: <WorkOutline fontSize="small" />,
       activeIcon: <Work fontSize="small" />,
-      permissions: [], // Disponível para todos
+      permissions: clientsPermissions, 
     },
     {
       label: "Regras de Auditorias",
@@ -186,14 +192,14 @@ const Index = ({ children }) => {
       url: "/my-permissions",
       icon: <SettingsOutlined fontSize="small" />,
       activeIcon: <Settings fontSize="small" />,
-      permissions: [], // Disponível para todos
+      permissions: [],
     },
     {
       label: "Logs",
       url: "/logs",
       icon: <Subject fontSize="small" />,
       activeIcon: <Subject fontSize="small" />,
-      permissions: relatorioPermissions,
+      permissions: "view_any_logs",
     },
   ];
 
@@ -214,7 +220,7 @@ const Index = ({ children }) => {
         <List className="grow">
           {sidebarItems.map((item, index) => {
             if (item.permissions && item.permissions.length > 0 && !hasPermission(item.permissions)) {
-              return null; // Não renderiza se não tiver permissão
+              return null;
             }
 
             return (

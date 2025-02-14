@@ -159,7 +159,7 @@ const AuditSection = ({ completionData, priorityData, stats }) => {
           variant="outlined"
           className="max-md:hidden p-4 flex flex-col gap-2 grow"
         >
-          <p>Tarefas por status</p>
+          <p>Atividades por status</p>
           <PieChart
             colors={[colors.grey[900], colors.grey[600]]}
             series={[
@@ -182,7 +182,7 @@ const AuditSection = ({ completionData, priorityData, stats }) => {
           variant="outlined"
           className="max-md:hidden p-4 flex flex-col gap-2 grow"
         >
-          <p>Tarefas por prioridade</p>
+          <p>Atividades por prioridade</p>
           <PieChart
             series={[
               {

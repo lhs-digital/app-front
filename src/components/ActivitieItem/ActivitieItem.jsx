@@ -189,7 +189,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
             </Typography>
           ) : (
             <Typography variant="body2" color="textSecondary">
-              Auditorado em: {dateFormatted(activitie?.created_at)}
+              Auditado em: {dateFormatted(activitie?.created_at)}
             </Typography>
           )}
         </Box>

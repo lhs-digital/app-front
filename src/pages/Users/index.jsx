@@ -23,7 +23,6 @@ import ModalView from "../../components/ModalView";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
-import { defaultLabelDisplayedRows } from "../../services/utils";
 
 const Users = () => {
   const [viewOnly, setViewOnly] = useState(false);
@@ -42,7 +41,6 @@ const Users = () => {
   const [dataEdit, setDataEdit] = useState({});
   const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
@@ -53,6 +51,7 @@ const Users = () => {
     direction: "asc",
   });
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
 
   const { permissions } = useContext(AuthContext);
 
@@ -66,8 +65,8 @@ const Users = () => {
           `/users?page=${currentPage}&per_page=${rowsPerPage}`,
         );
         setCurrentPage(response.data.meta.current_page);
-        setLastPage(response.data.meta.last_page);
         setData(response.data.data);
+        setTotalCount(response.data.meta.total);
       } catch (error) {
         console.error("Erro ao verificar lista de usuários", error);
       } finally {
@@ -280,11 +279,11 @@ const Users = () => {
             {(!search
               ? data
               : data.filter(
-                  (user) =>
-                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                    user.email.toLowerCase().includes(search.toLowerCase()) ||
-                    user.role.name.toLowerCase().includes(search.toLowerCase()),
-                )
+                (user) =>
+                  user.name.toLowerCase().includes(search.toLowerCase()) ||
+                  user.email.toLowerCase().includes(search.toLowerCase()) ||
+                  user.role.name.toLowerCase().includes(search.toLowerCase()),
+              )
             ).map(({ name, email, role, company, id }, index) => (
               <TableRow
                 key={index}
@@ -318,27 +317,27 @@ const Users = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(index);
-                      }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(index);
+                        }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(id);
-                      }}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    )}
                 </TableCell>
               </TableRow>
             ))}
@@ -347,13 +346,15 @@ const Users = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={lastPage * rowsPerPage}
+          count={totalCount}
           labelRowsPerPage="Linhas por página"
           rowsPerPage={rowsPerPage}
           page={currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelDisplayedRows={defaultLabelDisplayedRows}
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
+          }
         />
       </TableContainer>
     </div>

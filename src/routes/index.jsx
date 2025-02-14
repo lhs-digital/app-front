@@ -121,7 +121,17 @@ const RoutesApp = () => {
 
           <Route
             path="/clientes"
-            element={<Private Item={Clients} allowedRoles={["super-admin"]} />}
+            element={<Private
+              Item={Clients}
+              allowedRoles={["super-admin"]}
+              allowedPermissions={[
+                "view_any_clients",
+                "view_clients",
+                "create_clients",
+                "delete_clients",
+                "update_clients",
+              ]}
+            />}
           />
 
           <Route

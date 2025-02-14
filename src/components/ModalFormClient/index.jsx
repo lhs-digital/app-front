@@ -95,7 +95,14 @@ const ModalFormClient = ({
     try {
       await api.put(`/clients/${selectedActivitie?.record_id}`, data);
 
-      toast.success("Correção de dados do cliente concluída com sucesso!");
+      toast.success(
+        <span>
+          Correção de dados inválidos do cliente com ID: <b>{selectedActivitie?.record_id}</b> realizada com sucesso!
+          <br></br>
+          <br></br>
+          Dados inválidos corrigidos: <b>{fieldsWithErrors?.map((field) => field.label).join(", ")}</b>.
+        </span>
+      );
 
       await api.put(`auditing/${selectedActivitie?.id}/toggle_status`);
 

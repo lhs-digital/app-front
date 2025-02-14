@@ -21,7 +21,6 @@ import ModalViewClient from "../../components/ModalViewClient";
 import PageTitle from "../../components/PageTitle";
 import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
-import { defaultLabelDisplayedRows } from "../../services/utils";
 
 const Clients = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -42,6 +41,8 @@ const Clients = () => {
     key: "id",
     direction: "desc",
   });
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
 
   const { permissions } = useContext(AuthContext);
 
@@ -50,12 +51,14 @@ const Clients = () => {
       setLoading(true);
       try {
         const response = await api.get(
-          `/clients?page=${currentPage}&per_page=10`,
+          `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
         );
         const sortedData = response.data.data.sort((a, b) => b.id - a.id);
         setData(sortedData);
         setCurrentPage(response.data.current_page);
         setLastPage(response.data.last_page);
+        setTotalCount(response.data.total);
+        console.log(response)
       } catch (error) {
         console.error("Erro ao buscar clientes:", error);
         toast.error("Erro ao carregar a lista de clientes.");
@@ -109,6 +112,17 @@ const Clients = () => {
   const handleView = (client) => {
     setDataView(client);
     setViewOpen(true);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setCurrentPage(newPage + 1);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+    setRefresh((prev) => !prev);
   };
 
   return (
@@ -248,7 +262,7 @@ const Clients = () => {
                     <TableCell>{client.cnpj_cpf}</TableCell>
                     <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
                       {permissions.some(
-                        (perm) => perm.name === "update_users",
+                        (perm) => perm.name === "update_clients",
                       ) && (
                         <IconButton
                           onClick={(e) => {
@@ -260,7 +274,7 @@ const Clients = () => {
                         </IconButton>
                       )}
                       {permissions.some(
-                        (perm) => perm.name === "delete_users",
+                        (perm) => perm.name === "delete_clients",
                       ) && (
                         <IconButton
                           onClick={(e) => {
@@ -278,14 +292,17 @@ const Clients = () => {
           </TableBody>
         </Table>
         <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={lastPage * 10}
+          count={totalCount}
+          labelRowsPerPage="Linhas por página"
+          rowsPerPage={rowsPerPage}
           page={currentPage - 1}
-          onPageChange={(event, newPage) => setCurrentPage(newPage + 1)}
-          rowsPerPage={10}
-          labelDisplayedRows={defaultLabelDisplayedRows}
-          rowsPerPageOptions={[10]}
-          onRowsPerPageChange={() => {}}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count !== -1 ? count : `mais de ${to}`}`
+          }
         />
       </TableContainer>
     </div>
