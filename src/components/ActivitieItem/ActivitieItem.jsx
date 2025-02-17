@@ -1,4 +1,4 @@
-import { Build, KeyboardArrowDown } from "@mui/icons-material";
+import { Build, Info, KeyboardArrowDown } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -97,15 +97,30 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
           </Tooltip>
           {
             permissions.some((per) => per.name === "update_tasks") && (
-              <Tooltip title="Corrigir" aria-label="Corrigir">
-                <button
-                  onClick={handleView}
-                  className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
-                  style={getPriorityColor(activitie?.priority)}
-                >
-                  <Build fontSize="small" />
-                </button>
-              </Tooltip>
+              activitie?.status === 0 ? (
+                <Tooltip title="Corrigir" aria-label="Corrigir">
+                  <button
+                    onClick={handleView}
+                    className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
+                    style={getPriorityColor(activitie?.priority)}
+                  >
+                    <Build fontSize="small" />
+                  </button>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Informação" aria-label="Informação">
+                  <button
+                    onClick={handleView}
+                    className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
+                    style={
+                      {color: colors.green[500],
+                      backgroundColor: colors.green[100],}
+                    }
+                  >
+                    <Info fontSize="small" />
+                  </button>
+                </Tooltip>
+              )
             )
           }
         </Box>
