@@ -78,28 +78,30 @@ const ListActivities = () => {
     setPriorityOrder("desc");
     setCreatedAt([null, null]);
     setPriority(-1);
+    setStatus(-1);
     setFilterParams({
       search: "",
       priorityOrder: "desc",
       createdAt: [],
-      status: null,
+      status: -1,
       priority: -1,
     });
     setCurrentPage(1);
     setRefresh((prev) => !prev);
   };
 
+
   const handleFilter = () => {
     setFilterParams({
       search,
       priorityOrder,
       priority,
-      status: null,
+      status,
       createdAt,
     });
 
     setCurrentPage(1);
-    setRefresh((prev) => !prev);
+    // setRefresh((prev) => !prev);
   };
 
   const handlePerPageChange = (e) => {

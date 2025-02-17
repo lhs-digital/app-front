@@ -175,12 +175,12 @@ const ModalFormClient = ({
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Numero da residência",
-              ) === -1 || selectedActivitie?.status
+              ) === -1 || selectedActivitie?.status === 1
             }
             error={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Numero da residência",
-              ) !== -1 || selectedActivitie?.status
+              ) !== -1 && selectedActivitie?.status !== 1
             }
             onKeyDown={(e) => {
               if (e.key === "-" || e.key === "e" || e.key === "E") {
@@ -201,12 +201,12 @@ const ModalFormClient = ({
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Email",
-              ) === -1 || selectedActivitie?.status
+              ) === -1 || selectedActivitie?.status === 1
             }
             error={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Email",
-              ) !== -1 || selectedActivitie?.status
+              ) !== -1 && selectedActivitie?.status !== 1
             }
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             fullWidth
@@ -219,12 +219,12 @@ const ModalFormClient = ({
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Tipo de Pessoa",
-              ) === -1 || selectedActivitie?.status
+              ) === -1 || selectedActivitie?.status === 1
             }
             error={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Tipo de Pessoa",
-              ) !== -1 || selectedActivitie?.status
+              ) !== -1 && selectedActivitie?.status !== 1
             }
             onChange={(e) =>
               setForm({
@@ -242,19 +242,19 @@ const ModalFormClient = ({
         <Box>
           <InputLabel>WhatsApp *</InputLabel>
           <InputMask
-            mask="(99) 99999-9999"
+            mask={form.whatsapp.replace(/\D/g, "").length > 10 ? "(99) 99999-9999" : "(99) 9999-9999"}
             value={form.whatsapp}
             onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
             maskChar=""
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Whatsapp",
-              ) === -1 || selectedActivitie?.status
+              ) === -1 || selectedActivitie?.status === 1
             }
             error={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Whatsapp",
-              ) !== -1 || selectedActivitie?.status
+              ) !== -1 && selectedActivitie?.status !== 1
             }
           >
             {(inputProps) => (
@@ -278,12 +278,12 @@ const ModalFormClient = ({
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Data de Nascimento",
-              ) === -1 || selectedActivitie?.status
+              ) === -1 || selectedActivitie?.status === 1
             }
             error={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Data de Nascimento",
-              ) !== -1 || selectedActivitie?.status
+              ) !== -1 && selectedActivitie?.status !== 1
             }
             onChange={(e) =>
               setForm({ ...form, data_nascimento: e.target.value })
@@ -300,15 +300,9 @@ const ModalFormClient = ({
               form.tipo_pessoa === "F" ? "999.999.999-99" : "99.999.999/9999-99"
             }
             maskChar=""
-            disabled={
-              fieldsWithErrors?.findIndex(
-                (field) => field.label === "CPF/CNPJ",
-              ) === -1 || selectedActivitie?.status
-            }
+            disabled={selectedActivitie?.status === 1 || !fieldsWithErrors?.some((field) => field.label === "CPF/CNPJ")}
             error={
-              fieldsWithErrors?.findIndex(
-                (field) => field.label === "CPF/CNPJ",
-              ) !== -1 || selectedActivitie?.status
+              fieldsWithErrors?.some((field) => field.label === "CPF/CNPJ") && selectedActivitie?.status !== 1
             }
           >
             {(inputProps) => (
@@ -334,12 +328,12 @@ const ModalFormClient = ({
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Referência do Endereço",
-              ) === -1 || selectedActivitie?.status
+              ) === -1 || selectedActivitie?.status === 1
             }
             error={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Referência do Endereço",
-              ) !== -1 || selectedActivitie?.status
+              ) !== -1 && selectedActivitie?.status !== 1
             }
             onChange={(e) => setForm({ ...form, referencia: e.target.value })}
             fullWidth
@@ -352,12 +346,12 @@ const ModalFormClient = ({
             disabled={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Contribuinte de ICMS",
-              ) === -1 || selectedActivitie?.status
+              ) === -1 || selectedActivitie?.status === 1
             }
             error={
               fieldsWithErrors?.findIndex(
                 (field) => field.label === "Contribuinte de ICMS",
-              ) !== -1 || selectedActivitie?.status
+              ) !== -1 && selectedActivitie?.status !== 1
             }
             onChange={(e) =>
               setForm({ ...form, contribuinte_icms: e.target.value })
@@ -371,14 +365,19 @@ const ModalFormClient = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Voltar</Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={selectedActivitie?.status}
-        >
-          Atualizar Dados
-        </Button>
+        {
+          selectedActivitie?.status === 0 && (
+            <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            disabled={selectedActivitie?.status}
+          >
+            Atualizar Dados
+          </Button>
+          )
+        }
+
       </DialogActions>
     </Dialog>
   );

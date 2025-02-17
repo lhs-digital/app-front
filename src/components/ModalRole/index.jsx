@@ -54,8 +54,8 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
         const responsePermissions = await api.get(`/permissions`);
         setPermissions(responsePermissions.data.data);
 
-        if (dataEdit) {
-          const responseRolePermissions = await api.get(`/roles/${dataEdit.id}`);
+        if (dataEdit?.id) {
+          const responseRolePermissions = await api.get(`/roles/${dataEdit?.id}`);
           setRolePermissions(
             responseRolePermissions.data.data.permissions.map(
               (permission) => permission.id,

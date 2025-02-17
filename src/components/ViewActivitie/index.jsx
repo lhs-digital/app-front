@@ -64,8 +64,6 @@ const ViewActivitie = ({ id, selectedActivitie, setRefresh, refresh }) => {
           </TableBody>
         </Table>
       </TableContainer>
-      {/* <Box ><b>Auditoria foi realizada em:</b> {formattedDate(selectedActivitie?.created_at)} </Box>
-            <Box ><b>Auditoria foi atualizada em:</b> {formattedDate(selectedActivitie?.updated_at)} </Box> */}
     </Box>
   );
 };
