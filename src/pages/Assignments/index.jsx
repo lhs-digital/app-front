@@ -1,5 +1,6 @@
 import { Add, ContentPaste } from "@mui/icons-material";
 import {
+  Autocomplete,
   Button,
   Card,
   CardContent,
@@ -16,31 +17,34 @@ import api from "../../services/api";
 
 const Assignments = () => {
   const [assignments, setAssignments] = useState([]);
-  const [assignedTo, setAssignedTo] = useState("");
-  const [assignedBy, setAssignedBy] = useState("");
-  const [isCompleted, setIsCompleted] = useState("");
-  const [status, setStatus] = useState("");
+  const [availableUsersTo, setAvailableUsersTo] = useState([]);
+  const [availableUsersBy, setAvailableUsersBy] = useState([]);
+  const [searchAssignedTo, setSearchAssignedTo] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [searchAssignedBy, setSearchAssignedBy] = useState(null);
   const [filterParams, setFilterParams] = useState({
-    assigned_to: "",
-    assigned_by: "",
-    is_completed: "",
+    assigned_to: null,
+    assigned_by: null,
     status: "",
   });
 
-  const handleFilter = () => {
-    setFilterParams({
-      assigned_to: assignedTo,
-      assigned_by: assignedBy,
-      is_completed: isCompleted,
-      status,
-    });
+  const fetchAssignments = async () => {
+    try {
+      const params = {
+        assigned_to: filterParams.assigned_to || undefined,
+        assigned_by: filterParams.assigned_by || undefined,
+        is_completed: filterParams.is_completed || undefined,
+        status: filterParams.status || undefined,
+      };
+      const response = await api.get("/tasks", { params });
+      console.log(response.data.data);
+      setAssignments(response?.data?.data);
+    } catch (error) {
+      console.error("Erro ao obter as atribuições", error);
+    }
   };
 
   const handleClean = () => {
-    setAssignedTo("");
-    setAssignedBy("");
-    setIsCompleted("");
-    setStatus("");
     setFilterParams({
       assigned_to: "",
       assigned_by: "",
@@ -49,26 +53,51 @@ const Assignments = () => {
     });
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const params = {
-          assigned_to: filterParams.assigned_to || undefined,
-          assigned_by: filterParams.assigned_by || undefined,
-          is_completed: filterParams.is_completed || undefined,
-          status: filterParams.status || undefined,
-        };
-        const response = await api.get("/tasks", { params });
-        console.log(response.data.data);
-        setAssignments(response?.data?.data);
-      } catch (error) {
-        console.error("Erro ao obter as atribuições", error);
-      }
-    };
+  const lazyUserSearch = async (search) => {
+    const response = await api.get(`/users?search=${search}`);
+    return response.data.data;
+  };
 
-    getData();
-    console.log("assignments", assignments);
-  }, [filterParams]);
+  const fetchUsersForAssignedTo = async (search) => {
+    setIsFetching(true);
+    try {
+      const data = await lazyUserSearch(search);
+      setAvailableUsersTo(data);
+    } catch (error) {
+      console.error("Erro ao buscar usuários To", error);
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  const fetchUsersForAssignedBy = async (search) => {
+    setIsFetching(true);
+    try {
+      const data = await lazyUserSearch(search);
+      setAvailableUsersBy(data);
+    } catch (error) {
+      console.error("Erro ao buscar usuários By", error);
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
+
+  useEffect(() => {
+    if (searchAssignedTo && searchAssignedTo.length > 2) {
+      fetchUsersForAssignedTo(searchAssignedTo);
+    } else {
+      setAvailableUsersTo([]);
+    }
+    if (searchAssignedBy && searchAssignedBy.length > 2) {
+      fetchUsersForAssignedBy(searchAssignedBy);
+    } else {
+      setAvailableUsersBy([]);
+    }
+  }, [searchAssignedTo, searchAssignedBy]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -82,19 +111,52 @@ const Assignments = () => {
         ]}
       />
       <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-        <TextField
+        <Autocomplete
+          filterOptions={(x) => x}
+          value={filterParams.assigned_to}
+          inputValue={searchAssignedTo || ""}
+          getOptionKey={(option) => option.id}
+          getOptionLabel={(option) => option.name}
+          onInputChange={(e, value) => setSearchAssignedTo(value)}
+          options={availableUsersTo}
           className="col-span-2"
-          label="Atribuído para"
+          placeholder="Digite para pesquisar"
+          noOptionsText="Nenhum usuário encontrado"
+          loadingText="Carregando..."
           size="small"
-          value={assignedTo}
-          onChange={(e) => setAssignedTo(e.target.value)}
+          loading={isFetching}
+          renderInput={(params) => (
+            <TextField {...params} label="Atribuído para" />
+          )}
+          onChange={(e, newValue) =>
+            setFilterParams({
+              ...filterParams,
+              assigned_to: newValue,
+            })
+          }
         />
-        <TextField
+        <Autocomplete
+          placeholder="Digite para pesquisar"
+          filterOptions={(x) => x}
           className="col-span-2"
-          label="Atribuído por"
+          value={filterParams.assigned_by}
+          inputValue={searchAssignedBy || ""}
+          noOptionsText="Nenhum usuário encontrado"
+          onInputChange={(e, value) => setSearchAssignedBy(value)}
           size="small"
-          value={assignedBy}
-          onChange={(e) => setAssignedBy(e.target.value)}
+          loading={isFetching}
+          loadingText="Carregando..."
+          options={availableUsersBy}
+          getOptionLabel={(option) => option.name}
+          renderInput={(params) => (
+            <TextField {...params} label="Atribuído por" />
+          )}
+          onChange={(e, newValue) =>
+            setFilterParams({
+              ...filterParams,
+              assigned_by: newValue,
+            })
+          }
         />
         <TextField className="col-span-1" label="Empresa" size="small" />
         <FormControl className="col-span-1">
@@ -102,24 +164,29 @@ const Assignments = () => {
             Status
           </InputLabel>
           <Select
-            value={isCompleted}
+            value={filterParams.status}
             size="small"
             label="Status"
-            onChange={(e) => setIsCompleted(e.target.value)}
+            onChange={(e) =>
+              setFilterParams({
+                ...filterParams,
+                status: e.target.value,
+              })
+            }
             placeholder="Status"
           >
-            <MenuItem value="true" onClick={() => setIsCompleted("true")}>
-              Concluído
-            </MenuItem>
-            <MenuItem value="false" onClick={() => setIsCompleted("false")}>
-              Pendente
-            </MenuItem>
+            <MenuItem value="true">Concluído</MenuItem>
+            <MenuItem value="false">Pendente</MenuItem>
           </Select>
         </FormControl>
         <Button onClick={handleClean} size="small" variant="contained">
           Limpar
         </Button>
-        <Button onClick={handleFilter} size="small" variant="contained">
+        <Button
+          onClick={() => fetchAssignments()}
+          size="small"
+          variant="contained"
+        >
           Filtrar
         </Button>
       </div>
