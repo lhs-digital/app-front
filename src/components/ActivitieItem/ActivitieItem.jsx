@@ -17,13 +17,11 @@ import {
   formattedPriority,
   getPriorityColor,
 } from "../../services/utils";
-import ModalCheckActivitie from "../ModalCheckActivitie";
 import ModalFormClient from "../ModalFormClient";
 import ViewActivitie from "../ViewActivitie";
 import { AuthContext } from "../../contexts/auth";
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [dataView, setDataView] = useState(activitie);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { permissions } = useContext(AuthContext);
@@ -209,16 +207,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
           )}
         </Box>
       </Box>
-      {isDeleteOpen && (
-        <ModalCheckActivitie
-          id={activitie?.id}
-          status={activitie?.status}
-          isOpen={isDeleteOpen}
-          onClose={() => setIsDeleteOpen(false)}
-          setRefresh={setRefresh}
-          refresh={refresh}
-        />
-      )}
     </Box>
   );
 };
