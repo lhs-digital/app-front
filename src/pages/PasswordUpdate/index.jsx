@@ -13,11 +13,11 @@ const PasswordUpdate = () => {
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        const response = await api.get(`/password-reset/${token}`);
+        // const response = await api.get(`/password-reset/${token}`);
 
-        if (response.data.token !== token) {
-          navigate("/");
-        }
+        // if (response.data.token !== token) {
+        //   navigate("/");
+        // }
       } catch (error) {
         console.error("Erro ao verificar token:", error);
         navigate("/");
