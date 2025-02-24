@@ -9,19 +9,10 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import useDebounce from "../../hooks/useDebounce";
 import api from "../../services/api";
 
 const CreateTask = ({ open, onClose }) => {
-  const [searchAssignedTo, setSearchAssignedTo] = useState("");
-  const [searchAssignedBy, setSearchAssignedBy] = useState("");
-  const [searchCompany, setSearchCompany] = useState("");
-  const debouncedAssignedTo = useDebounce(searchAssignedTo, 500);
-  const debouncedAssignedBy = useDebounce(searchAssignedBy, 500);
-  const debouncedCompany = useDebounce(searchCompany, 500);
-
-  const [availableUsersTo, setAvailableUsersTo] = useState([]);
-  const [availableUsersBy, setAvailableUsersBy] = useState([]);
+  const [availableUsers, setAvailableUsers] = useState([]);
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -31,22 +22,12 @@ const CreateTask = ({ open, onClose }) => {
   const [data, setData] = useState({
     assigned_to: null,
     assigned_by: null,
-    company_id: null,
+    company: null,
     deadline: null,
     entity_id: null,
     entity_type: null,
     description: null,
   });
-
-  const lazyUserSearch = async (search) => {
-    const response = await api.get(`/users?search=${search}`);
-    return response.data.data;
-  };
-
-  const lazyCompanySearch = async (search) => {
-    const response = await api.get(`/companies?search=${search}`);
-    return response.data.data;
-  };
 
   const entitySearch = async () => {
     const response = await api.get(`/entities/${data.entity_type}`);
@@ -54,54 +35,29 @@ const CreateTask = ({ open, onClose }) => {
   };
 
   useEffect(() => {
-    if (debouncedAssignedTo && debouncedAssignedTo.length > 2) {
-      setIsFetching(true);
-      lazyUserSearch(debouncedAssignedTo)
-        .then((data) => {
-          setAvailableUsersTo(data);
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar os usuários", error);
-        })
-        .finally(() => {
-          setIsFetching(false);
-        });
-    } else {
-      setAvailableUsersTo([]);
-    }
+    setIsFetching(true);
+    const fetchEntityTypes = async () => {
+      try {
+        const response = await api.get("/assignables");
+        setEntityTypes(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar os tipos de entidades", error);
+      }
+    };
 
-    if (debouncedAssignedBy && debouncedAssignedBy.length > 2) {
-      setIsFetching(true);
-      lazyUserSearch(debouncedAssignedBy)
-        .then((data) => {
-          setAvailableUsersBy(data);
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar os usuários", error);
-        })
-        .finally(() => {
-          setIsFetching(false);
-        });
-    } else {
-      setAvailableUsersBy([]);
-    }
+    const fetchCompanies = async () => {
+      try {
+        const response = await api.get("/companies");
+        setAvailableCompanies(response.data.data);
+      } catch (error) {
+        console.error("Erro ao buscar as empresas", error);
+      }
+    };
 
-    if (debouncedCompany && debouncedCompany.length > 2) {
-      setIsFetching(true);
-      lazyCompanySearch(debouncedCompany)
-        .then((data) => {
-          setAvailableCompanies(data);
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar as empresas", error);
-        })
-        .finally(() => {
-          setIsFetching(false);
-        });
-    } else {
-      setAvailableCompanies([]);
-    }
-  }, [debouncedAssignedTo, debouncedAssignedBy, debouncedCompany]);
+    fetchCompanies();
+    fetchEntityTypes();
+    setIsFetching(false);
+  }, []);
 
   useEffect(() => {
     if (data.entity_type) {
@@ -113,7 +69,17 @@ const CreateTask = ({ open, onClose }) => {
           console.error("Erro ao buscar as entidades", error);
         });
     }
-  }, [data.entity_type]);
+
+    if (data.company) {
+      console.log(data.company);
+      api
+        .get(`/users?company_id=${data.company.id}`)
+        .then((res) => {
+          setAvailableUsers(res.data.data);
+        })
+        .catch((error) => console.error("Erro ao buscar os usuários", error));
+    }
+  }, [data.entity_type, data.company]);
 
   useEffect(() => {
     api
@@ -130,7 +96,7 @@ const CreateTask = ({ open, onClose }) => {
         ...data,
         assigned_to: data.assigned_to.id,
         assigned_by: data.assigned_by.id,
-        company_id: data.company_id.id,
+        company_id: data.company.id,
         entity_id: data.entity_id.id,
       })
       .then(() => {
@@ -163,34 +129,33 @@ const CreateTask = ({ open, onClose }) => {
         >
           <Autocomplete
             fullWidth
-            filterOptions={(x) => x}
-            options={availableUsersTo}
-            noOptionsText="Nenhum usuário encontrado"
+            options={availableCompanies}
+            noOptionsText="Nenhuma empresa encontrada"
             getOptionLabel={(option) => option.name}
             getOptionKey={(option) => option.id}
             loading={isFetching}
             loadingText="Carregando..."
-            onInputChange={(e, value) => setSearchAssignedTo(value)}
-            renderInput={(params) => (
-              <TextField {...params} label="Atribuído para" />
-            )}
-            value={data.assigned_to}
-            onChange={(e, newValue) =>
-              setData({ ...data, assigned_to: newValue })
-            }
+            renderInput={(params) => <TextField {...params} label="Empresa" />}
+            value={data.company_id}
+            onChange={(e, newValue) => setData({ ...data, company: newValue })}
           />
           <Autocomplete
-            filterOptions={(x) => x}
             fullWidth
-            options={availableUsersBy}
+            options={availableUsers}
             noOptionsText="Nenhum usuário encontrado"
             getOptionLabel={(option) => option.name}
             getOptionKey={(option) => option.id}
             loading={isFetching}
             loadingText="Carregando..."
-            onInputChange={(e, value) => setSearchAssignedBy(value)}
             renderInput={(params) => (
-              <TextField {...params} label="Atribuído por" />
+              <TextField
+                {...params}
+                label={
+                  !data.company
+                    ? "Selecione uma empresa para pesquisar"
+                    : "Atribuído por"
+                }
+              />
             )}
             value={data.assigned_by}
             onChange={(e, newValue) =>
@@ -199,24 +164,42 @@ const CreateTask = ({ open, onClose }) => {
           />
           <Autocomplete
             fullWidth
-            filterOptions={(x) => x}
-            options={availableCompanies}
-            noOptionsText="Nenhuma empresa encontrada"
+            options={
+              data.assigned_by
+                ? availableUsers.filter(
+                    (user) => user.role.nivel > data.assigned_by.role.nivel,
+                  )
+                : availableUsers
+            }
+            noOptionsText="Nenhum usuário encontrado"
             getOptionLabel={(option) => option.name}
             getOptionKey={(option) => option.id}
             loading={isFetching}
             loadingText="Carregando..."
-            onInputChange={(e, value) => setSearchCompany(value)}
-            renderInput={(params) => <TextField {...params} label="Empresa" />}
-            value={data.company_id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={
+                  !data.company
+                    ? "Selecione uma empresa para pesquisar"
+                    : "Atribuído para"
+                }
+              />
+            )}
+            value={data.assigned_to}
             onChange={(e, newValue) =>
-              setData({ ...data, company_id: newValue })
+              setData({ ...data, assigned_to: newValue })
             }
           />
           <Autocomplete
             fullWidth
-            filterOptions={(x) => x}
-            options={entityTypes}
+            options={
+              data.assigned_to
+                ? availableUsers.filter(
+                    (user) => user.role.nivel < data.assigned_to.role.nivel,
+                  )
+                : availableUsers
+            }
             noOptionsText="Nenhum tipo encontrado"
             getOptionLabel={(option) => option}
             loading={isFetching}
@@ -231,7 +214,6 @@ const CreateTask = ({ open, onClose }) => {
           />
           <Autocomplete
             fullWidth
-            filterOptions={(x) => x}
             options={availableEntities}
             noOptionsText="Nenhuma entidade encontrada"
             getOptionLabel={(option) => option.name}
