@@ -193,13 +193,7 @@ const CreateTask = ({ open, onClose }) => {
           />
           <Autocomplete
             fullWidth
-            options={
-              data.assigned_to
-                ? availableUsers.filter(
-                    (user) => user.role.nivel < data.assigned_to.role.nivel,
-                  )
-                : availableUsers
-            }
+            options={entityTypes}
             noOptionsText="Nenhum tipo encontrado"
             getOptionLabel={(option) => option}
             loading={isFetching}
