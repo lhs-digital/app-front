@@ -1,4 +1,6 @@
 import {
+  Assignment,
+  AssignmentOutlined,
   Build,
   BuildOutlined,
   Business,
@@ -96,7 +98,6 @@ const Index = ({ children }) => {
     navigate("/");
   };
 
-
   const { permissions } = useContext(AuthContext);
   const usersPermissions = [
     "view_users",
@@ -133,7 +134,7 @@ const Index = ({ children }) => {
 
   const hasPermission = (thePermissions) => {
     return permissions.some((permission) =>
-      thePermissions.includes(permission.name)
+      thePermissions.includes(permission.name),
     );
   };
 
@@ -178,7 +179,14 @@ const Index = ({ children }) => {
       url: "/clientes",
       icon: <WorkOutline fontSize="small" />,
       activeIcon: <Work fontSize="small" />,
-      permissions: clientsPermissions, 
+      permissions: clientsPermissions,
+    },
+    {
+      label: "Atribuições",
+      url: "/atribuicoes",
+      icon: <AssignmentOutlined fontSize="small" />,
+      activeIcon: <Assignment fontSize="small" />,
+      permissions: [],
     },
     {
       label: "Regras de Auditorias",
@@ -219,19 +227,30 @@ const Index = ({ children }) => {
         </div>
         <List className="grow">
           {sidebarItems.map((item, index) => {
-            if (item.permissions && item.permissions.length > 0 && !hasPermission(item.permissions)) {
+            if (
+              item.permissions &&
+              item.permissions.length > 0 &&
+              !hasPermission(item.permissions)
+            ) {
               return null;
             }
 
             return (
-              <Tooltip title={item.label} key={index} hidden={!open} placement="right">
+              <Tooltip
+                title={item.label}
+                key={index}
+                hidden={!open}
+                placement="right"
+              >
                 <ListItem disablePadding>
                   <ListItemButton
                     onClick={() => navigate(item.url)}
                     selected={isActive(item.url)}
                     sx={[
                       { minHeight: 48, px: 3 },
-                      open ? { justifyContent: "initial" } : { justifyContent: "center" },
+                      open
+                        ? { justifyContent: "initial" }
+                        : { justifyContent: "center" },
                     ]}
                   >
                     <ListItemIcon

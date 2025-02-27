@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthContext } from "../contexts/auth";
 import Layout from "../layout";
+import Assignments from "../pages/Assignments";
 import Clients from "../pages/Clients";
 import Companies from "../pages/Companies";
 import FirstAccess from "../pages/FirstAccess";
@@ -121,17 +122,19 @@ const RoutesApp = () => {
 
           <Route
             path="/clientes"
-            element={<Private
-              Item={Clients}
-              allowedRoles={["super-admin"]}
-              allowedPermissions={[
-                "view_any_clients",
-                "view_clients",
-                "create_clients",
-                "delete_clients",
-                "update_clients",
-              ]}
-            />}
+            element={
+              <Private
+                Item={Clients}
+                allowedRoles={["super-admin"]}
+                allowedPermissions={[
+                  "view_any_clients",
+                  "view_clients",
+                  "create_clients",
+                  "delete_clients",
+                  "update_clients",
+                ]}
+              />
+            }
           />
 
           <Route
@@ -182,6 +185,7 @@ const RoutesApp = () => {
               />
             }
           />
+          <Route path="/atribuicoes" element={<Private Item={Assignments} />} />
           <Route
             path="/my-permissions"
             element={

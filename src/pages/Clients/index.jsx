@@ -51,7 +51,11 @@ const Clients = () => {
       setLoading(true);
       try {
         const response = await api.get(
-          `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
+          `/clients?page=${currentPage}&per_page=${rowsPerPage}`, {
+            params: {
+              search: search,
+            },
+          }
         );
         const sortedData = response.data.data.sort((a, b) => b.id - a.id);
         setData(sortedData);
@@ -67,7 +71,7 @@ const Clients = () => {
     };
 
     fetchClients();
-  }, [currentPage, refresh]);
+  }, [currentPage, search, refresh]);
 
   const handleSort = (key) => {
     const direction =
@@ -165,7 +169,10 @@ const Clients = () => {
         placeholder="Buscar cliente"
         size="lg"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
         slotProps={{
           input: {
             startAdornment: (
