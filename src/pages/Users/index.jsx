@@ -62,7 +62,11 @@ const Users = () => {
       setLoading(true);
       try {
         const response = await api.get(
-          `/users?page=${currentPage}&per_page=${rowsPerPage}`,
+          `/users?page=${currentPage}&per_page=${rowsPerPage}`, {
+            params: {
+              search: search,
+            },
+          }
         );
         setCurrentPage(response.data.meta.current_page);
         setData(response.data.data);
@@ -74,7 +78,7 @@ const Users = () => {
       }
     };
     getData();
-  }, [setData, currentPage, refresh]);
+  }, [setData, currentPage, search, refresh]);
 
   const handleSort = (key) => {
     const direction =
@@ -197,7 +201,10 @@ const Users = () => {
         }}
         size="lg"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
       />
       <TableContainer>
         <Table>

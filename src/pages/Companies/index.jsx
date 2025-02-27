@@ -55,7 +55,11 @@ const Companies = () => {
       setLoading(true);
       try {
         const response = await api.get(
-          `/companies?page=${currentPage}&per_page=${rowsPerPage}`,
+          `/companies?page=${currentPage}&per_page=${rowsPerPage}`, {
+            params: {
+              search: search,
+            },
+          }
         );
         setCurrentPage(response.data.meta.current_page);
         setData(response.data.data);
@@ -67,7 +71,7 @@ const Companies = () => {
       }
     };
     getData();
-  }, [setData, currentPage, refresh]);
+  }, [setData, currentPage, search, refresh]);
 
   const handleRemove = async () => {
     try {
@@ -183,7 +187,10 @@ const Companies = () => {
         }}
         size="lg"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
       />
       <TableContainer>
         <Table>
@@ -193,13 +200,25 @@ const Companies = () => {
                 onClick={() => handleSort("name")}
                 style={{ cursor: "pointer" }}
               >
-                Nome {getSortIcon("name")}
+                Razão Social {getSortIcon("name")}
+              </TableCell>
+              <TableCell
+                onClick={() => handleSort("dba")}
+                style={{ cursor: "pointer" }}
+              >
+                Nome Fantasia {getSortIcon("dba")}
               </TableCell>
               <TableCell
                 onClick={() => handleSort("cnpj")}
                 style={{ cursor: "pointer" }}
               >
                 CNPJ {getSortIcon("cnpj")}
+              </TableCell>
+              <TableCell
+                onClick={() => handleSort("responsible_cpf")}
+                style={{ cursor: "pointer" }}
+              >
+                CPF do Responsável {getSortIcon("responsible_cpf")}
               </TableCell>
               <TableCell>Ações</TableCell>
             </TableRow>
@@ -212,23 +231,16 @@ const Companies = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              (!search
-                ? data
-                : data.filter(
-                    (company) =>
-                      company.name
-                        .toLowerCase()
-                        .includes(search.toLowerCase()) ||
-                      company.cnpj.toLowerCase().includes(search.toLowerCase()),
-                  )
-              ).map(({ name, cnpj, roles_count, id }, index) => (
+              data.map(({ name, cnpj, dba, responsible_cpf, roles_count, address, id }, index) => (
                 <TableRow
                   key={index}
                   style={{ cursor: "pointer" }}
                   onClick={() => handleView(index)}
                 >
                   <TableCell> {name} </TableCell>
+                  <TableCell> {dba} </TableCell>
                   <TableCell> {cnpj} </TableCell>
+                  <TableCell> {responsible_cpf} </TableCell>
                   <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
                     {permissions.some(
                       (permissions) => permissions.name === "update_companies",
@@ -236,7 +248,7 @@ const Companies = () => {
                       <IconButton
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleEdit({ name, cnpj, roles_count, id, index });
+                          handleEdit({ name, cnpj, dba, responsible_cpf, roles_count, address, id, index });
                         }}
                       >
                         <Edit />

@@ -45,7 +45,11 @@ const Roles = () => {
     const getData = async () => {
       try {
         const response = await api.get(
-          `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
+          `/roles?page=${currentPage}&per_page=${rowsPerPage}`,{
+            params: {
+              search: search,
+            },
+          }
         );
         setCurrentPage(response.data.meta.current_page);
         setTotalCount(response.data.meta.total);
@@ -55,7 +59,7 @@ const Roles = () => {
       }
     };
     getData();
-  }, [currentPage, rowsPerPage, refresh]);
+  }, [currentPage, rowsPerPage, search, refresh]);
 
   const handleRemove = async () => {
     try {
@@ -173,7 +177,10 @@ const Roles = () => {
         }}
         size="lg"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
       />
       <TableContainer>
         <Table>
@@ -236,16 +243,8 @@ const Roles = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {(!search
-              ? data
-              : data.filter(
-                (role) =>
-                  role.name.toLowerCase().includes(search.toLowerCase()) ||
-                  role.company?.name
-                    .toLowerCase()
-                    .includes(search.toLowerCase()),
-              )
-            ).map(({ name, nivel, company, permissions_count, id }, index) => (
+            {
+            data.map(({ name, nivel, company, permissions_count, id }, index) => (
               <TableRow
                 key={index}
                 style={{

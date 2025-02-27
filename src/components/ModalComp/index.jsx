@@ -134,7 +134,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
           />
         </Box>
         <Box>
-          <InputLabel>Empresa</InputLabel>
+          <InputLabel>Empresa *</InputLabel>
           <Select
             placeholder="Selecione uma opção"
             value={company}
