@@ -112,6 +112,9 @@ const Sidebar = ({ active }) => {
             <SidebarItem Icon={FaBook} Text="Logs" />
           </Link>
         ) : null}
+        <Link to={'/atribuicoes'}>
+          <SidebarItem Icon={FaBook} Text="Atribuições" />
+        </Link>
       </Content>
     </Container>
   );
