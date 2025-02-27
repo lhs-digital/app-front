@@ -7,15 +7,16 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 const CreateTask = ({ open, onClose }) => {
   const [availableUsers, setAvailableUsers] = useState([]);
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
-
+  const { user, isLighthouse } = useContext(AuthContext);
   const [entityTypes, setEntityTypes] = useState([]);
   const [availableEntities, setAvailableEntities] = useState([]);
 
@@ -35,6 +36,7 @@ const CreateTask = ({ open, onClose }) => {
   };
 
   useEffect(() => {
+    if (!open) return;
     setIsFetching(true);
     const fetchEntityTypes = async () => {
       try {
@@ -54,7 +56,12 @@ const CreateTask = ({ open, onClose }) => {
       }
     };
 
-    fetchCompanies();
+    if (isLighthouse) {
+      fetchCompanies();
+    } else {
+      setData({ ...data, company: user.company });
+    }
+
     fetchEntityTypes();
     setIsFetching(false);
   }, []);
@@ -127,18 +134,24 @@ const CreateTask = ({ open, onClose }) => {
           className="flex flex-col gap-4 pt-2"
           onSubmit={submit}
         >
-          <Autocomplete
-            fullWidth
-            options={availableCompanies}
-            noOptionsText="Nenhuma empresa encontrada"
-            getOptionLabel={(option) => option.name}
-            getOptionKey={(option) => option.id}
-            loading={isFetching}
-            loadingText="Carregando..."
-            renderInput={(params) => <TextField {...params} label="Empresa" />}
-            value={data.company_id}
-            onChange={(e, newValue) => setData({ ...data, company: newValue })}
-          />
+          {isLighthouse && (
+            <Autocomplete
+              fullWidth
+              options={availableCompanies}
+              noOptionsText="Nenhuma empresa encontrada"
+              getOptionLabel={(option) => option.name}
+              getOptionKey={(option) => option.id}
+              loading={isFetching}
+              loadingText="Carregando..."
+              renderInput={(params) => (
+                <TextField {...params} label="Empresa" />
+              )}
+              value={data.company_id}
+              onChange={(e, newValue) =>
+                setData({ ...data, company: newValue })
+              }
+            />
+          )}
           <Autocomplete
             fullWidth
             options={availableUsers}

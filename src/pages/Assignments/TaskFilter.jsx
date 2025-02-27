@@ -7,8 +7,9 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 export default function TaskFilter({
@@ -20,6 +21,7 @@ export default function TaskFilter({
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [entityTypes, setEntityTypes] = useState([]);
   const [availableEntities, setAvailableEntities] = useState([]);
+  const { user, isLighthouse } = useContext(AuthContext);
   const [filterParams, setFilterParams] = useState({
     assigned_to: null,
     assigned_by: null,
@@ -59,9 +61,9 @@ export default function TaskFilter({
       assigned_to: null,
       assigned_by: null,
       status: null,
-      company: null,
       entity_id: null,
       entity_type: null,
+      company: isLighthouse ? null : user.company,
     });
     setAvailableEntities([]);
     fetchAssignments();
@@ -86,7 +88,12 @@ export default function TaskFilter({
       }
     };
 
-    fetchCompanies();
+    if (isLighthouse) {
+      fetchCompanies();
+    } else {
+      setFilterParams({ ...filterParams, company: user.company.id });
+    }
+
     fetchEntityTypes();
     fetchAssignments();
   }, []);
@@ -101,7 +108,9 @@ export default function TaskFilter({
           console.error("Erro ao buscar as entidades", error);
         });
     }
+  }, [filterParams.entity_type]);
 
+  useEffect(() => {
     if (filterParams.company) {
       api
         .get(`/users?company_id=${filterParams.company.id}`)
@@ -110,22 +119,24 @@ export default function TaskFilter({
         })
         .catch((error) => console.error("Erro ao buscar os usuários", error));
     }
-  }, [filterParams.entity_type, filterParams.company]);
+  }, [filterParams.company]);
 
   return (
     <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-4">
-      <Autocomplete
-        className="col-span-8"
-        value={filterParams.company}
-        noOptionsText="Nenhuma empresa encontrada."
-        options={availableCompanies}
-        getOptionLabel={(option) => option.name}
-        loadingText="Carregando..."
-        renderInput={(params) => <TextField {...params} label="Empresa" />}
-        onChange={(e, newValue) =>
-          setFilterParams({ ...filterParams, company: newValue })
-        }
-      />
+      {isLighthouse && (
+        <Autocomplete
+          className="col-span-8"
+          value={filterParams.company}
+          noOptionsText="Nenhuma empresa encontrada."
+          options={availableCompanies}
+          getOptionLabel={(option) => option.name}
+          loadingText="Carregando..."
+          renderInput={(params) => <TextField {...params} label="Empresa" />}
+          onChange={(e, newValue) =>
+            setFilterParams({ ...filterParams, company: newValue })
+          }
+        />
+      )}
       <Autocomplete
         value={filterParams.assigned_by}
         getOptionLabel={(option) => option.name}
