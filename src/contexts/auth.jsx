@@ -1,6 +1,6 @@
-import { useState, createContext, useEffect } from "react";
-import api from "../services/api";
+import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 export const AuthContext = createContext({});
 
@@ -84,6 +84,7 @@ const AuthProvider = ({ children }) => {
       value={{
         signed: !!user,
         user,
+        isLighthouse: user?.company?.is_super_admin || false,
         permissions,
         signIn,
         logout,
