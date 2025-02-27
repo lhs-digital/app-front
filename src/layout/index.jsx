@@ -277,13 +277,13 @@ const Index = ({ children }) => {
               className="w-full text-left p-2 flex flex-row items-center border rounded-lg gap-2 hover:bg-gray-50"
             >
               <Avatar
-                src={user?.user?.avatar}
+                src={user?.avatar}
                 alt="Avatar"
                 sx={{ width: 48, height: 48 }}
               />
               <div className="flex flex-col">
-                <p className="font-medium">{user?.user?.name}</p>
-                <p className="text-sm">{user?.user?.company?.name}</p>
+                <p className="font-medium">{user?.name}</p>
+                <p className="text-sm">{user?.company?.name}</p>
               </div>
             </button>
           </div>

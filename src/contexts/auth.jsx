@@ -15,21 +15,21 @@ const AuthProvider = ({ children }) => {
       ? localStorage
       : sessionStorage;
 
-    const storagedUser = storage.getItem("user");
-    const storagedPermissions = storage.getItem("permissions");
-    const storagedToken = storage.getItem("token");
+    const storedUser = storage.getItem("user");
+    const storedPermissions = storage.getItem("permissions");
+    const storedToken = storage.getItem("token");
     const expiresAt = storage.getItem("expiresAt");
 
     if (
-      storagedToken &&
-      storagedUser &&
+      storedToken &&
+      storedUser &&
       expiresAt &&
       new Date().getTime() < expiresAt
     ) {
-      setUser(JSON.parse(storagedUser));
-      setPermissions(JSON.parse(storagedPermissions) || []);
+      setUser(JSON.parse(storedUser).user);
+      setPermissions(JSON.parse(storedPermissions) || []);
     } else {
-      if (storagedToken) logout();
+      if (storedToken) logout();
     }
 
     setLoading(false);

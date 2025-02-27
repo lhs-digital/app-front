@@ -19,7 +19,7 @@ const ModalReport = ({ isOpen, onClose }) => {
   const [createdAt, setCreatedAt] = useState([]);
   const { user } = useContext(AuthContext);
   const [company, setCompany] = useState("");
-  const [companyId, setCompanyId] = useState(user?.user?.company?.id);
+  const [companyId, setCompanyId] = useState(user?.company?.id);
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ const ModalReport = ({ isOpen, onClose }) => {
       <DialogTitle>Gerar Relatório</DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={4}>
-          {user?.user?.role?.name === "super-admin" && (
+          {user?.role?.name === "super-admin" && (
             <Box display="flex" flexDirection="column" gap={1}>
               <InputLabel htmlFor="company">Empresa</InputLabel>
               <Select

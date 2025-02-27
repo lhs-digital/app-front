@@ -21,7 +21,7 @@ export const stats = {
 };
 
 const Home = () => {
-  const { user } = useContext(AuthContext).user;
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     document.title = "LHS - Home";
