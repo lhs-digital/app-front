@@ -15,11 +15,10 @@ const Assignments = () => {
   const [assignments, setAssignments] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-
   return (
     <div className="flex flex-col gap-8">
       <PageTitle
-        title="Atribuições"
+        title="Ordens de serviço"
         icon={<ContentPaste />}
         buttons={[
           <Button
