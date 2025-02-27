@@ -7,6 +7,7 @@ import { AuthContext } from "../../contexts/auth";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const SignIn = () => {
   };
 
   const Login = async (event) => {
+    setLoading(true);
     event.preventDefault();
 
     if (!email || !password) {
@@ -30,6 +32,8 @@ const SignIn = () => {
       navigate("/dashboard");
     } catch (error) {
       toast.error("Email ou senha inválidos!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,6 +46,7 @@ const SignIn = () => {
       >
         <h1 className="text-2xl">Entrar</h1>
         <TextField
+          disabled={loading}
           fullWidth
           type="email"
           placeholder="Digite o seu email"
@@ -50,6 +55,7 @@ const SignIn = () => {
           autoComplete="email"
         />
         <TextField
+          disabled={loading}
           fullWidth
           type="password"
           placeholder="********"
@@ -59,6 +65,7 @@ const SignIn = () => {
         />
         <div className="flex flex-row items-center">
           <Checkbox
+            disabled={loading}
             id="rememberMe"
             checked={rememberMe}
             onChange={handleRememberMeChange}
@@ -67,7 +74,7 @@ const SignIn = () => {
             Mantenha-me conectado por 7 dias
           </label>
         </div>
-        <Button variant="contained" fullWidth type="submit">
+        <Button variant="contained" fullWidth type="submit" loading={loading}>
           ENTRAR
         </Button>
         <Link to="/recover-password" className="mt-4 text-center">
