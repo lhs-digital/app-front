@@ -26,7 +26,7 @@ const AuthProvider = ({ children }) => {
       expiresAt &&
       new Date().getTime() < expiresAt
     ) {
-      setUser(JSON.parse(storedUser).user);
+      setUser(JSON.parse(storedUser));
       setPermissions(JSON.parse(storedPermissions) || []);
     } else {
       if (storedToken) logout();
@@ -38,8 +38,9 @@ const AuthProvider = ({ children }) => {
   const signIn = async (email, password, rememberMe) => {
     try {
       const response = await api.post(`/login`, { email, password });
-      const token = response.data.token;
+      setUser(response.data.user);
 
+      const token = response.data.token;
       const storage = rememberMe ? localStorage : sessionStorage;
       const expiresAt =
         new Date().getTime() +
@@ -48,8 +49,7 @@ const AuthProvider = ({ children }) => {
       storage.setItem("token", token);
       storage.setItem("expiresAt", expiresAt);
 
-      setUser(response.data);
-      storage.setItem("user", JSON.stringify(response.data));
+      storage.setItem("user", JSON.stringify(response.data.user));
 
       const permissionsResponse = await api.get(`/me/permissions`);
       setPermissions(permissionsResponse.data.data);
