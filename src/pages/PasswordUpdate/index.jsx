@@ -53,9 +53,12 @@ const PasswordUpdate = () => {
 
       toast.success("Senha alterada com sucesso!");
 
-      navigate("/");
     } catch (error) {
       toast.error("Erro ao tentar alterar a senha");
+    } finally {
+      setPassword("");
+      setPasswordConfirmation("");
+      navigate("/");
     }
   };
 
