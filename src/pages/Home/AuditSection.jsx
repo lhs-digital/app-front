@@ -19,8 +19,8 @@ const AuditSection = () => {
   const navigate = useNavigate();
   const { permissions } = useContext(AuthContext);
   const [data, setData] = useState([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState(2); // Inicializa com o ID da "Provedor 1"
-  const [selectedTableId, setSelectedTableId] = useState("clientes"); // Inicializa com a tabela "clientes"
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null); // Inicializa com o ID da "Provedor 1"
+  const [selectedTableId, setSelectedTableId] = useState(null); // Inicializa com a tabela "clientes"
   const [chartData, setChartData] = useState({ errorsCount: 0, fixedErrorsCount: 0 });
 
   useEffect(() => {
