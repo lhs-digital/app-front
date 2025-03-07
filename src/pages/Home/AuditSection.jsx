@@ -178,7 +178,7 @@ const AuditSection = ({ completionData, priorityData, stats }) => {
             height={200}
           />
         </Card>
-        <Card
+        {/* <Card
           variant="outlined"
           className="max-md:hidden p-4 flex flex-col gap-2 grow"
         >
@@ -200,7 +200,7 @@ const AuditSection = ({ completionData, priorityData, stats }) => {
             }}
             height={200}
           />
-        </Card>
+        </Card> */}
       </Box>
       <ModalReport isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </Box>
