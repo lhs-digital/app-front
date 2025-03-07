@@ -40,7 +40,7 @@ const AuthProvider = ({ children }) => {
       const response = await api.post(`/login`, { email, password });
       setUser(response.data.user);
 
-      const token = response.data.token;
+      const token = response.data.access_token;
       const storage = rememberMe ? localStorage : sessionStorage;
       const expiresAt =
         new Date().getTime() +
@@ -51,11 +51,10 @@ const AuthProvider = ({ children }) => {
 
       storage.setItem("user", JSON.stringify(response.data.user));
 
-      const permissionsResponse = await api.get(`/me/permissions`);
-      setPermissions(permissionsResponse.data.data);
+      setPermissions(response.data.user.role.permissions);
       storage.setItem(
         "permissions",
-        JSON.stringify(permissionsResponse.data.data),
+        JSON.stringify(response.data.user.role.permissions),
       );
 
       return response.data;

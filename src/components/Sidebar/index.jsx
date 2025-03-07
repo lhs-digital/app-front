@@ -45,9 +45,9 @@ const Sidebar = ({ active }) => {
 
   const sidebarRef = useRef();
 
-  const hasPermission = (thePermissions) => {
-    return permissions.some((permission) =>
-      thePermissions.includes(permission.name),
+  const hasPermission = (requiredPermissions) => {
+    return permissions?.some((permission) =>
+      requiredPermissions.includes(permission.name),
     );
   };
 
