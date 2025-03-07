@@ -1,24 +1,25 @@
 import { Button, Checkbox, TextField, Tooltip } from "@mui/material";
-import { useContext, useState } from "react";
+import { useState } from "react";
+import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Lighthouse from "../../assets/favicon_neutral.svg";
-import { AuthContext } from "../../contexts/auth";
+import api from "../../services/api";
+import { formatAuthUser } from "../../services/utils";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const signIn = useSignIn();
   const navigate = useNavigate();
-
-  const { signIn } = useContext(AuthContext);
 
   const handleRememberMeChange = () => {
     setRememberMe(!rememberMe);
   };
 
-  const Login = async (event) => {
+  const login = async (event) => {
     setLoading(true);
     event.preventDefault();
 
@@ -28,10 +29,29 @@ const SignIn = () => {
     }
 
     try {
-      await signIn(email, password, rememberMe);
-      navigate("/dashboard");
+      const response = await api.post(`/login`, { email, password });
+      console.log(response.data);
+
+      if (
+        signIn({
+          auth: {
+            token: response.data.token,
+            type: "Bearer",
+          },
+          userState: formatAuthUser(response.data.user),
+        })
+      ) {
+        navigate("/painel");
+      } else {
+        toast.error("Ocorreu um erro ao realizar login.");
+      }
     } catch (error) {
-      toast.error("Email ou senha inválidos!");
+      console.error(error);
+      if (error.response) {
+        toast.error(error.response.data.message || "Email ou senha inválidos!");
+      } else {
+        toast.error("Ocorreu um erro ao realizar login.");
+      }
     } finally {
       setLoading(false);
     }
@@ -41,7 +61,7 @@ const SignIn = () => {
     <div className="relative bg-black flex flex-col items-center justify-center h-screen gap-8">
       <div className="absolute login-bg top-0 left-0 w-screen h-screen opacity-40 grayscale" />
       <form
-        onSubmit={Login}
+        onSubmit={login}
         className="z-20 bg-white shadow-lg shadow-white/50 flex flex-col gap-4 w-[95vw] sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 border p-8 rounded-lg"
       >
         <h1 className="text-2xl">Entrar</h1>

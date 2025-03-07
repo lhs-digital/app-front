@@ -7,15 +7,14 @@ import {
 } from "@mui/icons-material";
 import { Box, Button, Card, colors } from "@mui/material";
 import { PieChart } from "@mui/x-charts";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ModalReport from "../../components/ModalReport";
-import { AuthContext } from "../../contexts/auth";
 
 const AuditSection = ({ completionData, priorityData, stats }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useAuthUser().user;
 
   const usersPermissions = [
     "view_users",
@@ -37,7 +36,6 @@ const AuditSection = ({ completionData, priorityData, stats }) => {
       icon: <Work fontSize="small" />,
       fn: () => navigate("/clientes"),
       label: "Clientes",
-
     },
     {
       icon: <Person fontSize="small" />,
@@ -70,42 +68,38 @@ const AuditSection = ({ completionData, priorityData, stats }) => {
           gap={2}
           gridTemplateColumns={{ xs: "1fr", lg: "1fr 1fr" }}
         >
-          {
-            permissions.some((per) => per.name === "report_generate") && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
+          {permissions.some((per) => per.name === "report_generate") && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <p>Relatório disponível</p>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setIsOpen(true)}
+                startIcon={<Description />}
               >
-                <p>Relatório disponível</p>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setIsOpen(true)}
-                  startIcon={<Description />}
-                >
-                  GERAR RELATÓRIO
-                </Button>
-              </Card>
-            )
-          }
-          {
-            permissions.some((per) => per.name === "define_rules") && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
+                GERAR RELATÓRIO
+              </Button>
+            </Card>
+          )}
+          {permissions.some((per) => per.name === "define_rules") && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <p>Regras de auditoria</p>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate("/prioridades")}
+                startIcon={<RuleFolder />}
               >
-                <p>Regras de auditoria</p>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate("/prioridades")}
-                  startIcon={<RuleFolder />}
-                >
-                  VISUALIZAR
-                </Button>
-              </Card>
-            )
-          }
+                VISUALIZAR
+              </Button>
+            </Card>
+          )}
           <Card
             className="p-4 flex flex-col gap-2 justify-center"
             variant="outlined"
@@ -122,36 +116,55 @@ const AuditSection = ({ completionData, priorityData, stats }) => {
             <p>Última auditoria</p>
             <p className="text-xl font-bold">{stats.latestAudit}</p>
           </Card>
-          <Card variant="outlined" className="max-md:hidden col-span-2 p-4 flex flex-col gap-2 grow justify-between">
+          <Card
+            variant="outlined"
+            className="max-md:hidden col-span-2 p-4 flex flex-col gap-2 grow justify-between"
+          >
             <p>Acesso rápido</p>
             <Box display="flex" gap={4}>
-              {quickActions.map((action, index) => (
+              {quickActions.map((action, index) =>
                 action.permissions ? (
                   hasPermission(action.permissions) && (
-                    <div className="text-center w-min flex flex-col items-center gap-2" key={index}>
+                    <div
+                      className="text-center w-min flex flex-col items-center gap-2"
+                      key={index}
+                    >
                       <button
                         className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-gray-500/25"
-                        style={{ backgroundColor: colors.grey[900], color: colors.grey[50] }}
+                        style={{
+                          backgroundColor: colors.grey[900],
+                          color: colors.grey[50],
+                        }}
                         onClick={action.fn}
                       >
                         {action.icon}
                       </button>
-                      <label className="text-xs text-gray-500">{action.label}</label>
+                      <label className="text-xs text-gray-500">
+                        {action.label}
+                      </label>
                     </div>
                   )
                 ) : (
-                  <div className="text-center w-min flex flex-col items-center gap-2" key={index}>
+                  <div
+                    className="text-center w-min flex flex-col items-center gap-2"
+                    key={index}
+                  >
                     <button
                       className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-gray-500/25"
-                      style={{ backgroundColor: colors.grey[900], color: colors.grey[50] }}
+                      style={{
+                        backgroundColor: colors.grey[900],
+                        color: colors.grey[50],
+                      }}
                       onClick={action.fn}
                     >
                       {action.icon}
                     </button>
-                    <label className="text-xs text-gray-500">{action.label}</label>
+                    <label className="text-xs text-gray-500">
+                      {action.label}
+                    </label>
                   </div>
-                )
-              ))}
+                ),
+              )}
             </Box>
           </Card>
         </Box>

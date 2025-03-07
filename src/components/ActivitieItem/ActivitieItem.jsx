@@ -11,7 +11,8 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { useContext, useState } from "react";
+import { useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import {
   dateFormatted,
   formattedPriority,
@@ -19,12 +20,11 @@ import {
 } from "../../services/utils";
 import ModalFormClient from "../ModalFormClient";
 import ViewActivitie from "../ViewActivitie";
-import { AuthContext } from "../../contexts/auth";
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const [dataView, setDataView] = useState(activitie);
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useAuthUser().user;
   const [isOpen, setIsOpen] = useState(false);
 
   const handleView = () => {
@@ -39,7 +39,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
   };
-
 
   return (
     <Box
@@ -93,34 +92,31 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
               }
             />
           </Tooltip>
-          {
-            permissions.some((per) => per.name === "update_tasks") && (
-              activitie?.status === 0 ? (
-                <Tooltip title="Corrigir" aria-label="Corrigir">
-                  <button
-                    onClick={handleView}
-                    className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
-                    style={getPriorityColor(activitie?.priority)}
-                  >
-                    <Build fontSize="small" />
-                  </button>
-                </Tooltip>
-              ) : (
-                <Tooltip title="Informação" aria-label="Informação">
-                  <button
-                    onClick={handleView}
-                    className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
-                    style={
-                      {color: colors.green[500],
-                      backgroundColor: colors.green[100],}
-                    }
-                  >
-                    <Info fontSize="small" />
-                  </button>
-                </Tooltip>
-              )
-            )
-          }
+          {permissions.some((per) => per.name === "update_tasks") &&
+            (activitie?.status === 0 ? (
+              <Tooltip title="Corrigir" aria-label="Corrigir">
+                <button
+                  onClick={handleView}
+                  className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
+                  style={getPriorityColor(activitie?.priority)}
+                >
+                  <Build fontSize="small" />
+                </button>
+              </Tooltip>
+            ) : (
+              <Tooltip title="Informação" aria-label="Informação">
+                <button
+                  onClick={handleView}
+                  className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
+                  style={{
+                    color: colors.green[500],
+                    backgroundColor: colors.green[100],
+                  }}
+                >
+                  <Info fontSize="small" />
+                </button>
+              </Tooltip>
+            ))}
         </Box>
       </Box>
       <Divider

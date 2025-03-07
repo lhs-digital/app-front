@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   FaAngleDoubleUp,
   FaBook,
@@ -14,11 +14,10 @@ import {
 import { Link } from "react-router-dom";
 import { Container, Content } from "./styles";
 
-import { AuthContext } from "../../contexts/auth";
 import SidebarItem from "../SidebarItem";
 
 const Sidebar = ({ active }) => {
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useAuthUser().user;
   const usersPermissions = [
     "view_users",
     "view_any_users",
@@ -112,7 +111,7 @@ const Sidebar = ({ active }) => {
             <SidebarItem Icon={FaBook} Text="Logs" />
           </Link>
         ) : null}
-        <Link to={'/atribuicoes'}>
+        <Link to={"/atribuicoes"}>
           <SidebarItem Icon={FaBook} Text="Ordens de serviço" />
         </Link>
       </Content>

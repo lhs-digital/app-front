@@ -1,7 +1,7 @@
 import HomeIcon from "@mui/icons-material/Home";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import PageTitle from "../../components/PageTitle";
-import { AuthContext } from "../../contexts/auth";
 import AuditSection from "./AuditSection";
 
 export const completionData = [
@@ -21,7 +21,7 @@ export const stats = {
 };
 
 const Home = () => {
-  const { user } = useContext(AuthContext);
+  const auth = useAuthUser();
 
   useEffect(() => {
     document.title = "LHS - Home";
@@ -32,7 +32,7 @@ const Home = () => {
       <PageTitle
         title="Dashboard"
         icon={<HomeIcon />}
-        subtitle={`Bem vindo, ${user.name}`}
+        subtitle={`Bem vindo, ${auth.user.name}`}
       />
       <AuditSection
         completionData={completionData}

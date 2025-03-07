@@ -10,14 +10,13 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 const ModalReport = ({ isOpen, onClose }) => {
   const [createdAt, setCreatedAt] = useState([]);
-  const { user } = useContext(AuthContext);
+  const { user } = useAuthUser();
   const [company, setCompany] = useState("");
   const [companyId, setCompanyId] = useState(user?.company?.id);
   const [companies, setCompanies] = useState([]);

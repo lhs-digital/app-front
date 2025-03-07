@@ -15,13 +15,12 @@ import {
   TextField,
   useMediaQuery,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalComp from "../../components/ModalComp";
 import ModalDelete from "../../components/ModalDelete";
 import ModalView from "../../components/ModalView";
 import PageTitle from "../../components/PageTitle";
-import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 const Users = () => {
@@ -53,7 +52,7 @@ const Users = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useAuthUser().user;
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -62,11 +61,12 @@ const Users = () => {
       setLoading(true);
       try {
         const response = await api.get(
-          `/users?page=${currentPage}&per_page=${rowsPerPage}`, {
+          `/users?page=${currentPage}&per_page=${rowsPerPage}`,
+          {
             params: {
               search: search,
             },
-          }
+          },
         );
         setCurrentPage(response.data.meta.current_page);
         setData(response.data.data);
@@ -286,11 +286,11 @@ const Users = () => {
             {(!search
               ? data
               : data.filter(
-                (user) =>
-                  user.name.toLowerCase().includes(search.toLowerCase()) ||
-                  user.email.toLowerCase().includes(search.toLowerCase()) ||
-                  user.role.name.toLowerCase().includes(search.toLowerCase()),
-              )
+                  (user) =>
+                    user.name.toLowerCase().includes(search.toLowerCase()) ||
+                    user.email.toLowerCase().includes(search.toLowerCase()) ||
+                    user.role.name.toLowerCase().includes(search.toLowerCase()),
+                )
             ).map(({ name, email, role, company, id }, index) => (
               <TableRow
                 key={index}
@@ -324,27 +324,27 @@ const Users = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(index);
-                        }}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    )}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(index);
+                      }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(id);
-                        }}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    )}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(id);
+                      }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

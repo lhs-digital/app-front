@@ -1,13 +1,12 @@
 import { Box, Button } from "@mui/material";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import ModalReport from "../../components/ModalReport";
 import PageTitle from "../../components/PageTitle";
-import { AuthContext } from "../../contexts/auth";
 
 const ReportsAud = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useAuthUser().user;
 
   return (
     <div className="flex flex-col gap-4 w-full">
