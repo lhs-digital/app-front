@@ -5,7 +5,7 @@ import {
   RuleFolder,
   Work,
 } from "@mui/icons-material";
-import { Box, Button, Card, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, Button, Card, colors, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { PieChart } from "@mui/x-charts";
 import { useContext, useEffect, useState } from "react";
@@ -242,7 +242,7 @@ const AuditSection = () => {
               </Card>
             )
           }
-          <Card variant="outlined" className="max-md:hidden col-span-2 p-4 flex flex-col gap-2 grow justify-between">
+<Card variant="outlined" className="max-md:hidden col-span-2 p-4 flex flex-col gap-2 grow justify-between">
             <p>Acesso rápido</p>
             <Box display="flex" gap={4}>
               {quickActions.map((action, index) => (
@@ -250,7 +250,8 @@ const AuditSection = () => {
                   hasPermission(action.permissions) && (
                     <div className="text-center w-min flex flex-col items-center gap-2" key={index}>
                       <button
-                        style={{ backgroundColor: grey[900], color: grey[50] }}
+                        className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-gray-500/25"
+                        style={{ backgroundColor: colors.grey[900], color: colors.grey[50] }}
                         onClick={action.fn}
                       >
                         {action.icon}
@@ -262,7 +263,7 @@ const AuditSection = () => {
                   <div className="text-center w-min flex flex-col items-center gap-2" key={index}>
                     <button
                       className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-gray-500/25"
-                      style={{ backgroundColor: grey[900], color: grey[50] }}
+                      style={{ backgroundColor: colors.grey[900], color: colors.grey[50] }}
                       onClick={action.fn}
                     >
                       {action.icon}
