@@ -3,7 +3,7 @@ import axios from "axios";
 export const TOKEN_KEY = "@app-provedores-token";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "https://back.homologacao.app.lhs.digital/api",
 });
 
 api.interceptors.request.use(async (config) => {
