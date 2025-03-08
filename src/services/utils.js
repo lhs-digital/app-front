@@ -118,7 +118,7 @@ export const defaultLabelDisplayedRows = ({ from, to, count }) => {
   return `${from}–${to} de ${count !== -1 ? count : `mais que ${to}`}`;
 };
 
-export const formatAuthUser = (user) => ({
+export const formatUserObject = (user) => ({
   id: user?.id,
   name: user?.name,
   email: user?.email,

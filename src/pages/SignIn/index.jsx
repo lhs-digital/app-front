@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Lighthouse from "../../assets/favicon_neutral.svg";
 import api from "../../services/api";
-import { formatAuthUser } from "../../services/utils";
+import { formatUserObject } from "../../services/utils";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -35,10 +35,10 @@ const SignIn = () => {
       if (
         signIn({
           auth: {
-            token: response.data.token,
+            token: response.data.access_token,
             type: "Bearer",
           },
-          userState: formatAuthUser(response.data.user),
+          userState: formatUserObject(response.data.user),
         })
       ) {
         navigate("/painel");
