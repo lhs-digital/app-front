@@ -7,6 +7,7 @@ import Companies from "../pages/Companies";
 import FirstAccess from "../pages/FirstAccess";
 import Home from "../pages/Home";
 import ListActivities from "../pages/ListActivities";
+import Logout from "../pages/Logout";
 import Logs from "../pages/Logs";
 import MyPermissions from "../pages/MyPermissions";
 import PasswordUpdate from "../pages/PasswordUpdate";
@@ -15,6 +16,8 @@ import RecoverPassword from "../pages/RecoverPassword";
 import Roles from "../pages/Roles";
 import SignIn from "../pages/SignIn";
 import Users from "../pages/Users";
+import { pagePermissions } from "../services/permissions";
+import { RouteIcon } from "./utils";
 
 const publicRoutes = [
   {
@@ -108,5 +111,9 @@ export const AppRoutes = createBrowserRouter([
   {
     element: <PrivateRoute />,
     children: privateRoutes,
+  },
+  {
+    path: "/logout",
+    element: <Logout />,
   },
 ]);
