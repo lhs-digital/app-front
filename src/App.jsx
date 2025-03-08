@@ -2,6 +2,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import AuthProvider from "react-auth-kit";
 import createStore from "react-auth-kit/createStore";
 import { RouterProvider } from "react-router-dom";
+import { UserStateProvider } from "./contexts/userState";
 import { AppRoutes } from "./routes/routes";
 import { baseTheme } from "./theme";
 
@@ -15,7 +16,9 @@ const App = () => {
     <ThemeProvider theme={baseTheme}>
       <CssBaseline />
       <AuthProvider store={store}>
-        <RouterProvider router={AppRoutes} />
+        <UserStateProvider>
+          <RouterProvider router={AppRoutes} />
+        </UserStateProvider>
       </AuthProvider>
     </ThemeProvider>
   );
