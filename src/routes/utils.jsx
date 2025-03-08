@@ -19,11 +19,13 @@ import {
   Work,
   WorkOutline,
 } from "@mui/icons-material";
-import { pagePermissions } from "../services/permissions";
-import { privateRoutes } from "./routes";
+
+const iconStyles = {
+  fontSize: "small",
+};
 
 const icons = {
-  "/dashboard": {
+  "/painel": {
     icon: HomeOutlined,
     activeIcon: Home,
   },
@@ -66,14 +68,11 @@ const icons = {
 };
 
 export const RouteIcon = ({ path }) => {
-  return icons[path] || { icon: Subject, activeIcon: Subject };
-};
+  const Icon = icons[path]?.icon || Subject;
+  const ActiveIcon = icons[path]?.activeIcon || Subject;
 
-export const navigationRoutes = privateRoutes.map((route) => {
   return {
-    ...route,
-    icon: RouteIcon({ path: route.path }).icon,
-    activeIcon: RouteIcon({ path: route.path }).activeIcon,
-    permissions: pagePermissions(route.path),
+    icon: <Icon {...iconStyles} />,
+    activeIcon: <ActiveIcon {...iconStyles} />,
   };
-});
+};

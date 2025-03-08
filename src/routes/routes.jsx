@@ -93,6 +93,13 @@ export const privateRoutes = [
   },
 ];
 
+export const navigationRoutes = privateRoutes.map((route) => ({
+  ...route,
+  icon: RouteIcon({ path: route.path }).icon,
+  activeIcon: RouteIcon({ path: route.path }).activeIcon,
+  permissions: pagePermissions(route.path),
+}));
+
 export const AppRoutes = createBrowserRouter([
   {
     element: <PublicRoute />,
