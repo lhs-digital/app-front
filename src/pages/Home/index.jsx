@@ -21,7 +21,7 @@ export const stats = {
 };
 
 const Home = () => {
-  const auth = useAuthUser();
+  const user = useAuthUser();
 
   useEffect(() => {
     document.title = "LHS - Home";
@@ -32,7 +32,7 @@ const Home = () => {
       <PageTitle
         title="Dashboard"
         icon={<HomeIcon />}
-        subtitle={`Bem vindo, ${auth.user.name}`}
+        subtitle={`Bem vindo, ${user.name}`}
       />
       <AuditSection
         completionData={completionData}
