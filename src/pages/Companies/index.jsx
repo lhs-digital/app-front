@@ -25,6 +25,7 @@ import ModalCompany from "../../components/ModalCompany";
 import ModalDelete from "../../components/ModalDelete";
 import ModalViewCompany from "../../components/ModalViewCompany";
 import PageTitle from "../../components/PageTitle";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Companies = () => {
@@ -47,7 +48,7 @@ const Companies = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
 
   useEffect(() => {
     const getData = async () => {

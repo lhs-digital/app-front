@@ -19,6 +19,7 @@ import ModalDelete from "../../components/ModalDelete";
 import ModalRole from "../../components/ModalRole";
 import ModalViewRole from "../../components/ModalViewRole";
 import PageTitle from "../../components/PageTitle";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Roles = () => {
@@ -32,7 +33,7 @@ const Roles = () => {
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",

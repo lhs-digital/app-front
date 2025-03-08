@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { useUserState } from "../../hooks/useUserState";
 import {
   dateFormatted,
   formattedPriority,
@@ -24,7 +24,7 @@ import ViewActivitie from "../ViewActivitie";
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const [dataView, setDataView] = useState(activitie);
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
   const [isOpen, setIsOpen] = useState(false);
 
   const handleView = () => {

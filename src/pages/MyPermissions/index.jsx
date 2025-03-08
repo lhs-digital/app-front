@@ -11,9 +11,10 @@ import {
   Typography,
 } from "@mui/material";
 import PageTitle from "../../components/PageTitle";
+import { useUserState } from "../../hooks/useUserState";
 
 const MyPermissions = () => {
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
 
   return (
     <div className="flex flex-col gap-4 w-full">

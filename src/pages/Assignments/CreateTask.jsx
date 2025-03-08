@@ -16,7 +16,7 @@ const CreateTask = ({ open, onClose }) => {
   const [availableUsers, setAvailableUsers] = useState([]);
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
-  const { user } = useAuthUser();
+  const user = useAuthUser();
   const [entityTypes, setEntityTypes] = useState([]);
   const [availableEntities, setAvailableEntities] = useState([]);
 

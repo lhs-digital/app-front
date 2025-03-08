@@ -13,6 +13,7 @@ import ModalDelete from "../../components/ModalDelete";
 import ModalRule from "../../components/ModalRule";
 import PageTitle from "../../components/PageTitle";
 import SubAccordion from "../../components/Priorities/SubAccordion";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Priorities = () => {
@@ -31,7 +32,7 @@ const Priorities = () => {
   const [method, setMethod] = useState("");
   const [nivel, setNivel] = useState("");
   const [refresh, setRefresh] = useState(false);
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
 
   const [filterParams, setFilterParams] = useState({
     search: "",

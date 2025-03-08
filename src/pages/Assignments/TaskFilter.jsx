@@ -21,7 +21,7 @@ export default function TaskFilter({
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [entityTypes, setEntityTypes] = useState([]);
   const [availableEntities, setAvailableEntities] = useState([]);
-  const { user } = useAuthUser();
+  const user = useAuthUser();
   const [filterParams, setFilterParams] = useState({
     assigned_to: null,
     assigned_by: null,

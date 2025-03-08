@@ -5,22 +5,35 @@ import {
   RuleFolder,
   Work,
 } from "@mui/icons-material";
-import { Box, Button, Card, colors, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  colors,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { PieChart } from "@mui/x-charts";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ModalReport from "../../components/ModalReport";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
   const [data, setData] = useState([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState(null); // Inicializa com o ID da "Provedor 1"
   const [selectedTableId, setSelectedTableId] = useState(null); // Inicializa com a tabela "clientes"
-  const [chartData, setChartData] = useState({ errorsCount: 0, fixedErrorsCount: 0 });
+  const [chartData, setChartData] = useState({
+    errorsCount: 0,
+    fixedErrorsCount: 0,
+  });
 
   useEffect(() => {
     const getData = async () => {
@@ -44,33 +57,39 @@ const AuditSection = () => {
 
   useEffect(() => {
     if (data.length > 0) {
-      const selectedCompany = data.find(item => item.company.id === selectedCompanyId);
+      const selectedCompany = data.find(
+        (item) => item.company.id === selectedCompanyId,
+      );
       const tables = selectedCompany ? selectedCompany.per_tables : [];
-      const selectedTable = tables.find(table => table.label === selectedTableId);
+      const selectedTable = tables.find(
+        (table) => table.label === selectedTableId,
+      );
 
       if (selectedTable) {
         setChartData({
           errorsCount: selectedTable.errors_count,
-          fixedErrorsCount: selectedTable.fixed_errors_count
+          fixedErrorsCount: selectedTable.fixed_errors_count,
         });
       }
     }
   }, [data, selectedCompanyId, selectedTableId]);
 
-  const companies = data?.map(item => item.company) || [];
+  const companies = data?.map((item) => item.company) || [];
 
-  const selectedCompany = data?.find(item => item.company.id === selectedCompanyId);
+  const selectedCompany = data?.find(
+    (item) => item.company.id === selectedCompanyId,
+  );
   const tables = selectedCompany ? selectedCompany.per_tables : [];
 
   const handleTableChange = (event) => {
     const tableId = event.target.value;
     setSelectedTableId(tableId);
-    const selectedTable = tables?.find(table => table.label === tableId);
+    const selectedTable = tables?.find((table) => table.label === tableId);
 
     if (selectedTable) {
       setChartData({
         errorsCount: selectedTable.errors_count,
-        fixedErrorsCount: selectedTable.fixed_errors_count
+        fixedErrorsCount: selectedTable.fixed_errors_count,
       });
     }
   };
@@ -86,12 +105,6 @@ const AuditSection = () => {
   const completionData = [
     { id: 0, value: chartData?.errorsCount, label: "Pendentes" },
     { id: 1, value: chartData?.fixedErrorsCount, label: "Corrigidos" },
-  ];
-
-  const priorityData = [
-    { id: 0, value: Math.floor(Math.random() * 41), label: "Baixa" },
-    { id: 1, value: Math.floor(Math.random() * 42), label: "Média" },
-    { id: 2, value: Math.floor(Math.random() * 43), label: "Urgente" },
   ];
 
   const stats = {
@@ -129,8 +142,9 @@ const AuditSection = () => {
   ];
 
   const hasPermission = (thePermissions) => {
-    return permissions && permissions.some((permission) =>
-      thePermissions.includes(permission.name),
+    return (
+      permissions &&
+      permissions.some((permission) => thePermissions.includes(permission.name))
     );
   };
 
@@ -151,11 +165,14 @@ const AuditSection = () => {
           gap={2}
           gridTemplateColumns={{ xs: "1fr", lg: "1fr 1fr" }}
         >
-          <Card className="p-4 flex flex-col gap-2 justify-center" variant="outlined">
+          <Card
+            className="p-4 flex flex-col gap-2 justify-center"
+            variant="outlined"
+          >
             <FormControl fullWidth>
               <InputLabel id="company">Empresa</InputLabel>
               <Select
-                value={selectedCompanyId || ''}
+                value={selectedCompanyId || ""}
                 onChange={handleCompanyChange}
                 label="Empresa"
               >
@@ -168,16 +185,19 @@ const AuditSection = () => {
             </FormControl>
           </Card>
 
-          <Card className="p-4 flex flex-col gap-2 justify-center" variant="outlined">
+          <Card
+            className="p-4 flex flex-col gap-2 justify-center"
+            variant="outlined"
+          >
             <FormControl fullWidth>
               <InputLabel id="company">Tabela</InputLabel>
               <Select
-                value={selectedTableId || ''}
+                value={selectedTableId || ""}
                 onChange={handleTableChange}
                 label="Tabela"
               >
                 {tables && tables.length > 0 ? (
-                  tables.map(table => (
+                  tables.map((table) => (
                     <MenuItem key={table.label} value={table.label}>
                       {table.label}
                     </MenuItem>
@@ -205,43 +225,42 @@ const AuditSection = () => {
             <p>Última auditoria</p>
             <p className="text-xl font-bold">{stats.latestAudit}</p>
           </Card>
-          {
-            hasPermission(["report_generate"]) && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
+          {hasPermission(["report_generate"]) && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <p>Relatório disponível</p>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setIsOpen(true)}
+                startIcon={<Description />}
               >
-                <p>Relatório disponível</p>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setIsOpen(true)}
-                  startIcon={<Description />}
-                >
-                  GERAR RELATÓRIO
-                </Button>
-              </Card>
-            )
-          }
-          {
-            hasPermission(["define_rules"]) && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
+                GERAR RELATÓRIO
+              </Button>
+            </Card>
+          )}
+          {hasPermission(["define_rules"]) && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <p>Regras de auditoria</p>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate("/prioridades")}
+                startIcon={<RuleFolder />}
               >
-                <p>Regras de auditoria</p>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate("/prioridades")}
-                  startIcon={<RuleFolder />}
-                >
-                  VISUALIZAR
-                </Button>
-              </Card>
-            )
-          }
-<Card variant="outlined" className="max-md:hidden col-span-2 p-4 flex flex-col gap-2 grow justify-between">
+                VISUALIZAR
+              </Button>
+            </Card>
+          )}
+          <Card
+            variant="outlined"
+            className="max-md:hidden col-span-2 p-4 flex flex-col gap-2 grow justify-between"
+          >
             <p>Acesso rápido</p>
             <Box display="flex" gap={4}>
               {quickActions.map((action, index) =>
@@ -289,37 +308,38 @@ const AuditSection = () => {
               )}
             </Box>
           </Card>
-
         </Box>
         <Card
           variant="outlined"
           className="max-md:hidden p-4 flex flex-col gap-2 grow"
         >
           <p>Atividades por status</p>
-          {
-            !selectedTableId ? (
-              <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
-                <p className="text-gray-500">Não há dados para exibir...</p>
-                <p className="text-gray-500">Selecione uma empresa e uma tabela</p>
-              </div>
-            ) : (
-              <PieChart
-                colors={[grey[900], grey[600]]}
-                series={[{
+          {!selectedTableId ? (
+            <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
+              <p className="text-gray-500">Não há dados para exibir...</p>
+              <p className="text-gray-500">
+                Selecione uma empresa e uma tabela
+              </p>
+            </div>
+          ) : (
+            <PieChart
+              colors={[grey[900], grey[600]]}
+              series={[
+                {
                   data: completionData,
                   innerRadius: 50,
-                }]}
-                slotProps={{
-                  legend: {
-                    direction: "column",
-                    position: { vertical: "middle", horizontal: "right" },
-                    padding: 0,
-                  },
-                }}
-                height={200}
-              />
-            )
-          }
+                },
+              ]}
+              slotProps={{
+                legend: {
+                  direction: "column",
+                  position: { vertical: "middle", horizontal: "right" },
+                  padding: 0,
+                },
+              }}
+              height={200}
+            />
+          )}
         </Card>
         {/* {
           !selectedTableId ? (
@@ -348,7 +368,6 @@ const AuditSection = () => {
             </Card>
           )
         } */}
-
       </Box>
       <ModalReport isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </Box>

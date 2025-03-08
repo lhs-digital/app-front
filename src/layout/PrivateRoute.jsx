@@ -1,23 +1,17 @@
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import { Navigate, Outlet } from "react-router-dom";
+import Layout from ".";
+import { useUserState } from "../hooks/useUserState";
 
-const PrivateRoute = ({
-  // allowedRoles = [],
-  allowedPermissions = [],
-  ...rest
-}) => {
+const PrivateRoute = ({ allowedPermissions = [], ...rest }) => {
   const isAuthenticated = useIsAuthenticated();
-  const auth = useAuthUser();
+  const { permissions } = useUserState().userState;
 
   const hasPermissionAccess =
     allowedPermissions.length === 0 ||
-    auth.permissions.some((permission) =>
+    permissions.some((permission) =>
       allowedPermissions.includes(permission.name),
     );
-
-  // const hasRoleAccess =
-  //   allowedRoles.length === 0 || allowedRoles.includes(auth.user.role?.name);
 
   const hasAccess = isAuthenticated && hasPermissionAccess;
 
@@ -25,7 +19,11 @@ const PrivateRoute = ({
     return <Navigate to="/" />;
   }
 
-  return <Outlet {...rest} />;
+  return (
+    <Layout>
+      <Outlet {...rest} />
+    </Layout>
+  );
 };
 
 export default PrivateRoute;

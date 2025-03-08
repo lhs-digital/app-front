@@ -19,6 +19,7 @@ import ModalClient from "../../components/ModalClient";
 import ModalDelete from "../../components/ModalDelete";
 import ModalViewClient from "../../components/ModalViewClient";
 import PageTitle from "../../components/PageTitle";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Clients = () => {
@@ -43,7 +44,7 @@ const Clients = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
 
   useEffect(() => {
     const fetchClients = async () => {

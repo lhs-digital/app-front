@@ -17,7 +17,8 @@ import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { useNavigate } from "react-router-dom";
 import lighthouse from "../assets/favicon_neutral.svg";
-import { navigationRoutes } from "../routes/utils";
+import { useUserState } from "../hooks/useUserState";
+import { navigationRoutes } from "../routes/routes";
 
 const drawerWidth = 320;
 
@@ -67,19 +68,18 @@ const Drawer = styled(MuiDrawer, {
   ],
 }));
 
-const Index = ({ children }) => {
+const Layout = ({ children }) => {
   const [open, setOpen] = useState(false);
-  const { user } = useAuthUser();
+  const user = useAuthUser();
   const signOut = useSignOut();
   const navigate = useNavigate();
+  const { permissions } = useUserState().userState;
   const isActive = (url) => window.location.pathname === url;
 
   const handleLogout = async () => {
     signOut();
     navigate("/");
   };
-
-  const { permissions } = useAuthUser().user;
 
   const hasPermission = (thePermissions) => {
     return permissions.some((permission) =>
@@ -190,4 +190,4 @@ const Index = ({ children }) => {
   );
 };
 
-export default Index;
+export default Layout;

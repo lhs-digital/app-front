@@ -21,6 +21,7 @@ import ModalComp from "../../components/ModalComp";
 import ModalDelete from "../../components/ModalDelete";
 import ModalView from "../../components/ModalView";
 import PageTitle from "../../components/PageTitle";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Users = () => {
@@ -52,7 +53,7 @@ const Users = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 

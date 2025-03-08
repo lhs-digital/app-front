@@ -12,12 +12,12 @@ import {
   FaUserAlt,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useUserState } from "../../hooks/useUserState";
+import SidebarItem from "../SidebarItem";
 import { Container, Content } from "./styles";
 
-import SidebarItem from "../SidebarItem";
-
 const Sidebar = ({ active }) => {
-  const { permissions } = useAuthUser().user;
+  const { permissions } = useUserState().userState;
   const usersPermissions = [
     "view_users",
     "view_any_users",
