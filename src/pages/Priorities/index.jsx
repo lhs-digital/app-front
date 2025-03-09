@@ -7,14 +7,15 @@ import {
   Button,
   useMediaQuery,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import ModalRule from "../../components/ModalRule";
 import PageTitle from "../../components/PageTitle";
 import SubAccordion from "../../components/Priorities/SubAccordion";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
-import { AuthContext } from "../../contexts/auth";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const Priorities = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +33,9 @@ const Priorities = () => {
   const [method, setMethod] = useState("");
   const [nivel, setNivel] = useState("");
   const [refresh, setRefresh] = useState(false);
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useUserState().userState;
+  const user = useAuthUser();
+  const [companies, setCompanies] = useState([]);
 
   const [filterParams, setFilterParams] = useState({
     search: "",
@@ -68,6 +71,11 @@ const Priorities = () => {
         setCurrentPage(response.data.meta.current_page);
         setLastPage(response.data.meta.last_page);
         setData(response.data.data);
+
+        if (user.isLighthouse) {
+          const responseCompany = await api.get(`/companies/get_companies`);
+          setCompanies(responseCompany?.data?.data);
+        }
       } catch (error) {
         console.error("Erro ao verificar lista de usuários", error);
       } finally {
@@ -77,8 +85,8 @@ const Priorities = () => {
     getData();
   }, [currentPage, refresh, filterParams]);
 
-  const handleEdit = (column) => {
-    setDataEdit(column);
+  const handleEdit = (column, companyId) => {
+    setDataEdit({ ...column, companyId });
     setIsOpen(true);
   };
 
@@ -90,7 +98,7 @@ const Priorities = () => {
   const handleRemove = async () => {
     try {
       await api.delete(`/company_table_columns/${deleteId}`);
-      setRefresh(prev => !prev);
+      setRefresh((prev) => !prev);
       toast.success("Regra removida com sucesso!");
       setIsDeleteOpen(false);
     } catch (error) {
@@ -129,7 +137,55 @@ const Priorities = () => {
           )
         }
       />
-      {data.map((table) => (
+      {user.isLighthouse && companies.length === 0 && <p>Não há empresas disponíveis.</p>}
+      {user.isLighthouse && companies
+        .filter(company => company.name.toLowerCase() !== "lighthouse")
+        .map((company) => (
+          <Accordion key={company.id} variant="outlined">
+            <AccordionSummary
+              expandIcon={<ExpandMore />}
+              id={company.id}
+              aria-controls={`${company.id}-content`}
+            >
+              Empresa: {company.name}
+            </AccordionSummary>
+            <AccordionDetails>
+              {data.filter(table => table.company.id === company.id).length === 0 ? (
+                <p>Não há tabelas na empresa.</p>
+              ) : (
+                data.filter(table => table.company.id === company.id).map((table) => (
+                  <Accordion key={table.id} variant="outlined">
+                    <AccordionSummary
+                      expandIcon={<ExpandMore />}
+                      id={table.id}
+                      aria-controls={`${table.id}-content`}
+                    >
+                      Tabela: {table.label}
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {table.columns.length === 0 ? (
+                        <p>Não há colunas na tabela.</p>
+                      ) : (
+                        table.columns.map((column) => (
+                          <SubAccordion
+                            key={column.id}
+                            column={column}
+                            data={data}
+                            refresh={refresh}
+                            handleEdit={() => handleEdit(column, company.id)}
+                            handleDelete={handleDelete}
+                          />
+                        ))
+                      )}
+                    </AccordionDetails>
+                  </Accordion>
+                ))
+              )}
+            </AccordionDetails>
+          </Accordion>
+        ))}
+      {!user.isLighthouse && data.length === 0 && <p>Não há tabelas disponíveis.</p>}
+      {!user.isLighthouse && data.map((table) => (
         <Accordion key={table.id} variant="outlined">
           <AccordionSummary
             expandIcon={<ExpandMore />}
@@ -139,16 +195,20 @@ const Priorities = () => {
             Tabela: {table.label}
           </AccordionSummary>
           <AccordionDetails>
-            {table.columns.map((column) => (
-              <SubAccordion
-                key={column.id}
-                column={column}
-                data={data}
-                refresh={refresh}
-                handleEdit={handleEdit}
-                handleDelete={handleDelete}
-              />
-            ))}
+            {table.columns.length === 0 ? (
+              <p>Não há colunas na tabela.</p>
+            ) : (
+              table.columns.map((column) => (
+                <SubAccordion
+                  key={column.id}
+                  column={column}
+                  data={data}
+                  refresh={refresh}
+                  handleEdit={() => handleEdit(column, table.company.id)}
+                  handleDelete={handleDelete}
+                />
+              ))
+            )}
           </AccordionDetails>
         </Accordion>
       ))}

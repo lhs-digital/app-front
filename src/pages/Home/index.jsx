@@ -1,7 +1,7 @@
 import HomeIcon from "@mui/icons-material/Home";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import PageTitle from "../../components/PageTitle";
-import { AuthContext } from "../../contexts/auth";
 import AuditSection from "./AuditSection";
 
 export const completionData = [
@@ -21,7 +21,7 @@ export const stats = {
 };
 
 const Home = () => {
-  const { user } = useContext(AuthContext);
+  const user = useAuthUser();
 
   useEffect(() => {
     document.title = "LHS - Home";

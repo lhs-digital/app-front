@@ -10,12 +10,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useContext } from "react";
 import PageTitle from "../../components/PageTitle";
-import { AuthContext } from "../../contexts/auth";
+import { useUserState } from "../../hooks/useUserState";
 
 const MyPermissions = () => {
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useUserState().userState;
 
   return (
     <div className="flex flex-col gap-4 w-full">

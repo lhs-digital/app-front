@@ -18,6 +18,7 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
   const [listRules, setListRules] = useState([]);
@@ -27,29 +28,43 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
   const [checkedRules, setCheckedRules] = useState([]);
   const [column, setColumn] = useState("");
   const [columnLabel, setColumnLabel] = useState("");
-  const [priority, setPriority] = useState("");
+  const [priority, setPriority] = useState(null);
   // eslint-disable-next-line no-unused-vars
   const [validations, setValidations] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [rulesLoaded, setRulesLoaded] = useState(false);
-
+  const [companies, setCompanies] = useState([]);
   const [ruleDetails, setRuleDetails] = useState({});
+  const user = useAuthUser();
+  const [company, setCompany] = useState("");
+  const [tables, setTables] = useState([]);
+  const [table, setTable] = useState("");
 
   useEffect(() => {
-    if (dataEdit) {
+    if (dataEdit && isOpen) {
+      setCompany(dataEdit.companyId);
+      setTable(dataEdit.company_table_id);
       setColumn(dataEdit.name);
       setColumnLabel(dataEdit.label);
       setPriority(dataEdit.priority);
       setValidations(dataEdit.validations);
     } else {
+      setCompany("");
+      setTable("");
       setColumn("");
       setColumnLabel("");
-      setPriority("");
+      setPriority(null);
       setValidations([]);
       setSelectAll(false);
     }
-  }, [dataEdit]);
+  }, [dataEdit, isOpen]);
+
+  useEffect(() => {
+    if (company) {
+      tablesFromCompany(company);
+    }
+  }, [company]);
 
   const handleSelectAll = () => {
     if (!selectAll) {
@@ -79,6 +94,10 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
         const responseRules = await api.get(`/rules`);
         setRules(responseRules.data.data);
         setRulesLoaded(true);
+
+        const responseCompany = await api.get(`/companies/get_companies`);
+        setCompanies(responseCompany?.data?.data);
+
       } catch (error) {
         console.error("Erro ao acessar as roles por empresa", error);
       }
@@ -121,6 +140,20 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
     }));
   };
 
+  const tablesFromCompany = async (companyId) => {
+    try {
+      const response = await api.get(`company_tables/all_tables?company_id=${companyId}`);
+      setTables(response?.data?.data);
+    } catch (error) {
+      console.error("Erro ao acessar as roles por empresa", error);
+    }
+  };
+
+  const handleCompanyChange = (event) => {
+    setCompany(event.target.value);
+    tablesFromCompany(event.target.value);
+  };
+
   const saveData = async () => {
     const formattedRules = {};
 
@@ -133,6 +166,7 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
 
     const dataToPost = {
       column: {
+        company_table_id: table,
         name: column,
         priority: priority,
         label: columnLabel,
@@ -140,10 +174,10 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
       rules: formattedRules,
     };
 
-    if (dataEdit.id) {
+    if (dataEdit?.id) {
       try {
         await api.put(
-          `/company_table_columns/${dataEdit.id}/update`,
+          `/company_table_columns/${dataEdit?.id}/update`,
           dataToPost,
         );
         toast.success("Dados editados com sucesso!");
@@ -155,13 +189,13 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
       }
     } else {
       try {
-        await api.post(`/company_table_columns/${1}/rules`, dataToPost);
+        await api.post(`/company_table_columns/${table}/rules`, dataToPost);
         toast.success("Dados salvos com sucesso!");
         setRefresh((prev) => !prev);
 
       } catch (error) {
         console.error("Erro ao salvar os dados", error);
-        
+
         if (error.response?.data?.message) {
           toast.error(error.response.data.message);
           return;
@@ -171,7 +205,7 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
   };
 
   const handleSave = () => {
-    if (!column || priority === null || listRules.length === 0) {
+    if (!column || priority === null || listRules.length === 0 || !table || !company) {
       toast.warning(
         "Preencha os campos obrigatórios: Tabela, coluna, prioridade e regras",
       );
@@ -209,6 +243,8 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
     setColumn("");
     setColumnLabel("");
     setPriority("");
+    setCompany("");
+    setTable("");
     setSelectAll(false);
     setListRules([]);
     setCheckedRules([]);
@@ -231,12 +267,35 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
           : "Adicionar coluna na auditoria"}
       </DialogTitle>
       <DialogContent className="flex flex-col gap-4">
+
+        <Box>
+          <InputLabel>Empresa *</InputLabel>
+          <Select
+            placeholder="Selecione uma opção"
+            value={user.isLighthouse ? company : user.company.id}
+            onChange={handleCompanyChange}
+            disabled={!user.isLighthouse}
+            fullWidth
+          >
+            {companies.map((companyItem) => (
+              <MenuItem key={companyItem.id} value={companyItem.id}>
+                {companyItem.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </Box>
         <Box>
           <InputLabel htmlFor="table">Tabela</InputLabel>
-          <Select id="table" value={1} fullWidth>
-            <MenuItem key={1} value={1}>
-              clients
-            </MenuItem>
+          <Select id="table" value={table} onChange={(e) => setTable(e.target.value)} fullWidth>
+            {tables.length === 0 ? (
+              <MenuItem disabled>Não existem tabelas na empresa</MenuItem>
+            ) : (
+              tables.map((tableItem) => (
+                <MenuItem key={tableItem.id} value={tableItem.id}>
+                  {tableItem.name}
+                </MenuItem>
+              ))
+            )}
           </Select>
         </Box>
         <Box>
@@ -265,9 +324,9 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
             onChange={(e) => setPriority(e.target.value)}
             fullWidth
           >
-            <MenuItem value={0}>Alta</MenuItem>
-            <MenuItem value={1}>Moderada</MenuItem>
-            <MenuItem value={2}>Baixa</MenuItem>
+            <MenuItem value={1}>Alta</MenuItem>
+            <MenuItem value={2}>Moderada</MenuItem>
+            <MenuItem value={3}>Baixa</MenuItem>
           </Select>
         </Box>
         <FormGroup className="flex flex-col gap-4">

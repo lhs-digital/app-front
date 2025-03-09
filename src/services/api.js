@@ -3,11 +3,11 @@ import axios from "axios";
 export const TOKEN_KEY = "@app-provedores-token";
 
 const api = axios.create({
-  baseURL: "https://back.homologacao.app.lhs.digital/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 api.interceptors.request.use(async (config) => {
-  const JWT = localStorage.getItem("token") || sessionStorage.getItem("token");
+  const JWT = localStorage.getItem("_auth") || sessionStorage.getItem("_auth");
   if (JWT != null) {
     config.headers.Authorization = `Bearer ${JWT}`;
   }

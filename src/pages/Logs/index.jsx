@@ -289,21 +289,6 @@ const Logs = () => {
               </TableCell>
               <TableCell
                 sortDirection={
-                  sortConfig.key === "log.user" ? sortConfig.direction : false
-                }
-              >
-                <TableSortLabel
-                  active={sortConfig.key === "log.user"}
-                  direction={
-                    sortConfig.key === "log.user" ? sortConfig.direction : "asc"
-                  }
-                  onClick={createSortHandler("log.user")}
-                >
-                  Usuário
-                </TableSortLabel>
-              </TableCell>
-              <TableCell
-                sortDirection={
                   sortConfig.key === "log.method" ? sortConfig.direction : false
                 }
               >
@@ -412,7 +397,6 @@ const Logs = () => {
                   <TableCell>{dateFormatted(log.created_at)}</TableCell>
                   <TableCell>{log.ip}</TableCell>
                   <TableCell>{log.email}</TableCell>
-                  <TableCell>{log.object_id}</TableCell>
                   <TableCell>{log.method}</TableCell>
                   <TableCell>{log.nivel}</TableCell>
                   <TableCell>{log.type}</TableCell>

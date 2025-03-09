@@ -7,9 +7,9 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
-import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 export default function TaskFilter({
@@ -21,7 +21,7 @@ export default function TaskFilter({
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [entityTypes, setEntityTypes] = useState([]);
   const [availableEntities, setAvailableEntities] = useState([]);
-  const { user, isLighthouse } = useContext(AuthContext);
+  const user = useAuthUser();
   const [filterParams, setFilterParams] = useState({
     assigned_to: null,
     assigned_by: null,
@@ -63,7 +63,7 @@ export default function TaskFilter({
       status: null,
       entity_id: null,
       entity_type: null,
-      company: isLighthouse ? null : user.company,
+      company: user.isLighthouse ? null : user.company,
     });
     setAvailableEntities([]);
     fetchAssignments();
@@ -88,7 +88,7 @@ export default function TaskFilter({
       }
     };
 
-    if (isLighthouse) {
+    if (user.isLighthouse) {
       fetchCompanies();
     } else {
       setFilterParams({ ...filterParams, company: user.company.id });
@@ -123,7 +123,7 @@ export default function TaskFilter({
 
   return (
     <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-4">
-      {isLighthouse && (
+      {user.isLighthouse && (
         <Autocomplete
           className="col-span-8"
           value={filterParams.company}

@@ -19,13 +19,13 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalCompany from "../../components/ModalCompany";
 import ModalDelete from "../../components/ModalDelete";
 import ModalViewCompany from "../../components/ModalViewCompany";
 import PageTitle from "../../components/PageTitle";
-import { AuthContext } from "../../contexts/auth";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Companies = () => {
@@ -48,18 +48,19 @@ const Companies = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useUserState().userState;
 
   useEffect(() => {
     const getData = async () => {
       setLoading(true);
       try {
         const response = await api.get(
-          `/companies?page=${currentPage}&per_page=${rowsPerPage}`, {
+          `/companies?page=${currentPage}&per_page=${rowsPerPage}`,
+          {
             params: {
               search: search,
             },
-          }
+          },
         );
         setCurrentPage(response.data.meta.current_page);
         setData(response.data.data);
@@ -231,44 +232,68 @@ const Companies = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              data.map(({ name, cnpj, dba, responsible_cpf, roles_count, address, id }, index) => (
-                <TableRow
-                  key={index}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleView(index)}
-                >
-                  <TableCell> {name} </TableCell>
-                  <TableCell> {dba} </TableCell>
-                  <TableCell> {cnpj} </TableCell>
-                  <TableCell> {responsible_cpf} </TableCell>
-                  <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
-                    {permissions.some(
-                      (permissions) => permissions.name === "update_companies",
-                    ) ? (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit({ name, cnpj, dba, responsible_cpf, roles_count, address, id, index });
-                        }}
-                      >
-                        <Edit />
-                      </IconButton>
-                    ) : null}
-                    {permissions.some(
-                      (permissions) => permissions.name === "delete_companies",
-                    ) ? (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(id);
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              ))
+              data.map(
+                (
+                  {
+                    name,
+                    cnpj,
+                    dba,
+                    responsible_cpf,
+                    roles_count,
+                    address,
+                    id,
+                  },
+                  index,
+                ) => (
+                  <TableRow
+                    key={index}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleView(index)}
+                  >
+                    <TableCell> {name} </TableCell>
+                    <TableCell> {dba} </TableCell>
+                    <TableCell> {cnpj} </TableCell>
+                    <TableCell> {responsible_cpf} </TableCell>
+                    <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
+                      {permissions.some(
+                        (permissions) =>
+                          permissions.name === "update_companies",
+                      ) ? (
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit({
+                              name,
+                              cnpj,
+                              dba,
+                              responsible_cpf,
+                              roles_count,
+                              address,
+                              id,
+                              index,
+                            });
+                          }}
+                        >
+                          <Edit />
+                        </IconButton>
+                      ) : null}
+                      {permissions.some(
+                        (permissions) =>
+                          permissions.name === "delete_companies",
+                      ) ? (
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(id);
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
+                ),
+              )
             )}
           </TableBody>
         </Table>

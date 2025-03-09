@@ -43,9 +43,10 @@ export const validarEmail = (email) => {
 export const validarCPF = (cpf) => {
   cpf = cpf.replace(/[^\d]/g, "");
 
-  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false; 
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
 
-  let soma = 0, resto;
+  let soma = 0,
+    resto;
 
   for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
   resto = (soma * 10) % 11;
@@ -116,3 +117,17 @@ export const validarDataNascimento = (data) => {
 export const defaultLabelDisplayedRows = ({ from, to, count }) => {
   return `${from}–${to} de ${count !== -1 ? count : `mais que ${to}`}`;
 };
+
+export const formatUserObject = (user) => ({
+  id: user?.id,
+  name: user?.name,
+  email: user?.email,
+  role: {
+    id: user?.role?.id,
+    name: user?.role?.name,
+    level: user?.role?.nivel,
+  },
+  company: user?.company,
+  isLighthouse: user?.company?.is_super_admin || false,
+  permissions: user?.role?.permissions,
+});

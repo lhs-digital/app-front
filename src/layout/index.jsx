@@ -1,26 +1,4 @@
-import {
-  Assignment,
-  AssignmentOutlined,
-  Build,
-  BuildOutlined,
-  Business,
-  BusinessOutlined,
-  Home,
-  HomeOutlined,
-  Lock,
-  LockOutlined,
-  Logout,
-  Menu,
-  Person,
-  PersonOutline,
-  RuleFolder,
-  RuleFolderOutlined,
-  Settings,
-  SettingsOutlined,
-  Subject,
-  Work,
-  WorkOutline,
-} from "@mui/icons-material";
+import { Logout, Menu } from "@mui/icons-material";
 import {
   Avatar,
   colors,
@@ -34,10 +12,13 @@ import {
   Tooltip,
 } from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
-import { useContext, useState } from "react";
+import { useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { useNavigate } from "react-router-dom";
 import lighthouse from "../assets/favicon_neutral.svg";
-import { AuthContext } from "../contexts/auth";
+import { useUserState } from "../hooks/useUserState";
+import { navigationRoutes } from "../routes/routes";
 
 const drawerWidth = 320;
 
@@ -87,129 +68,24 @@ const Drawer = styled(MuiDrawer, {
   ],
 }));
 
-const Index = ({ children }) => {
+const Layout = ({ children }) => {
   const [open, setOpen] = useState(false);
-  const { user, logout } = useContext(AuthContext);
+  const user = useAuthUser();
+  const signOut = useSignOut();
   const navigate = useNavigate();
+  const { permissions } = useUserState().userState;
   const isActive = (url) => window.location.pathname === url;
 
   const handleLogout = async () => {
-    logout();
+    signOut();
     navigate("/");
   };
-
-  const { permissions } = useContext(AuthContext);
-  const usersPermissions = [
-    "view_users",
-    "view_any_users",
-    "create_users",
-    "update_users",
-    "delete_users",
-  ];
-  const clientsPermissions = [
-    "view_clients",
-    "view_any_clients",
-    "create_clients",
-    "update_clients",
-    "delete_clients",
-  ];
-  const companyPermissions = [
-    "view_companies",
-    "view_any_companies",
-    "create_companies",
-    "update_companies",
-    "delete_companies",
-  ];
-  //eslint-disable-next-line
-  const rolesPermissions = [
-    "view_roles",
-    "view_any_roles",
-    "create_roles",
-    "update_roles",
-    "delete_roles",
-  ];
-  //eslint-disable-next-line
-  const auditoriaPermissions = ["view_any_tasks", "update_tasks"];
-  const defineRules = ["define_rules"];
 
   const hasPermission = (thePermissions) => {
     return permissions.some((permission) =>
       thePermissions.includes(permission.name),
     );
   };
-
-  const sidebarItems = [
-    {
-      label: "Início",
-      url: "/dashboard",
-      icon: <HomeOutlined fontSize="small" />,
-      activeIcon: <Home fontSize="small" />,
-      permissions: [],
-    },
-    {
-      label: "Auditorias",
-      url: "/audits",
-      icon: <BuildOutlined fontSize="small" />,
-      activeIcon: <Build fontSize="small" />,
-      permissions: auditoriaPermissions,
-    },
-    {
-      label: "Empresas",
-      url: "/companies",
-      icon: <BusinessOutlined fontSize="small" />,
-      activeIcon: <Business fontSize="small" />,
-      permissions: companyPermissions,
-    },
-    {
-      label: "Papéis & Permissões",
-      url: "/roles",
-      icon: <LockOutlined fontSize="small" />,
-      activeIcon: <Lock fontSize="small" />,
-      permissions: rolesPermissions,
-    },
-    {
-      label: "Usuários",
-      url: "/users",
-      icon: <PersonOutline fontSize="small" />,
-      activeIcon: <Person fontSize="small" />,
-      permissions: usersPermissions,
-    },
-    {
-      label: "Clientes",
-      url: "/clientes",
-      icon: <WorkOutline fontSize="small" />,
-      activeIcon: <Work fontSize="small" />,
-      permissions: clientsPermissions,
-    },
-    {
-      label: "Atribuições",
-      url: "/atribuicoes",
-      icon: <AssignmentOutlined fontSize="small" />,
-      activeIcon: <Assignment fontSize="small" />,
-      permissions: [],
-    },
-    {
-      label: "Regras de Auditorias",
-      url: "/prioridades",
-      icon: <RuleFolderOutlined fontSize="small" />,
-      activeIcon: <RuleFolder fontSize="small" />,
-      permissions: defineRules,
-    },
-    {
-      label: "Minhas Permissões",
-      url: "/my-permissions",
-      icon: <SettingsOutlined fontSize="small" />,
-      activeIcon: <Settings fontSize="small" />,
-      permissions: [],
-    },
-    {
-      label: "Logs",
-      url: "/logs",
-      icon: <Subject fontSize="small" />,
-      activeIcon: <Subject fontSize="small" />,
-      permissions: "view_any_logs",
-    },
-  ];
 
   return (
     <div className="flex flex-row h-screen w-full">
@@ -226,7 +102,7 @@ const Index = ({ children }) => {
           </IconButton>
         </div>
         <List className="grow">
-          {sidebarItems.map((item, index) => {
+          {navigationRoutes.map((item, index) => {
             if (
               item.permissions &&
               item.permissions.length > 0 &&
@@ -244,8 +120,8 @@ const Index = ({ children }) => {
               >
                 <ListItem disablePadding>
                   <ListItemButton
-                    onClick={() => navigate(item.url)}
-                    selected={isActive(item.url)}
+                    onClick={() => navigate(item.path)}
+                    selected={isActive(item.path)}
                     sx={[
                       { minHeight: 48, px: 3 },
                       open
@@ -257,10 +133,10 @@ const Index = ({ children }) => {
                       sx={[
                         { minWidth: 0, justifyContent: "center" },
                         open ? { mr: 3 } : { mr: "auto" },
-                        isActive(item.url) && { color: colors.grey[900] },
+                        isActive(item.path) && { color: colors.grey[900] },
                       ]}
                     >
-                      {isActive(item.url) ? item.activeIcon : item.icon}
+                      {isActive(item.path) ? item.activeIcon : item.icon}
                     </ListItemIcon>
                     {open && <ListItemText primary={item.label} />}
                   </ListItemButton>
@@ -314,4 +190,4 @@ const Index = ({ children }) => {
   );
 };
 
-export default Index;
+export default Layout;
