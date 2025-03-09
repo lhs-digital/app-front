@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../services/api";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
   const [name, setName] = useState("");
@@ -21,17 +22,29 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
   const [company, setCompany] = useState("");
   const [companies, setCompanies] = useState([]);
   const [roles, setRoles] = useState([]);
+  const user = useAuthUser();
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const responseCompany = await api.get(`/companies/get_companies`);
-        setCompanies(responseCompany?.data?.data);
+        if (user.isLighthouse) {
 
-        const responseRole = await api.get(`/roles/roles_from_company`, {
-          params: { company_id: dataEdit.company.id },
-        });
-        setRoles(responseRole?.data?.data);
+          const responseCompany = await api.get(`/companies/get_companies`);
+          setCompanies(responseCompany?.data?.data);
+          
+          const responseRole = await api.get(`/roles/roles_from_company`, {
+            params: { company_id: dataEdit.company.id },
+          });
+          setRoles(responseRole?.data?.data);
+        } else {
+          const responseCompany = await api.get(`/companies/get_companies`);
+          setCompanies(responseCompany?.data?.data);
+          
+          const responseRole = await api.get(`/roles/roles_from_company`, {
+            params: { company_id: user.company.id },
+          });
+          setRoles(responseRole?.data?.data);
+        }
       } catch (error) {
         console.error("Erro ao acessar as roles por empresa", error);
       }
@@ -62,12 +75,20 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
 
   const saveData = async () => {
     try {
-      await api.post("/users", {
-        name,
-        email,
-        company_id: company,
-        role_id: role,
-      });
+      if (user.isLighthouse) {
+        await api.post("/users", {
+          name,
+          email,
+          company_id: company,
+          role_id: role,
+        });
+      } else {
+        await api.post("/users", {
+          name,
+          email,
+          role_id: role,
+        });
+      }
 
       setRefresh((prev) => !prev);
       toast.success("Usuário cadastrado com sucesso!");
@@ -133,28 +154,45 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
             fullWidth
           />
         </Box>
-        <Box>
-          <InputLabel>Empresa *</InputLabel>
-          <Select
-            placeholder="Selecione uma opção"
-            value={company}
-            onChange={handleCompanyChange}
-            fullWidth
-          >
-            {companies.map((companyItem) => (
-              <MenuItem key={companyItem.id} value={companyItem.id}>
-                {companyItem.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </Box>
+        {
+          user.isLighthouse ? (
+            <Box>
+              <InputLabel>Empresa *</InputLabel>
+              <Select
+                placeholder="Selecione uma opção"
+                value={company}
+                onChange={handleCompanyChange}
+                fullWidth
+              >
+                {companies.map((companyItem) => (
+                  <MenuItem key={companyItem.id} value={companyItem.id}>
+                    {companyItem.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+          ) : (
+            <Box>
+              <InputLabel>Empresa *</InputLabel>
+              <Select
+                value={user.company.id}
+                disabled
+                fullWidth
+              >
+                <MenuItem value={user.company.id}>
+                  {user.company.name}
+                </MenuItem>
+              </Select>
+            </Box>
+          )
+        }
         <Box>
           <InputLabel>Role *</InputLabel>
           <Select
             placeholder="Selecione uma opção"
             value={role?.id}
             onChange={handleRoleChange}
-            disabled={!company}
+            disabled={!company && user.isLighthouse}
             fullWidth
           >
             {roles.map((roleItem) => (
@@ -166,7 +204,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button color="info" mr={3} onClick={() => {onClose(), cleanFields()}}>
+        <Button color="info" mr={3} onClick={() => { onClose(), cleanFields() }}>
           CANCELAR
         </Button>
         <Button color="primary" onClick={handleSave}>

@@ -5,6 +5,8 @@ import { RouterProvider } from "react-router-dom";
 import { UserStateProvider } from "./contexts/userState";
 import { AppRoutes } from "./routes/routes";
 import { baseTheme } from "./theme";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const store = createStore({
   authType: "localstorage",
@@ -18,6 +20,7 @@ const App = () => {
       <AuthProvider store={store}>
         <UserStateProvider>
           <RouterProvider router={AppRoutes} />
+          <ToastContainer />
         </UserStateProvider>
       </AuthProvider>
     </ThemeProvider>

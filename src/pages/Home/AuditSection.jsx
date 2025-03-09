@@ -22,14 +22,16 @@ import { useNavigate } from "react-router-dom";
 import ModalReport from "../../components/ModalReport";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { permissions } = useUserState().userState;
+  const user = useAuthUser();
   const [data, setData] = useState([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState(null); // Inicializa com o ID da "Provedor 1"
-  const [selectedTableId, setSelectedTableId] = useState(null); // Inicializa com a tabela "clientes"
+  const [selectedCompanyId, setSelectedCompanyId] = useState(user.isLighthouse ? null : user.company.id);
+  const [selectedTableId, setSelectedTableId] = useState(null);
   const [chartData, setChartData] = useState({
     errorsCount: 0,
     fixedErrorsCount: 0,
@@ -40,12 +42,11 @@ const AuditSection = () => {
       try {
         const response = await api.get(`/auditing/summary`);
         const data = response?.data?.data;
-        // Verifique se a resposta é um array antes de tentar usar o map
         if (Array.isArray(data)) {
           setData(data);
         } else {
           console.error("A resposta não é um array:", data);
-          setData([]); // Defina como um array vazio caso a resposta não seja válida
+          setData([]);
         }
       } catch (error) {
         console.error("Erro ao verificar lista de usuários", error);
@@ -97,9 +98,8 @@ const AuditSection = () => {
   const handleCompanyChange = (event) => {
     const companyId = Number(event.target.value);
     setSelectedCompanyId(companyId);
-    setSelectedTableId(null); // Reset selected table when company changes
-    setChartData({ errorsCount: 0, fixedErrorsCount: 0 }); // Reset chart data when company changes
-    console.log("Selected Company ID:", companyId);
+    setSelectedTableId(null);
+    setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
   };
 
   const completionData = [
@@ -175,12 +175,19 @@ const AuditSection = () => {
                 value={selectedCompanyId || ""}
                 onChange={handleCompanyChange}
                 label="Empresa"
+                disabled={!user.isLighthouse}
               >
-                {companies.map((company) => (
-                  <MenuItem key={company.id} value={company.id}>
-                    {company.name}
+                {user.isLighthouse ? (
+                  companies.map((company) => (
+                    <MenuItem key={company.id} value={company.id}>
+                      {company.name}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem value={user.company.id}>
+                    {user.company.name}
                   </MenuItem>
-                ))}
+                )}
               </Select>
             </FormControl>
           </Card>

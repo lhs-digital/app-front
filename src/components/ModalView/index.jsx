@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { toast } from "react-toastify";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
   const [name, setName] = useState("");
@@ -21,17 +22,29 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
   const [company, setCompany] = useState("");
   const [companies, setCompanies] = useState([]);
   const [roles, setRoles] = useState([]);
+  const user = useAuthUser();
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const responseCompany = await api.get(`/companies/get_companies`);
-        setCompanies(responseCompany?.data?.data);
+        if (user.isLighthouse) {
 
-        const responseRole = await api.get(`/roles/roles_from_company`, {
-          params: { company_id: selectedUser.company.id },
-        });
-        setRoles(responseRole?.data?.data);
+          const responseCompany = await api.get(`/companies/get_companies`);
+          setCompanies(responseCompany?.data?.data);
+
+          const responseRole = await api.get(`/roles/roles_from_company`, {
+            params: { company_id: selectedUser.company.id },
+          });
+          setRoles(responseRole?.data?.data);
+        } else {
+          const responseCompany = await api.get(`/companies/get_companies`);
+          setCompanies(responseCompany?.data?.data);
+
+          const responseRole = await api.get(`/roles/roles_from_company`, {
+            params: { company_id: user.company.id },
+          });
+          setRoles(responseRole?.data?.data);
+        }
 
         setName(selectedUser?.name || "");
         setEmail(selectedUser?.email || "");
@@ -70,12 +83,21 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
 
   const saveData = async () => {
     try {
-      await api.put(`/users/${selectedUser.id}`, {
-        name,
-        email,
-        company_id: company,
-        role_id: role,
-      });
+      if (user.isLighthouse) {
+
+        await api.put(`/users/${selectedUser.id}`, {
+          name,
+          email,
+          company_id: company,
+          role_id: role,
+        });
+      } else {
+        await api.put(`/users/${selectedUser.id}`, {
+          name,
+          email,
+          role_id: role,
+        });
+      }
 
       setRefresh((prev) => !prev);
       toast.success("Usuário Editado com sucesso!");
@@ -132,7 +154,7 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
             placeholder="Selecione uma opção"
             value={company}
             onChange={handleCompanyChange}
-            disabled={viewOnly}
+            disabled={!user.isLighthouse || viewOnly}
             fullWidth
           >
             {companies.map((companyItem) => (
