@@ -12,15 +12,14 @@ const PasswordUpdate = () => {
 
   useEffect(() => {
     const verifyToken = async () => {
+      console.log("token", token);
       try {
         const response = await api.get(`/password-reset/${token}`);
-
         if (response.data.token !== token) {
           navigate("/");
         }
       } catch (error) {
         console.error("Erro ao verificar token:", error);
-        navigate("/");
       }
     };
 
@@ -54,9 +53,12 @@ const PasswordUpdate = () => {
 
       toast.success("Senha alterada com sucesso!");
 
-      navigate("/");
     } catch (error) {
       toast.error("Erro ao tentar alterar a senha");
+    } finally {
+      setPassword("");
+      setPasswordConfirmation("");
+      navigate("/");
     }
   };
 

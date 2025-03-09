@@ -7,14 +7,14 @@ import {
   Button,
   useMediaQuery,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import ModalRule from "../../components/ModalRule";
 import PageTitle from "../../components/PageTitle";
 import SubAccordion from "../../components/Priorities/SubAccordion";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
-import { AuthContext } from "../../contexts/auth";
 
 const Priorities = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +32,7 @@ const Priorities = () => {
   const [method, setMethod] = useState("");
   const [nivel, setNivel] = useState("");
   const [refresh, setRefresh] = useState(false);
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useUserState().userState;
 
   const [filterParams, setFilterParams] = useState({
     search: "",
@@ -90,7 +90,7 @@ const Priorities = () => {
   const handleRemove = async () => {
     try {
       await api.delete(`/company_table_columns/${deleteId}`);
-      setRefresh(prev => !prev);
+      setRefresh((prev) => !prev);
       toast.success("Regra removida com sucesso!");
       setIsDeleteOpen(false);
     } catch (error) {

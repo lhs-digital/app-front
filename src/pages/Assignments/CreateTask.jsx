@@ -7,16 +7,16 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
-import { AuthContext } from "../../contexts/auth";
 import api from "../../services/api";
 
 const CreateTask = ({ open, onClose }) => {
   const [availableUsers, setAvailableUsers] = useState([]);
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
-  const { user, isLighthouse } = useContext(AuthContext);
+  const user = useAuthUser();
   const [entityTypes, setEntityTypes] = useState([]);
   const [availableEntities, setAvailableEntities] = useState([]);
 
@@ -56,7 +56,7 @@ const CreateTask = ({ open, onClose }) => {
       }
     };
 
-    if (isLighthouse) {
+    if (user.isLighthouse) {
       fetchCompanies();
     } else {
       setData({ ...data, company: user.company });
@@ -134,7 +134,7 @@ const CreateTask = ({ open, onClose }) => {
           className="flex flex-col gap-4 pt-2"
           onSubmit={submit}
         >
-          {isLighthouse && (
+          {user.isLighthouse && (
             <Autocomplete
               fullWidth
               options={availableCompanies}

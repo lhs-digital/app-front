@@ -13,13 +13,13 @@ import {
   TableSortLabel,
   TextField,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import ModalRole from "../../components/ModalRole";
 import ModalViewRole from "../../components/ModalViewRole";
 import PageTitle from "../../components/PageTitle";
-import { AuthContext } from "../../contexts/auth";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Roles = () => {
@@ -33,7 +33,7 @@ const Roles = () => {
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useUserState().userState;
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",
@@ -45,11 +45,12 @@ const Roles = () => {
     const getData = async () => {
       try {
         const response = await api.get(
-          `/roles?page=${currentPage}&per_page=${rowsPerPage}`,{
+          `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
+          {
             params: {
               search: search,
             },
-          }
+          },
         );
         setCurrentPage(response.data.meta.current_page);
         setTotalCount(response.data.meta.total);
@@ -153,7 +154,6 @@ const Roles = () => {
         subtitle="Administração e atribuição de permissões e funções de usuários"
         buttons={
           permissions.some((per) => per.name === "create_roles") && (
-
             <Button
               variant="contained"
               color="primary"
@@ -243,22 +243,22 @@ const Roles = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {
-            data.map(({ name, nivel, company, permissions_count, id }, index) => (
-              <TableRow
-                key={index}
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => handleView(index)}
-              >
-                <TableCell>{name}</TableCell>
-                <TableCell>{company?.name}</TableCell>
-                <TableCell>{permissions_count}</TableCell>
-                <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
-                  {permissions.some(
-                    (permissions) => permissions.name === "update_roles",
-                  ) && (
+            {data.map(
+              ({ name, nivel, company, permissions_count, id }, index) => (
+                <TableRow
+                  key={index}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleView(index)}
+                >
+                  <TableCell>{name}</TableCell>
+                  <TableCell>{company?.name}</TableCell>
+                  <TableCell>{permissions_count}</TableCell>
+                  <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
+                    {permissions.some(
+                      (permissions) => permissions.name === "update_roles",
+                    ) && (
                       <IconButton
                         onClick={(e) => {
                           e.stopPropagation();
@@ -268,9 +268,9 @@ const Roles = () => {
                         <Edit fontSize="small" />
                       </IconButton>
                     )}
-                  {permissions.some(
-                    (permissions) => permissions.name === "delete_roles",
-                  ) && (
+                    {permissions.some(
+                      (permissions) => permissions.name === "delete_roles",
+                    ) && (
                       <IconButton
                         onClick={(e) => {
                           e.stopPropagation();
@@ -280,9 +280,10 @@ const Roles = () => {
                         <Delete />
                       </IconButton>
                     )}
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                </TableRow>
+              ),
+            )}
           </TableBody>
         </Table>
         <TablePagination

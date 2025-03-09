@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   FaAngleDoubleUp,
   FaBook,
@@ -12,13 +12,12 @@ import {
   FaUserAlt,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useUserState } from "../../hooks/useUserState";
+import SidebarItem from "../SidebarItem";
 import { Container, Content } from "./styles";
 
-import { AuthContext } from "../../contexts/auth";
-import SidebarItem from "../SidebarItem";
-
 const Sidebar = ({ active }) => {
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useUserState().userState;
   const usersPermissions = [
     "view_users",
     "view_any_users",
@@ -45,9 +44,9 @@ const Sidebar = ({ active }) => {
 
   const sidebarRef = useRef();
 
-  const hasPermission = (thePermissions) => {
-    return permissions.some((permission) =>
-      thePermissions.includes(permission.name),
+  const hasPermission = (requiredPermissions) => {
+    return permissions?.some((permission) =>
+      requiredPermissions.includes(permission.name),
     );
   };
 
@@ -112,7 +111,7 @@ const Sidebar = ({ active }) => {
             <SidebarItem Icon={FaBook} Text="Logs" />
           </Link>
         ) : null}
-        <Link to={'/atribuicoes'}>
+        <Link to={"/atribuicoes"}>
           <SidebarItem Icon={FaBook} Text="Ordens de serviço" />
         </Link>
       </Content>

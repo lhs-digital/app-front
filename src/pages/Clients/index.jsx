@@ -13,13 +13,13 @@ import {
   TableSortLabel,
   TextField,
 } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalClient from "../../components/ModalClient";
 import ModalDelete from "../../components/ModalDelete";
 import ModalViewClient from "../../components/ModalViewClient";
 import PageTitle from "../../components/PageTitle";
-import { AuthContext } from "../../contexts/auth";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Clients = () => {
@@ -44,18 +44,19 @@ const Clients = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { permissions } = useContext(AuthContext);
+  const { permissions } = useUserState().userState;
 
   useEffect(() => {
     const fetchClients = async () => {
       setLoading(true);
       try {
         const response = await api.get(
-          `/clients?page=${currentPage}&per_page=${rowsPerPage}`, {
+          `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
+          {
             params: {
               search: search,
             },
-          }
+          },
         );
         const sortedData = response.data.data.sort((a, b) => b.id - a.id);
         setData(sortedData);

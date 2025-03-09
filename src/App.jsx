@@ -1,19 +1,26 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { BrowserRouter } from "react-router-dom";
-import AuthProvider from "./contexts/auth";
-import RoutesApp from "./routes";
+import AuthProvider from "react-auth-kit";
+import createStore from "react-auth-kit/createStore";
+import { RouterProvider } from "react-router-dom";
+import { UserStateProvider } from "./contexts/userState";
+import { AppRoutes } from "./routes/routes";
 import { baseTheme } from "./theme";
+
+const store = createStore({
+  authType: "localstorage",
+  authName: "_auth",
+});
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <ThemeProvider theme={baseTheme}>
-        <CssBaseline />
-        <AuthProvider>
-          <RoutesApp />
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <ThemeProvider theme={baseTheme}>
+      <CssBaseline />
+      <AuthProvider store={store}>
+        <UserStateProvider>
+          <RouterProvider router={AppRoutes} />
+        </UserStateProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 
