@@ -3,10 +3,11 @@ import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import api from "../services/api";
 
 export const UserStateContext = createContext({
-  userState: {
+  state: {
     permissions: [],
   },
   refetchUserState: () => {},
+  setUserState: () => {},
   userStateIsFetching: false,
 });
 
@@ -22,12 +23,11 @@ export const UserStateProvider = ({ children }) => {
 
     try {
       const response = await api.get("/me/permissions");
-      setUserState({
-        ...user,
-        permissions: response.data.data,
-      });
+      setUserState({ ...user, permissions: response.data.data });
     } catch (error) {
       console.error(error);
+    } finally {
+      setUserStateIsFetching(false);
     }
   };
 
@@ -43,7 +43,12 @@ export const UserStateProvider = ({ children }) => {
 
   return (
     <UserStateContext.Provider
-      value={{ userState, refetchUserState, userStateIsFetching }}
+      value={{
+        state: userState,
+        refetchUserState,
+        userStateIsFetching,
+        setUserState,
+      }}
     >
       {children}
     </UserStateContext.Provider>

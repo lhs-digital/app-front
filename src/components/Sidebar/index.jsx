@@ -17,7 +17,7 @@ import SidebarItem from "../SidebarItem";
 import { Container, Content } from "./styles";
 
 const Sidebar = ({ active }) => {
-  const { permissions } = useUserState().userState;
+  const { permissions } = useUserState().state;
   const usersPermissions = [
     "view_users",
     "view_any_users",

@@ -4,6 +4,7 @@ import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Lighthouse from "../../assets/favicon_neutral.svg";
+import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import { formatUserObject } from "../../services/utils";
 
@@ -14,6 +15,7 @@ const SignIn = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const signIn = useSignIn();
   const navigate = useNavigate();
+  const { setUserState } = useUserState();
 
   const handleRememberMeChange = () => {
     setRememberMe(!rememberMe);
@@ -30,17 +32,17 @@ const SignIn = () => {
 
     try {
       const response = await api.post(`/login`, { email, password });
-
+      const formattedUser = formatUserObject(response.data.user);
       if (
         signIn({
           auth: {
             token: response.data.access_token,
             type: "Bearer",
           },
-          userState: formatUserObject(response.data.user),
+          userState: formatUserObject(formattedUser),
         })
       ) {
-        navigate("/painel");
+        setUserState(formattedUser);
       } else {
         toast.error("Ocorreu um erro ao realizar login.");
       }
@@ -52,6 +54,7 @@ const SignIn = () => {
         toast.error("Ocorreu um erro ao realizar login.");
       }
     } finally {
+      navigate("/painel");
       setLoading(false);
     }
   };

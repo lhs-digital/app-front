@@ -8,6 +8,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import ModalRule from "../../components/ModalRule";
@@ -15,7 +16,6 @@ import PageTitle from "../../components/PageTitle";
 import SubAccordion from "../../components/Priorities/SubAccordion";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const Priorities = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +33,7 @@ const Priorities = () => {
   const [method, setMethod] = useState("");
   const [nivel, setNivel] = useState("");
   const [refresh, setRefresh] = useState(false);
-  const { permissions } = useUserState().userState;
+  const { permissions } = useUserState().state;
   const user = useAuthUser();
   const [companies, setCompanies] = useState([]);
 
@@ -137,81 +137,92 @@ const Priorities = () => {
           )
         }
       />
-      {user.isLighthouse && companies.length === 0 && <p>Não há empresas disponíveis.</p>}
-      {user.isLighthouse && companies
-        .filter(company => company.name.toLowerCase() !== "lighthouse")
-        .map((company) => (
-          <Accordion key={company.id} variant="outlined">
+      {user.isLighthouse && companies.length === 0 && (
+        <p>Não há empresas disponíveis.</p>
+      )}
+      {user.isLighthouse &&
+        companies
+          .filter((company) => company.name.toLowerCase() !== "lighthouse")
+          .map((company) => (
+            <Accordion key={company.id} variant="outlined">
+              <AccordionSummary
+                expandIcon={<ExpandMore />}
+                id={company.id}
+                aria-controls={`${company.id}-content`}
+              >
+                Empresa: {company.name}
+              </AccordionSummary>
+              <AccordionDetails>
+                {data.filter((table) => table.company.id === company.id)
+                  .length === 0 ? (
+                  <p>Não há tabelas na empresa.</p>
+                ) : (
+                  data
+                    .filter((table) => table.company.id === company.id)
+                    .map((table) => (
+                      <Accordion key={table.id} variant="outlined">
+                        <AccordionSummary
+                          expandIcon={<ExpandMore />}
+                          id={table.id}
+                          aria-controls={`${table.id}-content`}
+                        >
+                          Tabela: {table.label}
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          {table.columns.length === 0 ? (
+                            <p>Não há colunas na tabela.</p>
+                          ) : (
+                            table.columns.map((column) => (
+                              <SubAccordion
+                                key={column.id}
+                                column={column}
+                                data={data}
+                                refresh={refresh}
+                                handleEdit={() =>
+                                  handleEdit(column, company.id)
+                                }
+                                handleDelete={handleDelete}
+                              />
+                            ))
+                          )}
+                        </AccordionDetails>
+                      </Accordion>
+                    ))
+                )}
+              </AccordionDetails>
+            </Accordion>
+          ))}
+      {!user.isLighthouse && data.length === 0 && (
+        <p>Não há tabelas disponíveis.</p>
+      )}
+      {!user.isLighthouse &&
+        data.map((table) => (
+          <Accordion key={table.id} variant="outlined">
             <AccordionSummary
               expandIcon={<ExpandMore />}
-              id={company.id}
-              aria-controls={`${company.id}-content`}
+              id={table.id}
+              aria-controls={`${table.id}-content`}
             >
-              Empresa: {company.name}
+              Tabela: {table.label}
             </AccordionSummary>
             <AccordionDetails>
-              {data.filter(table => table.company.id === company.id).length === 0 ? (
-                <p>Não há tabelas na empresa.</p>
+              {table.columns.length === 0 ? (
+                <p>Não há colunas na tabela.</p>
               ) : (
-                data.filter(table => table.company.id === company.id).map((table) => (
-                  <Accordion key={table.id} variant="outlined">
-                    <AccordionSummary
-                      expandIcon={<ExpandMore />}
-                      id={table.id}
-                      aria-controls={`${table.id}-content`}
-                    >
-                      Tabela: {table.label}
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      {table.columns.length === 0 ? (
-                        <p>Não há colunas na tabela.</p>
-                      ) : (
-                        table.columns.map((column) => (
-                          <SubAccordion
-                            key={column.id}
-                            column={column}
-                            data={data}
-                            refresh={refresh}
-                            handleEdit={() => handleEdit(column, company.id)}
-                            handleDelete={handleDelete}
-                          />
-                        ))
-                      )}
-                    </AccordionDetails>
-                  </Accordion>
+                table.columns.map((column) => (
+                  <SubAccordion
+                    key={column.id}
+                    column={column}
+                    data={data}
+                    refresh={refresh}
+                    handleEdit={() => handleEdit(column, table.company.id)}
+                    handleDelete={handleDelete}
+                  />
                 ))
               )}
             </AccordionDetails>
           </Accordion>
         ))}
-      {!user.isLighthouse && data.length === 0 && <p>Não há tabelas disponíveis.</p>}
-      {!user.isLighthouse && data.map((table) => (
-        <Accordion key={table.id} variant="outlined">
-          <AccordionSummary
-            expandIcon={<ExpandMore />}
-            id={table.id}
-            aria-controls={`${table.id}-content`}
-          >
-            Tabela: {table.label}
-          </AccordionSummary>
-          <AccordionDetails>
-            {table.columns.length === 0 ? (
-              <p>Não há colunas na tabela.</p>
-            ) : (
-              table.columns.map((column) => (
-                <SubAccordion
-                  key={column.id}
-                  column={column}
-                  data={data}
-                  refresh={refresh}
-                  handleEdit={() => handleEdit(column, table.company.id)}
-                  handleDelete={handleDelete}
-                />
-              ))
-            )}
-          </AccordionDetails>
-        </Accordion>
-      ))}
     </div>
   );
 };

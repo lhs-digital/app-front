@@ -73,7 +73,8 @@ const Layout = ({ children }) => {
   const user = useAuthUser();
   const signOut = useSignOut();
   const navigate = useNavigate();
-  const { permissions } = useUserState().userState;
+  const { permissions } = useUserState().state;
+
   const isActive = (url) => window.location.pathname === url;
 
   const handleLogout = async () => {
@@ -82,6 +83,10 @@ const Layout = ({ children }) => {
   };
 
   const hasPermission = (thePermissions) => {
+    console.log(permissions);
+    if (!permissions || !permissions.length) {
+      return false;
+    }
     return permissions.some((permission) =>
       thePermissions.includes(permission.name),
     );

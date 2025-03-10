@@ -5,7 +5,7 @@ import { useUserState } from "../hooks/useUserState";
 
 const PrivateRoute = ({ allowedPermissions = [], ...rest }) => {
   const isAuthenticated = useIsAuthenticated();
-  const { permissions } = useUserState().userState;
+  const { permissions } = useUserState().state;
 
   const hasPermissionAccess =
     allowedPermissions.length === 0 ||

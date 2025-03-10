@@ -33,7 +33,7 @@ const Roles = () => {
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
-  const { permissions } = useUserState().userState;
+  const { permissions } = useUserState().state;
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",

@@ -2,11 +2,11 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import AuthProvider from "react-auth-kit";
 import createStore from "react-auth-kit/createStore";
 import { RouterProvider } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { UserStateProvider } from "./contexts/userState";
 import { AppRoutes } from "./routes/routes";
 import { baseTheme } from "./theme";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 const store = createStore({
   authType: "localstorage",

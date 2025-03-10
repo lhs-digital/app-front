@@ -24,7 +24,7 @@ import ViewActivitie from "../ViewActivitie";
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const [dataView, setDataView] = useState(activitie);
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const { permissions } = useUserState().userState;
+  const { permissions } = useUserState().state;
   const [isOpen, setIsOpen] = useState(false);
 
   const handleView = () => {

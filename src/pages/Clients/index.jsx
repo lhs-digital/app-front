@@ -44,7 +44,7 @@ const Clients = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { permissions } = useUserState().userState;
+  const { permissions } = useUserState().state;
 
   useEffect(() => {
     const fetchClients = async () => {

@@ -18,19 +18,21 @@ import {
 import { grey } from "@mui/material/colors";
 import { PieChart } from "@mui/x-charts";
 import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useNavigate } from "react-router-dom";
 import ModalReport from "../../components/ModalReport";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const { permissions } = useUserState().userState;
+  const { permissions } = useUserState().state;
   const user = useAuthUser();
   const [data, setData] = useState([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState(user.isLighthouse ? null : user.company.id);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(
+    user.isLighthouse ? null : user.company.id,
+  );
   const [selectedTableId, setSelectedTableId] = useState(null);
   const [chartData, setChartData] = useState({
     errorsCount: 0,
