@@ -1,3 +1,4 @@
+import { CircularProgress } from "@mui/material";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import { Navigate, Outlet } from "react-router-dom";
 import Layout from ".";
@@ -5,11 +6,19 @@ import { useUserState } from "../hooks/useUserState";
 
 const PrivateRoute = ({ allowedPermissions = [], ...rest }) => {
   const isAuthenticated = useIsAuthenticated();
-  const { permissions } = useUserState().state;
+  const { state, userStateIsFetching } = useUserState();
+
+  if (!state && userStateIsFetching) {
+    return (
+      <div className="w-full h-[100vh] flex flex-col items-center justify-center">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   const hasPermissionAccess =
     allowedPermissions.length === 0 ||
-    permissions.some((permission) =>
+    state.permissions.some((permission) =>
       allowedPermissions.includes(permission.name),
     );
 
