@@ -29,6 +29,7 @@ const permissions = {
     "update_clients",
     "delete_clients",
   ],
+  "/clientes/criar": ["create_clients"],
   "/atribuicoes": [],
   "/prioridades": ["define_rules"],
   "/permissoes": [],

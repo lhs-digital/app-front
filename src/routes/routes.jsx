@@ -4,6 +4,7 @@ import PublicRoute from "../layout/PublicRoute";
 import Assignments from "../pages/Assignments";
 import Clients from "../pages/Clients";
 import Companies from "../pages/Companies";
+import CreateClient from "../pages/CreateClient";
 import FirstAccess from "../pages/FirstAccess";
 import Home from "../pages/Home";
 import ListActivities from "../pages/ListActivities";
@@ -96,6 +97,14 @@ export const privateRoutes = [
   },
 ];
 
+export const privateSubRoutes = [
+  {
+    label: "Criar cliente",
+    path: "/clientes/criar",
+    element: <CreateClient />,
+  },
+];
+
 export const navigationRoutes = privateRoutes.map((route) => ({
   ...route,
   icon: RouteIcon({ path: route.path }).icon,
@@ -110,7 +119,7 @@ export const AppRoutes = createBrowserRouter([
   },
   {
     element: <PrivateRoute />,
-    children: privateRoutes,
+    children: [...privateRoutes, ...privateSubRoutes],
   },
   {
     path: "/logout",
