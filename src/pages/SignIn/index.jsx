@@ -43,6 +43,7 @@ const SignIn = () => {
         })
       ) {
         setUserState(formattedUser);
+        navigate("/painel");
       } else {
         toast.error("Ocorreu um erro ao realizar login.");
       }
@@ -54,7 +55,6 @@ const SignIn = () => {
         toast.error("Ocorreu um erro ao realizar login.");
       }
     } finally {
-      navigate("/painel");
       setLoading(false);
     }
   };
