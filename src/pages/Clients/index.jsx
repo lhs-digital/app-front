@@ -14,6 +14,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalClient from "../../components/ModalClient";
 import ModalDelete from "../../components/ModalDelete";
@@ -43,7 +44,7 @@ const Clients = () => {
   });
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
-
+  const navigate = useNavigate();
   const { permissions } = useUserState().state;
 
   useEffect(() => {
@@ -159,7 +160,7 @@ const Clients = () => {
             variant="contained"
             color="primary"
             startIcon={<Add />}
-            onClick={() => [setDataEdit({}), setModalOpen(true)]}
+            onClick={() => navigate("/clientes/criar")}
           >
             NOVO CADASTRO
           </Button>
