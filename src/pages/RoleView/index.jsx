@@ -1,8 +1,8 @@
 import { Edit, LockOpen, Save } from "@mui/icons-material";
-import { Button, TextField } from "@mui/material";
+import { Autocomplete, Button, TextField } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../components/FormField";
@@ -13,11 +13,11 @@ import api from "../../services/api";
 
 const RoleView = () => {
   const { id } = useParams();
+  const isCreating = id === "novo";
   const methods = useForm();
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const navigate = useNavigate();
-  const [isCreating, setIsCreating] = useState(id === "novo");
   const { isLighthouse } = useUserState().state;
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
@@ -27,6 +27,7 @@ const RoleView = () => {
       const response = await api.get(`/roles/${id}`);
       return response.data.data;
     },
+    enabled: !isCreating,
   });
 
   useEffect(() => {
@@ -52,11 +53,15 @@ const RoleView = () => {
     },
   });
 
-  const {
-    mutate: createRole,
-    isPending: createIsPending,
-    data: createdRole,
-  } = useMutation({
+  const { data: companies } = useQuery({
+    queryKey: ["companies"],
+    queryFn: async () => {
+      const response = await api.get("/companies");
+      return response.data.data;
+    },
+  });
+
+  const { mutate: createRole, isPending: createIsPending } = useMutation({
     mutationFn: async (data) => {
       const response = await api.post("/roles", data);
       return response.data;
@@ -72,8 +77,8 @@ const RoleView = () => {
       }
       return toast.error("Erro ao criar o cargo");
     },
-    onSettled: () => {
-      navigate(`/cargos/${createdRole.id}`);
+    onSettled: (data) => {
+      navigate(`/cargos/${data.data.id}`);
     },
   });
 
@@ -109,7 +114,9 @@ const RoleView = () => {
       permissions: selectedPermissions.map((permission) => permission.id),
     });
 
-    updateRole({
+    if (isCreating) return createRole(data);
+
+    return updateRole({
       ...data,
       permissions: selectedPermissions.map((permission) => permission.id),
     });
@@ -126,7 +133,7 @@ const RoleView = () => {
               ? [
                   <Button
                     key="save-role-form"
-                    loading={updateIsPending}
+                    loading={updateIsPending || createIsPending}
                     type="submit"
                     form="role-form"
                     variant="contained"
@@ -156,42 +163,60 @@ const RoleView = () => {
         >
           <FormField
             label="Nome"
+            required={isCreating}
             containerClass={`${isLighthouse ? "lg:col-span-3" : "lg:col-span-5"}`}
           >
             <TextField
               fullWidth
               name="name"
-              {...methods.register("name")}
+              {...methods.register("name", { required: "Campo obrigatório" })}
               slotProps={{
                 input: {
-                  readOnly: !isEditing,
+                  readOnly: !isEditing && !isCreating,
                 },
               }}
             />
           </FormField>
-          <FormField label="Nível" containerClass="col-span-1">
+          <FormField
+            label="Nível"
+            containerClass="col-span-1"
+            required={isCreating}
+          >
             <TextField
               fullWidth
               name="level"
-              {...methods.register("nivel")}
+              type="number"
+              {...methods.register("nivel", { required: "Campo obrigatório" })}
               slotProps={{
                 input: {
-                  readOnly: !isEditing,
+                  readOnly: !isEditing && !isCreating,
                 },
               }}
             />
           </FormField>
           {isLighthouse && (
-            <FormField label="Empresa" containerClass="col-span-2">
-              <TextField
-                fullWidth
-                name="company.name"
-                {...methods.register("company.name")}
-                slotProps={{
-                  input: {
-                    readOnly: !isEditing,
-                  },
-                }}
+            <FormField
+              label="Empresa"
+              containerClass="col-span-2"
+              required={isCreating}
+            >
+              <Controller
+                control={methods.control}
+                name="company_id"
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    className="col-span-8"
+                    noOptionsText="Nenhuma empresa encontrada."
+                    options={companies || []}
+                    getOptionLabel={(option) => option.name}
+                    getOptionKey={(option) => option.id}
+                    loadingText="Carregando..."
+                    readOnly={!isEditing && !isCreating}
+                    renderInput={(params) => <TextField {...params} />}
+                    onChange={(e, newValue) => field.onChange(newValue.id)}
+                  />
+                )}
               />
             </FormField>
           )}
@@ -200,7 +225,7 @@ const RoleView = () => {
             {permissions &&
               Object.keys(permissions).map((category) => (
                 <PermissionCategory
-                  isEditing={isEditing}
+                  readOnly={!isEditing && !isCreating}
                   key={category}
                   category={category}
                   permissions={permissions[category]}

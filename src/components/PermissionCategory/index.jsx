@@ -7,7 +7,7 @@ const PermissionCategory = ({
   permissions,
   selectedPermissions = [],
   setSelectedPermissions = () => {},
-  isEditing = false,
+  readOnly = false,
 }) => {
   return (
     <div className="flex flex-col">
@@ -37,7 +37,7 @@ const PermissionCategory = ({
                     "aria-label": "controlled",
                   }}
                   onChange={(e) => {
-                    if (!isEditing) return;
+                    if (readOnly) return;
                     if (e.target.checked) {
                       setSelectedPermissions((prev) => [...prev, permission]);
                     } else {
