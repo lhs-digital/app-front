@@ -152,3 +152,7 @@ export const handlePermissionName = (name) => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
+
+export const hasPermission = (permissions, permission) => {
+  return permissions.some((p) => p.name === permission);
+};

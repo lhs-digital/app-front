@@ -1,4 +1,4 @@
-import { Add, Delete, Edit, Search } from "@mui/icons-material";
+import { Add, Delete, Edit, Search, Visibility } from "@mui/icons-material";
 import {
   Button,
   IconButton,
@@ -13,22 +13,19 @@ import {
   TableSortLabel,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
-import ModalRole from "../../components/ModalRole";
 import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import { hasPermission } from "../../services/utils";
 
 const Roles = () => {
-  const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [data, setData] = useState([]);
-  const [dataEdit, setDataEdit] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
   const { permissions } = useUserState().state;
@@ -39,51 +36,39 @@ const Roles = () => {
   });
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
+  const [sortedData, setSortedData] = useState([]);
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await api.get(
-          `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
-          {
-            params: {
-              search: search,
-            },
-          },
-        );
-        setCurrentPage(response.data.meta.current_page);
-        setTotalCount(response.data.meta.total);
-        setData(response.data.data);
-      } catch (error) {
-        console.error("Erro ao verificar lista de roles", error);
-      }
-    };
-    getData();
-  }, [currentPage, rowsPerPage, search, refresh]);
+  const { data } = useQuery({
+    queryKey: ["roles"],
+    queryFn: async () => {
+      const response = await api.get(
+        `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
+        {
+          params: { search: search },
+        },
+      );
+      setSortedData(response.data.data);
+      setCurrentPage(response.data.meta.current_page);
+      setTotalCount(response.data.meta.total);
+      return response.data.data;
+    },
+  });
 
-  const handleRemove = async () => {
-    try {
-      await api.delete(`/roles/${deleteId}`);
-      setRefresh(!refresh);
+  const { mutate: deleteRole } = useMutation({
+    mutationFn: async (id) => {
+      await api.delete(`/roles/${id}`);
+    },
+    onSuccess: () => {
       toast.success("Role removida com sucesso!");
       setDeleteOpen(false);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Erro ao remover role", error);
-    }
-  };
+    },
+  });
 
-  const handleCreate = () => {
-    setDataEdit({});
-    setModalOpen(true);
-  };
-
-  const handleEdit = (role) => {
-    setDataEdit(role);
-    setModalOpen(true);
-  };
-
-  const handleView = (id) => {
-    navigate(`/papeis/${id}`);
+  const handleRemove = () => {
+    deleteRole(deleteId);
   };
 
   const handleDelete = (id) => {
@@ -94,8 +79,8 @@ const Roles = () => {
   const handleSort = (key) => {
     const direction =
       sortConfig.direction === "asc" && sortConfig.key === key ? "desc" : "asc";
-
-    const sortedData = [...data].sort((a, b) => {
+    const newSortedData = [...sortedData];
+    newSortedData.sort((a, b) => {
       const aKey = key.split(".").reduce((acc, part) => acc && acc[part], a);
       const bKey = key.split(".").reduce((acc, part) => acc && acc[part], b);
 
@@ -105,7 +90,7 @@ const Roles = () => {
     });
 
     setSortConfig({ key, direction });
-    setData(sortedData);
+    setSortedData(newSortedData);
   };
 
   const createSortHandler = (key) => () => {
@@ -120,37 +105,25 @@ const Roles = () => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
-    setRefresh((prev) => !prev);
   };
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      <ModalRole
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        data={data}
-        setData={setData}
-        dataEdit={dataEdit || null}
-        setDataEdit={setDataEdit}
-        setRefresh={setRefresh}
-        refresh={refresh}
-      />
       <ModalDelete
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleRemove}
       />
-
       <PageTitle
         title="Papéis e permissões"
         subtitle="Administração e atribuição de permissões e funções de usuários"
         buttons={
-          permissions.some((per) => per.name === "create_roles") && (
+          hasPermission(permissions, "create_roles") && (
             <Button
               variant="contained"
               color="primary"
               startIcon={<Add />}
-              onClick={handleCreate}
+              onClick={() => navigate("/papeis/novo")}
             >
               NOVO CARGO
             </Button>
@@ -235,48 +208,39 @@ const Roles = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map(
-              ({ name, nivel, company, permissions_count, id }, index) => (
-                <TableRow
-                  key={id}
-                  hover
-                  style={{
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleView(id)}
-                >
-                  <TableCell>{name}</TableCell>
-                  <TableCell>{company?.name}</TableCell>
-                  <TableCell>{permissions_count}</TableCell>
-                  <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
-                    {permissions.some(
-                      (permissions) => permissions.name === "update_roles",
-                    ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit({ name, nivel, company, id, index });
-                        }}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    )}
-                    {permissions.some(
-                      (permissions) => permissions.name === "delete_roles",
-                    ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(id);
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ),
-            )}
+            {sortedData.map(({ name, company, permissions_count, id }) => (
+              <TableRow key={id}>
+                <TableCell>{name}</TableCell>
+                <TableCell>{company?.name}</TableCell>
+                <TableCell>{permissions_count}</TableCell>
+                <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
+                  {hasPermission(permissions, "view_roles") && (
+                    <IconButton onClick={() => navigate(`/papeis/${id}`)}>
+                      <Visibility fontSize="small" />
+                    </IconButton>
+                  )}
+                  {hasPermission(permissions, "update_roles") && (
+                    <IconButton
+                      onClick={() =>
+                        navigate(`/papeis/${id}`, { state: { edit: true } })
+                      }
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
+                  {hasPermission(permissions, "delete_roles") && (
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(id);
+                      }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
         <TablePagination

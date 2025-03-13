@@ -3,7 +3,7 @@ import { Button, TextField } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../components/FormField";
 import PageTitle from "../../components/PageTitle";
@@ -14,7 +14,8 @@ import api from "../../services/api";
 const RoleView = () => {
   const { id } = useParams();
   const methods = useForm();
-  const [isEditing, setIsEditing] = useState(false);
+  const location = useLocation();
+  const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const { isLighthouse } = useUserState().state;
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
@@ -99,7 +100,7 @@ const RoleView = () => {
                     type="submit"
                     form="role-form"
                     variant="contained"
-                    startIcon={<Save />}
+                    startIcon={<Save fontSize="small" />}
                   >
                     SALVAR
                   </Button>,
@@ -111,7 +112,7 @@ const RoleView = () => {
                     variant="contained"
                     type="button"
                     onClick={() => setIsEditing(true)}
-                    startIcon={<Edit />}
+                    startIcon={<Edit fontSize="small" />}
                   >
                     EDITAR
                   </Button>,
