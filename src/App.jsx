@@ -1,5 +1,6 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { StrictMode } from "react";
 import AuthProvider from "react-auth-kit";
 import createStore from "react-auth-kit/createStore";
 import { RouterProvider } from "react-router-dom";
@@ -17,17 +18,19 @@ const store = createStore({
 
 const App = () => {
   return (
-    <ThemeProvider theme={baseTheme}>
-      <CssBaseline />
-      <QueryClientProvider client={qc}>
-        <AuthProvider store={store}>
-          <UserStateProvider>
-            <RouterProvider router={AppRoutes} />
-            <ToastContainer position="bottom-right" />
-          </UserStateProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <StrictMode>
+      <ThemeProvider theme={baseTheme}>
+        <CssBaseline />
+        <QueryClientProvider client={qc}>
+          <AuthProvider store={store}>
+            <UserStateProvider>
+              <RouterProvider router={AppRoutes} />
+              <ToastContainer position="bottom-right" />
+            </UserStateProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </StrictMode>
   );
 };
 
