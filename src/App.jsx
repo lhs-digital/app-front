@@ -7,21 +7,12 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserStateProvider } from "./contexts/userState";
 import { AppRoutes } from "./routes/routes";
+import { qc } from "./services/queryClient";
 import { baseTheme } from "./theme";
 
 const store = createStore({
   authType: "localstorage",
   authName: "_auth",
-});
-
-const qc = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: true,
-      retry: true,
-      staleTime: 1000 * 60 * 5,
-    },
-  },
 });
 
 const App = () => {
