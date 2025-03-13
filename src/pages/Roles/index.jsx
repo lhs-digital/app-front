@@ -1,6 +1,7 @@
 import { Add, Delete, Edit, Search, Visibility } from "@mui/icons-material";
 import {
   Button,
+  CircularProgress,
   IconButton,
   InputAdornment,
   Table,
@@ -14,13 +15,14 @@ import {
   TextField,
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import { qc } from "../../services/queryClient";
 import { hasPermission } from "../../services/utils";
 
 const Roles = () => {
@@ -38,8 +40,8 @@ const Roles = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [sortedData, setSortedData] = useState([]);
 
-  const { data } = useQuery({
-    queryKey: ["roles"],
+  const { data, isFetching, isSuccess } = useQuery({
+    queryKey: ["roles", currentPage],
     queryFn: async () => {
       const response = await api.get(
         `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
@@ -47,9 +49,6 @@ const Roles = () => {
           params: { search: search },
         },
       );
-      setSortedData(response.data.data);
-      setCurrentPage(response.data.meta.current_page);
-      setTotalCount(response.data.meta.total);
       return response.data.data;
     },
   });
@@ -61,6 +60,7 @@ const Roles = () => {
     onSuccess: () => {
       toast.success("Role removida com sucesso!");
       setDeleteOpen(false);
+      qc.invalidateQueries({ queryKey: ["roles", currentPage] });
     },
     onError: (error) => {
       console.error("Erro ao remover role", error);
@@ -106,6 +106,12 @@ const Roles = () => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      setSortedData(data);
+    }
+  }, [isSuccess]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -208,6 +214,13 @@ const Roles = () => {
             </TableRow>
           </TableHead>
           <TableBody>
+            {isFetching && (
+              <TableRow>
+                <TableCell colSpan={4} rowSpan={2} align="center">
+                  <CircularProgress size={24} />
+                </TableCell>
+              </TableRow>
+            )}
             {sortedData.map(({ name, company, permissions_count, id }) => (
               <TableRow key={id}>
                 <TableCell>{name}</TableCell>
