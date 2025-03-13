@@ -1,8 +1,8 @@
 import { Edit, LockOpen, Save } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../components/FormField";
@@ -13,14 +13,20 @@ import api from "../../services/api";
 
 const RoleView = () => {
   const { id } = useParams();
+  const methods = useForm();
   const [isEditing, setIsEditing] = useState(false);
   const { isLighthouse } = useUserState().state;
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
+
   const { data: role } = useQuery({
     queryKey: ["role", id],
     queryFn: async () => {
       const response = await api.get(`/roles/${id}`);
-      console.log("role", response.data.data);
-
+      const role = response.data.data;
+      methods.setValue("name", role.name);
+      methods.setValue("nivel", role.nivel);
+      methods.setValue("company.name", role.company.name);
+      setSelectedPermissions(role.permissions);
       return response.data.data;
     },
   });
@@ -40,99 +46,91 @@ const RoleView = () => {
     },
   });
 
-  useEffect(() => {
-    if (role) {
-      setValue("name", role.name);
-      setValue("nivel", role.nivel);
-      setValue("company.name", role.company.name);
-    }
-  }, [role]);
-
-  const {
-    register,
-    formState: { errors, isDirty },
-    handleSubmit,
-    setValue,
-  } = useForm({
-    defaultValues: role,
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data) => {
+      const response = await api.put(`/roles/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Cargo atualizado com sucesso");
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar o cargo", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      toast.error("Erro ao atualizar o cargo");
+    },
+    onSettled: () => {
+      setIsEditing(false);
+    },
   });
 
   const onSubmit = (data) => {
-    if (!isDirty) toast.info("Nenhuma alteração foi feita");
-    if (errors) return toast.error("Preencha todos os campos corretamente");
-    console.log("data", data);
-    setIsEditing(false);
+    if (Object.keys(methods.formState.errors).length > 0) {
+      console.error("errors", methods.formState.errors);
+      return toast.error("Preencha todos os campos corretamente");
+    }
+
+    console.log("data", {
+      ...data,
+      permissions: selectedPermissions.map((permission) => permission.id),
+    });
+
+    mutate({
+      ...data,
+      permissions: selectedPermissions.map((permission) => permission.id),
+    });
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <PageTitle
-        title="Cargo"
-        icon={<LockOpen />}
-        buttons={
-          isEditing
-            ? [
-                <Button
-                  key="save-role-form"
-                  type="submit"
-                  form="role-form"
-                  variant="contained"
-                  startIcon={<Save />}
-                >
-                  SALVAR
-                </Button>,
-              ]
-            : [
-                <Button
-                  key="edit-role-form"
-                  variant="contained"
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  startIcon={<Edit />}
-                >
-                  EDITAR
-                </Button>,
-              ]
-        }
-      />
-      <form
-        className="grid grid-cols-1 lg:grid-cols-6 gap-8 w-full"
-        id="role-form"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <FormField
-          label="Nome"
-          containerClass={`${isLighthouse ? "lg:col-span-3" : "lg:col-span-5"}`}
+    <FormProvider {...methods}>
+      <div className="flex flex-col gap-8">
+        <PageTitle
+          title="Cargo"
+          icon={<LockOpen />}
+          buttons={
+            isEditing
+              ? [
+                  <Button
+                    key="save-role-form"
+                    loading={isPending}
+                    type="submit"
+                    form="role-form"
+                    variant="contained"
+                    startIcon={<Save />}
+                  >
+                    SALVAR
+                  </Button>,
+                ]
+              : [
+                  <Button
+                    key="edit-role-form"
+                    loading={isPending}
+                    variant="contained"
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    startIcon={<Edit />}
+                  >
+                    EDITAR
+                  </Button>,
+                ]
+          }
+        />
+        <form
+          className="grid grid-cols-1 lg:grid-cols-6 gap-8 w-full"
+          id="role-form"
+          onSubmit={methods.handleSubmit(onSubmit)}
         >
-          <TextField
-            fullWidth
-            name="name"
-            {...register("name")}
-            slotProps={{
-              input: {
-                readOnly: !isEditing,
-              },
-            }}
-          />
-        </FormField>
-        <FormField label="Nível" containerClass="col-span-1">
-          <TextField
-            fullWidth
-            name="level"
-            {...register("nivel")}
-            slotProps={{
-              input: {
-                readOnly: !isEditing,
-              },
-            }}
-          />
-        </FormField>
-        {isLighthouse && (
-          <FormField label="Empresa" containerClass="col-span-2">
+          <FormField
+            label="Nome"
+            containerClass={`${isLighthouse ? "lg:col-span-3" : "lg:col-span-5"}`}
+          >
             <TextField
               fullWidth
-              name="company.name"
-              {...register("company.name")}
+              name="name"
+              {...methods.register("name")}
               slotProps={{
                 input: {
                   readOnly: !isEditing,
@@ -140,20 +138,49 @@ const RoleView = () => {
               }}
             />
           </FormField>
-        )}
-        <div className="col-span-full flex flex-col gap-4">
-          {permissions &&
-            Object.keys(permissions).map((category) => (
-              <PermissionCategory
-                key={category}
-                category={category}
-                permissions={permissions[category]}
-                rolePermissions={role?.permissions}
+          <FormField label="Nível" containerClass="col-span-1">
+            <TextField
+              fullWidth
+              name="level"
+              {...methods.register("nivel")}
+              slotProps={{
+                input: {
+                  readOnly: !isEditing,
+                },
+              }}
+            />
+          </FormField>
+          {isLighthouse && (
+            <FormField label="Empresa" containerClass="col-span-2">
+              <TextField
+                fullWidth
+                name="company.name"
+                {...methods.register("company.name")}
+                slotProps={{
+                  input: {
+                    readOnly: !isEditing,
+                  },
+                }}
               />
-            ))}
-        </div>
-      </form>
-    </div>
+            </FormField>
+          )}
+          <div className="col-span-full flex flex-col">
+            <h2 className="text-lg font-semibold mb-4">Permissões</h2>
+            {permissions &&
+              Object.keys(permissions).map((category) => (
+                <PermissionCategory
+                  isEditing={isEditing}
+                  key={category}
+                  category={category}
+                  permissions={permissions[category]}
+                  selectedPermissions={selectedPermissions}
+                  setSelectedPermissions={setSelectedPermissions}
+                />
+              ))}
+          </div>
+        </form>
+      </div>
+    </FormProvider>
   );
 };
 
