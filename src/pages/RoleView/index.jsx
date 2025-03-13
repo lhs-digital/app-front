@@ -1,9 +1,9 @@
 import { Edit, LockOpen, Save } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../components/FormField";
 import PageTitle from "../../components/PageTitle";
@@ -16,6 +16,8 @@ const RoleView = () => {
   const methods = useForm();
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
+  const navigate = useNavigate();
+  const [isCreating, setIsCreating] = useState(id === "novo");
   const { isLighthouse } = useUserState().state;
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
@@ -23,14 +25,17 @@ const RoleView = () => {
     queryKey: ["role", id],
     queryFn: async () => {
       const response = await api.get(`/roles/${id}`);
-      const role = response.data.data;
-      methods.setValue("name", role.name);
-      methods.setValue("nivel", role.nivel);
-      methods.setValue("company.name", role.company.name);
-      setSelectedPermissions(role.permissions);
       return response.data.data;
     },
   });
+
+  useEffect(() => {
+    if (!role) return;
+    methods.setValue("name", role.name);
+    methods.setValue("nivel", role.nivel);
+    methods.setValue("company.name", role.company.name);
+    setSelectedPermissions(role.permissions);
+  }, [role]);
 
   const { data: permissions } = useQuery({
     queryKey: ["permissions"],
@@ -47,7 +52,32 @@ const RoleView = () => {
     },
   });
 
-  const { mutate, isPending } = useMutation({
+  const {
+    mutate: createRole,
+    isPending: createIsPending,
+    data: createdRole,
+  } = useMutation({
+    mutationFn: async (data) => {
+      const response = await api.post("/roles", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Cargo criado com sucesso");
+    },
+    onError: (error) => {
+      console.error("Erro ao criar o cargo", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      return toast.error("Erro ao criar o cargo");
+    },
+    onSettled: () => {
+      navigate(`/cargos/${createdRole.id}`);
+    },
+  });
+
+  const { mutate: updateRole, isPending: updateIsPending } = useMutation({
     mutationFn: async (data) => {
       const response = await api.put(`/roles/${id}`, data);
       return response.data;
@@ -79,7 +109,7 @@ const RoleView = () => {
       permissions: selectedPermissions.map((permission) => permission.id),
     });
 
-    mutate({
+    updateRole({
       ...data,
       permissions: selectedPermissions.map((permission) => permission.id),
     });
@@ -92,11 +122,11 @@ const RoleView = () => {
           title="Cargo"
           icon={<LockOpen />}
           buttons={
-            isEditing
+            isEditing || isCreating
               ? [
                   <Button
                     key="save-role-form"
-                    loading={isPending}
+                    loading={updateIsPending}
                     type="submit"
                     form="role-form"
                     variant="contained"
@@ -108,7 +138,7 @@ const RoleView = () => {
               : [
                   <Button
                     key="edit-role-form"
-                    loading={isPending}
+                    loading={updateIsPending}
                     variant="contained"
                     type="button"
                     onClick={() => setIsEditing(true)}
