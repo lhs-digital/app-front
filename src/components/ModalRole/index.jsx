@@ -55,7 +55,9 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
         setPermissions(responsePermissions.data.data);
 
         if (dataEdit?.id) {
-          const responseRolePermissions = await api.get(`/roles/${dataEdit?.id}`);
+          const responseRolePermissions = await api.get(
+            `/roles/${dataEdit?.id}`,
+          );
           setRolePermissions(
             responseRolePermissions.data.data.permissions.map(
               (permission) => permission.id,
@@ -165,10 +167,14 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle>{dataEdit?.id ? "Editar Role" : "Cadastrar Role"}</DialogTitle>
+      <DialogTitle>
+        {dataEdit?.id ? "Editar Role" : "Cadastrar Role"}
+      </DialogTitle>
       <DialogContent className="w-[480px] flex flex-col gap-4">
         <Box>
-          <InputLabel htmlFor="name">Nome *</InputLabel>
+          <InputLabel htmlFor="name" required>
+            Nome
+          </InputLabel>
           <TextField
             id="name"
             type="text"
@@ -178,7 +184,9 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
           />
         </Box>
         <Box>
-          <InputLabel htmlFor="nivel">Nível *</InputLabel>
+          <InputLabel htmlFor="nivel" required>
+            Nível
+          </InputLabel>
           <Select
             id="nivel"
             value={nivel}
@@ -249,7 +257,13 @@ const ModalRole = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button color="inherit" onClick={() => { onClose(); cleanData(); }}>
+        <Button
+          color="inherit"
+          onClick={() => {
+            onClose();
+            cleanData();
+          }}
+        >
           CANCELAR
         </Button>
         <Button color="primary" onClick={handleSave}>

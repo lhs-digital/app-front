@@ -14,26 +14,25 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import ModalRole from "../../components/ModalRole";
-import ModalViewRole from "../../components/ModalViewRole";
 import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
 const Roles = () => {
-  const [viewOpen, setViewOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [data, setData] = useState([]);
   const [dataEdit, setDataEdit] = useState({});
-  const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
   const { permissions } = useUserState().state;
+  const navigate = useNavigate();
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",
@@ -83,10 +82,8 @@ const Roles = () => {
     setModalOpen(true);
   };
 
-  const handleView = (index) => {
-    const selectedRole = data;
-    setDataView(selectedRole[index]);
-    setViewOpen(true);
+  const handleView = (id) => {
+    navigate(`/papeis/${id}`);
   };
 
   const handleDelete = (id) => {
@@ -142,11 +139,6 @@ const Roles = () => {
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleRemove}
-      />
-      <ModalViewRole
-        selectedRole={dataView}
-        isOpen={viewOpen}
-        onClose={() => setViewOpen(false)}
       />
 
       <PageTitle
@@ -246,11 +238,12 @@ const Roles = () => {
             {data.map(
               ({ name, nivel, company, permissions_count, id }, index) => (
                 <TableRow
-                  key={index}
+                  key={id}
+                  hover
                   style={{
                     cursor: "pointer",
                   }}
-                  onClick={() => handleView(index)}
+                  onClick={() => handleView(id)}
                 >
                   <TableCell>{name}</TableCell>
                   <TableCell>{company?.name}</TableCell>
