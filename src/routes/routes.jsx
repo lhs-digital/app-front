@@ -103,6 +103,11 @@ export const privateSubRoutes = [
     path: "/clientes/criar",
     element: <CreateClient />,
   },
+  {
+    label: "Cargo",
+    path: "/papeis/:id",
+    element: <RoleView />,
+  },
 ];
 
 export const navigationRoutes = privateRoutes.map((route) => ({
