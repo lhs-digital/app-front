@@ -71,14 +71,11 @@ const ModalViewRole = ({ selectedRole, isOpen, onClose }) => {
                     <div className="flex flex-row flex-wrap gap-4">
                       {group?.items?.map((permission) => (
                         <Grid key={permission?.id} item xs={12}>
-                          <Checkbox
-                            checked={true}
-                            disabled
-                            color="primary"
-                          />
-                          <Typography component="span">{permission?.label}</Typography>
+                          <Checkbox checked={true} disabled color="primary" />
+                          <Typography component="span">
+                            {permission?.label}
+                          </Typography>
                         </Grid>
-
                       ))}
                     </div>
                   </Box>

@@ -131,3 +131,28 @@ export const formatUserObject = (user) => ({
   isLighthouse: user?.company?.is_super_admin || false,
   permissions: user?.role?.permissions ?? [],
 });
+
+export const handlePermissionName = (name) => {
+  const action = name.split("_")[0];
+  const entity = name.split("_")[1];
+
+  const actionMap = {
+    view: entity === "any" ? "Listar" : "Visualizar",
+    create: "Criar",
+    update: "Editar",
+    delete: "Deletar",
+  };
+
+  if (actionMap[action]) {
+    return actionMap[action];
+  }
+
+  return name
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+export const hasPermission = (permissions, permission) => {
+  return permissions.some((p) => p.name === permission);
+};

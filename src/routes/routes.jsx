@@ -4,6 +4,7 @@ import PublicRoute from "../layout/PublicRoute";
 import Assignments from "../pages/Assignments";
 import Clients from "../pages/Clients";
 import Companies from "../pages/Companies";
+import CreateClient from "../pages/CreateClient";
 import FirstAccess from "../pages/FirstAccess";
 import Home from "../pages/Home";
 import ListActivities from "../pages/ListActivities";
@@ -14,6 +15,7 @@ import PasswordUpdate from "../pages/PasswordUpdate";
 import Priorities from "../pages/Priorities";
 import RecoverPassword from "../pages/RecoverPassword";
 import Roles from "../pages/Roles";
+import RoleView from "../pages/RoleView";
 import SignIn from "../pages/SignIn";
 import Users from "../pages/Users";
 import { pagePermissions } from "../services/permissions";
@@ -96,6 +98,19 @@ export const privateRoutes = [
   },
 ];
 
+export const privateSubRoutes = [
+  {
+    label: "Criar cliente",
+    path: "/clientes/criar",
+    element: <CreateClient />,
+  },
+  {
+    label: "Cargo",
+    path: "/papeis/:id",
+    element: <RoleView />,
+  },
+];
+
 export const navigationRoutes = privateRoutes.map((route) => ({
   ...route,
   icon: RouteIcon({ path: route.path }).icon,
@@ -110,7 +125,7 @@ export const AppRoutes = createBrowserRouter([
   },
   {
     element: <PrivateRoute />,
-    children: privateRoutes,
+    children: [...privateRoutes, ...privateSubRoutes],
   },
   {
     path: "/logout",

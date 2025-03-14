@@ -1,6 +1,7 @@
-import { Logout, Menu } from "@mui/icons-material";
+import { HomeOutlined, Logout, Menu, NavigateNext } from "@mui/icons-material";
 import {
   Avatar,
+  Breadcrumbs,
   colors,
   IconButton,
   List,
@@ -15,10 +16,14 @@ import MuiDrawer from "@mui/material/Drawer";
 import { useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import lighthouse from "../assets/favicon_neutral.svg";
 import { useUserState } from "../hooks/useUserState";
-import { navigationRoutes } from "../routes/routes";
+import {
+  navigationRoutes,
+  privateRoutes,
+  privateSubRoutes,
+} from "../routes/routes";
 
 const drawerWidth = 320;
 
@@ -73,6 +78,7 @@ const Layout = ({ children }) => {
   const user = useAuthUser();
   const signOut = useSignOut();
   const navigate = useNavigate();
+  const location = window.location.pathname.split("/").slice(1);
   const { permissions } = useUserState().state;
 
   const isActive = (url) => window.location.pathname === url;
@@ -83,7 +89,6 @@ const Layout = ({ children }) => {
   };
 
   const hasPermission = (thePermissions) => {
-    console.log(permissions);
     if (!permissions || !permissions.length) {
       return false;
     }
@@ -187,7 +192,37 @@ const Layout = ({ children }) => {
             </IconButton>
           </div>
         </div>
-        <div className="max-h-[calc(100vh-4rem)] p-8 overflow-y-scroll">
+        <div className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6">
+          {location[0] !== "painel" && (
+            <Breadcrumbs
+              aria-label="breadcrumb"
+              className="items-center"
+              separator={<NavigateNext fontSize="small" className="mt-0.5" />}
+            >
+              <Link
+                key="base"
+                to="/"
+                className="text-sm text-gray-500 hover:text-gray-900"
+              >
+                <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
+              </Link>
+              {location.map((path, index) => (
+                <Link
+                  key={index}
+                  to={`/${path}`}
+                  className="text-sm text-gray-500 hover:text-gray-900"
+                >
+                  {
+                    [...privateRoutes, ...privateSubRoutes].find(
+                      (route) =>
+                        route.path === `/${path}` ||
+                        route.path === `/${location[index - 1]}/:id`,
+                    )?.label
+                  }
+                </Link>
+              ))}
+            </Breadcrumbs>
+          )}
           {children}
         </div>
       </div>

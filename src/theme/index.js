@@ -66,20 +66,6 @@ export const getTheme = (mode) => {
       fontFamily: "Onest",
     },
     components: {
-      MuiTabs: {
-        styleOverrides: {
-          root: {
-            backgroundColor: "#5A939F",
-          },
-        },
-      },
-      MuiTab: {
-        styleOverrides: {
-          root: {
-            color: "#FFF",
-          },
-        },
-      },
       MuiButton: {
         defaultProps: {
           disableElevation: true,
@@ -124,20 +110,6 @@ export const baseTheme = createTheme({
     fontFamily: "Onest",
   },
   components: {
-    MuiTabs: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#5A939F",
-        },
-      },
-    },
-    MuiTab: {
-      styleOverrides: {
-        root: {
-          color: "#FFF",
-        },
-      },
-    },
     MuiButton: {
       defaultProps: {
         disableElevation: true,
@@ -152,7 +124,15 @@ export const baseTheme = createTheme({
     MuiInput: {
       styleOverrides: {
         root: {
-          borderRadius: "1rem",
+          borderColor: "#e5e7eb",
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: "0.5rem",
+          borderColor: "#e5e7eb",
         },
       },
     },
