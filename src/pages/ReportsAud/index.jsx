@@ -30,11 +30,7 @@ const ReportsAud = () => {
           {permissions.some(
             (permissions) => permissions.name === "report_generate",
           ) ? (
-            <Button
-              colorScheme="blue"
-              marginBottom="6px"
-              onClick={() => setIsOpen(true)}
-            >
+            <Button marginBottom="6px" onClick={() => setIsOpen(true)}>
               GERAR RELATÓRIO
             </Button>
           ) : null}

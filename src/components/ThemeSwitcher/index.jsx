@@ -1,29 +1,27 @@
 import { Computer, DarkMode, LightMode } from "@mui/icons-material";
-import { Button, ButtonGroup, useTheme } from "@mui/material";
-import { useState } from "react";
+import { Button, ButtonGroup } from "@mui/material";
+import { useThemeMode } from "../../contexts/themeModeContext";
 
 const ThemeSwitcher = () => {
-  const theme = useTheme();
-  const [mode, setMode] = useState(theme.palette.mode);
+  const { mode, setMode } = useThemeMode();
 
   const handleModeChange = (value) => {
     setMode(value);
-    document.documentElement.setAttribute("data-theme", value);
   };
 
   const options = [
     {
-      icon: <Computer />,
+      icon: <Computer fontSize="small" />,
       value: "system",
       label: "Automático",
     },
     {
-      icon: <LightMode />,
+      icon: <LightMode fontSize="small" />,
       value: "light",
       label: "Claro",
     },
     {
-      icon: <DarkMode />,
+      icon: <DarkMode fontSize="small" />,
       value: "dark",
       label: "Escuro",
     },
@@ -33,13 +31,14 @@ const ThemeSwitcher = () => {
     <ButtonGroup
       variant="outlined"
       size="small"
-      color="primary"
+      color="default"
       disableElevation
     >
       {options.map((option) => (
         <Button
           className="aspect-square"
           key={option.value}
+          color={mode === option.value ? "primary" : "info"}
           variant={mode === option.value ? "contained" : "outlined"}
           onClick={() => handleModeChange(option.value)}
         >

@@ -11,12 +11,31 @@
   font-family: "Onest", sans-serif;
 }
 
+:root,
+[data-theme="light"] {
+  --background-color: #ffffff;
+  --foreground-color: #000000;
+}
+
+.dark,
+[data-theme="dark"] {
+  --background-color: #121212;
+  --foreground-color: #ffffff;
+}
+
 body {
   width: 100vw;
   height: 100vh;
   font: 14px;
   font-family: "Onest", sans-serif;
   overflow-x: hidden;
+  background-color: var(--background-color);
+  color: var(--foreground-color);
+}
+
+html {
+  background-color: var(--background-color);
+  color: var(--foreground-color);
 }
 
 h1,
