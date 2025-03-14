@@ -165,7 +165,7 @@ const Layout = ({ children }) => {
           <div className="p-4">
             <button
               aria-label="Perfil"
-              onClick={() => navigate("/my-permissions")}
+              onClick={() => navigate("/permissoes")}
               className="w-full text-left p-2 flex flex-row items-center border rounded-lg gap-2 hover:bg-gray-50"
             >
               <Avatar

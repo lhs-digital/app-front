@@ -2,7 +2,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import { useEffect } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import PageTitle from "../../components/PageTitle";
-import AuditSection from "./AuditSection";
+import AuditSection from "./auditoriasection";
 
 export const completionData = [
   { id: 0, value: Math.floor(Math.random() * 41), label: "Pendentes" },

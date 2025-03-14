@@ -126,7 +126,7 @@ const AuditSection = () => {
   const quickActions = [
     {
       icon: <Build fontSize="small" />,
-      fn: () => navigate("/audits"),
+      fn: () => navigate("/auditorias"),
       label: "Atividades",
       permissions: auditoriaPermissions,
     },
