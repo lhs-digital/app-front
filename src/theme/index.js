@@ -49,26 +49,14 @@ export const handleMode = (mode) => {
     const prefersDarkMode = window.matchMedia(
       "(prefers-color-scheme: dark)",
     ).matches;
-    if (prefersDarkMode) {
-      document.body.classList.add("dark");
-      return "dark";
-    } else {
-      document.body.classList.remove("dark");
-      return "light";
-    }
+    return prefersDarkMode ? "dark" : "light";
   }
-  if (mode === "dark") document.body.classList.add("dark");
-  if (mode === "light") document.body.classList.remove("dark");
+
   return mode;
 };
 
 export const getTheme = (mode) => {
-  console.log(mode);
   return createTheme({
-    colorSchemes: {
-      light: lightPalette,
-      dark: darkPalette,
-    },
     palette:
       handleMode(mode || "system") === "dark" ? darkPalette : lightPalette,
     typography: {
@@ -112,54 +100,3 @@ export const getTheme = (mode) => {
     },
   });
 };
-
-export const baseTheme = createTheme({
-  palette: lightPalette,
-  typography: {
-    fontFamily: "Onest",
-  },
-  components: {
-    MuiButton: {
-      defaultProps: {
-        disableElevation: true,
-        size: "large",
-      },
-      styleOverrides: {
-        root: {
-          borderRadius: "0.5rem",
-        },
-      },
-    },
-    MuiInput: {
-      styleOverrides: {
-        root: {
-          borderColor: "#e5e7eb",
-        },
-      },
-    },
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          borderRadius: "0.5rem",
-          borderColor: "#e5e7eb",
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: "0.75rem",
-          overflow: "clip",
-        },
-      },
-    },
-    MuiInputBase: {
-      styleOverrides: {
-        root: {
-          borderRadius: "0.5rem",
-          overflow: "clip",
-        },
-      },
-    },
-  },
-});

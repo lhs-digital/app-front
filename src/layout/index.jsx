@@ -17,7 +17,8 @@ import { useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { Link, useNavigate } from "react-router-dom";
-import lighthouse from "../assets/favicon_neutral.svg";
+import blackLogo from "../assets/lh_black.svg";
+import whiteLogo from "../assets/lh_white.svg";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { useThemeMode } from "../contexts/themeModeContext";
 import { useUserState } from "../hooks/useUserState";
@@ -195,7 +196,11 @@ const Layout = ({ children }) => {
       </Drawer>
       <div className="grow flex flex-col">
         <div className="h-16 border-b flex flex-row items-center justify-between px-4">
-          <img src={lighthouse} alt="Lighthouse" className="h-10 mb-1" />
+          <img
+            src={theme === "light" ? blackLogo : whiteLogo}
+            alt="Lighthouse"
+            className="h-8 mb-2"
+          />
           <div className="flex flex-row gap-2">
             <ThemeSwitcher />
           </div>
@@ -205,12 +210,17 @@ const Layout = ({ children }) => {
             <Breadcrumbs
               aria-label="breadcrumb"
               className="items-center"
-              separator={<NavigateNext fontSize="small" className="mt-0.5" />}
+              separator={
+                <NavigateNext
+                  fontSize="small"
+                  className="mt-0.5 text-gray-500 dark:text-gray-400"
+                />
+              }
             >
               <Link
                 key="base"
                 to="/"
-                className="text-sm text-gray-500 hover:text-[--foreground-color]"
+                className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color]"
               >
                 <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
               </Link>
@@ -218,7 +228,7 @@ const Layout = ({ children }) => {
                 <Link
                   key={index}
                   to={`/${path}`}
-                  className="text-sm text-gray-500 hover:text-[--foreground-color]"
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color] hover:underline"
                 >
                   {
                     [...privateRoutes, ...privateSubRoutes].find(

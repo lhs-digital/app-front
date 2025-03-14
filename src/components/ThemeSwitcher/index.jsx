@@ -31,13 +31,14 @@ const ThemeSwitcher = () => {
     <ButtonGroup
       variant="outlined"
       size="small"
-      color="primary"
+      color="default"
       disableElevation
     >
       {options.map((option) => (
         <Button
           className="aspect-square"
           key={option.value}
+          color={mode === option.value ? "primary" : "info"}
           variant={mode === option.value ? "contained" : "outlined"}
           onClick={() => handleModeChange(option.value)}
         >

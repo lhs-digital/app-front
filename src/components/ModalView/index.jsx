@@ -11,9 +11,9 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import api from "../../services/api";
-import { toast } from "react-toastify";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { toast } from "react-toastify";
+import api from "../../services/api";
 
 const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
   const [name, setName] = useState("");
@@ -28,7 +28,6 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
     const getData = async () => {
       try {
         if (user.isLighthouse) {
-
           const responseCompany = await api.get(`/companies/get_companies`);
           setCompanies(responseCompany?.data?.data);
 
@@ -50,7 +49,6 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
         setEmail(selectedUser?.email || "");
         setRole(selectedUser?.role?.id || "");
         setCompany(selectedUser?.company?.id || "");
-
       } catch (error) {
         console.error("Erro ao acessar as roles por empresa", error);
       }
@@ -63,7 +61,7 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
     try {
       const response = await api.get(`/roles/roles_from_company`, {
         params: {
-          company_id: companyId
+          company_id: companyId,
         },
       });
       setRoles(response?.data?.data);
@@ -84,7 +82,6 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
   const saveData = async () => {
     try {
       if (user.isLighthouse) {
-
         await api.put(`/users/${selectedUser.id}`, {
           name,
           email,
@@ -104,7 +101,6 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
     } catch (error) {
       console.error("Erro ao salvar usuário", error);
     }
-
   };
 
   const handleSave = () => {
@@ -119,12 +115,13 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
     onClose();
   };
 
-
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle>{
-        viewOnly ? `Visualizar Usuário: ${selectedUser.name}` : `Editar Usuário: ${selectedUser.name}`
-      }</DialogTitle>
+      <DialogTitle>
+        {viewOnly
+          ? `Visualizar Usuário: ${selectedUser.name}`
+          : `Editar Usuário: ${selectedUser.name}`}
+      </DialogTitle>
       <DialogContent className="w-[480px] flex flex-col gap-4">
         <div>
           <InputLabel htmlFor="name">Nome</InputLabel>
@@ -183,11 +180,7 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Voltar</Button>
-        {!viewOnly && (
-          <Button colorScheme="green" onClick={handleSave}>
-            Salvar
-          </Button>
-        )}
+        {!viewOnly && <Button onClick={handleSave}>Salvar</Button>}
       </DialogActions>
     </Dialog>
   );

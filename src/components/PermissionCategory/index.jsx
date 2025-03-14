@@ -1,6 +1,5 @@
 import { LabelOutlined } from "@mui/icons-material";
 import Checkbox from "@mui/material/Checkbox";
-import { handlePermissionName } from "../../services/utils";
 
 const PermissionCategory = ({
   category,
@@ -19,7 +18,7 @@ const PermissionCategory = ({
       </h2>
       <table className="w-full">
         <thead>
-          <tr className="text-left font-medium text-sm border-b [&>*]:py-4 [&>*]:px-4 bg-neutral-100 dark:bg-neutral-700/50">
+          <tr className="text-left font-medium text-sm border-b [&>*]:py-4 [&>*]:px-4 bg-neutral-500/20">
             <th className="w-1/3">Permissão</th>
             <th>Ativo</th>
           </tr>
@@ -27,7 +26,7 @@ const PermissionCategory = ({
         <tbody>
           {permissions.map((permission) => (
             <tr key={permission.id} className="[&>*]:py-2">
-              <td className="px-4">{handlePermissionName(permission.name)}</td>
+              <td className="px-4">{permission.label}</td>
               <td className="px-3">
                 <Checkbox
                   checked={selectedPermissions.some(
