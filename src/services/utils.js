@@ -19,16 +19,31 @@ export const formattedPriority = (priority) => {
   }
 };
 
-export const getPriorityColor = (priority) => {
+export const getPriorityColor = (priority, theme) => {
   switch (priority) {
     case 1:
-      return { color: colors.grey[700], backgroundColor: colors.grey[200] };
+      return {
+        color: theme === "light" ? colors.grey[700] : colors.grey[200],
+        backgroundColor:
+          theme === "light" ? colors.grey[200] : colors.grey[700],
+      };
     case 2:
-      return { color: colors.amber[600], backgroundColor: colors.amber[100] };
+      return {
+        color: theme === "light" ? colors.amber[600] : colors.amber[200],
+        backgroundColor:
+          theme === "light" ? colors.amber[100] : colors.amber[700],
+      };
     case 3:
-      return { color: colors.red[600], backgroundColor: colors.red[100] };
+      return {
+        color: theme === "light" ? colors.red[600] : colors.grey[50],
+        backgroundColor: theme === "light" ? colors.red[100] : colors.red[800],
+      };
     default:
-      return { color: colors.grey[600], backgroundColor: colors.grey[100] };
+      return {
+        color: theme === "light" ? colors.grey[700] : colors.grey[200],
+        backgroundColor:
+          theme === "light" ? colors.grey[200] : colors.grey[700],
+      };
   }
 };
 

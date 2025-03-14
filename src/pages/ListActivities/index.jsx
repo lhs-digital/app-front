@@ -8,14 +8,16 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField,
   TablePagination,
+  TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import ActivitieItem from "../../components/ActivitieItem/ActivitieItem";
 import PageTitle from "../../components/PageTitle";
+import { useThemeMode } from "../../contexts/themeModeContext";
 import api from "../../services/api";
 import { getPriorityColor, priorities } from "../../services/utils";
+import { handleMode } from "../../theme";
 
 const ListActivities = () => {
   const [data, setData] = useState([]);
@@ -31,6 +33,7 @@ const ListActivities = () => {
   const [per_page, setPer_page] = useState(20);
   const [priority, setPriority] = useState(-1);
   const [totalCount, setTotalCount] = useState(0);
+  const theme = handleMode(useThemeMode().mode);
 
   const [filterParams, setFilterParams] = useState({
     search: "",
@@ -90,7 +93,6 @@ const ListActivities = () => {
     setRefresh((prev) => !prev);
   };
 
-
   const handleFilter = () => {
     setFilterParams({
       search,
@@ -101,7 +103,6 @@ const ListActivities = () => {
     });
 
     setCurrentPage(1);
-    // setRefresh((prev) => !prev);
   };
 
   const handlePerPageChange = (e) => {
@@ -180,7 +181,11 @@ const ListActivities = () => {
         </Box>
         <Box className="col-span-1">
           <InputLabel>Status</InputLabel>
-          <Select value={status} onChange={(e) => setStatus(e.target.value)} fullWidth>
+          <Select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            fullWidth
+          >
             <MenuItem value={-1}>Todos</MenuItem>
             <MenuItem value={0}>Pendentes</MenuItem>
             <MenuItem value={1}>Concluídas</MenuItem>
@@ -232,7 +237,7 @@ const ListActivities = () => {
               width="12px"
               height="12px"
               borderRadius="30%"
-              bgcolor={colors.orange[100]}
+              bgcolor={colors.orange[theme === "light" ? 100 : 500]}
             />
             <p className="text-sm">Atividade Pendente</p>
           </Box>
@@ -241,7 +246,7 @@ const ListActivities = () => {
               width="12px"
               height="12px"
               borderRadius="30%"
-              bgcolor={colors.green[100]}
+              bgcolor={colors.green[theme === "light" ? 100 : 500]}
             />
             <p className="text-sm">Atividade Concluída</p>
           </Box>
@@ -254,7 +259,9 @@ const ListActivities = () => {
                 height="12px"
                 borderRadius="30%"
                 sx={{
-                  backgroundColor: getPriorityColor(item.value).color,
+                  backgroundColor: getPriorityColor(item.value, theme)[
+                    theme === "light" ? "color" : "backgroundColor"
+                  ],
                 }}
               />
               <p className="text-sm">Prioridade {item.label}</p>

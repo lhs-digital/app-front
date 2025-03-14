@@ -12,17 +12,21 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
+import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
 import {
   dateFormatted,
   formattedPriority,
   getPriorityColor,
 } from "../../services/utils";
+import { handleMode } from "../../theme";
 import ModalFormClient from "../ModalFormClient";
 import ViewActivitie from "../ViewActivitie";
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const [dataView, setDataView] = useState(activitie);
+  const { mode: themeMode } = useThemeMode();
+  const theme = handleMode(themeMode);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { permissions } = useUserState().state;
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +53,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
       borderRadius="8px"
       gap={2}
       padding="24px 16px 16px 16px"
-      bgcolor="white"
       position="relative"
       overflow="clip"
     >
@@ -57,7 +60,13 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
         className="absolute h-[8px] left-0 right-0 top-0"
         style={{
           backgroundColor:
-            activitie?.status === 1 ? colors.green[100] : colors.orange[100],
+            activitie?.status === 1
+              ? theme === "light"
+                ? colors.green[100]
+                : colors.green[600]
+              : theme === "light"
+                ? colors.orange[100]
+                : colors.orange[500],
         }}
       />
       <ModalFormClient
@@ -78,16 +87,16 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
         </p>
         <Box display="flex" gap={2}>
           <Tooltip
-            title={`Prioridade: ${formattedPriority(activitie?.priority)}`}
+            title={`Prioridade: ${formattedPriority(activitie?.priority, theme)}`}
             aria-label="Prioridade"
           >
             <Chip
               size="large"
-              sx={getPriorityColor(activitie?.priority)}
+              sx={getPriorityColor(activitie?.priority, theme)}
               label={
                 <div>
                   {isMobile ? "" : "Prioridade Geral:"}{" "}
-                  <b>{formattedPriority(activitie?.priority)}</b>
+                  <b>{formattedPriority(activitie?.priority, theme)}</b>
                 </div>
               }
             />
@@ -98,7 +107,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 <button
                   onClick={handleView}
                   className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
-                  style={getPriorityColor(activitie?.priority)}
+                  style={getPriorityColor(activitie?.priority, theme)}
                 >
                   <Build fontSize="small" />
                 </button>
@@ -109,8 +118,10 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                   onClick={handleView}
                   className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
                   style={{
-                    color: colors.green[500],
-                    backgroundColor: colors.green[100],
+                    color:
+                      theme === "light" ? colors.green[600] : colors.green[100],
+                    backgroundColor:
+                      theme === "light" ? colors.green[100] : colors.green[600],
                   }}
                 >
                   <Info fontSize="small" />
@@ -121,7 +132,8 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
       </Box>
       <Divider
         sx={{
-          borderColor: "gray.300",
+          borderColor:
+            handleMode(themeMode) === "light" ? "grey.300" : "grey.700",
           width: "100%",
           alignSelf: "center",
           borderWidth: "1px",
@@ -131,7 +143,11 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
         <div className="flex flex-row items-center gap-2">
           <p className="text-sm">
             Campos inválidos{" "}
-            <span style={{ color: colors.red[500] }}>
+            <span
+              style={{
+                color: theme === "light" ? colors.red[500] : colors.red[400],
+              }}
+            >
               ({activitie?.columns.length})
             </span>
             :{" "}
@@ -143,7 +159,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
               variant="outlined"
               label={col?.label}
               sx={{
-                color: getPriorityColor(col?.priority).color,
+                color: getPriorityColor(col?.priority, theme).color,
               }}
             >
               <p className="text-sm">&quot;{col?.label}&quot;</p>
@@ -157,7 +173,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 .join(", ")}
               aria-label="Mais campos"
             >
-              <div className="flex flex-col items-center justify-center bg-neutral-300 aspect-square rounded-full px-1 text-xs">
+              <div className="flex flex-col items-center justify-center bg-neutral-300 dark:bg-neutral-700 aspect-square rounded-full px-1 text-xs">
                 <p className="mr-0.5">+{activitie?.columns.length - 2}</p>
               </div>
             </Tooltip>

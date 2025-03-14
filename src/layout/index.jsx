@@ -18,12 +18,15 @@ import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { Link, useNavigate } from "react-router-dom";
 import lighthouse from "../assets/favicon_neutral.svg";
+import ThemeSwitcher from "../components/ThemeSwitcher";
+import { useThemeMode } from "../contexts/themeModeContext";
 import { useUserState } from "../hooks/useUserState";
 import {
   navigationRoutes,
   privateRoutes,
   privateSubRoutes,
 } from "../routes/routes";
+import { handleMode } from "../theme";
 
 const drawerWidth = 320;
 
@@ -77,10 +80,10 @@ const Layout = ({ children }) => {
   const [open, setOpen] = useState(false);
   const user = useAuthUser();
   const signOut = useSignOut();
+  const theme = handleMode(useThemeMode().mode);
   const navigate = useNavigate();
   const location = window.location.pathname.split("/").slice(1);
   const { permissions } = useUserState().state;
-
   const isActive = (url) => window.location.pathname === url;
 
   const handleLogout = async () => {
@@ -143,7 +146,9 @@ const Layout = ({ children }) => {
                       sx={[
                         { minWidth: 0, justifyContent: "center" },
                         open ? { mr: 3 } : { mr: "auto" },
-                        isActive(item.path) && { color: colors.grey[900] },
+                        isActive(item.path) && {
+                          color: colors.grey[theme === "light" ? 900 : 200],
+                        },
                       ]}
                     >
                       {isActive(item.path) ? item.activeIcon : item.icon}
@@ -182,14 +187,17 @@ const Layout = ({ children }) => {
             />
           </div>
         )}
+        <div className="py-2 flex flex-col items-center justify-center">
+          <IconButton color="info" onClick={handleLogout}>
+            <Logout fontSize="small" />
+          </IconButton>
+        </div>
       </Drawer>
       <div className="grow flex flex-col">
         <div className="h-16 border-b flex flex-row items-center justify-between px-4">
           <img src={lighthouse} alt="Lighthouse" className="h-10 mb-1" />
           <div className="flex flex-row gap-2">
-            <IconButton color="info" onClick={handleLogout}>
-              <Logout />
-            </IconButton>
+            <ThemeSwitcher />
           </div>
         </div>
         <div className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6">
@@ -202,7 +210,7 @@ const Layout = ({ children }) => {
               <Link
                 key="base"
                 to="/"
-                className="text-sm text-gray-500 hover:text-gray-900"
+                className="text-sm text-gray-500 hover:text-[--foreground-color]"
               >
                 <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
               </Link>
@@ -210,7 +218,7 @@ const Layout = ({ children }) => {
                 <Link
                   key={index}
                   to={`/${path}`}
-                  className="text-sm text-gray-500 hover:text-gray-900"
+                  className="text-sm text-gray-500 hover:text-[--foreground-color]"
                 >
                   {
                     [...privateRoutes, ...privateSubRoutes].find(

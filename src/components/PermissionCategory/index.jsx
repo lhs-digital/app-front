@@ -11,7 +11,7 @@ const PermissionCategory = ({
 }) => {
   return (
     <div className="flex flex-col">
-      <h2 className="font-semibold border-b-2 border-b-black px-4 py-4 border-t">
+      <h2 className="font-semibold border-b-2 border-b-black dark:border-b-white px-4 py-4 border-t dark:border-t-white/20">
         <span>
           <LabelOutlined fontSize="small" className="mr-2 mb-0.5" />
         </span>
@@ -19,7 +19,7 @@ const PermissionCategory = ({
       </h2>
       <table className="w-full">
         <thead>
-          <tr className="text-left font-medium text-sm border-b [&>*]:py-4 [&>*]:px-4 bg-neutral-100">
+          <tr className="text-left font-medium text-sm border-b [&>*]:py-4 [&>*]:px-4 bg-neutral-100 dark:bg-neutral-700/50">
             <th className="w-1/3">Permissão</th>
             <th>Ativo</th>
           </tr>

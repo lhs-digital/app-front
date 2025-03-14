@@ -2,6 +2,7 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      backgroundColor: "var(--background-color)",
       colors: {
         primary: {
           // 100: "#E0FBFC",
