@@ -1,7 +1,8 @@
-import { Logout, Menu } from "@mui/icons-material";
+import { HomeOutlined, Logout, Menu, NavigateNext } from "@mui/icons-material";
 import {
   Avatar,
   Box,
+  Breadcrumbs,
   colors,
   IconButton,
   List,
@@ -16,10 +17,18 @@ import MuiDrawer from "@mui/material/Drawer";
 import { useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
-import { useNavigate } from "react-router-dom";
-import lighthouse from "../assets/favicon_neutral.svg";
+import { Link, useNavigate } from "react-router-dom";
+import blackLogo from "../assets/lh_black.svg";
+import whiteLogo from "../assets/lh_white.svg";
+import ThemeSwitcher from "../components/ThemeSwitcher";
+import { useThemeMode } from "../contexts/themeModeContext";
 import { useUserState } from "../hooks/useUserState";
-import { navigationRoutes } from "../routes/routes";
+import {
+  navigationRoutes,
+  privateRoutes,
+  privateSubRoutes,
+} from "../routes/routes";
+import { handleMode } from "../theme";
 
 const drawerWidth = 320;
 
@@ -73,9 +82,10 @@ const Layout = ({ children }) => {
   const [open, setOpen] = useState(false);
   const user = useAuthUser();
   const signOut = useSignOut();
+  const theme = handleMode(useThemeMode().mode);
   const navigate = useNavigate();
+  const location = window.location.pathname.split("/").slice(1);
   const { permissions } = useUserState().state;
-
   const isActive = (url) => window.location.pathname === url;
 
   const handleLogout = async () => {
@@ -138,7 +148,9 @@ const Layout = ({ children }) => {
                       sx={[
                         { minWidth: 0, justifyContent: "center" },
                         open ? { mr: 3 } : { mr: "auto" },
-                        isActive(item.path) && { color: colors.grey[900] },
+                        isActive(item.path) && {
+                          color: colors.grey[theme === "light" ? 900 : 200],
+                        },
                       ]}
                     >
                       {isActive(item.path) ? item.activeIcon : item.icon}
@@ -154,7 +166,7 @@ const Layout = ({ children }) => {
           <div className="p-4">
             <button
               aria-label="Perfil"
-              onClick={() => navigate("/my-permissions")}
+              onClick={() => navigate("/permissoes")}
               className="w-full text-left p-2 flex flex-row items-center border rounded-lg gap-2 hover:bg-gray-50"
             >
               <Avatar
@@ -177,6 +189,11 @@ const Layout = ({ children }) => {
             />
           </div>
         )}
+        <div className="py-2 flex flex-col items-center justify-center">
+          <IconButton color="info" onClick={handleLogout}>
+            <Logout fontSize="small" />
+          </IconButton>
+        </div>
       </Drawer>
       <div className="grow flex flex-col">
         <div className="h-16 border-b flex flex-row items-center justify-between px-4">
@@ -185,12 +202,45 @@ const Layout = ({ children }) => {
             <p className="text-xl font-bold">{user?.company?.name}</p>
           </Box>
           <div className="flex flex-row gap-2">
-            <IconButton color="info" onClick={handleLogout}>
-              <Logout />
-            </IconButton>
+            <ThemeSwitcher />
           </div>
         </div>
-        <div className="max-h-[calc(100vh-4rem)] p-8 overflow-y-scroll">
+        <div className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6">
+          {location[0] !== "painel" && (
+            <Breadcrumbs
+              aria-label="breadcrumb"
+              className="items-center"
+              separator={
+                <NavigateNext
+                  fontSize="small"
+                  className="mt-0.5 text-gray-500 dark:text-gray-400"
+                />
+              }
+            >
+              <Link
+                key="base"
+                to="/"
+                className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color]"
+              >
+                <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
+              </Link>
+              {location.map((path, index) => (
+                <Link
+                  key={index}
+                  to={`/${path}`}
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color] hover:underline"
+                >
+                  {
+                    [...privateRoutes, ...privateSubRoutes].find(
+                      (route) =>
+                        route.path === `/${path}` ||
+                        route.path === `/${location[index - 1]}/:id`,
+                    )?.label
+                  }
+                </Link>
+              ))}
+            </Breadcrumbs>
+          )}
           {children}
         </div>
       </div>

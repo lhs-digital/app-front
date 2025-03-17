@@ -15,6 +15,7 @@ import PasswordUpdate from "../pages/PasswordUpdate";
 import Priorities from "../pages/Priorities";
 import RecoverPassword from "../pages/RecoverPassword";
 import Roles from "../pages/Roles";
+import RoleView from "../pages/RoleView";
 import SignIn from "../pages/SignIn";
 import Users from "../pages/Users";
 import { pagePermissions } from "../services/permissions";
@@ -102,6 +103,11 @@ export const privateSubRoutes = [
     label: "Criar cliente",
     path: "/clientes/criar",
     element: <CreateClient />,
+  },
+  {
+    label: "Cargo",
+    path: "/papeis/:id",
+    element: <RoleView />,
   },
 ];
 

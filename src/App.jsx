@@ -1,30 +1,41 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { StrictMode } from "react";
 import AuthProvider from "react-auth-kit";
 import createStore from "react-auth-kit/createStore";
 import { RouterProvider } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ThemeModeProvider } from "./contexts/themeModeContext";
 import { UserStateProvider } from "./contexts/userState";
 import { AppRoutes } from "./routes/routes";
-import { baseTheme } from "./theme";
+import { qc } from "./services/queryClient";
 
 const store = createStore({
   authType: "localstorage",
   authName: "_auth",
 });
 
-const App = () => {
+const Root = () => {
   return (
-    <ThemeProvider theme={baseTheme}>
-      <CssBaseline />
-      <AuthProvider store={store}>
-        <UserStateProvider>
-          <RouterProvider router={AppRoutes} />
-          <ToastContainer />
-        </UserStateProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <StrictMode>
+      <ThemeModeProvider>
+        <App />
+      </ThemeModeProvider>
+    </StrictMode>
   );
 };
 
-export default App;
+function App() {
+  return (
+    <QueryClientProvider client={qc}>
+      <AuthProvider store={store}>
+        <UserStateProvider>
+          <RouterProvider router={AppRoutes} />
+          <ToastContainer position="bottom-right" />
+        </UserStateProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default Root;

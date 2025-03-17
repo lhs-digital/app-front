@@ -103,7 +103,7 @@ const Sidebar = ({ active }) => {
             <SidebarItem Icon={FaPaperclip} Text="Relatórios de Auditorias" />
           </Link>
         ) : null}
-        <Link to="/my-permissions">
+        <Link to="/permissoes">
           <SidebarItem Icon={FaRegSun} Text="Minhas Permissões" />
         </Link>
         {hasPermission("view_any_logs") ? (
