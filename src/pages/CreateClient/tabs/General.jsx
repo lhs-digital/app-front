@@ -1,4 +1,4 @@
-import { Box, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Box, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 
 const General = () => {
@@ -23,6 +23,7 @@ const General = () => {
           <MenuItem value="F">Física</MenuItem>
           <MenuItem value="J">Jurídica</MenuItem>
         </Select>
+        {errors.type && <FormHelperText error>{errors.type.message}</FormHelperText>}
       </Box>
       <Box className="lg:col-span-3">
         <InputLabel required>
@@ -104,6 +105,7 @@ const General = () => {
           <MenuItem value={8}>Igrejas e templos de qualquer natureza</MenuItem>
           <MenuItem value={9}>Outros</MenuItem>
         </Select>
+        {errors.client_type && <FormHelperText error>{errors.client_type.message}</FormHelperText>}
       </Box>
       {watch("type") === "J" && (
         <Box className="lg:col-span-2">
@@ -118,6 +120,7 @@ const General = () => {
             <MenuItem value={1}>Sim</MenuItem>
             <MenuItem value={0}>Não</MenuItem>
           </Select>
+          {errors.icms_contributor && <FormHelperText error>{errors.icms_contributor.message}</FormHelperText>}
         </Box>
       )}
       {watch("type") === "F" && (
@@ -181,6 +184,7 @@ const General = () => {
             <MenuItem value={1}>Masculino</MenuItem>
             <MenuItem value={0}>Feminino</MenuItem>
           </Select>
+          {errors.sex && <FormHelperText error>{errors.sex.message}</FormHelperText>}
         </Box>
       )}
       {watch("type") === "F" && (
@@ -188,7 +192,7 @@ const General = () => {
           <InputLabel required>Profissão</InputLabel>
           <TextField
             type="text"
-            {...register("nationality", {
+            {...register("profession", {
               required: "Profissão é obrigatória",
             })}
             fullWidth
@@ -213,6 +217,7 @@ const General = () => {
           <MenuItem value={5}>Semi-público</MenuItem>
           <MenuItem value={6}>Outros</MenuItem>
         </Select>
+        {errors.subscriber_type && <FormHelperText error>{errors.subscriber_type.message}</FormHelperText>}
       </Box>
       {watch("type") === "J" && (
         <Box className="lg:col-span-4">

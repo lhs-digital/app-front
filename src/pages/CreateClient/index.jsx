@@ -1,8 +1,9 @@
-import { CreateOutlined, Save } from "@mui/icons-material";
+import { CreateOutlined, KeyboardReturn, Save } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Tab } from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import PageTitle from "../../components/PageTitle";
 import {
   address,
@@ -13,6 +14,13 @@ import {
   sale,
 } from "./defaults";
 import General from "./tabs/General";
+import Address from "./tabs/Address";
+import Contact from "./tabs/Contact";
+import Crm from "./tabs/Crm";
+import Complementary from "./tabs/Complementary";
+import Documentation from "./tabs/Documentation";
+import Contract from "./tabs/Contract";
+
 const CreateClient = () => {
   const [activeTab, setActiveTab] = useState(1);
   const methods = useForm({
@@ -20,11 +28,13 @@ const CreateClient = () => {
       ...general,
       ...contact,
       ...complimentary,
-      address,
-      sale,
-      contract,
+      ...address,
+      ...sale,
+      ...contract,
     },
   });
+
+  const navigate = useNavigate();
 
   const onSubmit = (data) => {
     console.log(data);
@@ -40,6 +50,16 @@ const CreateClient = () => {
           title="Cadastro de cliente"
           icon={<CreateOutlined />}
           buttons={[
+            <Button
+            key="return-clients-button"
+            type="submit"
+            variant="contained"
+            color="default"
+            startIcon={<KeyboardReturn />}
+            onClick={() => navigate("/clientes")}
+          >
+            VOLTAR
+          </Button>,
             <Button
               key="create-client-button"
               type="submit"
@@ -68,22 +88,22 @@ const CreateClient = () => {
             <General />
           </TabPanel>
           <TabPanel value={2} sx={{ padding: 0 }}>
-            teste
+            <Address />
           </TabPanel>
           <TabPanel value={3} sx={{ padding: 0 }}>
-            teste
+            <Contact />
           </TabPanel>
           <TabPanel value={4} sx={{ padding: 0 }}>
-            teste
+            <Crm />
           </TabPanel>
           <TabPanel value={5} sx={{ padding: 0 }}>
-            teste
+            <Complementary />
           </TabPanel>
           <TabPanel value={6} sx={{ padding: 0 }}>
-            teste
+            <Contract />
           </TabPanel>
           <TabPanel value={7} sx={{ padding: 0 }}>
-            teste
+            <Documentation />
           </TabPanel>
         </TabContext>
       </form>

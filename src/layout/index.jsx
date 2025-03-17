@@ -1,6 +1,7 @@
 import { HomeOutlined, Logout, Menu, NavigateNext } from "@mui/icons-material";
 import {
   Avatar,
+  Box,
   Breadcrumbs,
   colors,
   IconButton,
@@ -196,11 +197,10 @@ const Layout = ({ children }) => {
       </Drawer>
       <div className="grow flex flex-col">
         <div className="h-16 border-b flex flex-row items-center justify-between px-4">
-          <img
-            src={theme === "light" ? blackLogo : whiteLogo}
-            alt="Lighthouse"
-            className="h-8 mb-2"
-          />
+          <Box className="flex flex-row gap-2 items-center">
+            <img src={lighthouse} alt="Lighthouse" className="h-10 mb-1" />
+            <p className="text-xl font-bold">{user?.company?.name}</p>
+          </Box>
           <div className="flex flex-row gap-2">
             <ThemeSwitcher />
           </div>
