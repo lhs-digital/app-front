@@ -32,8 +32,11 @@ export const getPriorityColor = (priority) => {
   }
 };
 
-export const dateFormatted = (date) =>
-  new Date(date).toLocaleDateString("pt-BR");
+export const dateFormatted = (date) => {
+  return new Date(date).toLocaleDateString("pt-BR", {
+    timeZone: "UTC",
+  });
+};
 
 export const validarEmail = (email) => {
   const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

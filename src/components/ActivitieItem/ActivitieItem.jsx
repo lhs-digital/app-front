@@ -192,9 +192,10 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
         marginLeft="auto"
       >
         <Box>
-          {activitie?.status === true ? (
+          {activitie?.status === 1 ? (
             <Typography variant="body2" color="textSecondary">
-              Auditoria atualizada em: {dateFormatted(activitie?.updated_at)}
+              Corrigido em: {dateFormatted(activitie?.updated_at)}
+              {console.log(activitie)}
             </Typography>
           ) : (
             <Typography variant="body2" color="textSecondary">

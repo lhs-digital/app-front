@@ -71,4 +71,11 @@ const contract = {
   unproductive_visit_fee: "",
 };
 
-export { address, complimentary, contact, contract, general, sale };
+const documentation = {
+  rg_cpf: "",
+  residence_proof: "",
+  signed_contract: "",
+  equipment_loan: "",
+};
+
+export { address, complimentary, contact, contract, general, sale, documentation };

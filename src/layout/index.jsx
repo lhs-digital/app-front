@@ -1,6 +1,7 @@
 import { Logout, Menu } from "@mui/icons-material";
 import {
   Avatar,
+  Box,
   colors,
   IconButton,
   List,
@@ -83,7 +84,6 @@ const Layout = ({ children }) => {
   };
 
   const hasPermission = (thePermissions) => {
-    console.log(permissions);
     if (!permissions || !permissions.length) {
       return false;
     }
@@ -180,7 +180,10 @@ const Layout = ({ children }) => {
       </Drawer>
       <div className="grow flex flex-col">
         <div className="h-16 border-b flex flex-row items-center justify-between px-4">
-          <img src={lighthouse} alt="Lighthouse" className="h-10 mb-1" />
+          <Box className="flex flex-row gap-2 items-center">
+            <img src={lighthouse} alt="Lighthouse" className="h-10 mb-1" />
+            <p className="text-xl font-bold">{user?.company?.name}</p>
+          </Box>
           <div className="flex flex-row gap-2">
             <IconButton color="info" onClick={handleLogout}>
               <Logout />
