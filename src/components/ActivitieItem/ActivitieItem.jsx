@@ -211,7 +211,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
           {activitie?.status === 1 ? (
             <Typography variant="body2" color="textSecondary">
               Corrigido em: {dateFormatted(activitie?.updated_at)}
-              {console.log(activitie)}
             </Typography>
           ) : (
             <Typography variant="body2" color="textSecondary">
