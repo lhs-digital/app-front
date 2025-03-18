@@ -21,13 +21,16 @@ import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useNavigate } from "react-router-dom";
 import ModalReport from "../../components/ModalReport";
+import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import { handleMode } from "../../theme";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
+  const theme = handleMode(useThemeMode().mode);
   const user = useAuthUser();
   const [data, setData] = useState([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState(
@@ -282,14 +285,15 @@ const AuditSection = () => {
                       <button
                         className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-gray-500/25"
                         style={{
-                          backgroundColor: colors.grey[900],
-                          color: colors.grey[50],
+                          backgroundColor:
+                            theme === "light" ? colors.grey[900] : "#fff",
+                          color: colors.grey[theme === "light" ? 50 : 900],
                         }}
                         onClick={action.fn}
                       >
                         {action.icon}
                       </button>
-                      <label className="text-xs text-gray-500">
+                      <label className="text-xs text-gray-500 dark:text-[--foreground-color]">
                         {action.label}
                       </label>
                     </div>
@@ -302,14 +306,15 @@ const AuditSection = () => {
                     <button
                       className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-gray-500/25"
                       style={{
-                        backgroundColor: colors.grey[900],
-                        color: colors.grey[50],
+                        backgroundColor:
+                          theme === "light" ? colors.grey[900] : "#fff",
+                        color: colors.grey[theme === "light" ? 50 : 900],
                       }}
                       onClick={action.fn}
                     >
                       {action.icon}
                     </button>
-                    <label className="text-xs text-gray-500">
+                    <label className="text-xs text-gray-500 dark:text-[--foreground-color]">
                       {action.label}
                     </label>
                   </div>
