@@ -51,7 +51,6 @@ const PasswordUpdate = () => {
       });
 
       toast.success("Senha alterada com sucesso!");
-
     } catch (error) {
       toast.error("Erro ao tentar alterar a senha");
     } finally {
@@ -66,7 +65,7 @@ const PasswordUpdate = () => {
       <div className="absolute login-bg top-0 left-0 w-screen h-screen opacity-40 grayscale" />
       <form
         onSubmit={handleSubmit}
-        className="z-20 bg-white shadow-lg shadow-white/50 flex flex-col gap-4 w-[95vw] sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 border p-8 rounded-lg"
+        className="z-20 bg-[--background-color] shadow-lg shadow-white/50 flex flex-col gap-4 w-[95vw] sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 border p-8 rounded-lg"
       >
         <h1 className="text-2xl">Nova Senha</h1>
         <p>Preencha e confirme sua nova senha</p>
