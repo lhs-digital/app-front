@@ -21,20 +21,29 @@ const RoleView = () => {
   const { isLighthouse } = useUserState().state;
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
+  const { data: companies, isFetched: isCompanyFetched } = useQuery({
+    queryKey: ["companies"],
+    queryFn: async () => {
+      const response = await api.get("/companies");
+      return response.data.data;
+    },
+  });
+
   const { data: role } = useQuery({
     queryKey: ["role", id],
     queryFn: async () => {
       const response = await api.get(`/roles/${id}`);
       return response.data.data;
     },
-    enabled: !isCreating,
+    enabled: !isCreating && isCompanyFetched,
   });
 
   useEffect(() => {
     if (!role) return;
+    console.log("role", role);
     methods.setValue("name", role.name);
     methods.setValue("nivel", role.nivel);
-    methods.setValue("company.name", role.company.name);
+    methods.setValue("company", role.company);
     setSelectedPermissions(role.permissions);
   }, [role]);
 
@@ -50,14 +59,6 @@ const RoleView = () => {
       });
 
       return formatted;
-    },
-  });
-
-  const { data: companies } = useQuery({
-    queryKey: ["companies"],
-    queryFn: async () => {
-      const response = await api.get("/companies");
-      return response.data.data;
     },
   });
 
@@ -78,7 +79,7 @@ const RoleView = () => {
       return toast.error("Erro ao criar o cargo");
     },
     onSettled: (data) => {
-      navigate(`/cargos/${data.data.id}`);
+      navigate(`/papeis/${data.data.id}`);
     },
   });
 
@@ -109,15 +110,15 @@ const RoleView = () => {
       return toast.error("Preencha todos os campos corretamente");
     }
 
-    console.log("data", {
-      ...data,
-      permissions: selectedPermissions.map((permission) => permission.id),
-    });
-
-    if (isCreating) return createRole(data);
+    if (isCreating)
+      return createRole({
+        ...data,
+        company_id: data.company.id,
+      });
 
     return updateRole({
       ...data,
+      company_id: data.company.id,
       permissions: selectedPermissions.map((permission) => permission.id),
     });
   };
@@ -194,32 +195,54 @@ const RoleView = () => {
               }}
             />
           </FormField>
-          {isLighthouse && (
-            <FormField
-              label="Empresa"
-              containerClass="col-span-2"
-              required={isCreating}
-            >
-              <Controller
-                control={methods.control}
-                name="company_id"
-                render={({ field }) => (
-                  <Autocomplete
-                    {...field}
-                    className="col-span-8"
-                    noOptionsText="Nenhuma empresa encontrada."
-                    options={companies || []}
-                    getOptionLabel={(option) => option.name}
-                    getOptionKey={(option) => option.id}
-                    loadingText="Carregando..."
-                    readOnly={!isEditing && !isCreating}
-                    renderInput={(params) => <TextField {...params} />}
-                    onChange={(e, newValue) => field.onChange(newValue.id)}
-                  />
-                )}
-              />
-            </FormField>
-          )}
+          {isLighthouse ? (
+            isCreating || isEditing ? (
+              <FormField
+                label="Empresa"
+                containerClass="col-span-2"
+                required={isCreating}
+              >
+                <Controller
+                  control={methods.control}
+                  name="company"
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      className="col-span-8"
+                      noOptionsText="Nenhuma empresa encontrada."
+                      options={companies || []}
+                      getOptionLabel={(option) => option.name}
+                      getOptionKey={(option) => option.id}
+                      loadingText="Carregando..."
+                      readOnly={!isEditing && !isCreating}
+                      renderInput={(params) => <TextField {...params} />}
+                      onChange={(e, newValue) => field.onChange(newValue)}
+                    />
+                  )}
+                />
+              </FormField>
+            ) : (
+              <FormField
+                label="Empresa"
+                containerClass="col-span-2"
+                required={isCreating}
+              >
+                <TextField
+                  fullWidth
+                  name="company.name"
+                  type="text"
+                  {...methods.register("company.name", {
+                    required: "Campo obrigatório",
+                  })}
+                  slotProps={{
+                    input: {
+                      readOnly: !isEditing && !isCreating,
+                    },
+                  }}
+                />
+              </FormField>
+            )
+          ) : null}
           <div className="col-span-full flex flex-col">
             <h2 className="text-lg font-semibold mb-4">Permissões</h2>
             {permissions &&
