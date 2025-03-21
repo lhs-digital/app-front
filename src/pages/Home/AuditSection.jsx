@@ -25,6 +25,7 @@ import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import { handleMode } from "../../theme";
+import { dateFormatted } from "../../services/utils";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,6 +34,7 @@ const AuditSection = () => {
   const theme = handleMode(useThemeMode().mode);
   const user = useAuthUser();
   const [data, setData] = useState([]);
+  const [dataLastAudit, setDataLastAudit] = useState([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState(
     user.isLighthouse ? null : user.company.id,
   );
@@ -47,6 +49,7 @@ const AuditSection = () => {
       try {
         const response = await api.get(`/auditing/summary`);
         const data = response?.data?.data;
+        setDataLastAudit(data[0].last_audit_date);
         if (Array.isArray(data)) {
           setData(data);
         } else {
@@ -220,23 +223,28 @@ const AuditSection = () => {
               </Select>
             </FormControl>
           </Card>
-
-          <Card
-            className="p-4 flex flex-col gap-2 justify-center"
-            variant="outlined"
-          >
-            <p>Entidades auditadas</p>
-            <p className="text-lg lg:text-2xl font-bold">
-              {stats.audittedEntities}
-            </p>
-          </Card>
-          <Card
-            className="p-4 flex flex-col gap-2 justify-center"
-            variant="outlined"
-          >
-            <p>Última auditoria</p>
-            <p className="text-xl font-bold">{stats.latestAudit}</p>
-          </Card>
+          {
+            selectedTableId && (
+              <Card
+                className="p-4 flex flex-col gap-2 justify-center"
+                variant="outlined"
+              >
+                <p>Entidades auditadas</p>
+                <p className="text-lg lg:text-2xl font-bold">
+                  {stats.audittedEntities}
+                </p>
+              </Card>
+            )}
+          {
+            selectedTableId && (
+              <Card
+                className="p-4 flex flex-col gap-2 justify-center"
+                variant="outlined"
+              >
+                <p>Última auditoria</p>
+                <p className="text-xl font-bold">{dateFormatted(dataLastAudit)}</p>
+              </Card>
+            )}
           {hasPermission(["report_generate"]) && (
             <Card
               className="p-4 flex flex-col gap-2 justify-center"

@@ -40,7 +40,6 @@ const RoleView = () => {
 
   useEffect(() => {
     if (!role) return;
-    console.log("role", role);
     methods.setValue("name", role.name);
     methods.setValue("nivel", role.nivel);
     methods.setValue("company", role.company);

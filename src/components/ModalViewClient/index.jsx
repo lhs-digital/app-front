@@ -32,7 +32,7 @@ const ModalViewClient = ({ selectedUser, isOpen, onClose }) => {
           </p>
           <p>
             <b>Data Nascimento:</b>{" "}
-            {selectedUser?.data_nascimento || "Não disponível"}
+            {dateFormatted(selectedUser?.data_nascimento) || "Não disponível"}
           </p>
           <p>
             <b>Whatsapp:</b> {selectedUser?.whatsapp || "Não disponível"}

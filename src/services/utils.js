@@ -48,9 +48,27 @@ export const getPriorityColor = (priority, theme) => {
 };
 
 export const dateFormatted = (date) => {
-  return new Date(date).toLocaleDateString("pt-BR", {
-    timeZone: "UTC",
-  });
+  if (!date) {
+    return "Data não informada";
+  }
+
+  if (date.includes(" ")) {
+    const dateObj = new Date(date.includes(" ") ? date.replace(" ", "T") + "Z" : date);
+    const datePart = dateObj.toLocaleDateString("pt-BR", {
+      timeZone: "UTC",
+    });
+    const timePart = dateObj.toLocaleTimeString("pt-BR", {
+      timeZone: "UTC",
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    return `${datePart} às ${timePart}`;
+  } else {
+    const dateObj = new Date(date);
+    return dateObj.toLocaleDateString("pt-BR", {
+      timeZone: "UTC",
+    });
+  }
 };
 
 export const validarEmail = (email) => {
