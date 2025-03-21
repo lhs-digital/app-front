@@ -49,6 +49,7 @@ const Roles = () => {
           params: { search: search },
         },
       );
+      setTotalCount(response.data.meta.total);
       return response.data.data;
     },
   });

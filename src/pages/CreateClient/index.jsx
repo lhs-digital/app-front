@@ -1,10 +1,14 @@
 import { CreateOutlined, KeyboardReturn, Save } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Tab } from "@mui/material";
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createContext, useContext, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle";
+import api from "../../services/api";
+import { formatClient } from "../../services/clientFormatter";
 import {
   address,
   complimentary,
@@ -13,16 +17,42 @@ import {
   general,
   sale,
 } from "./defaults";
-import General from "./tabs/General";
 import Address from "./tabs/Address";
+import Complementary from "./tabs/Complementary";
 import Contact from "./tabs/Contact";
 import Crm from "./tabs/Crm";
-import Complementary from "./tabs/Complementary";
-import Documentation from "./tabs/Documentation";
-import Contract from "./tabs/Contract";
+import General from "./tabs/General";
 
-const CreateClient = () => {
+const ClientFormContext = createContext();
+
+export const ClientFormProvider = ({ children }) => {
+  const { id } = useParams();
+  const location = useLocation();
+  const [isEditing, setIsEditing] = useState(location.state?.edit || false);
+  const isCreating = id === "novo";
+
+  return (
+    <ClientFormContext.Provider
+      value={{ isEditing, isCreating, setIsEditing, id }}
+    >
+      {children}
+    </ClientFormContext.Provider>
+  );
+};
+
+export const useClientForm = () => {
+  const context = useContext(ClientFormContext);
+  if (context === undefined) {
+    throw new Error("useClientForm must be used within a ClientFormProvider");
+  }
+  return context;
+};
+
+const CreateClientForm = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
+  const { isEditing, setIsEditing, isCreating, id } = useClientForm();
+
   const methods = useForm({
     defaultValues: {
       ...general,
@@ -34,10 +64,74 @@ const CreateClient = () => {
     },
   });
 
-  const navigate = useNavigate();
+  const { data: client } = useQuery({
+    queryKey: ["role", id],
+    queryFn: async () => {
+      const response = await api.get(`/clients/${id}`);
+      return response.data.data;
+    },
+    enabled: !isCreating,
+  });
+
+  const { mutate: createClient, isPending: createIsPending } = useMutation({
+    mutationFn: async (data) => {
+      const response = await api.post("/roles", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Cargo criado com sucesso");
+    },
+    onError: (error) => {
+      console.error("Erro ao criar o cargo", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      return toast.error("Erro ao criar o cargo");
+    },
+    onSettled: (data) => {
+      navigate(`/papeis/${data.data.id}`);
+    },
+  });
+
+  const { mutate: updateClient, isPending: updateIsPending } = useMutation({
+    mutationFn: async (data) => {
+      const response = await api.put(`/clients/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Cliente atualizado com sucesso");
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar o cliente", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      toast.error("Erro ao atualizar o cliente");
+    },
+    onSettled: () => {
+      setIsEditing(false);
+    },
+  });
+
+  useEffect(() => {
+    if (!client) return;
+    // Fetch data for "id"
+    // methods.reset(fetchedData);
+  }, [client]);
 
   const onSubmit = (data) => {
-    console.log(data);
+    if (Object.keys(methods.formState.errors).length > 0) {
+      console.error("errors", methods.formState.errors);
+      return toast.error("Preencha todos os campos corretamente");
+    }
+
+    console.log(formatClient(data));
+
+    if (isCreating) return createClient(formatClient(data));
+
+    return updateClient(formatClient(data));
   };
 
   return (
@@ -47,19 +141,19 @@ const CreateClient = () => {
         className="flex flex-col gap-4"
       >
         <PageTitle
-          title="Cadastro de cliente"
+          title={isEditing ? "Edição de cliente" : "Cadastro de cliente"}
           icon={<CreateOutlined />}
           buttons={[
             <Button
-            key="return-clients-button"
-            type="submit"
-            variant="contained"
-            color="default"
-            startIcon={<KeyboardReturn />}
-            onClick={() => navigate("/clientes")}
-          >
-            VOLTAR
-          </Button>,
+              key="return-clients-button"
+              type="submit"
+              variant="contained"
+              color="default"
+              startIcon={<KeyboardReturn />}
+              onClick={() => navigate("/clientes")}
+            >
+              VOLTAR
+            </Button>,
             <Button
               key="create-client-button"
               type="submit"
@@ -99,15 +193,23 @@ const CreateClient = () => {
           <TabPanel value={5} sx={{ padding: 0 }}>
             <Complementary />
           </TabPanel>
-          <TabPanel value={6} sx={{ padding: 0 }}>
+          {/* <TabPanel value={6} sx={{ padding: 0 }}>
             <Contract />
           </TabPanel>
           <TabPanel value={7} sx={{ padding: 0 }}>
             <Documentation />
-          </TabPanel>
+          </TabPanel> */}
         </TabContext>
       </form>
     </FormProvider>
+  );
+};
+
+const CreateClient = () => {
+  return (
+    <ClientFormProvider>
+      <CreateClientForm />
+    </ClientFormProvider>
   );
 };
 
