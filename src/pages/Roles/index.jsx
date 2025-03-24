@@ -1,4 +1,4 @@
-import { Add, Delete, Edit, Search, Visibility } from "@mui/icons-material";
+import { Add, Delete, Edit, Search } from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
@@ -223,16 +223,17 @@ const Roles = () => {
               </TableRow>
             )}
             {sortedData.map(({ name, company, permissions_count, id }) => (
-              <TableRow key={id}>
+              <TableRow
+                key={id}
+                onClick={() =>
+                  hasPermission(permissions, "view_roles") &&
+                  navigate(`/papeis/${id}`)
+                }
+              >
                 <TableCell>{name}</TableCell>
                 <TableCell>{company?.name}</TableCell>
                 <TableCell>{permissions_count}</TableCell>
                 <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
-                  {hasPermission(permissions, "view_roles") && (
-                    <IconButton onClick={() => navigate(`/papeis/${id}`)}>
-                      <Visibility fontSize="small" />
-                    </IconButton>
-                  )}
                   {hasPermission(permissions, "update_roles") && (
                     <IconButton
                       onClick={() =>
