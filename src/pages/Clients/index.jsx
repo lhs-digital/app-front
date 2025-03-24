@@ -250,7 +250,7 @@ const Clients = () => {
                 .map((client) => (
                   <TableRow
                     key={client.id}
-                    cursor="pointer"
+                    className="cursor-pointer hover:bg-gray-600/20 transition-all"
                     onClick={() =>
                       hasPermission(permissions, "view_clients") &&
                       navigate(`/clientes/${client.id}`)

@@ -225,6 +225,7 @@ const Roles = () => {
             {sortedData.map(({ name, company, permissions_count, id }) => (
               <TableRow
                 key={id}
+                className="cursor-pointer hover:bg-gray-600/20 transition-all"
                 onClick={() =>
                   hasPermission(permissions, "view_roles") &&
                   navigate(`/papeis/${id}`)
