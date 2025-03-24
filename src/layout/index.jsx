@@ -111,7 +111,7 @@ const Layout = ({ children }) => {
         onClose={() => setOpen(false)}
         PaperProps={{ style: { borderRadius: 0 } }}
       >
-        <div className="h-16 p-4 w-full flex flex-row items-center border-b justify-end">
+        <div className="h-16 p-4 w-full flex flex-row items-center border-b border-b-black/10 dark:border-b-white/15 justify-end">
           <IconButton size="small" onClick={() => setOpen(!open)}>
             <Menu />
           </IconButton>
@@ -196,9 +196,13 @@ const Layout = ({ children }) => {
         </div>
       </Drawer>
       <div className="grow flex flex-col">
-        <div className="h-16 border-b flex flex-row items-center justify-between px-4">
+        <div className="h-16 border-b border-b-black/10 dark:border-b-white/15 flex flex-row items-center justify-between px-4">
           <Box className="flex flex-row gap-2 items-center">
-            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="Lighthouse" className="h-10 mb-1" />
+            <img
+              src={theme === "dark" ? whiteLogo : blackLogo}
+              alt="Lighthouse"
+              className="h-10 mb-1"
+            />
             <p className="text-2xl font-bold">{user?.company?.name}</p>
           </Box>
           <div className="flex flex-row gap-2">
