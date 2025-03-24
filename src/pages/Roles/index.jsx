@@ -41,7 +41,7 @@ const Roles = () => {
   const [sortedData, setSortedData] = useState([]);
 
   const { data, isFetching, isSuccess } = useQuery({
-    queryKey: ["roles", currentPage],
+    queryKey: ["roles", currentPage, rowsPerPage, search],
     queryFn: async () => {
       const response = await api.get(
         `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
@@ -49,6 +49,7 @@ const Roles = () => {
           params: { search: search },
         },
       );
+      console.log(response)
       setTotalCount(response.data.meta.total);
       return response.data.data;
     },
@@ -112,7 +113,14 @@ const Roles = () => {
     if (isSuccess) {
       setSortedData(data);
     }
-  }, [isSuccess]);
+  }, [isSuccess, data]);
+
+  useEffect(() => {
+    if (search === "") {
+      setCurrentPage(1);
+      qc.invalidateQueries({ queryKey: ["roles"] });
+    }
+  }, [search]);
 
   return (
     <div className="flex flex-col gap-6 w-full">

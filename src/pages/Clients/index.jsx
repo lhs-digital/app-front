@@ -23,6 +23,7 @@ import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import { hasPermission } from "../../services/utils";
+import { qc } from "../../services/queryClient";
 
 const Clients = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -40,38 +41,18 @@ const Clients = () => {
   const [sortedData, setSortedData] = useState([]);
 
   const { data, isFetching, isSuccess } = useQuery({
-    queryKey: ["clients", currentPage],
+    queryKey: ["clients", currentPage, rowsPerPage, search],
     queryFn: async () => {
       const response = await api.get(
         `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
         {
-          params: {
-            search: search,
-          },
+          params: { search: search },
         },
       );
-      console.log("clients res", response);
-      setTotalCount(response.data.meta.total);
+      setTotalCount(response.data.total);
       return response.data.data;
     },
   });
-
-  // const { data, isFetching, isSuccess } = useQuery({
-  //   queryKey: ["clients", currentPage, rowsPerPage, search],
-  //   queryFn: async () => {
-  //     const response = await api.get(
-  //       `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
-  //       {
-  //         params: { search },
-  //       },
-  //     );
-  //     return response.data;
-  //   },
-  //   onSuccess: (res) => {
-  //     setTotalCount(res.meta.total);
-  //     setSortedData(res.data);
-  //   },
-  // });
 
   const handleSort = (key) => {
     const direction =
@@ -100,7 +81,7 @@ const Clients = () => {
       toast.success("Cliente removido com sucesso!");
       setDeleteOpen(false);
     } catch (error) {
-      console.error(`Erro ao delter cliente com ID: ${deleteId}`, error);
+      console.error(`Erro ao deletar cliente com ID: ${deleteId}`, error);
     }
   };
 
@@ -121,10 +102,9 @@ const Clients = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      console.log("isSuccess", data);
       setSortedData(data);
     }
-  }, [isSuccess]);
+  }, [isSuccess, data]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
