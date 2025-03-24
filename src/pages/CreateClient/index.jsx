@@ -20,7 +20,9 @@ import {
 import Address from "./tabs/Address";
 import Complementary from "./tabs/Complementary";
 import Contact from "./tabs/Contact";
+import Contract from "./tabs/Contract";
 import Crm from "./tabs/Crm";
+import Documentation from "./tabs/Documentation";
 import General from "./tabs/General";
 
 const ClientFormContext = createContext();
@@ -31,9 +33,19 @@ export const ClientFormProvider = ({ children }) => {
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const isCreating = id === "novo";
 
+  const { data: client } = useQuery({
+    queryKey: ["client", id],
+    queryFn: async () => {
+      const response = await api.get(`/clients/${id}`);
+      console.log("clientRes", response.data);
+      return response.data;
+    },
+    enabled: !isCreating,
+  });
+
   return (
     <ClientFormContext.Provider
-      value={{ isEditing, isCreating, setIsEditing, id }}
+      value={{ isEditing, isCreating, setIsEditing, client, id }}
     >
       {children}
     </ClientFormContext.Provider>
@@ -51,7 +63,7 @@ export const useClientForm = () => {
 const CreateClientForm = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
-  const { isEditing, setIsEditing, isCreating, id } = useClientForm();
+  const { isEditing, setIsEditing, isCreating, client, id } = useClientForm();
 
   const methods = useForm({
     defaultValues: {
@@ -62,15 +74,6 @@ const CreateClientForm = () => {
       ...sale,
       ...contract,
     },
-  });
-
-  const { data: client } = useQuery({
-    queryKey: ["role", id],
-    queryFn: async () => {
-      const response = await api.get(`/clients/${id}`);
-      return response.data.data;
-    },
-    enabled: !isCreating,
   });
 
   const { mutate: createClient, isPending: createIsPending } = useMutation({
@@ -157,6 +160,7 @@ const CreateClientForm = () => {
             <Button
               key="create-client-button"
               type="submit"
+              loading={updateIsPending || createIsPending}
               variant="contained"
               startIcon={<Save />}
             >
@@ -193,12 +197,12 @@ const CreateClientForm = () => {
           <TabPanel value={5} sx={{ padding: 0 }}>
             <Complementary />
           </TabPanel>
-          {/* <TabPanel value={6} sx={{ padding: 0 }}>
+          <TabPanel value={6} sx={{ padding: 0 }}>
             <Contract />
           </TabPanel>
           <TabPanel value={7} sx={{ padding: 0 }}>
             <Documentation />
-          </TabPanel> */}
+          </TabPanel>
         </TabContext>
       </form>
     </FormProvider>
