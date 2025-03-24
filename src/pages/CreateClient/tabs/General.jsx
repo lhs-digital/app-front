@@ -1,5 +1,13 @@
-import { Box, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import {
+  Box,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import { useFormContext } from "react-hook-form";
+import { useClientForm } from "..";
 
 const General = () => {
   const {
@@ -9,6 +17,8 @@ const General = () => {
     setValue,
   } = useFormContext();
 
+  const { isEditing, isCreating } = useClientForm();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
       <Box>
@@ -17,13 +27,16 @@ const General = () => {
           {...register("type", {
             required: "Selecione o tipo de pessoa",
           })}
+          readOnly={!isEditing && !isCreating}
           fullWidth
           error={!!errors.type}
         >
           <MenuItem value="F">Física</MenuItem>
           <MenuItem value="J">Jurídica</MenuItem>
         </Select>
-        {errors.type && <FormHelperText error>{errors.type.message}</FormHelperText>}
+        {errors.type && (
+          <FormHelperText error>{errors.type.message}</FormHelperText>
+        )}
       </Box>
       <Box className="lg:col-span-3">
         <InputLabel required>
@@ -36,6 +49,7 @@ const General = () => {
         <TextField
           type="text"
           {...register("name", { required: "Nome é obrigatório" })}
+          readOnly={!isEditing && !isCreating}
           fullWidth
           error={!!errors.name}
           helperText={errors.name?.message}
@@ -55,6 +69,7 @@ const General = () => {
           {...register("cpf", {
             required: "CPF/CNPJ é obrigatório",
           })}
+          readOnly={!isEditing && !isCreating}
           fullWidth
           slotProps={{
             htmlInput: {
@@ -89,6 +104,7 @@ const General = () => {
           {...register("client_type", {
             required: "Selecione o tipo de Cliente",
           })}
+          readOnly={!isEditing && !isCreating}
           fullWidth
           error={!!errors.client_type}
         >
@@ -105,7 +121,9 @@ const General = () => {
           <MenuItem value={8}>Igrejas e templos de qualquer natureza</MenuItem>
           <MenuItem value={9}>Outros</MenuItem>
         </Select>
-        {errors.client_type && <FormHelperText error>{errors.client_type.message}</FormHelperText>}
+        {errors.client_type && (
+          <FormHelperText error>{errors.client_type.message}</FormHelperText>
+        )}
       </Box>
       {watch("type") === "J" && (
         <Box className="lg:col-span-2">
@@ -114,13 +132,18 @@ const General = () => {
             {...register("icms_contributor", {
               required: "Selecione o contribuinte ICMS",
             })}
+            readOnly={!isEditing && !isCreating}
             fullWidth
             error={!!errors.icms_contributor}
           >
             <MenuItem value={1}>Sim</MenuItem>
             <MenuItem value={0}>Não</MenuItem>
           </Select>
-          {errors.icms_contributor && <FormHelperText error>{errors.icms_contributor.message}</FormHelperText>}
+          {errors.icms_contributor && (
+            <FormHelperText error>
+              {errors.icms_contributor.message}
+            </FormHelperText>
+          )}
         </Box>
       )}
       {watch("type") === "F" && (
@@ -131,6 +154,7 @@ const General = () => {
             {...register("birth_date", {
               required: "Data de nascimento é obrigatória",
             })}
+            readOnly={!isEditing && !isCreating}
             fullWidth
             slotProps={{
               htmlInput: { max: new Date().toISOString().split("T")[0] },
@@ -154,6 +178,7 @@ const General = () => {
             required:
               watch("type") === "F" ? "RG é obrigatório" : "IE é obrigatório",
           })}
+          readOnly={!isEditing && !isCreating}
           fullWidth
           error={!!errors.ie_rg}
           helperText={errors.ie_rg?.message}
@@ -166,6 +191,7 @@ const General = () => {
           {...register("nationality", {
             required: "Nacionalidade é obrigatória",
           })}
+          readOnly={!isEditing && !isCreating}
           fullWidth
           error={!!errors.nationality}
           helperText={errors.nationality?.message}
@@ -178,13 +204,16 @@ const General = () => {
             {...register("sex", {
               required: "Selecione o sexo",
             })}
+            readOnly={!isEditing && !isCreating}
             fullWidth
             error={!!errors.sex}
           >
             <MenuItem value={1}>Masculino</MenuItem>
             <MenuItem value={0}>Feminino</MenuItem>
           </Select>
-          {errors.sex && <FormHelperText error>{errors.sex.message}</FormHelperText>}
+          {errors.sex && (
+            <FormHelperText error>{errors.sex.message}</FormHelperText>
+          )}
         </Box>
       )}
       {watch("type") === "F" && (
@@ -195,6 +224,7 @@ const General = () => {
             {...register("profession", {
               required: "Profissão é obrigatória",
             })}
+            readOnly={!isEditing && !isCreating}
             fullWidth
             error={!!errors.profession}
             helperText={errors.profession?.message}
@@ -207,6 +237,7 @@ const General = () => {
           {...register("subscriber_type", {
             required: "Selecione o tipo de assinante",
           })}
+          readOnly={!isEditing && !isCreating}
           fullWidth
           error={!!errors.subscriber_type}
         >
@@ -217,7 +248,11 @@ const General = () => {
           <MenuItem value={5}>Semi-público</MenuItem>
           <MenuItem value={6}>Outros</MenuItem>
         </Select>
-        {errors.subscriber_type && <FormHelperText error>{errors.subscriber_type.message}</FormHelperText>}
+        {errors.subscriber_type && (
+          <FormHelperText error>
+            {errors.subscriber_type.message}
+          </FormHelperText>
+        )}
       </Box>
       {watch("type") === "J" && (
         <Box className="lg:col-span-4">
@@ -225,6 +260,7 @@ const General = () => {
           <TextField
             type="text"
             {...register("branch")}
+            readOnly={!isEditing && !isCreating}
             fullWidth
             error={!!errors.branch}
             helperText={errors.branch?.message}
