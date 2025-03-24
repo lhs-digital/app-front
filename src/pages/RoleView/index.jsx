@@ -1,5 +1,11 @@
 import { Edit, LockOpen, Save } from "@mui/icons-material";
-import { Autocomplete, Button, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Button,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
@@ -33,6 +39,7 @@ const RoleView = () => {
     queryKey: ["role", id],
     queryFn: async () => {
       const response = await api.get(`/roles/${id}`);
+      console.log("response", response.data.data);
       return response.data.data;
     },
     enabled: !isCreating && isCompanyFetched,
@@ -183,16 +190,22 @@ const RoleView = () => {
             containerClass="col-span-1"
             required={isCreating}
           >
-            <TextField
-              fullWidth
-              name="level"
-              type="number"
-              {...methods.register("nivel", { required: "Campo obrigatório" })}
-              slotProps={{
-                input: {
-                  readOnly: !isEditing && !isCreating,
-                },
-              }}
+            <Controller
+              control={methods.control}
+              name="nivel"
+              render={({ field }) => (
+                <Select
+                  fullWidth
+                  {...field}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  readOnly={!isEditing && !isCreating}
+                >
+                  <MenuItem value={0}>Alto</MenuItem>
+                  <MenuItem value={1}>Médio</MenuItem>
+                  <MenuItem value={2}>Baixo</MenuItem>
+                </Select>
+              )}
             />
           </FormField>
           {isLighthouse ? (
