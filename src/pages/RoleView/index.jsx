@@ -49,7 +49,7 @@ const RoleView = () => {
     if (!role) return;
     console.log("role", role);
     methods.setValue("name", role.name);
-    methods.setValue("nivel", role.nivel);
+    methods.setValue("nivel", parseInt(role.nivel));
     methods.setValue("company", role.company);
     setSelectedPermissions(role.permissions);
   }, [role]);
@@ -165,7 +165,7 @@ const RoleView = () => {
           }
         />
         <form
-          className="grid grid-cols-1 lg:grid-cols-6 gap-8 w-full"
+          className="grid grid-cols-1 lg:grid-cols-6 gap-4 w-full"
           id="role-form"
           onSubmit={methods.handleSubmit(onSubmit)}
         >
@@ -197,10 +197,11 @@ const RoleView = () => {
                 <Select
                   fullWidth
                   {...field}
-                  value={field.value}
+                  value={field.value || ""}
                   onChange={(e) => field.onChange(e.target.value)}
                   readOnly={!isEditing && !isCreating}
                 >
+                  <MenuItem value={""}>--</MenuItem>
                   <MenuItem value={0}>Alto</MenuItem>
                   <MenuItem value={1}>Médio</MenuItem>
                   <MenuItem value={2}>Baixo</MenuItem>
