@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { toast } from "react-toastify";
 import InputMask from "react-input-mask";
+import { useClientForm } from "..";
 
 const Address = ({ data }) => {
     const {
@@ -14,6 +15,8 @@ const Address = ({ data }) => {
     } = useFormContext();
 
     const zipCode = watch("zip_code");
+    const { isEditing, isCreating } = useClientForm();
+
 
     useEffect(() => {
         if (data) {
@@ -80,6 +83,9 @@ const Address = ({ data }) => {
                             {...inputProps}
                             fullWidth
                             error={!!errors.zip_code}
+                            InputProps={{
+                                readOnly: !isEditing && !isCreating,
+                            }}
                             helperText={errors.zip_code?.message}
                             type="text"
                         />
@@ -94,6 +100,9 @@ const Address = ({ data }) => {
                     {...register("street", { required: "Endereço é obrigatório" })}
                     fullWidth
                     error={!!errors.street}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.street?.message}
                 />
             </Box>
@@ -105,6 +114,9 @@ const Address = ({ data }) => {
                     {...register("neighborhood", { required: "Bairro é obrigatório" })}
                     fullWidth
                     error={!!errors.neighborhood}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.neighborhood?.message}
                 />
             </Box>
@@ -116,6 +128,9 @@ const Address = ({ data }) => {
                     {...register("city", { required: "Cidade é obrigatória" })}
                     fullWidth
                     error={!!errors.city}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.city?.message}
                 />
             </Box>
@@ -126,6 +141,9 @@ const Address = ({ data }) => {
                     {...register("number", { required: "Número é obrigatório" })}
                     fullWidth
                     error={!!errors.number}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.number?.message}
                 />
             </Box>
@@ -136,6 +154,9 @@ const Address = ({ data }) => {
                     {...register("complement", { required: "Complemento é obrigatório" })}
                     fullWidth
                     error={!!errors.complement}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.complement?.message}
                 />
             </Box>
@@ -146,6 +167,9 @@ const Address = ({ data }) => {
                     {...register("reference", { required: "Referência é obrigatória" })}
                     fullWidth
                     error={!!errors.reference}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.reference?.message}
                 />
             </Box>
@@ -156,6 +180,9 @@ const Address = ({ data }) => {
                     {...register("housing_type", { required: "Tipo de moradia é obrigatório" })}
                     fullWidth
                     error={!!errors.housing_type}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.housing_type?.message}
                 />
             </Box>
@@ -166,6 +193,9 @@ const Address = ({ data }) => {
                     {...register("billing_address", { required: "Endereço de cobrança é obrigatório" })}
                     fullWidth
                     error={!!errors.billing_address}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.billing_address?.message}
                 />
             </Box>
