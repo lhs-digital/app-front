@@ -5,7 +5,7 @@ import { useFormContext } from "react-hook-form";
 import { toast } from "react-toastify";
 import InputMask from "react-input-mask";
 
-const Address = () => {
+const Address = ({ data }) => {
     const {
         register,
         formState: { errors },
@@ -14,6 +14,20 @@ const Address = () => {
     } = useFormContext();
 
     const zipCode = watch("zip_code");
+
+    useEffect(() => {
+        if (data) {
+            setValue("zip_code", data?.cep || "");
+            setValue("street", data?.endereco || "");
+            setValue("number", data?.numero || "");
+            setValue("complement", data?.complemento || "");
+            setValue("neighborhood", data?.bairro || "");
+            setValue("city", data?.cidade || "");
+            setValue("reference", data?.referencia || "");
+            setValue("housing_type", data?.moradia || "");
+            setValue("billing_address", data?.endereco_cob || "");
+        }
+    }, [data, setValue]);
 
     useEffect(() => {
         const fetchAddress = async (cep) => {

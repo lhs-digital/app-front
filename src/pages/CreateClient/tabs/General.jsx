@@ -8,8 +8,9 @@ import {
 } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import { useClientForm } from "..";
+import { useEffect } from "react";
 
-const General = () => {
+const General = ({ data }) => {
   const {
     register,
     formState: { errors },
@@ -19,8 +20,28 @@ const General = () => {
 
   const { isEditing, isCreating } = useClientForm();
 
+  useEffect(() => {
+    if (data) {
+      setValue("name", data?.razao || "");
+      setValue("fantasy_name", data?.fantasia || "");
+      setValue("type", data?.tipo_pessoa || "");
+      setValue("client_type", data?.tipo_cliente_scm || "");
+      setValue("cpf", data?.cnpj_cpf || "");
+      setValue("ie_rg", data?.ie_identidade || "");
+      setValue("icms_contributor", data?.contribuinte_icms || "");
+      setValue("nationality", data?.nacionalidade || "");
+      setValue("birth_date", data?.data_nascimento || "");
+      setValue("active", data?.ativo || "");
+      setValue("sex", data?.sexo || "");
+      setValue("subscriber_type", data?.tipo_assinante || "");
+      setValue("profession", data?.profissao || "");
+      setValue("branch", data?.filial_id || "");
+    }
+  }, [data, setValue]);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
+      {console.log(data)}
       <Box>
         <InputLabel required>Tipo de Pessoa</InputLabel>
         <Select
@@ -28,6 +49,7 @@ const General = () => {
             required: "Selecione o tipo de pessoa",
           })}
           readOnly={!isEditing && !isCreating}
+          value={watch("type") || ""}
           fullWidth
           error={!!errors.type}
         >
@@ -49,10 +71,13 @@ const General = () => {
         <TextField
           type="text"
           {...register("name", { required: "Nome é obrigatório" })}
-          readOnly={!isEditing && !isCreating}
+          defaultValue={data?.name || ""}
           fullWidth
           error={!!errors.name}
           helperText={errors.name?.message}
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -69,7 +94,10 @@ const General = () => {
           {...register("cpf", {
             required: "CPF/CNPJ é obrigatório",
           })}
-          readOnly={!isEditing && !isCreating}
+          defaultValue={data?.cpf || ""}
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
           fullWidth
           slotProps={{
             htmlInput: {
@@ -104,22 +132,23 @@ const General = () => {
           {...register("client_type", {
             required: "Selecione o tipo de Cliente",
           })}
+          value={watch("client_type") || ""}
           readOnly={!isEditing && !isCreating}
           fullWidth
           error={!!errors.client_type}
         >
-          <MenuItem value={1}>Comercial</MenuItem>
-          <MenuItem value={2}>Industrial</MenuItem>
-          <MenuItem value={3}>Residencial / Pessoa Física</MenuItem>
-          <MenuItem value={4}>Produtor Rural</MenuItem>
-          <MenuItem value={5}>Órgão da administração pública</MenuItem>
-          <MenuItem value={6}>Prestador de serviço de telecomunicação</MenuItem>
-          <MenuItem value={7}>
+          <MenuItem value="01">Comercial</MenuItem>
+          <MenuItem value="02">Industrial</MenuItem>
+          <MenuItem value="03">Residencial / Pessoa Física</MenuItem>
+          <MenuItem value="04">Produtor Rural</MenuItem>
+          <MenuItem value="05">Órgão da administração pública</MenuItem>
+          <MenuItem value="06">Prestador de serviço de telecomunicação</MenuItem>
+          <MenuItem value="07">
             Missões diplomáticas, repartições consulares e organismos
             internacionais
           </MenuItem>
-          <MenuItem value={8}>Igrejas e templos de qualquer natureza</MenuItem>
-          <MenuItem value={9}>Outros</MenuItem>
+          <MenuItem value="08">Igrejas e templos de qualquer natureza</MenuItem>
+          <MenuItem value="99">Outros</MenuItem>
         </Select>
         {errors.client_type && (
           <FormHelperText error>{errors.client_type.message}</FormHelperText>
@@ -132,12 +161,13 @@ const General = () => {
             {...register("icms_contributor", {
               required: "Selecione o contribuinte ICMS",
             })}
+            value={watch("icms_contributor") || ""}
             readOnly={!isEditing && !isCreating}
             fullWidth
             error={!!errors.icms_contributor}
           >
-            <MenuItem value={1}>Sim</MenuItem>
-            <MenuItem value={0}>Não</MenuItem>
+            <MenuItem value="1">Sim</MenuItem>
+            <MenuItem value="0">Não</MenuItem>
           </Select>
           {errors.icms_contributor && (
             <FormHelperText error>
@@ -154,7 +184,10 @@ const General = () => {
             {...register("birth_date", {
               required: "Data de nascimento é obrigatória",
             })}
-            readOnly={!isEditing && !isCreating}
+            defaultValue={data?.birth_date || ""}
+            InputProps={{
+              readOnly: !isEditing && !isCreating,
+            }}
             fullWidth
             slotProps={{
               htmlInput: { max: new Date().toISOString().split("T")[0] },
@@ -178,7 +211,10 @@ const General = () => {
             required:
               watch("type") === "F" ? "RG é obrigatório" : "IE é obrigatório",
           })}
-          readOnly={!isEditing && !isCreating}
+          defaultValue={data?.ie_rg || ""}
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
           fullWidth
           error={!!errors.ie_rg}
           helperText={errors.ie_rg?.message}
@@ -191,7 +227,10 @@ const General = () => {
           {...register("nationality", {
             required: "Nacionalidade é obrigatória",
           })}
-          readOnly={!isEditing && !isCreating}
+          defaultValue={data?.nationality || ""}
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
           fullWidth
           error={!!errors.nationality}
           helperText={errors.nationality?.message}
@@ -204,12 +243,14 @@ const General = () => {
             {...register("sex", {
               required: "Selecione o sexo",
             })}
+            value={watch("sex") || ""}
             readOnly={!isEditing && !isCreating}
             fullWidth
             error={!!errors.sex}
+
           >
-            <MenuItem value={1}>Masculino</MenuItem>
-            <MenuItem value={0}>Feminino</MenuItem>
+            <MenuItem value="M">Masculino</MenuItem>
+            <MenuItem value="F">Feminino</MenuItem>
           </Select>
           {errors.sex && (
             <FormHelperText error>{errors.sex.message}</FormHelperText>
@@ -224,7 +265,10 @@ const General = () => {
             {...register("profession", {
               required: "Profissão é obrigatória",
             })}
-            readOnly={!isEditing && !isCreating}
+            defaultValue={data?.profession || ""}
+            InputProps={{
+              readOnly: !isEditing && !isCreating,
+            }}
             fullWidth
             error={!!errors.profession}
             helperText={errors.profession?.message}
@@ -237,16 +281,17 @@ const General = () => {
           {...register("subscriber_type", {
             required: "Selecione o tipo de assinante",
           })}
+          value={watch("subscriber_type") || ""}
           readOnly={!isEditing && !isCreating}
           fullWidth
           error={!!errors.subscriber_type}
         >
-          <MenuItem value={1}>Comercial/Industrial</MenuItem>
-          <MenuItem value={2}>Poder público</MenuItem>
-          <MenuItem value={3}>Público</MenuItem>
-          <MenuItem value={4}>Residencial/Pessoa física</MenuItem>
-          <MenuItem value={5}>Semi-público</MenuItem>
-          <MenuItem value={6}>Outros</MenuItem>
+          <MenuItem value="1">Comercial/Industrial</MenuItem>
+          <MenuItem value="2">Poder público</MenuItem>
+          <MenuItem value="3">Público</MenuItem>
+          <MenuItem value="4">Residencial/Pessoa física</MenuItem>
+          <MenuItem value="5">Semi-público</MenuItem>
+          <MenuItem value="6">Outros</MenuItem>
         </Select>
         {errors.subscriber_type && (
           <FormHelperText error>
@@ -260,7 +305,10 @@ const General = () => {
           <TextField
             type="text"
             {...register("branch")}
-            readOnly={!isEditing && !isCreating}
+            defaultValue={data?.branch || ""}
+            InputProps={{
+              readOnly: !isEditing && !isCreating,
+            }}
             fullWidth
             error={!!errors.branch}
             helperText={errors.branch?.message}

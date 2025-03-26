@@ -32,22 +32,28 @@ export const ClientFormProvider = ({ children }) => {
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const isCreating = id === "novo";
+  const methods = useForm();
 
   const { data: client } = useQuery({
     queryKey: ["client", id],
     queryFn: async () => {
       const response = await api.get(`/clients/${id}`);
-      console.log("clientRes", response.data);
       return response.data;
     },
     enabled: !isCreating,
   });
 
+  useEffect(() => {
+    if (client) {
+      methods.reset(client);
+    }
+  }, [client, methods]);
+
   return (
     <ClientFormContext.Provider
       value={{ isEditing, isCreating, setIsEditing, client, id }}
     >
-      {children}
+      <FormProvider {...methods}>{children}</FormProvider>
     </ClientFormContext.Provider>
   );
 };
@@ -183,10 +189,10 @@ const CreateClientForm = () => {
             <Tab label="Documentação" value={7} />
           </TabList>
           <TabPanel value={1} sx={{ padding: 0 }}>
-            <General />
+            <General data={client} />
           </TabPanel>
           <TabPanel value={2} sx={{ padding: 0 }}>
-            <Address />
+            <Address data={client} />
           </TabPanel>
           <TabPanel value={3} sx={{ padding: 0 }}>
             <Contact />

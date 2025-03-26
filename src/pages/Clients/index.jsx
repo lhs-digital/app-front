@@ -23,7 +23,6 @@ import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import { hasPermission } from "../../services/utils";
-import { qc } from "../../services/queryClient";
 
 const Clients = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
