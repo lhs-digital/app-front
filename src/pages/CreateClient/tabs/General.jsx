@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import { useClientForm } from "..";
-import { useEffect } from "react";
 
 const General = ({ data }) => {
   const {
@@ -19,25 +18,6 @@ const General = ({ data }) => {
   } = useFormContext();
 
   const { isEditing, isCreating } = useClientForm();
-
-  useEffect(() => {
-    if (data) {
-      setValue("name", data?.razao || "");
-      setValue("fantasy_name", data?.fantasia || "");
-      setValue("type", data?.tipo_pessoa || "");
-      setValue("client_type", data?.tipo_cliente_scm || "");
-      setValue("cpf", data?.cnpj_cpf || "");
-      setValue("ie_rg", data?.ie_identidade || "");
-      setValue("icms_contributor", data?.contribuinte_icms || "");
-      setValue("nationality", data?.nacionalidade || "");
-      setValue("birth_date", data?.data_nascimento || "");
-      setValue("active", data?.ativo || "");
-      setValue("sex", data?.sexo || "");
-      setValue("subscriber_type", data?.tipo_assinante || "");
-      setValue("profession", data?.profissao || "");
-      setValue("branch", data?.filial_id || "");
-    }
-  }, [data, setValue]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
@@ -142,7 +122,9 @@ const General = ({ data }) => {
           <MenuItem value="03">Residencial / Pessoa Física</MenuItem>
           <MenuItem value="04">Produtor Rural</MenuItem>
           <MenuItem value="05">Órgão da administração pública</MenuItem>
-          <MenuItem value="06">Prestador de serviço de telecomunicação</MenuItem>
+          <MenuItem value="06">
+            Prestador de serviço de telecomunicação
+          </MenuItem>
           <MenuItem value="07">
             Missões diplomáticas, repartições consulares e organismos
             internacionais
@@ -247,7 +229,6 @@ const General = ({ data }) => {
             readOnly={!isEditing && !isCreating}
             fullWidth
             error={!!errors.sex}
-
           >
             <MenuItem value="M">Masculino</MenuItem>
             <MenuItem value="F">Feminino</MenuItem>

@@ -39,7 +39,7 @@ export const formatClient = (client) => {
 };
 
 export const formatClientBack = (client) => {
-  const general = {
+  return {
     name: client.razao,
     fantasy_name: client.fantasia,
     type: client.tipo_pessoa,
@@ -54,9 +54,6 @@ export const formatClientBack = (client) => {
     subscriber_type: client.tipo_assinante,
     profession: client.profissao,
     branch: client.filial_id,
-  };
-
-  const address = {
     zip_code: client.cep,
     street: client.endereco,
     number: client.numero,
@@ -66,33 +63,16 @@ export const formatClientBack = (client) => {
     reference: client.referencia,
     housing_type: client.moradia,
     billing_address: client.id_conta,
-  };
-
-  const contact = {
     mobile: client.telefone_celular,
     whatsapp: client.whatsapp,
     email: client.email,
-  };
-
-  const sale = {
     sales_channel: client.id_campanha,
     competitor: client.id_concorrente,
     profile: client.id_perfil,
     responsible: client.responsavel,
     seller: client.id_vendedor,
     payment_condition: client.cond_pagamento,
-  };
-
-  const complimentary = {
     father_name: client.nome_pai,
     mother_name: client.nome_mae,
-  };
-
-  return {
-    general,
-    address,
-    contact,
-    sale,
-    complimentary,
   };
 };

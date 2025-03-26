@@ -8,7 +8,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle";
 import api from "../../services/api";
-import { formatClient } from "../../services/clientFormatter";
+import { formatClient, formatClientBack } from "../../services/clientFormatter";
 import {
   address,
   complimentary,
@@ -38,7 +38,7 @@ export const ClientFormProvider = ({ children }) => {
     queryKey: ["client", id],
     queryFn: async () => {
       const response = await api.get(`/clients/${id}`);
-      return response.data;
+      return formatClientBack(response.data);
     },
     enabled: !isCreating,
   });
@@ -126,8 +126,10 @@ const CreateClientForm = () => {
 
   useEffect(() => {
     if (!client) return;
-    // Fetch data for "id"
-    // methods.reset(fetchedData);
+    Object.keys(client).forEach((key) => {
+      console.log(key, client[key]);
+      methods.setValue(key, client[key]);
+    });
   }, [client]);
 
   const onSubmit = (data) => {
@@ -150,7 +152,13 @@ const CreateClientForm = () => {
         className="flex flex-col gap-4"
       >
         <PageTitle
-          title={isEditing ? "Edição de cliente" : "Cadastro de cliente"}
+          title={
+            isEditing
+              ? "Edição de cliente"
+              : isCreating
+                ? "Novo cliente"
+                : "Visualização de cliente"
+          }
           icon={<CreateOutlined />}
           buttons={[
             <Button
