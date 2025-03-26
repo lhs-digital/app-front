@@ -20,7 +20,7 @@ import {
 import Address from "./tabs/Address";
 import Complementary from "./tabs/Complementary";
 import Contact from "./tabs/Contact";
-import Contract from "./tabs/Contract";
+// import Contract from "./tabs/Contract";
 import Crm from "./tabs/Crm";
 import Documentation from "./tabs/Documentation";
 import General from "./tabs/General";
@@ -211,9 +211,9 @@ const CreateClientForm = () => {
           <TabPanel value={5} sx={{ padding: 0 }}>
             <Complementary />
           </TabPanel>
-          <TabPanel value={6} sx={{ padding: 0 }}>
+          {/* <TabPanel value={6} sx={{ padding: 0 }}>
             <Contract />
-          </TabPanel>
+          </TabPanel> */}
           <TabPanel value={7} sx={{ padding: 0 }}>
             <Documentation />
           </TabPanel>
