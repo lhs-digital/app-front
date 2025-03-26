@@ -193,7 +193,7 @@ const CreateClientForm = () => {
             <Tab label="Contato" value={3} />
             <Tab label="CRM" value={4} />
             <Tab label="Complementar" value={5} />
-            <Tab label="Contrato" value={6} />
+            {/* <Tab label="Contrato" value={6} /> */}
             <Tab label="Documentação" value={7} />
           </TabList>
           <TabPanel value={1} sx={{ padding: 0 }}>
