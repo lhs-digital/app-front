@@ -1,11 +1,14 @@
 import { Box, InputLabel, TextField } from "@mui/material";
 import { useFormContext } from "react-hook-form";
+import { useClientForm } from "..";
 
 const Complementary = () => {
   const {
     register,
     formState: { errors },
   } = useFormContext();
+
+  const { isEditing, isCreating } = useClientForm();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
@@ -18,6 +21,9 @@ const Complementary = () => {
           })}
           fullWidth
           error={!!errors.father_name}
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
           helperText={errors.father_name?.message}
         />
       </Box>
@@ -29,6 +35,9 @@ const Complementary = () => {
             required: "Nome da mãe é obrigatório",
           })}
           fullWidth
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
           error={!!errors.mother_name}
           helperText={errors.mother_name?.message}
         />
@@ -41,6 +50,9 @@ const Complementary = () => {
             required: "Representante legal é obrigatório",
           })}
           fullWidth
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
           error={!!errors.legal_representative}
           helperText={errors.legal_representative?.message}
         />

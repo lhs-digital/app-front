@@ -1,12 +1,15 @@
 import { Box, InputLabel, TextField } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import InputMask from "react-input-mask";
+import { useClientForm } from "..";
 
 const Contact = () => {
     const {
         register,
         formState: { errors },
     } = useFormContext();
+
+    const { isEditing, isCreating } = useClientForm();
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
@@ -23,6 +26,9 @@ const Contact = () => {
                     })}
                     fullWidth
                     error={!!errors.email}
+                    InputProps={{
+                        readOnly: !isEditing && !isCreating,
+                    }}
                     helperText={errors.email?.message}
 
                 />
@@ -40,6 +46,9 @@ const Contact = () => {
                             fullWidth
                             error={!!errors.mobile}
                             helperText={errors.mobile?.message}
+                            InputProps={{
+                                readOnly: !isEditing && !isCreating,
+                            }}
                             type="text"
                         />
                     )}
@@ -58,6 +67,9 @@ const Contact = () => {
                             fullWidth
                             error={!!errors.whatsapp}
                             helperText={errors.whatsapp?.message}
+                            InputProps={{
+                                readOnly: !isEditing && !isCreating,
+                            }}
                             type="text"
                         />
                     )}
