@@ -111,13 +111,13 @@ const Address = () => {
         <TextField
           type="text"
           disabled
-          {...register("city", { required: "Cidade é obrigatória" })}
+          {...register("cidade", { required: "Cidade é obrigatória" })}
           fullWidth
-          error={!!errors.city}
+          error={!!errors.cidade}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.city?.message}
+          helperText={errors.cidade?.message}
         />
       </Box>
       <Box className="lg:col-span-1">
