@@ -16,45 +16,45 @@ const Complementary = () => {
         <InputLabel required>Nome do pai</InputLabel>
         <TextField
           type="text"
-          {...register("father_name", {
+          {...register("nome_pai", {
             required: "Nome do pai é obrigatório",
           })}
           fullWidth
-          error={!!errors.father_name}
+          error={!!errors.nome_pai}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.father_name?.message}
+          helperText={errors.nome_pai?.message}
         />
       </Box>
       <Box className="lg:col-span-4">
         <InputLabel required>Nome da mãe</InputLabel>
         <TextField
           type="text"
-          {...register("mother_name", {
+          {...register("nome_mae", {
             required: "Nome da mãe é obrigatório",
           })}
           fullWidth
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          error={!!errors.mother_name}
-          helperText={errors.mother_name?.message}
+          error={!!errors.nome_mae}
+          helperText={errors.nome_mae?.message}
         />
       </Box>
       <Box className="lg:col-span-4">
         <InputLabel required>Representante legal</InputLabel>
         <TextField
           type="text"
-          {...register("legal_representative", {
+          {...register("representante_legal", {
             required: "Representante legal é obrigatório",
           })}
           fullWidth
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          error={!!errors.legal_representative}
-          helperText={errors.legal_representative?.message}
+          error={!!errors.representante_legal}
+          helperText={errors.representante_legal?.message}
         />
       </Box>
     </div>

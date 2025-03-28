@@ -23,12 +23,11 @@ const Address = () => {
         const response = await axios.get(
           `https://viacep.com.br/ws/${cep}/json/`,
         );
-        const data = response.data;
-        if (!data.erro) {
-          setValue("street", data.logradouro);
-          setValue("neighborhood", data.bairro);
-          setValue("city", data.localidade);
-          setValue("complement", data.complemento);
+        if (!response.data.erro) {
+          setValue("endereco", response.data.logradouro);
+          setValue("bairro", response.data.bairro);
+          setValue("cidade", response.data.localidade);
+          setValue("complemento", response.data.complemento);
         } else {
           toast.error("CEP não encontrado");
         }
@@ -38,7 +37,7 @@ const Address = () => {
       }
     };
 
-    if (zipCode && zipCode.length === 8 && !watch("street")) {
+    if (zipCode && zipCode.length === 8 && !watch("endereco")) {
       fetchAddress(zipCode);
     }
   }, [zipCode, setValue]);
@@ -48,10 +47,10 @@ const Address = () => {
     setValue("zip_code", value);
 
     if (value.length === 0) {
-      setValue("street", "");
-      setValue("neighborhood", "");
-      setValue("city", "");
-      setValue("complement", "");
+      setValue("endereco", "");
+      setValue("bairro", "");
+      setValue("cidade", "");
+      setValue("complemento", "");
     }
   };
 
@@ -84,13 +83,13 @@ const Address = () => {
         <TextField
           type="text"
           disabled
-          {...register("street", { required: "Endereço é obrigatório" })}
+          {...register("endereco", { required: "Endereço é obrigatório" })}
           fullWidth
-          error={!!errors.street}
+          error={!!errors.endereco}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.street?.message}
+          helperText={errors.endereco?.message}
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -98,13 +97,13 @@ const Address = () => {
         <TextField
           type="text"
           disabled
-          {...register("neighborhood", { required: "Bairro é obrigatório" })}
+          {...register("bairro", { required: "Bairro é obrigatório" })}
           fullWidth
-          error={!!errors.neighborhood}
+          error={!!errors.bairro}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.neighborhood?.message}
+          helperText={errors.bairro?.message}
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -125,69 +124,71 @@ const Address = () => {
         <InputLabel required>Número</InputLabel>
         <TextField
           type="text"
-          {...register("number", { required: "Número é obrigatório" })}
+          {...register("numero", { required: "Número é obrigatório" })}
           fullWidth
-          error={!!errors.number}
+          error={!!errors.numero}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.number?.message}
+          helperText={errors.numero?.message}
         />
       </Box>
       <Box className="lg:col-span-3">
         <InputLabel>Complemento</InputLabel>
         <TextField
           type="text"
-          {...register("complement", { required: "Complemento é obrigatório" })}
+          {...register("complemento", {
+            required: "Complemento é obrigatório",
+          })}
           fullWidth
-          error={!!errors.complement}
+          error={!!errors.complemento}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.complement?.message}
+          helperText={errors.complemento?.message}
         />
       </Box>
       <Box className="lg:col-span-2">
         <InputLabel>Referência</InputLabel>
         <TextField
           type="text"
-          {...register("reference", { required: "Referência é obrigatória" })}
+          {...register("referencia", { required: "Referência é obrigatória" })}
           fullWidth
-          error={!!errors.reference}
+          error={!!errors.referencia}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.reference?.message}
+          helperText={errors.referencia?.message}
         />
       </Box>
       <Box className="lg:col-span-2">
         <InputLabel required>Tipo de Moradia</InputLabel>
         <TextField
           type="text"
-          {...register("housing_type", {
+          {...register("moradia", {
             required: "Tipo de moradia é obrigatório",
           })}
           fullWidth
-          error={!!errors.housing_type}
+          error={!!errors.moradia}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.housing_type?.message}
+          helperText={errors.moradia?.message}
         />
       </Box>
       <Box className="lg:col-span-4">
         <InputLabel required>Endereço de Cobrança</InputLabel>
         <TextField
           type="text"
-          {...register("billing_address", {
+          {...register("id_conta", {
             required: "Endereço de cobrança é obrigatório",
           })}
           fullWidth
-          error={!!errors.billing_address}
+          error={!!errors.id_conta}
           InputProps={{
             readOnly: !isEditing && !isCreating,
           }}
-          helperText={errors.billing_address?.message}
+          helperText={errors.id_conta?.message}
         />
       </Box>
     </div>
