@@ -228,21 +228,23 @@ const Layout = ({ children }) => {
               >
                 <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
               </Link>
-              {location.map((path, index) => (
-                <Link
-                  key={index}
-                  to={`/${path}`}
-                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color] hover:underline"
-                >
-                  {
-                    [...privateRoutes, ...privateSubRoutes].find(
-                      (route) =>
-                        route.path === `/${path}` ||
-                        route.path === `/${location[index - 1]}/:id`,
-                    )?.label
-                  }
-                </Link>
-              ))}
+              {location.map((path, index) => {
+                return (
+                  <Link
+                    key={index}
+                    to={`/${location.slice(0, index + 1).join("/")}`}
+                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color] hover:underline"
+                  >
+                    {
+                      [...privateRoutes, ...privateSubRoutes].find(
+                        (route) =>
+                          route.path === `/${path}` ||
+                          route.path === `/${location[index - 1]}/:id`,
+                      )?.label
+                    }
+                  </Link>
+                );
+              })}
             </Breadcrumbs>
           )}
           {children}

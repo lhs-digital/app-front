@@ -100,7 +100,7 @@ export const privateRoutes = [
 
 export const privateSubRoutes = [
   {
-    label: "Criar cliente",
+    label: "Cliente",
     path: "/clientes/:id",
     element: <CreateClient />,
   },

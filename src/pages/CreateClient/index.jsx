@@ -1,4 +1,4 @@
-import { CreateOutlined, KeyboardReturn, Save } from "@mui/icons-material";
+import { EditNote, Save } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Tab } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle";
 import api from "../../services/api";
-import { formatClient, formatClientBack } from "../../services/clientFormatter";
+import { formatClient } from "../../services/clientFormatter";
 import {
   address,
   complimentary,
@@ -20,7 +20,6 @@ import {
 import Address from "./tabs/Address";
 import Complementary from "./tabs/Complementary";
 import Contact from "./tabs/Contact";
-// import Contract from "./tabs/Contract";
 import Crm from "./tabs/Crm";
 import Documentation from "./tabs/Documentation";
 import General from "./tabs/General";
@@ -40,7 +39,7 @@ export const ClientFormProvider = ({ children }) => {
     queryKey: ["client", id],
     queryFn: async () => {
       const response = await api.get(`/clients/${id}`);
-      return formatClientBack(response.data);
+      return response.data;
     },
     enabled: !isCreating,
   });
@@ -153,7 +152,7 @@ const CreateClientForm = () => {
 
     if (isCreating) return createClient(formatClient(data));
 
-    return updateClient(formatClient(data));
+    return updateClient(data);
   };
 
   return (
@@ -170,28 +169,33 @@ const CreateClientForm = () => {
                 ? "Novo cliente"
                 : "Visualização de cliente"
           }
-          icon={<CreateOutlined />}
-          buttons={[
-            <Button
-              key="return-clients-button"
-              type="submit"
-              variant="contained"
-              color="default"
-              startIcon={<KeyboardReturn />}
-              onClick={() => navigate("/clientes")}
-            >
-              VOLTAR
-            </Button>,
-            <Button
-              key="create-client-button"
-              type="submit"
-              loading={updateIsPending || createIsPending}
-              variant="contained"
-              startIcon={<Save />}
-            >
-              SALVAR
-            </Button>,
-          ]}
+          icon={<EditNote />}
+          buttons={
+            isEditing || isCreating
+              ? [
+                  <Button
+                    key="create-client-button"
+                    type="submit"
+                    loading={updateIsPending || createIsPending}
+                    variant="contained"
+                    startIcon={<Save />}
+                  >
+                    SALVAR
+                  </Button>,
+                ]
+              : [
+                  <Button
+                    key="edit-client-button"
+                    type="button"
+                    variant="contained"
+                    color="primary"
+                    startIcon={<EditNote />}
+                    onClick={() => setIsEditing(true)}
+                  >
+                    EDITAR
+                  </Button>,
+                ]
+          }
         />
         <TabContext value={activeTab}>
           <TabList
