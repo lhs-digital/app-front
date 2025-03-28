@@ -21,7 +21,6 @@ const General = ({ data }) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
-      {console.log(data)}
       <Box>
         <InputLabel required>Tipo de Pessoa</InputLabel>
         <Select
