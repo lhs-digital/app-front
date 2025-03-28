@@ -1,6 +1,7 @@
-import { Add, Delete, Edit, Search } from "@mui/icons-material";
+import { Add, Delete, Edit, RemoveRedEye, Search } from "@mui/icons-material";
 import {
   Button,
+  CircularProgress,
   IconButton,
   InputAdornment,
   Table,
@@ -13,80 +14,60 @@ import {
   TableSortLabel,
   TextField,
 } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import ModalClient from "../../components/ModalClient";
 import ModalDelete from "../../components/ModalDelete";
-import ModalViewClient from "../../components/ModalViewClient";
 import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import { hasPermission } from "../../services/utils";
 
 const Clients = () => {
-  const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [viewOpen, setViewOpen] = useState(false);
-  const [data, setData] = useState([]);
-  const [dataEdit, setDataEdit] = useState({});
-  const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  //eslint-disable-next-line
-  const [lastPage, setLastPage] = useState(null);
-  const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
-  //eslint-disable-next-line
-  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
     key: "id",
     direction: "desc",
   });
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [totalCount, setTotalCount] = useState(0);
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
+  const [sortedData, setSortedData] = useState([]);
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      setLoading(true);
-      try {
-        const response = await api.get(
-          `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
-          {
-            params: {
-              search: search,
-            },
-          },
-        );
-        const sortedData = response.data.data.sort((a, b) => b.id - a.id);
-        setData(sortedData);
-        setCurrentPage(response.data.current_page);
-        setLastPage(response.data.last_page);
-        setTotalCount(response.data.total);
-      } catch (error) {
-        console.error("Erro ao buscar clientes:", error);
-        toast.error("Erro ao carregar a lista de clientes.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClients();
-  }, [currentPage, search, refresh]);
+  const { data, isFetching, isSuccess } = useQuery({
+    queryKey: ["clients", currentPage, rowsPerPage, search],
+    queryFn: async () => {
+      const response = await api.get(
+        `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
+        {
+          params: { search: search },
+        },
+      );
+      setTotalCount(response.data.total);
+      return response.data.data;
+    },
+  });
 
   const handleSort = (key) => {
     const direction =
-      sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
-    const sortedData = [...data].sort((a, b) => {
-      const aValue = a[key];
-      const bValue = b[key];
-      if (aValue < bValue) return direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return direction === "asc" ? 1 : -1;
+      sortConfig.direction === "asc" && sortConfig.key === key ? "desc" : "asc";
+    const newSortedData = [...sortedData];
+    newSortedData.sort((a, b) => {
+      const aKey = key.split(".").reduce((acc, part) => acc && acc[part], a);
+      const bKey = key.split(".").reduce((acc, part) => acc && acc[part], b);
+
+      if (aKey < bKey) return direction === "asc" ? -1 : 1;
+      if (aKey > bKey) return direction === "asc" ? 1 : -1;
       return 0;
     });
+
     setSortConfig({ key, direction });
-    setData(sortedData);
+    setSortedData(newSortedData);
   };
 
   const createSortHandler = (key) => () => {
@@ -96,27 +77,16 @@ const Clients = () => {
   const handleRemove = async () => {
     try {
       await api.delete(`/clients/${deleteId}`);
-      setRefresh(!refresh);
-      toast.success("Client removido com sucesso!");
+      toast.success("Cliente removido com sucesso!");
       setDeleteOpen(false);
     } catch (error) {
-      console.error(`Erro ao delter cliente com ID: ${deleteId}`, error);
+      console.error(`Erro ao deletar cliente com ID: ${deleteId}`, error);
     }
   };
 
   const handleDelete = async (id) => {
     setDeleteId(id);
     setDeleteOpen(true);
-  };
-
-  const handleEdit = (client) => {
-    setDataEdit(client);
-    setModalOpen(true);
-  };
-
-  const handleView = (client) => {
-    setDataView(client);
-    setViewOpen(true);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -127,30 +97,20 @@ const Clients = () => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
-    setRefresh((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      setSortedData(data);
+    }
+  }, [isSuccess, data]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      <ModalClient
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        data={data}
-        setData={setData}
-        dataEdit={dataEdit}
-        setDataEdit={setDataEdit}
-        refresh={refresh}
-        setRefresh={setRefresh}
-      />
       <ModalDelete
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleRemove}
-      />
-      <ModalViewClient
-        isOpen={viewOpen}
-        onClose={() => setViewOpen(false)}
-        selectedUser={dataView}
       />
       <PageTitle
         title="Clientes"
@@ -160,7 +120,7 @@ const Clients = () => {
             variant="contained"
             color="primary"
             startIcon={<Add />}
-            onClick={() => navigate("/clientes/criar")}
+            onClick={() => navigate("/clientes/novo")}
           >
             NOVO CADASTRO
           </Button>
@@ -238,14 +198,21 @@ const Clients = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.length === 0 ? (
+            {isFetching && (
+              <TableRow>
+                <TableCell colSpan={4} rowSpan={2} align="center">
+                  <CircularProgress size={24} />
+                </TableCell>
+              </TableRow>
+            )}
+            {!isFetching && sortedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan="5" textAlign="center">
                   Nenhum cliente encontrado
                 </TableCell>
               </TableRow>
             ) : (
-              data
+              sortedData
                 .filter((client) =>
                   [
                     client.id,
@@ -262,28 +229,33 @@ const Clients = () => {
                 .map((client) => (
                   <TableRow
                     key={client.id}
-                    cursor="pointer"
-                    onClick={() => handleView(client)}
+                    className="cursor-pointer hover:bg-gray-600/20 transition-all"
                   >
                     <TableCell>{client.id}</TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.cnpj_cpf}</TableCell>
                     <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
-                      {permissions.some(
-                        (perm) => perm.name === "update_clients",
-                      ) && (
+                      {hasPermission(permissions, "view_clients") && (
                         <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(client);
+                          onClick={() => {
+                            navigate(`/clientes/${client.id}`, {});
+                          }}
+                        >
+                          <RemoveRedEye fontSize="small" />
+                        </IconButton>
+                      )}
+                      {hasPermission(permissions, "update_clients") && (
+                        <IconButton
+                          onClick={() => {
+                            navigate(`/clientes/${client.id}`, {
+                              state: { edit: true },
+                            });
                           }}
                         >
                           <Edit fontSize="small" />
                         </IconButton>
                       )}
-                      {permissions.some(
-                        (perm) => perm.name === "delete_clients",
-                      ) && (
+                      {hasPermission(permissions, "delete_clients") && (
                         <IconButton
                           onClick={(e) => {
                             e.stopPropagation();

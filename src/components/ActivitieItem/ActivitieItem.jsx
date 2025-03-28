@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
 import {
@@ -20,7 +21,6 @@ import {
   getPriorityColor,
 } from "../../services/utils";
 import { handleMode } from "../../theme";
-import ModalFormClient from "../ModalFormClient";
 import ViewActivitie from "../ViewActivitie";
 
 const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
@@ -29,14 +29,21 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const theme = handleMode(themeMode);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { permissions } = useUserState().state;
-  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleView = () => {
-    setIsOpen(true);
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
+    console.log(activitie);
+    let path = "";
+    switch (activitie?.table.name) {
+      case "clients":
+        path = "/clientes";
+        break;
+      default:
+        break;
+    }
+    return navigate(`${path}/${activitie?.record_id}`, {
+      state: { edit: true, columns: activitie?.columns },
+    });
   };
 
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -68,13 +75,6 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 ? colors.orange[100]
                 : colors.orange[500],
         }}
-      />
-      <ModalFormClient
-        isOpen={isOpen}
-        onClose={handleClose}
-        selectedActivitie={dataView}
-        setRefresh={setRefresh}
-        refresh={refresh}
       />
       <Box
         display="flex"

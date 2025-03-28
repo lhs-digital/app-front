@@ -1,5 +1,6 @@
 import { Box, InputLabel, TextField } from "@mui/material";
 import { useFormContext } from "react-hook-form";
+import { useClientForm } from "..";
 
 const Complementary = () => {
   const {
@@ -7,42 +8,53 @@ const Complementary = () => {
     formState: { errors },
   } = useFormContext();
 
+  const { isEditing, isCreating } = useClientForm();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
       <Box className="lg:col-span-4">
         <InputLabel required>Nome do pai</InputLabel>
         <TextField
           type="text"
-          {...register("father_name", {
+          {...register("nome_pai", {
             required: "Nome do pai é obrigatório",
           })}
           fullWidth
-          error={!!errors.father_name}
-          helperText={errors.father_name?.message}
+          error={!!errors.nome_pai}
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
+          helperText={errors.nome_pai?.message}
         />
       </Box>
       <Box className="lg:col-span-4">
         <InputLabel required>Nome da mãe</InputLabel>
         <TextField
           type="text"
-          {...register("mother_name", {
+          {...register("nome_mae", {
             required: "Nome da mãe é obrigatório",
           })}
           fullWidth
-          error={!!errors.mother_name}
-          helperText={errors.mother_name?.message}
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
+          error={!!errors.nome_mae}
+          helperText={errors.nome_mae?.message}
         />
       </Box>
       <Box className="lg:col-span-4">
         <InputLabel required>Representante legal</InputLabel>
         <TextField
           type="text"
-          {...register("legal_representative", {
+          {...register("representante_legal", {
             required: "Representante legal é obrigatório",
           })}
           fullWidth
-          error={!!errors.legal_representative}
-          helperText={errors.legal_representative?.message}
+          InputProps={{
+            readOnly: !isEditing && !isCreating,
+          }}
+          error={!!errors.representante_legal}
+          helperText={errors.representante_legal?.message}
         />
       </Box>
     </div>

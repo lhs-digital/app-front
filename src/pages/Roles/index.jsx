@@ -1,4 +1,4 @@
-import { Add, Delete, Edit, Search, Visibility } from "@mui/icons-material";
+import { Add, Delete, Edit, RemoveRedEye, Search } from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
@@ -40,8 +40,8 @@ const Roles = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [sortedData, setSortedData] = useState([]);
 
-  const { data, isFetching, isSuccess } = useQuery({
-    queryKey: ["roles", currentPage],
+  const { data, isFetched, isSuccess } = useQuery({
+    queryKey: ["roles", currentPage, rowsPerPage, search],
     queryFn: async () => {
       const response = await api.get(
         `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
@@ -49,6 +49,8 @@ const Roles = () => {
           params: { search: search },
         },
       );
+      console.log(response);
+      setTotalCount(response.data.meta.total);
       return response.data.data;
     },
   });
@@ -111,7 +113,14 @@ const Roles = () => {
     if (isSuccess) {
       setSortedData(data);
     }
-  }, [isSuccess]);
+  }, [isSuccess, data]);
+
+  useEffect(() => {
+    if (search === "") {
+      setCurrentPage(1);
+      qc.invalidateQueries({ queryKey: ["roles"] });
+    }
+  }, [search]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -214,7 +223,7 @@ const Roles = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {isFetching && (
+            {!isFetched && (
               <TableRow>
                 <TableCell colSpan={4} rowSpan={2} align="center">
                   <CircularProgress size={24} />
@@ -222,14 +231,17 @@ const Roles = () => {
               </TableRow>
             )}
             {sortedData.map(({ name, company, permissions_count, id }) => (
-              <TableRow key={id}>
+              <TableRow
+                key={id}
+                className="cursor-pointer hover:bg-gray-600/20 transition-all"
+              >
                 <TableCell>{name}</TableCell>
                 <TableCell>{company?.name}</TableCell>
                 <TableCell>{permissions_count}</TableCell>
                 <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
-                  {hasPermission(permissions, "view_roles") && (
+                  {hasPermission(permissions, "view_clients") && (
                     <IconButton onClick={() => navigate(`/papeis/${id}`)}>
-                      <Visibility fontSize="small" />
+                      <RemoveRedEye fontSize="small" />
                     </IconButton>
                   )}
                   {hasPermission(permissions, "update_roles") && (
