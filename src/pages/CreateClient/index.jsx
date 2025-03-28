@@ -31,6 +31,8 @@ export const ClientFormProvider = ({ children }) => {
   const { id } = useParams();
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
+  const errors = location.state?.columns;
+  console.log("errors", errors);
   const isCreating = id === "novo";
   const methods = useForm();
 
@@ -51,7 +53,7 @@ export const ClientFormProvider = ({ children }) => {
 
   return (
     <ClientFormContext.Provider
-      value={{ isEditing, isCreating, setIsEditing, client, id }}
+      value={{ isEditing, isCreating, setIsEditing, errors, client, id }}
     >
       <FormProvider {...methods}>{children}</FormProvider>
     </ClientFormContext.Provider>
@@ -69,7 +71,8 @@ export const useClientForm = () => {
 const CreateClientForm = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
-  const { isEditing, setIsEditing, isCreating, client, id } = useClientForm();
+  const { isEditing, setIsEditing, isCreating, errors, client, id } =
+    useClientForm();
 
   const methods = useForm({
     defaultValues: {
@@ -125,9 +128,19 @@ const CreateClientForm = () => {
   });
 
   useEffect(() => {
+    if (errors) {
+      errors.forEach((error) => {
+        methods.setError(error.name, {
+          type: "manual",
+          message: error.message,
+        });
+      });
+    }
+  }, [errors]);
+
+  useEffect(() => {
     if (!client) return;
     Object.keys(client).forEach((key) => {
-      console.log(key, client[key]);
       methods.setValue(key, client[key]);
     });
   }, [client]);
@@ -137,8 +150,6 @@ const CreateClientForm = () => {
       console.error("errors", methods.formState.errors);
       return toast.error("Preencha todos os campos corretamente");
     }
-
-    console.log(formatClient(data));
 
     if (isCreating) return createClient(formatClient(data));
 
