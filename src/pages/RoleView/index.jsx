@@ -28,9 +28,10 @@ const RoleView = () => {
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   const { data: companies, isFetched: isCompanyFetched } = useQuery({
-    queryKey: ["companies"],
+    queryKey: ["companies", id],
     queryFn: async () => {
       const response = await api.get("/companies");
+      console.log("companies", response.data.data);
       return response.data.data;
     },
   });
@@ -197,11 +198,10 @@ const RoleView = () => {
                 <Select
                   fullWidth
                   {...field}
-                  value={field.value || ""}
+                  value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value)}
                   readOnly={!isEditing && !isCreating}
                 >
-                  <MenuItem value={""}>--</MenuItem>
                   <MenuItem value={0}>Alto</MenuItem>
                   <MenuItem value={1}>Médio</MenuItem>
                   <MenuItem value={2}>Baixo</MenuItem>
@@ -228,6 +228,10 @@ const RoleView = () => {
                       getOptionLabel={(option) => option.name}
                       getOptionKey={(option) => option.id}
                       loadingText="Carregando..."
+                      inputValue={role.company?.name || ""}
+                      onInputChange={(e, newValue) => {
+                        field.onChange(newValue);
+                      }}
                       readOnly={!isEditing && !isCreating}
                       renderInput={(params) => <TextField {...params} />}
                       onChange={(e, newValue) => field.onChange(newValue)}
