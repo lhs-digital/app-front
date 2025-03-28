@@ -40,7 +40,7 @@ const Roles = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [sortedData, setSortedData] = useState([]);
 
-  const { data, isFetching, isSuccess } = useQuery({
+  const { data, isFetched, isSuccess } = useQuery({
     queryKey: ["roles", currentPage, rowsPerPage, search],
     queryFn: async () => {
       const response = await api.get(
@@ -223,7 +223,7 @@ const Roles = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {isFetching && (
+            {!isFetched && (
               <TableRow>
                 <TableCell colSpan={4} rowSpan={2} align="center">
                   <CircularProgress size={24} />
