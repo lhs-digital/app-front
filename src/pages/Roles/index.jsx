@@ -1,4 +1,4 @@
-import { Add, Delete, Edit, Search } from "@mui/icons-material";
+import { Add, Delete, Edit, RemoveRedEye, Search } from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
@@ -49,7 +49,7 @@ const Roles = () => {
           params: { search: search },
         },
       );
-      console.log(response)
+      console.log(response);
       setTotalCount(response.data.meta.total);
       return response.data.data;
     },
@@ -234,15 +234,16 @@ const Roles = () => {
               <TableRow
                 key={id}
                 className="cursor-pointer hover:bg-gray-600/20 transition-all"
-                onClick={() =>
-                  hasPermission(permissions, "view_roles") &&
-                  navigate(`/papeis/${id}`)
-                }
               >
                 <TableCell>{name}</TableCell>
                 <TableCell>{company?.name}</TableCell>
                 <TableCell>{permissions_count}</TableCell>
                 <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
+                  {hasPermission(permissions, "view_clients") && (
+                    <IconButton onClick={() => navigate(`/papeis/${id}`)}>
+                      <RemoveRedEye fontSize="small" />
+                    </IconButton>
+                  )}
                   {hasPermission(permissions, "update_roles") && (
                     <IconButton
                       onClick={() =>
