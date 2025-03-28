@@ -1,4 +1,4 @@
-import { Add, Delete, Edit, Search } from "@mui/icons-material";
+import { Add, Delete, Edit, RemoveRedEye, Search } from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
@@ -230,15 +230,20 @@ const Clients = () => {
                   <TableRow
                     key={client.id}
                     className="cursor-pointer hover:bg-gray-600/20 transition-all"
-                    onClick={() =>
-                      hasPermission(permissions, "view_clients") &&
-                      navigate(`/clientes/${client.id}`)
-                    }
                   >
                     <TableCell>{client.id}</TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.cnpj_cpf}</TableCell>
                     <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
+                      {hasPermission(permissions, "view_clients") && (
+                        <IconButton
+                          onClick={() => {
+                            navigate(`/clientes/${client.id}`, {});
+                          }}
+                        >
+                          <RemoveRedEye fontSize="small" />
+                        </IconButton>
+                      )}
                       {hasPermission(permissions, "update_clients") && (
                         <IconButton
                           onClick={() => {
