@@ -8,7 +8,7 @@ const Crm = () => {
     formState: { errors },
   } = useFormContext();
 
-  const { isEditing, isCreating } = useClientForm();
+  const { isEditing, isCreating, auditErrors } = useClientForm();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
@@ -20,11 +20,13 @@ const Crm = () => {
             required: "Canal de vendas é obrigatório",
           })}
           fullWidth
-          error={!!errors.vd_canal}
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          error={!!auditErrors.vd_canal || !!errors.vd_canal}
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
-          helperText={errors.vd_canal?.message}
+          helperText={auditErrors.vd_canal?.message ?? errors.vd_canal?.message}
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -35,11 +37,15 @@ const Crm = () => {
             required: "Concorrente é obrigatório",
           })}
           fullWidth
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
-          error={!!errors.concorrente}
-          helperText={errors.concorrente?.message}
+          error={!!auditErrors.concorrente || !!errors.concorrente}
+          helperText={
+            auditErrors.concorrente?.message ?? errors.concorrente?.message
+          }
         />
       </Box>
       <Box className="lg:col-span-3">
@@ -48,11 +54,13 @@ const Crm = () => {
           type="text"
           {...register("perfil", { required: "Perfil é obrigatório" })}
           fullWidth
-          error={!!errors.perfil}
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          error={!!auditErrors.perfil || !!errors.perfil}
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
-          helperText={errors.perfil?.message}
+          helperText={auditErrors.perfil?.message ?? errors.perfil?.message}
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -63,11 +71,15 @@ const Crm = () => {
             required: "Responsável é obrigatório",
           })}
           fullWidth
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
-          error={!!errors.responsavel}
-          helperText={errors.responsavel?.message}
+          error={!!auditErrors.responsavel || !!errors.responsavel}
+          helperText={
+            auditErrors.responsavel?.message ?? errors.responsavel?.message
+          }
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -78,11 +90,19 @@ const Crm = () => {
             required: "Planejamento analítico é obrigatório",
           })}
           fullWidth
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
-          error={!!errors.planejamento_analitico}
-          helperText={errors.planejamento_analitico?.message}
+          error={
+            !!auditErrors.planejamento_analitico ||
+            !!errors.planejamento_analitico
+          }
+          helperText={
+            auditErrors.planejamento_analitico?.message ??
+            errors.planejamento_analitico?.message
+          }
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -93,11 +113,19 @@ const Crm = () => {
             required: "Condição de pagamentos é obrigatória",
           })}
           fullWidth
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
-          error={!!errors.planejamento_analitico}
-          helperText={errors.planejamento_analitico?.message}
+          error={
+            !!auditErrors.planejamento_analitico ||
+            !!errors.planejamento_analitico
+          }
+          helperText={
+            auditErrors.planejamento_analitico?.message ??
+            errors.planejamento_analitico?.message
+          }
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -108,11 +136,13 @@ const Crm = () => {
             required: "Vendedor padrão é obrigatório",
           })}
           fullWidth
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
-          error={!!errors.vendedor}
-          helperText={errors.vendedor?.message}
+          error={!!auditErrors.vendedor || !!errors.vendedor}
+          helperText={auditErrors.vendedor?.message ?? errors.vendedor?.message}
         />
       </Box>
     </div>

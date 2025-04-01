@@ -30,10 +30,20 @@ export const ClientFormProvider = ({ children }) => {
   const { id } = useParams();
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
-  const errors = location.state?.columns;
-  console.log("errors", errors);
+  const errorColumns = location.state?.columns;
   const isCreating = id === "novo";
-  const methods = useForm();
+  const [auditErrors, setAuditErrors] = useState(
+    errorColumns?.reduce((acc, column) => {
+      acc[column.name] = {
+        message: column.message,
+      };
+      return acc;
+    }, {}),
+  );
+
+  const resetAuditErrors = () => {
+    setAuditErrors({});
+  };
 
   const { data: client } = useQuery({
     queryKey: ["client", id],
@@ -44,17 +54,19 @@ export const ClientFormProvider = ({ children }) => {
     enabled: !isCreating,
   });
 
-  useEffect(() => {
-    if (client) {
-      methods.reset(client);
-    }
-  }, [client, methods]);
-
   return (
     <ClientFormContext.Provider
-      value={{ isEditing, isCreating, setIsEditing, errors, client, id }}
+      value={{
+        isEditing,
+        isCreating,
+        setIsEditing,
+        auditErrors,
+        resetAuditErrors,
+        client,
+        id,
+      }}
     >
-      <FormProvider {...methods}>{children}</FormProvider>
+      {children}
     </ClientFormContext.Provider>
   );
 };
@@ -70,7 +82,7 @@ export const useClientForm = () => {
 const CreateClientForm = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
-  const { isEditing, setIsEditing, isCreating, errors, client, id } =
+  const { isEditing, setIsEditing, isCreating, client, id, resetAuditErrors } =
     useClientForm();
 
   const methods = useForm({
@@ -123,19 +135,9 @@ const CreateClientForm = () => {
     },
     onSettled: () => {
       setIsEditing(false);
+      resetAuditErrors();
     },
   });
-
-  useEffect(() => {
-    if (errors) {
-      errors.forEach((error) => {
-        methods.setError(error.name, {
-          type: "manual",
-          message: error.message,
-        });
-      });
-    }
-  }, [errors]);
 
   useEffect(() => {
     if (!client) return;

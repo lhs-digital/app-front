@@ -1,6 +1,19 @@
-import { Box, InputLabel, TextField, Select, MenuItem, Accordion, AccordionSummary, AccordionDetails, Typography, Grid, FormHelperText } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useFormContext } from "react-hook-form";
+import { useClientForm } from "..";
 
 const Contract = () => {
   const {
@@ -8,46 +21,62 @@ const Contract = () => {
     formState: { errors },
   } = useFormContext();
 
+  const { auditErrors } = useClientForm();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
       <Box className="lg:col-span-4">
         <InputLabel required>Plano de vendas</InputLabel>
         <TextField
           type="text"
-          {...register("sales_plan", { required: "Plano de vendas é obrigatório" })}
+          {...register("sales_plan", {
+            required: "Plano de vendas é obrigatório",
+          })}
           fullWidth
-          error={!!errors.sales_plan}
-          helperText={errors.sales_plan?.message}
+          error={!!auditErrors.sales_plan || !!errors.sales_plan}
+          helperText={
+            auditErrors.sales_plan?.message ?? errors.sales_plan?.message
+          }
         />
       </Box>
       <Box className="lg:col-span-4">
         <InputLabel required>Tipo de cobrança</InputLabel>
         <TextField
           type="text"
-          {...register("billing_type", { required: "Tipo de cobrança é obrigatório" })}
+          {...register("billing_type", {
+            required: "Tipo de cobrança é obrigatório",
+          })}
           fullWidth
-          error={!!errors.billing_type}
-          helperText={errors.billing_type?.message}
+          error={!!auditErrors.billing_type || !!errors.billing_type}
+          helperText={
+            auditErrors.billing_type?.message ?? errors.billing_type?.message
+          }
         />
       </Box>
       <Box className="lg:col-span-4">
         <InputLabel required>Modelo para impressão</InputLabel>
         <TextField
           type="text"
-          {...register("model", { required: "Modelo para impressão é obrigatório" })}
+          {...register("model", {
+            required: "Modelo para impressão é obrigatório",
+          })}
           fullWidth
-          error={!!errors.model}
-          helperText={errors.model?.message}
+          error={!!auditErrors.model || !!errors.model}
+          helperText={auditErrors.model?.message ?? errors.model?.message}
         />
       </Box>
       <Box className="lg:col-span-4">
         <InputLabel required>Assinatura digital</InputLabel>
         <TextField
           type="text"
-          {...register("signature", { required: "Assinatura digital é obrigatória" })}
+          {...register("signature", {
+            required: "Assinatura digital é obrigatória",
+          })}
           fullWidth
-          error={!!errors.signature}
-          helperText={errors.signature?.message}
+          error={!!auditErrors.signature || !!errors.signature}
+          helperText={
+            auditErrors.signature?.message ?? errors.signature?.message
+          }
         />
       </Box>
       <Box className="lg:col-span-4">
@@ -56,8 +85,8 @@ const Contract = () => {
           type="text"
           {...register("branch", { required: "Filial é obrigatória" })}
           fullWidth
-          error={!!errors.branch}
-          helperText={errors.branch?.message}
+          error={!!auditErrors.branch || !!errors.branch}
+          helperText={auditErrors.branch?.message ?? errors.branch?.message}
         />
       </Box>
       <Box className="lg:col-span-4">
@@ -66,8 +95,10 @@ const Contract = () => {
           type="text"
           {...register("indication", { required: "Indicação é obrigatória" })}
           fullWidth
-          error={!!errors.indication}
-          helperText={errors.indication?.message}
+          error={!!auditErrors.indication || !!errors.indication}
+          helperText={
+            auditErrors.indication?.message ?? errors.indication?.message
+          }
         />
       </Box>
 
@@ -82,72 +113,120 @@ const Contract = () => {
                 <InputLabel required>Tipo de documento fatura</InputLabel>
                 <TextField
                   type="text"
-                  {...register("invoice_document_type", { required: "Tipo de documento fatura é obrigatório" })}
+                  {...register("invoice_document_type", {
+                    required: "Tipo de documento fatura é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.invoice_document_type}
-                  helperText={errors.invoice_document_type?.message}
+                  error={
+                    !!auditErrors.invoice_document_type ||
+                    !!errors.invoice_document_type
+                  }
+                  helperText={
+                    auditErrors.invoice_document_type?.message ??
+                    errors.invoice_document_type?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Carteira de cobrança</InputLabel>
                 <TextField
                   type="text"
-                  {...register("billing_wallet", { required: "Carteira de cobrança é obrigatória" })}
+                  {...register("billing_wallet", {
+                    required: "Carteira de cobrança é obrigatória",
+                  })}
                   fullWidth
-                  error={!!errors.billing_wallet}
-                  helperText={errors.billing_wallet?.message}
+                  error={
+                    !!auditErrors.billing_wallet || !!errors.billing_wallet
+                  }
+                  helperText={
+                    auditErrors.billing_wallet?.message ??
+                    errors.billing_wallet?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Vendedor</InputLabel>
                 <TextField
                   type="text"
-                  {...register("seller", { required: "Vendedor é obrigatório" })}
+                  {...register("seller", {
+                    required: "Vendedor é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.seller}
-                  helperText={errors.seller?.message}
+                  error={!!auditErrors.seller || !!errors.seller}
+                  helperText={
+                    auditErrors.seller?.message ?? errors.seller?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Gera financeiro automático</InputLabel>
                 <Select
-                  {...register("automatic", { required: "Gera financeiro automático é obrigatório" })}
+                  {...register("automatic", {
+                    required: "Gera financeiro automático é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.automatic}
+                  error={!!auditErrors.automatic || !!errors.automatic}
                 >
                   <MenuItem value="Sim">Sim</MenuItem>
                   <MenuItem value="Não">Não</MenuItem>
                 </Select>
-                {errors.automatic && <FormHelperText error>{errors.automatic.message}</FormHelperText>}
+                {errors.automatic && (
+                  <FormHelperText error>
+                    {errors.automatic.message}
+                  </FormHelperText>
+                )}
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel>ID Contrato principal</InputLabel>
                 <TextField
                   type="text"
-                  {...register("main_contract_id", { required: "ID Contrato principal é obrigatório" })}
+                  {...register("main_contract_id", {
+                    required: "ID Contrato principal é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.main_contract_id}
-                  helperText={errors.main_contract_id?.message}
+                  error={
+                    !!auditErrors.main_contract_id || !!errors.main_contract_id
+                  }
+                  helperText={
+                    auditErrors.main_contract_id?.message ??
+                    errors.main_contract_id?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Tipo de Documento Opcional</InputLabel>
                 <TextField
                   type="text"
-                  {...register("optional_document_type", { required: "Tipo de Documento Opcional é obrigatório" })}
+                  {...register("optional_document_type", {
+                    required: "Tipo de Documento Opcional é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.optional_document_type}
-                  helperText={errors.optional_document_type?.message}
+                  error={
+                    !!auditErrors.optional_document_type ||
+                    !!errors.optional_document_type
+                  }
+                  helperText={
+                    auditErrors.optional_document_type?.message ??
+                    errors.optional_document_type?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Tipo de Documento Opcional 2</InputLabel>
                 <TextField
                   type="text"
-                  {...register("optional_document_type_2", { required: "Tipo de Documento Opcional 2 é obrigatório" })}
+                  {...register("optional_document_type_2", {
+                    required: "Tipo de Documento Opcional 2 é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.optional_document_type_2}
-                  helperText={errors.optional_document_type_2?.message}
+                  error={
+                    !!auditErrors.optional_document_type_2 ||
+                    !!errors.optional_document_type_2
+                  }
+                  helperText={
+                    auditErrors.optional_document_type_2?.message ??
+                    errors.optional_document_type_2?.message
+                  }
                 />
               </Grid>
             </Grid>
@@ -166,80 +245,134 @@ const Contract = () => {
                 <InputLabel required>Tipo de documento</InputLabel>
                 <TextField
                   type="text"
-                  {...register("activation_document_type", { required: "Tipo de documento é obrigatório" })}
+                  {...register("activation_document_type", {
+                    required: "Tipo de documento é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.activation_document_type}
-                  helperText={errors.activation_document_type?.message}
+                  error={
+                    !!auditErrors.activation_document_type ||
+                    !!errors.activation_document_type
+                  }
+                  helperText={
+                    auditErrors.activation_document_type?.message ??
+                    errors.activation_document_type?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Produto</InputLabel>
                 <TextField
                   type="text"
-                  {...register("product", { required: "Produto é obrigatório" })}
+                  {...register("product", {
+                    required: "Produto é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.product}
-                  helperText={errors.product?.message}
+                  error={!!auditErrors.product || !!errors.product}
+                  helperText={
+                    auditErrors.product?.message ?? errors.product?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Taxa de ativação</InputLabel>
                 <TextField
                   type="text"
-                  {...register("activation_fee", { required: "Taxa de ativação é obrigatória" })}
+                  {...register("activation_fee", {
+                    required: "Taxa de ativação é obrigatória",
+                  })}
                   fullWidth
-                  error={!!errors.activation_fee}
-                  helperText={errors.activation_fee?.message}
+                  error={
+                    !!auditErrors.activation_fee || !!errors.activation_fee
+                  }
+                  helperText={
+                    auditErrors.activation_fee?.message ??
+                    errors.activation_fee?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Condição de pagamento</InputLabel>
                 <TextField
                   type="text"
-                  {...register("payment_condition", { required: "Condição de pagamento é obrigatória" })}
+                  {...register("payment_condition", {
+                    required: "Condição de pagamento é obrigatória",
+                  })}
                   fullWidth
-                  error={!!errors.payment_condition}
-                  helperText={errors.payment_condition?.message}
+                  error={
+                    !!auditErrors.payment_condition ||
+                    !!errors.payment_condition
+                  }
+                  helperText={
+                    auditErrors.payment_condition?.message ??
+                    errors.payment_condition?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Vendedor ativação</InputLabel>
                 <TextField
                   type="text"
-                  {...register("activation_seller", { required: "Vendedor ativação é obrigatório" })}
+                  {...register("activation_seller", {
+                    required: "Vendedor ativação é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.activation_seller}
-                  helperText={errors.activation_seller?.message}
+                  error={
+                    !!auditErrors.activation_seller ||
+                    !!errors.activation_seller
+                  }
+                  helperText={
+                    auditErrors.activation_seller?.message ??
+                    errors.activation_seller?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Fidelidade</InputLabel>
                 <TextField
                   type="text"
-                  {...register("loyalty", { required: "Fidelidade é obrigatória" })}
+                  {...register("loyalty", {
+                    required: "Fidelidade é obrigatória",
+                  })}
                   fullWidth
-                  error={!!errors.loyalty}
-                  helperText={errors.loyalty?.message}
+                  error={!!auditErrors.loyalty || !!errors.loyalty}
+                  helperText={
+                    auditErrors.loyalty?.message ?? errors.loyalty?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Desconto fidelidade</InputLabel>
                 <TextField
                   type="text"
-                  {...register("loyalty_discount", { required: "Desconto fidelidade é obrigatório" })}
+                  {...register("loyalty_discount", {
+                    required: "Desconto fidelidade é obrigatório",
+                  })}
                   fullWidth
-                  error={!!errors.loyalty_discount}
-                  helperText={errors.loyalty_discount?.message}
+                  error={
+                    !!auditErrors.loyalty_discount || !!errors.loyalty_discount
+                  }
+                  helperText={
+                    auditErrors.loyalty_discount?.message ??
+                    errors.loyalty_discount?.message
+                  }
                 />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <InputLabel required>Taxa de visita improdutiva</InputLabel>
                 <TextField
                   type="text"
-                  {...register("unproductive_visit_fee", { required: "Taxa de visita improdutiva é obrigatória" })}
+                  {...register("unproductive_visit_fee", {
+                    required: "Taxa de visita improdutiva é obrigatória",
+                  })}
                   fullWidth
-                  error={!!errors.unproductive_visit_fee}
-                  helperText={errors.unproductive_visit_fee?.message}
+                  error={
+                    !!auditErrors.unproductive_visit_fee ||
+                    !!errors.unproductive_visit_fee
+                  }
+                  helperText={
+                    auditErrors.unproductive_visit_fee?.message ??
+                    errors.unproductive_visit_fee?.message
+                  }
                 />
               </Grid>
             </Grid>

@@ -1,8 +1,8 @@
-import { Box, InputLabel, TextField, IconButton } from "@mui/material";
-import { useFormContext } from "react-hook-form";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
+import { Box, IconButton, InputLabel, TextField } from "@mui/material";
 import { styled } from "@mui/system";
 import { useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 const FileInputWrapper = styled("div")({
   position: "relative",
@@ -61,13 +61,17 @@ const Documentation = () => {
           <TextField
             type="text"
             fullWidth
-            InputProps={{
-              readOnly: true,
-              endAdornment: (
-                <IconButton className={`file-icon ${fileNames.rg_cpf !== "Nenhum ficheiro selecionado" ? "selected" : ""}`}>
-                  <AttachFileIcon />
-                </IconButton>
-              ),
+            slotProps={{
+              input: {
+                readOnly: true,
+                endAdornment: (
+                  <IconButton
+                    className={`file-icon ${fileNames.rg_cpf !== "Nenhum ficheiro selecionado" ? "selected" : ""}`}
+                  >
+                    <AttachFileIcon />
+                  </IconButton>
+                ),
+              },
             }}
             value={fileNames.rg_cpf}
             error={!!errors.rg_cpf}
@@ -76,24 +80,30 @@ const Documentation = () => {
           <input
             type="file"
             accept="application/pdf"
-            {...register("rg_cpf", { required: "RG e CPF do titular são obrigatórios" })}
+            {...register("rg_cpf")}
             onChange={(e) => handleFileChange(e, "rg_cpf")}
           />
         </FileInputWrapper>
       </Box>
       <Box className="lg:col-span-4">
-        <InputLabel required>Comprovante de residência atualizado (PDF)</InputLabel>
+        <InputLabel required>
+          Comprovante de residência atualizado (PDF)
+        </InputLabel>
         <FileInputWrapper>
           <TextField
             type="text"
             fullWidth
-            InputProps={{
-              readOnly: true,
-              endAdornment: (
-                <IconButton className={`file-icon ${fileNames.residence_proof !== "Nenhum ficheiro selecionado" ? "selected" : ""}`}>
-                  <AttachFileIcon />
-                </IconButton>
-              ),
+            slotProps={{
+              input: {
+                readOnly: true,
+                endAdornment: (
+                  <IconButton
+                    className={`file-icon ${fileNames.residence_proof !== "Nenhum ficheiro selecionado" ? "selected" : ""}`}
+                  >
+                    <AttachFileIcon />
+                  </IconButton>
+                ),
+              },
             }}
             value={fileNames.residence_proof}
             error={!!errors.residence_proof}
@@ -102,24 +112,30 @@ const Documentation = () => {
           <input
             type="file"
             accept="application/pdf"
-            {...register("residence_proof", { required: "Comprovante de residência é obrigatório" })}
+            {...register("residence_proof")}
             onChange={(e) => handleFileChange(e, "residence_proof")}
           />
         </FileInputWrapper>
       </Box>
       <Box className="lg:col-span-4">
-        <InputLabel required>Contrato assinado digitalmente ou fisicamente (PDF)</InputLabel>
+        <InputLabel required>
+          Contrato assinado digitalmente ou fisicamente (PDF)
+        </InputLabel>
         <FileInputWrapper>
           <TextField
             type="text"
             fullWidth
-            InputProps={{
-              readOnly: true,
-              endAdornment: (
-                <IconButton className={`file-icon ${fileNames.signed_contract !== "Nenhum ficheiro selecionado" ? "selected" : ""}`}>
-                  <AttachFileIcon />
-                </IconButton>
-              ),
+            slotProps={{
+              input: {
+                readOnly: true,
+                endAdornment: (
+                  <IconButton
+                    className={`file-icon ${fileNames.signed_contract !== "Nenhum ficheiro selecionado" ? "selected" : ""}`}
+                  >
+                    <AttachFileIcon />
+                  </IconButton>
+                ),
+              },
             }}
             value={fileNames.signed_contract}
             error={!!errors.signed_contract}
@@ -128,24 +144,30 @@ const Documentation = () => {
           <input
             type="file"
             accept="application/pdf"
-            {...register("signed_contract", { required: "Contrato assinado é obrigatório" })}
+            {...register("signed_contract")}
             onChange={(e) => handleFileChange(e, "signed_contract")}
           />
         </FileInputWrapper>
       </Box>
       <Box className="lg:col-span-4">
-        <InputLabel required>Comodato de equipamentos, se aplicável (PDF)</InputLabel>
+        <InputLabel required>
+          Comodato de equipamentos, se aplicável (PDF)
+        </InputLabel>
         <FileInputWrapper>
           <TextField
             type="text"
             fullWidth
-            InputProps={{
-              readOnly: true,
-              endAdornment: (
-                <IconButton className={`file-icon ${fileNames.equipment_loan !== "Nenhum ficheiro selecionado" ? "selected" : ""}`}>
-                  <AttachFileIcon />
-                </IconButton>
-              ),
+            slotProps={{
+              input: {
+                readOnly: true,
+                endAdornment: (
+                  <IconButton
+                    className={`file-icon ${fileNames.equipment_loan !== "Nenhum ficheiro selecionado" ? "selected" : ""}`}
+                  >
+                    <AttachFileIcon />
+                  </IconButton>
+                ),
+              },
             }}
             value={fileNames.equipment_loan}
             error={!!errors.equipment_loan}
@@ -154,7 +176,7 @@ const Documentation = () => {
           <input
             type="file"
             accept="application/pdf"
-            {...register("equipment_loan", { required: "Comodato de equipamentos é obrigatório" })}
+            {...register("equipment_loan")}
             onChange={(e) => handleFileChange(e, "equipment_loan")}
           />
         </FileInputWrapper>
