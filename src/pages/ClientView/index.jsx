@@ -33,12 +33,14 @@ export const ClientFormProvider = ({ children }) => {
   const errorColumns = location.state?.columns;
   const isCreating = id === "novo";
   const [auditErrors, setAuditErrors] = useState(
-    errorColumns?.reduce((acc, column) => {
-      acc[column.name] = {
-        message: column.message,
-      };
-      return acc;
-    }, {}),
+    errorColumns
+      ? errorColumns?.reduce((acc, column) => {
+          acc[column.name] = {
+            message: column.message,
+          };
+          return acc;
+        }, {})
+      : {},
   );
 
   const resetAuditErrors = () => {
@@ -79,7 +81,7 @@ export const useClientForm = () => {
   return context;
 };
 
-const CreateClientForm = () => {
+const ClientForm = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
   const { isEditing, setIsEditing, isCreating, client, id, resetAuditErrors } =
@@ -240,12 +242,12 @@ const CreateClientForm = () => {
   );
 };
 
-const CreateClient = () => {
+const ClientView = () => {
   return (
     <ClientFormProvider>
-      <CreateClientForm />
+      <ClientForm />
     </ClientFormProvider>
   );
 };
 
-export default CreateClient;
+export default ClientView;

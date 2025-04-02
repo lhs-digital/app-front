@@ -3,8 +3,8 @@ import PrivateRoute from "../layout/PrivateRoute";
 import PublicRoute from "../layout/PublicRoute";
 import Assignments from "../pages/Assignments";
 import Clients from "../pages/Clients";
+import ClientView from "../pages/ClientView";
 import Companies from "../pages/Companies";
-import CreateClient from "../pages/CreateClient";
 import FirstAccess from "../pages/FirstAccess";
 import Home from "../pages/Home";
 import ListActivities from "../pages/ListActivities";
@@ -102,7 +102,7 @@ export const privateSubRoutes = [
   {
     label: "Cliente",
     path: "/clientes/:id",
-    element: <CreateClient />,
+    element: <ClientView />,
   },
   {
     label: "Cargo",
