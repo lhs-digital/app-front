@@ -19,7 +19,7 @@ import RoleView from "../pages/RoleView";
 import SignIn from "../pages/SignIn";
 import Users from "../pages/Users";
 import { pagePermissions } from "../services/permissions";
-import { RouteIcon } from "./utils";
+import { RouteIcon } from "./icons";
 
 const publicRoutes = [
   {
