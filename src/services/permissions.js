@@ -34,6 +34,8 @@ const permissions = {
   "/prioridades": ["define_rules"],
   "/permissoes": [],
   "/logs": [],
+  "/regras": ["define_rules"],
+  "/regras/criar": ["create_audit_rules"],
 };
 
 export const pagePermissions = (path) => permissions[path] ?? [];

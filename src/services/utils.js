@@ -53,14 +53,16 @@ export const dateFormatted = (date) => {
   }
 
   if (date.includes(" ")) {
-    const dateObj = new Date(date.includes(" ") ? date.replace(" ", "T") + "Z" : date);
+    const dateObj = new Date(
+      date.includes(" ") ? date.replace(" ", "T") + "Z" : date,
+    );
     const datePart = dateObj.toLocaleDateString("pt-BR", {
       timeZone: "UTC",
     });
     const timePart = dateObj.toLocaleTimeString("pt-BR", {
       timeZone: "UTC",
-      hour: '2-digit',
-      minute: '2-digit'
+      hour: "2-digit",
+      minute: "2-digit",
     });
     return `${datePart} às ${timePart}`;
   } else {
@@ -164,7 +166,7 @@ export const formatUserObject = (user) => ({
     level: user?.role?.nivel,
   },
   company: user?.company,
-  isLighthouse: user?.company?.is_super_admin || false,
+  isLighthouse: user?.company?.is_super_admin === 1 ? true : false,
   permissions: user?.role?.permissions ?? [],
 });
 

@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import PrivateRoute from "../layout/PrivateRoute";
 import PublicRoute from "../layout/PublicRoute";
 import Assignments from "../pages/Assignments";
+import AuditRules from "../pages/AuditRules";
 import Clients from "../pages/Clients";
 import ClientView from "../pages/ClientView";
 import Companies from "../pages/Companies";
@@ -85,6 +86,11 @@ export const privateRoutes = [
     label: "Regras de Auditorias",
     path: "/prioridades",
     element: <Priorities />,
+  },
+  {
+    label: "Regras de Auditoria (novo)",
+    path: "/regras",
+    element: <AuditRules />,
   },
   {
     label: "Minhas Permissões",
