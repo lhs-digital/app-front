@@ -13,10 +13,11 @@ import {
   TextField,
 } from "@mui/material";
 import { useState } from "react";
+import { severities, validations } from "../../services/utils";
 
 const AddRule = ({ open = true, onClose = () => {} }) => {
   const [selectedColumn, setSelectedColumn] = useState(null);
-  const [selectedCondition, setSelectedCondition] = useState(null);
+  const [selectedValidation, setselectedValidation] = useState(null);
   const [selectedSeverity, setSelectedSeverity] = useState(null);
   const [params, setParams] = useState([]);
   const [inputValue, setInputValue] = useState();
@@ -34,79 +35,12 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
     { id: 10, label: "Coluna 10", name: "column_10" },
   ];
 
-  const conditions = [
-    {
-      id: 1,
-      name: "required",
-      label: "É obrigatório(a)",
-      has_params: 0,
-      description: "Campo obrigatório",
-      field: null,
-    },
-    {
-      id: 2,
-      name: "cpf_cnpj",
-      label: "É um CPF ou CNPJ",
-      has_params: 1,
-      description:
-        "Verifica se é um CPF ou CNPJ. Esta regra depende de valores como: F (pessoa física), J (Pessoa jurídica) e E (Estrangeiro). Selecione a coluna ou valor que contem esses valores.",
-      field: null,
-    },
-    {
-      id: 3,
-      name: "is_of_legal_age",
-      label: "É maior de idade",
-      has_params: 0,
-      description:
-        "Verifica se a idade da pessoa é igual ou superior ao limite definido como maioridade",
-      field: null,
-    },
-    {
-      id: 4,
-      name: "date",
-      label: "É uma data",
-      has_params: 0,
-      description: "Verifica se é uma data válida",
-      field: null,
-    },
-    {
-      id: 5,
-      name: "multi_email",
-      label: "É um email",
-      has_params: 0,
-      description: "Verifica se é um email válido.",
-      field: null,
-    },
-    {
-      id: 6,
-      name: "in",
-      label: "Está em",
-      has_params: 1,
-      description: "Selecione os valores que serão aceitos por essa regra.",
-      field: "array",
-    },
-    {
-      id: 7,
-      name: "not_in",
-      label: "Não está em",
-      has_params: 1,
-      description: "Selecione os valores que não serão aceitos por essa regra.",
-      field: "array",
-    },
-  ];
-
-  const severities = [
-    { label: "Baixa", name: "low", value: 0 },
-    { label: "Média", name: "medium", value: 1 },
-    { label: "Alta", name: "high", value: 2 },
-  ];
-
-  const renderConditionField = () => {
-    const condition = conditions.find(
-      (condition) => condition.name === selectedCondition,
+  const renderValidationField = () => {
+    const validation = validations.find(
+      (validation) => validation.name === selectedValidation,
     );
-    if (!condition) return null;
-    if (condition.field === "array")
+    if (!validation) return null;
+    if (validation.field === "array")
       return (
         <FormControl className="w-full lg:w-3/4">
           <FormLabel id="company-label">Valores possíveis</FormLabel>
@@ -133,7 +67,7 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
 
   const handleClose = () => {
     setSelectedColumn(null);
-    setSelectedCondition(null);
+    setselectedValidation(null);
     setSelectedSeverity(null);
     setParams([]);
     setInputValue("");
@@ -161,28 +95,28 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
           <FormControl className="w-1/2">
             <FormLabel id="company-label">Condição</FormLabel>
             <Select
-              value={selectedCondition}
+              value={selectedValidation}
               onChange={(e) => {
-                setSelectedCondition(e.target.value);
+                setselectedValidation(e.target.value);
               }}
             >
-              {conditions?.map((condition) => (
-                <MenuItem key={condition.name} value={condition.name}>
-                  {condition.label}
+              {validations.map((validation) => (
+                <MenuItem key={validation.name} value={validation.name}>
+                  {validation.label}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </div>
         <div className="flex flex-row gap-4">
-          {renderConditionField()}
+          {renderValidationField()}
           <FormControl className="grow">
             <FormLabel id="company-label">Prioridade</FormLabel>
             <Select
               value={selectedSeverity}
               onChange={(e) => setSelectedSeverity(e.target.value)}
             >
-              {severities?.map((severity) => (
+              {severities.map((severity) => (
                 <MenuItem key={severity.name} value={severity.name}>
                   {severity.label}
                 </MenuItem>
@@ -196,7 +130,8 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
             multiline
             rows={3}
             value={
-              conditions.find((c) => c.name === selectedCondition)?.description
+              validations.find((c) => c.name === selectedValidation)
+                ?.description
             }
             slotProps={{
               input: {

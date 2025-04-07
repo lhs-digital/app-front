@@ -9,6 +9,7 @@ import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import AddRule from "./AddRule";
 import CompanySelector from "./CompanySelector";
+import Rule from "./Rule";
 
 const AuditRules = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,12 +47,13 @@ const AuditRules = () => {
         Object.entries(params).filter(([_, v]) => v !== undefined),
       );
 
-      const response = await api.get(`/company_tables?page=${currentPage}`, {
-        params: filteredParams,
+      const response = await api.get(`/company_tables`, {
+        params: { ...filteredParams, page: currentPage, company_id: company },
       });
       console.log("tables", response.data.data);
       return response.data.data;
     },
+    enabled: company !== "" && table !== "",
   });
 
   const handleEdit = (column, companyId) => {
@@ -94,8 +96,14 @@ const AuditRules = () => {
         }
       />
       {isLighthouse && (
-        <CompanySelector company={company} setCompany={setCompany} />
+        <CompanySelector
+          company={company}
+          setCompany={setCompany}
+          table={table}
+          setTable={setTable}
+        />
       )}
+      <Rule />
     </div>
   );
 };

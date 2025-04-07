@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
-const CompanySelector = ({ company, setCompany }) => {
+const CompanySelector = ({ company, setCompany, table, setTable }) => {
   const { permissions, isLighthouse } = useUserState().state;
 
   const { data: companies } = useQuery({
@@ -21,6 +21,18 @@ const CompanySelector = ({ company, setCompany }) => {
     },
     enabled: isLighthouse,
   });
+
+  const { data: tables } = useQuery({
+    queryKey: ["company_tables", company],
+    queryFn: async () => {
+      const response = await api.get(`/company/auditable_tables`, {
+        params: { company_id: company },
+      });
+      return response.data.data;
+    },
+    enabled: !!company,
+  });
+
   return (
     <Card variant="outlined">
       <CardContent className="flex flex-row gap-4">
@@ -42,13 +54,10 @@ const CompanySelector = ({ company, setCompany }) => {
         <div className="w-1/4">
           <FormControl fullWidth>
             <FormLabel id="company-label">Tabela</FormLabel>
-            <Select
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-            >
-              {companies?.map((company) => (
-                <MenuItem key={company.id} value={company.id}>
-                  {company.name}
+            <Select value={table} onChange={(e) => setTable(e.target.value)}>
+              {tables?.map((table) => (
+                <MenuItem key={table.id} value={table.label}>
+                  {table.name}
                 </MenuItem>
               ))}
             </Select>
