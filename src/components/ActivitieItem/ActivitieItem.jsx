@@ -32,17 +32,10 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const navigate = useNavigate();
 
   const handleView = () => {
-    console.log(activitie);
-    let path = "";
-    switch (activitie?.table.name) {
-      case "clients":
-        path = "/clientes";
-        break;
-      default:
-        break;
-    }
-    return navigate(`${path}/${activitie?.record_id}`, {
-      state: { edit: true, columns: activitie?.columns },
+    console.log("activi", activitie.record_id);
+
+    return navigate(`/clientes/${activitie?.id}`, {
+      state: { edit: true, columns: activitie?.columns, recordId: Number(activitie?.record_id) },
     });
   };
 

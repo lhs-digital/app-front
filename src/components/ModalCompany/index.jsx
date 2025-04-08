@@ -445,6 +445,21 @@ const ModalCompany = ({
             />
           </Grid>
         </Grid>
+        <Typography sx={{ mt: 2 }}>
+          <b>Auditoria</b>
+        </Typography>
+        <Grid container spacing={0}>
+          <Grid item xs={12}>
+            <TextField
+              label="Complemento"
+              type="text"
+              value={address.complement}
+              onChange={(e) => setAddress({ ...address, complement: e.target.value })}
+              fullWidth
+              margin="dense"
+            />
+          </Grid>
+        </Grid>
       </DialogContent>
       <DialogActions>
         <Button onClick={() => { onClose(); cleanFields(); }}>

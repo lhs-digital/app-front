@@ -30,16 +30,17 @@ export const ClientFormProvider = ({ children }) => {
   const { id } = useParams();
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
+  const recordId = location.state?.recordId;
   const errorColumns = location.state?.columns;
   const isCreating = id === "novo";
   const [auditErrors, setAuditErrors] = useState(
     errorColumns
       ? errorColumns?.reduce((acc, column) => {
-          acc[column.name] = {
-            message: column.message,
-          };
-          return acc;
-        }, {})
+        acc[column.name] = {
+          message: column.message,
+        };
+        return acc;
+      }, {})
       : {},
   );
 
@@ -64,6 +65,7 @@ export const ClientFormProvider = ({ children }) => {
         setIsEditing,
         auditErrors,
         resetAuditErrors,
+        recordId,
         client,
         id,
       }}
@@ -84,7 +86,7 @@ export const useClientForm = () => {
 const ClientForm = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
-  const { isEditing, setIsEditing, isCreating, client, id, resetAuditErrors } =
+  const { isEditing, setIsEditing, isCreating, client, id, resetAuditErrors, recordId } =
     useClientForm();
 
   const methods = useForm({
@@ -124,8 +126,12 @@ const ClientForm = () => {
       const response = await api.put(`/clients/${id}`, data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Cliente atualizado com sucesso");
+      if (recordId) {
+        await api.put(`/auditing/${recordId}/toggle_status`);
+        toast.success("Auditoria corrigida com sucesso");
+      }
     },
     onError: (error) => {
       console.error("Erro ao atualizar o cliente", error);
@@ -177,28 +183,28 @@ const ClientForm = () => {
           buttons={
             isEditing || isCreating
               ? [
-                  <Button
-                    key="create-client-button"
-                    type="submit"
-                    loading={updateIsPending || createIsPending}
-                    variant="contained"
-                    startIcon={<Save />}
-                  >
-                    SALVAR
-                  </Button>,
-                ]
+                <Button
+                  key="create-client-button"
+                  type="submit"
+                  loading={updateIsPending || createIsPending}
+                  variant="contained"
+                  startIcon={<Save />}
+                >
+                  SALVAR
+                </Button>,
+              ]
               : [
-                  <Button
-                    key="edit-client-button"
-                    type="button"
-                    variant="contained"
-                    color="primary"
-                    startIcon={<EditNote />}
-                    onClick={() => setIsEditing(true)}
-                  >
-                    EDITAR
-                  </Button>,
-                ]
+                <Button
+                  key="edit-client-button"
+                  type="button"
+                  variant="contained"
+                  color="primary"
+                  startIcon={<EditNote />}
+                  onClick={() => setIsEditing(true)}
+                >
+                  EDITAR
+                </Button>,
+              ]
           }
         />
         <TabContext value={activeTab}>
