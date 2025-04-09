@@ -210,7 +210,7 @@ export const validations = [
     label: "É um CPF ou CNPJ",
     has_params: 1,
     description:
-      "Verifica se é um CPF ou CNPJ. Esta regra depende de valores como: F (pessoa física), J (Pessoa jurídica) e E (Estrangeiro). Selecione a coluna ou valor que contem esses valores.",
+      "Verifica se é um CPF ou CNPJ. Esta regra depende de valores como: F (pessoa física), J (Pessoa jurídica) e E (Estrangeiro).",
     field: null,
   },
   {
@@ -243,7 +243,8 @@ export const validations = [
     name: "in",
     label: "Está em",
     has_params: 1,
-    description: "Selecione os valores que serão aceitos por essa regra.",
+    description:
+      "Verifica se os valores inseridos estão dentro do grupo de valores aceitos por essa regra.",
     field: "array",
   },
   {
@@ -251,7 +252,8 @@ export const validations = [
     name: "not_in",
     label: "Não está em",
     has_params: 1,
-    description: "Selecione os valores que não serão aceitos por essa regra.",
+    description:
+      "Verifica se os valores inseridos não estão dentro do grupo de valores aceitos por essa regra.",
     field: "array",
   },
 ];
@@ -267,7 +269,13 @@ export const validationLabels = {
 };
 
 export const severities = [
-  { label: "Baixa", name: "low", value: 0 },
-  { label: "Média", name: "medium", value: 1 },
-  { label: "Alta", name: "high", value: 2 },
+  { label: "Baixa", name: "low", value: 1 },
+  { label: "Moderada", name: "medium", value: 2 },
+  { label: "Urgente", name: "high", value: 3 },
 ];
+
+export const severityLabels = {
+  1: "Baixa",
+  2: "Moderada",
+  3: "Urgente",
+};

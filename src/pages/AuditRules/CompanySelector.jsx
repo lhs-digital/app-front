@@ -28,6 +28,7 @@ const CompanySelector = ({ company, setCompany, table, setTable }) => {
       const response = await api.get(`/company/auditable_tables`, {
         params: { company_id: company },
       });
+      console.log("auditable", response.data.data);
       return response.data.data;
     },
     enabled: !!company,
@@ -56,8 +57,8 @@ const CompanySelector = ({ company, setCompany, table, setTable }) => {
             <FormLabel id="company-label">Tabela</FormLabel>
             <Select value={table} onChange={(e) => setTable(e.target.value)}>
               {tables?.map((table) => (
-                <MenuItem key={table.id} value={table.label}>
-                  {table.name}
+                <MenuItem key={table.id} value={table.name}>
+                  {table.label}
                 </MenuItem>
               ))}
             </Select>
