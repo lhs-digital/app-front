@@ -8,7 +8,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle";
 import api from "../../services/api";
-import { formatClient } from "../../services/clientFormatter";
 import {
   address,
   complimentary,
@@ -36,11 +35,11 @@ export const ClientFormProvider = ({ children }) => {
   const [auditErrors, setAuditErrors] = useState(
     errorColumns
       ? errorColumns?.reduce((acc, column) => {
-        acc[column.name] = {
-          message: column.message,
-        };
-        return acc;
-      }, {})
+          acc[column.name] = {
+            message: column.message,
+          };
+          return acc;
+        }, {})
       : {},
   );
 
@@ -86,8 +85,15 @@ export const useClientForm = () => {
 const ClientForm = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
-  const { isEditing, setIsEditing, isCreating, client, id, resetAuditErrors, recordId } =
-    useClientForm();
+  const {
+    isEditing,
+    setIsEditing,
+    isCreating,
+    client,
+    id,
+    resetAuditErrors,
+    recordId,
+  } = useClientForm();
 
   const methods = useForm({
     defaultValues: {
@@ -160,7 +166,7 @@ const ClientForm = () => {
       return toast.error("Preencha todos os campos corretamente");
     }
 
-    if (isCreating) return createClient(formatClient(data));
+    if (isCreating) return createClient(data);
 
     return updateClient(data);
   };
@@ -183,28 +189,28 @@ const ClientForm = () => {
           buttons={
             isEditing || isCreating
               ? [
-                <Button
-                  key="create-client-button"
-                  type="submit"
-                  loading={updateIsPending || createIsPending}
-                  variant="contained"
-                  startIcon={<Save />}
-                >
-                  SALVAR
-                </Button>,
-              ]
+                  <Button
+                    key="create-client-button"
+                    type="submit"
+                    loading={updateIsPending || createIsPending}
+                    variant="contained"
+                    startIcon={<Save />}
+                  >
+                    SALVAR
+                  </Button>,
+                ]
               : [
-                <Button
-                  key="edit-client-button"
-                  type="button"
-                  variant="contained"
-                  color="primary"
-                  startIcon={<EditNote />}
-                  onClick={() => setIsEditing(true)}
-                >
-                  EDITAR
-                </Button>,
-              ]
+                  <Button
+                    key="edit-client-button"
+                    type="button"
+                    variant="contained"
+                    color="primary"
+                    startIcon={<EditNote />}
+                    onClick={() => setIsEditing(true)}
+                  >
+                    EDITAR
+                  </Button>,
+                ]
           }
         />
         <TabContext value={activeTab}>
