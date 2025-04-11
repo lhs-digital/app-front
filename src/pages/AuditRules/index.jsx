@@ -16,25 +16,30 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import ModalDelete from "../../components/ModalDelete";
 import PageTitle from "../../components/PageTitle";
 import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import { qc } from "../../services/queryClient";
 import { getPriorityColor, severityLabels } from "../../services/utils";
 import { handleMode } from "../../theme";
 import AddRule from "./AddRule";
-import CompanySelector from "./CompanySelector";
+import ContextSelect from "./ContextSelect";
 import Validation from "./Validation";
 
 const AuditRules = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [dataEdit, setDataEdit] = useState({});
   const [deleteId, setDeleteId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [company, setCompany] = useState("");
   const [table, setTable] = useState("");
-  const { permissions, isLighthouse } = useUserState().state;
+  const {
+    permissions,
+    isLighthouse,
+    company: { id: companyId },
+  } = useUserState().state;
   const [totalCount, setTotalCount] = useState(0);
   const [tableData, setTableData] = useState([]);
   const [pagination, setPagination] = useState({
@@ -76,9 +81,26 @@ const AuditRules = () => {
     enabled: company !== "" && table !== "",
   });
 
+  const updateTableData = (
+    page = pagination.page,
+    rows = pagination.rowsPerPage,
+  ) => {
+    if (!data) return;
+    const currentTable = data.find((t) => t.id === table);
+    if (currentTable) {
+      const startIndex = (page - 1) * rows;
+      const endIndex = startIndex + rows;
+      setTableData(currentTable.columns.slice(startIndex, endIndex));
+      setTotalCount(currentTable.columns.length);
+    }
+  };
+
   useEffect(() => {
+    if (!isLighthouse && companyId) {
+      setCompany(companyId);
+    }
     if (data) {
-      const currentTable = data.filter((t) => t.name === table)[0];
+      const currentTable = data.filter((t) => t.id === table)[0];
       if (currentTable) {
         const rows = currentTable.columns.slice(
           pagination.rowsPerPage * (currentPage - 1),
@@ -88,22 +110,17 @@ const AuditRules = () => {
         setTableData(rows);
       }
     }
-  }, [data, table]);
+  }, [data, table, companyId]);
 
   const handleEdit = (column, companyId) => {
-    setDataEdit({ ...column, companyId });
+    setDataEdit({ ...column, company_table_id: table });
     setIsOpen(true);
-  };
-
-  const handleDelete = (id) => {
-    setDeleteId(id);
-    setIsDeleteOpen(true);
   };
 
   const handleChangePage = (event, newPage) => {
     setTableData(
       data
-        .filter((t) => t.name === table)[0]
+        .filter((t) => t.id === table)[0]
         .columns.slice(
           pagination.rowsPerPage * newPage,
           pagination.rowsPerPage * (newPage + 1),
@@ -118,7 +135,7 @@ const AuditRules = () => {
   const handleChangeRowsPerPage = (event) => {
     setTableData(
       data
-        .filter((t) => t.name === table)[0]
+        .filter((t) => t.id === table)[0]
         .columns.slice(0, parseInt(event.target.value, 10)),
     );
     setPagination({
@@ -127,9 +144,43 @@ const AuditRules = () => {
     });
   };
 
+  const { mutate: addRule } = useMutation({
+    mutationFn: async (data) => {
+      await api.post(`/company_table_columns/${table}/rules`, data);
+    },
+    onSuccess: () => {
+      toast.success("Regra adicionada com sucesso");
+      setIsOpen(false);
+    },
+    onError: (error) => {
+      toast.error("Erro ao adicionar regra");
+      console.error("Erro ao adicionar regra", error);
+    },
+  });
+
+  const { mutate: updateRule } = useMutation({
+    mutationFn: async (data) => {
+      await api.put(`/company_table_columns/${data.id}/update`, data);
+    },
+    onSuccess: () => {
+      toast.success("Regra atualizada com sucesso");
+      setIsOpen(false);
+      setDataEdit({});
+    },
+    onError: (error) => {
+      toast.error("Erro ao atualizar regra");
+      console.error("Erro ao atualizar regra", error);
+    },
+  });
+
   const { mutate: removeRule } = useMutation({
     mutationFn: async (id) => {
       await api.delete(`/company_table_columns/${id}`);
+    },
+    onSuccess: () => {
+      toast.success("Regra removida com sucesso");
+      setDeleteId(null);
+      qc.invalidateQueries(["company_tables"]);
     },
     onError: (error) => {
       toast.error("Erro ao remover regra");
@@ -158,17 +209,57 @@ const AuditRules = () => {
     );
   };
 
+  const renderWarning = () => {
+    if (!isLighthouse && !company && !table) {
+      return (
+        <p className="text-sm text-gray-400">
+          Selecione uma empresa e uma tabela para ver as regras de auditoria.
+        </p>
+      );
+    }
+
+    if (!isLighthouse && !company) {
+      return <p className="text-sm text-gray-400">Selecione uma empresa</p>;
+    }
+
+    if (!table) {
+      return (
+        <p className="text-sm text-gray-400">
+          Selecione uma tabela para ver as regras de auditoria.
+        </p>
+      );
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full">
-      <AddRule open={isOpen} onClose={() => setIsOpen(false)} />
+      <ModalDelete
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId("")}
+        content={
+          <p>
+            Você tem certeza que deseja excluir esta coluna? Ela parará de ser
+            auditada.
+          </p>
+        }
+        onConfirm={() => removeRule(deleteId)}
+      />
+      <AddRule
+        open={isOpen}
+        data={dataEdit}
+        onClose={() => setIsOpen(false)}
+        submit={dataEdit?.id ? updateRule : addRule}
+      />
       <PageTitle
         title="Regras de Auditoria"
         subtitle="Administração e supervisão das regras das auditorias"
         buttons={
           permissions.some((per) => per.name === "define_rules") && (
             <Button
+              key="add-rule"
               variant="contained"
               color="primary"
+              disabled={!company || !table}
               onClick={() => [setDataEdit({}), setIsOpen(true)]}
               startIcon={<Add />}
             >
@@ -177,14 +268,13 @@ const AuditRules = () => {
           )
         }
       />
-      {isLighthouse && (
-        <CompanySelector
-          company={company}
-          setCompany={setCompany}
-          table={table}
-          setTable={setTable}
-        />
-      )}
+      <ContextSelect
+        company={company}
+        setCompany={setCompany}
+        table={table}
+        setTable={setTable}
+      />
+      {renderWarning()}
       <TableContainer>
         <Table>
           <TableHead>
@@ -202,7 +292,11 @@ const AuditRules = () => {
                 <TableCell>
                   <div className="flex flex-row gap-2">
                     {column.validations.map((v) => (
-                      <Validation rule={v.rule} params={v.params} />
+                      <Validation
+                        key={`${v.id}-${column.name}`}
+                        rule={v.rule}
+                        params={v.params}
+                      />
                     ))}
                   </div>
                 </TableCell>
@@ -211,15 +305,14 @@ const AuditRules = () => {
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleEdit(index);
+                      handleEdit(column);
                     }}
                   >
                     <Edit fontSize="small" />
                   </IconButton>
                   <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(index);
+                    onClick={() => {
+                      setDeleteId(column.id);
                     }}
                   >
                     <Delete fontSize="small" />

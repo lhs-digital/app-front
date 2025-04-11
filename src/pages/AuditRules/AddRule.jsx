@@ -14,28 +14,18 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { priorities, validations } from "../../services/utils";
 import Validation from "./Validation";
 
-// REQUEST OBJECT REFERENCE
-// {
-//     "column": {
-//         "name": "tipo_moradia",
-//         "priority": 0,
-//         "label": "Tipo de Moradia"
-//     },
-//     "rules": {
-//         "2": {
-//             "message": "Alguma mensagem.",
-//             "params": "A,B,C"
-//         }
-//     }
-// }
-
-const AddRule = ({ open = true, onClose = () => {} }) => {
+const AddRule = ({
+  open = true,
+  onClose = () => {},
+  submit = () => {},
+  data,
+}) => {
   const [rules, setRules] = useState([]);
   const [ruleParams, setRuleParams] = useState(new Set());
   const [inputValue, setInputValue] = useState();
@@ -99,28 +89,67 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
       );
   };
 
-  const onSubmit = (data) => {
+  useEffect(() => {
+    if (data) {
+      console.log(data);
+      reset({
+        column: {
+          name: data.name || "",
+          priority: data.priority || 0,
+          label: data.label || "",
+        },
+        rule: {
+          name: "",
+          message: "",
+          params: "",
+        },
+      });
+
+      if (data.validations && data.validations.length > 0) {
+        const formattedRules = data.validations.map((validation) => {
+          if (validation.rule.has_params && validation.params) {
+            const paramArray = validation.params.split(",");
+            setRuleParams((prev) => new Set([...prev, ...paramArray]));
+          }
+
+          return {
+            id: validation.rule.id,
+            name: validation.rule.name,
+            message: validation.message,
+            params: validation.params || "",
+          };
+        });
+
+        console.log("formattedRules", formattedRules);
+
+        setRules(formattedRules);
+      }
+    }
+  }, [data, reset]);
+
+  const onSubmit = (formData) => {
     if (Object.keys(errors).length > 0) {
       console.error("errors", errors);
       return toast.error("Preencha todos os campos corretamente");
     }
 
     const formattedData = {
+      id: data?.id,
       column: {
-        name: data.column?.name,
-        priority: data.column?.priority,
-        label: data.column?.label,
+        name: formData.column?.name,
+        priority: formData.column?.priority,
+        label: formData.column?.label,
+        company_table_id: data?.company_table_id,
       },
       rules: rules.reduce((acc, rule) => {
-        const ruleKey = Object.keys(rule)[0];
-        acc[ruleKey] = {
-          message: rule[ruleKey].message,
-          params: rule[ruleKey].params,
+        acc[rule.id] = {
+          message: rule.message,
+          params: rule.params,
         };
         return acc;
       }, {}),
     };
-    console.log(formattedData);
+    submit(formattedData);
   };
 
   const addRule = () => {
@@ -139,17 +168,28 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
     }
 
     const rule = {
+      id: data.rule.name.split("/")[0],
       name: data.rule.name.split("/")[1],
       message: data.rule.message,
       params: [...ruleParams].join(","),
     };
-    console.log("new rule", rule);
     setRules((prev) => [...prev, rule]);
     resetField("rule.name");
     resetField("rule.message");
     resetField("rule.params");
     setRuleParams(new Set());
     setInputValue("");
+  };
+
+  const removeRule = (rule) => {
+    setRules((prev) => prev.filter((r) => r.id !== rule.id));
+    setRuleParams((prev) => {
+      const newParams = new Set([...prev]);
+      rule.params.split(",").forEach((param) => {
+        newParams.delete(param.trim());
+      });
+      return newParams;
+    });
   };
 
   const handleClose = () => {
@@ -161,12 +201,18 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Adicionar Regra</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="sm"
+      scroll="body"
+    >
+      <DialogTitle>{data ? "Editar coluna" : "Adicionar coluna"}</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         <form
           id="rule-form"
-          onSubmit={handleSubmit(handleSubmit)}
+          onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4"
         >
           <FormControl error={!!errors?.column?.name}>
@@ -223,15 +269,13 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
             <Controller
               name="rule.name"
               control={control}
-              rules={{ required: "Este campo é obrigatório" }}
               render={({ field }) => (
-                <FormControl error={!!errors?.rule?.name}>
-                  <FormLabel required>Condição</FormLabel>
+                <FormControl>
+                  <FormLabel>Condição</FormLabel>
                   <Select
                     key="validation"
                     value={field.value}
                     onChange={(e) => field.onChange(e.target.value)}
-                    error={!!errors?.rule?.name}
                   >
                     {validations.map((validation) => (
                       <MenuItem
@@ -252,14 +296,9 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
               )}
             />
             {renderValidationField()}
-            <FormControl error={!!errors?.column?.message}>
-              <FormLabel required>Mensagem de erro</FormLabel>
-              <TextField
-                {...register("rule.message", {
-                  required: "Este campo é obrigatório",
-                })}
-                error={!!errors?.column?.message}
-              />
+            <FormControl>
+              <FormLabel>Mensagem de erro</FormLabel>
+              <TextField {...register("rule.message")} />
               <FormHelperText>
                 Mensagem que será exibida quando a regra for violada.
               </FormHelperText>
@@ -269,7 +308,7 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
             ADICIONAR
           </Button>
           <Divider />
-          <h2 className="font-semibold">Regras adicionadas</h2>
+          <h2 className="font-semibold">Regras</h2>
           <div className="flex flex-row gap-2 items-center">
             {rules.length === 0 ? (
               <p className="text-sm text-gray-400">
@@ -281,6 +320,7 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
                   key={`${rule.name}-${index}`}
                   rule={rule}
                   params={rule.params}
+                  onDelete={() => removeRule(rule)}
                 />
               ))
             )}
@@ -300,7 +340,6 @@ const AddRule = ({ open = true, onClose = () => {} }) => {
           variant="contained"
           type="submit"
           form="rule-form"
-          onClick={() => {}}
           color="primary"
           startIcon={<Save />}
         >

@@ -1,7 +1,7 @@
 import { Chip } from "@mui/material";
 import { validationLabels } from "../../services/utils";
 
-const Validation = ({ rule, params }) => {
+const Validation = ({ rule, params, onDelete }) => {
   const formatParams = () => {
     if (!params) return null;
     if (Array.isArray(params)) {
@@ -26,7 +26,7 @@ const Validation = ({ rule, params }) => {
     return validationLabels[rule.name];
   };
 
-  return <Chip label={handleLabel()} />;
+  return <Chip label={handleLabel()} onDelete={onDelete} />;
 };
 
 export default Validation;

@@ -189,7 +189,7 @@ const ModalRule = ({ dataEdit, isOpen, onClose, setRefresh }) => {
       }
     } else {
       try {
-        await api.post(`/company_table_columns/${table}/rules`, dataToPost);
+      await api.post(`/company_table_columns/${table}/rules`, dataToPost);
         toast.success("Dados salvos com sucesso!");
         setRefresh((prev) => !prev);
 

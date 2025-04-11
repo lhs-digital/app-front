@@ -10,8 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 
-const CompanySelector = ({ company, setCompany, table, setTable }) => {
-  const { permissions, isLighthouse } = useUserState().state;
+const ContextSelect = ({ company, setCompany, table, setTable }) => {
+  const { isLighthouse } = useUserState().state;
 
   const { data: companies } = useQuery({
     queryKey: ["companies"],
@@ -37,27 +37,29 @@ const CompanySelector = ({ company, setCompany, table, setTable }) => {
   return (
     <Card variant="outlined">
       <CardContent className="flex flex-row gap-4">
-        <div className="w-3/4">
-          <FormControl fullWidth>
-            <FormLabel id="company-label">Empresa</FormLabel>
-            <Select
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-            >
-              {companies?.map((company) => (
-                <MenuItem key={company.id} value={company.id}>
-                  {company.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </div>
-        <div className="w-1/4">
+        {isLighthouse && (
+          <div className="w-3/4">
+            <FormControl fullWidth>
+              <FormLabel id="company-label">Empresa</FormLabel>
+              <Select
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              >
+                {companies?.map((company) => (
+                  <MenuItem key={company.id} value={company.id}>
+                    {company.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
+        )}
+        <div className="grow">
           <FormControl fullWidth>
             <FormLabel id="company-label">Tabela</FormLabel>
             <Select value={table} onChange={(e) => setTable(e.target.value)}>
               {tables?.map((table) => (
-                <MenuItem key={table.id} value={table.name}>
+                <MenuItem key={table.id} value={table.id}>
                   {table.label}
                 </MenuItem>
               ))}
@@ -69,4 +71,4 @@ const CompanySelector = ({ company, setCompany, table, setTable }) => {
   );
 };
 
-export default CompanySelector;
+export default ContextSelect;
