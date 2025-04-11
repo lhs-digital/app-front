@@ -6,7 +6,7 @@ import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
 import { useClientForm } from "..";
 
-const Address = () => {
+const Address = ({data}) => {
   const {
     register,
     formState: { errors },
@@ -14,39 +14,48 @@ const Address = () => {
     setValue,
   } = useFormContext();
 
-  const zipCode = watch("zip_code");
+  const cep = watch("cep");
   const { isEditing, isCreating } = useClientForm();
 
   useEffect(() => {
-    const fetchAddress = async (cep) => {
-      try {
-        const response = await axios.get(
-          `https://viacep.com.br/ws/${cep}/json/`,
-        );
-        if (!response.data.erro) {
-          setValue("endereco", response.data.logradouro);
-          setValue("bairro", response.data.bairro);
-          setValue("cidade", response.data.localidade);
-          setValue("complemento", response.data.complemento);
-        } else {
-          toast.error("CEP não encontrado");
-        }
-      } catch (error) {
-        console.error("Erro ao buscar o endereço pelo CEP", error);
-        toast.error("Erro ao buscar o endereço pelo CEP");
-      }
-    };
-
-    if (zipCode && zipCode.length === 8 && !watch("endereco")) {
-      fetchAddress(zipCode);
+    if (data?.cep) {
+      setValue("cep", data.cep.replace(/\D/g, ""));
     }
-  }, [zipCode, setValue]);
+  }, [data, setValue]);
+
+  const fetchAddress = async (cep) => {
+    try {
+      const response = await axios.get(
+        `https://viacep.com.br/ws/${cep}/json/`,
+      );
+      if (!response.data.erro) {
+        setValue("endereco", response.data.logradouro);
+        setValue("bairro", response.data.bairro);
+        setValue("cidade", response.data.localidade);
+        setValue("complemento", response.data.complemento);
+      } else {
+        toast.error("CEP não encontrado");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar o endereço pelo CEP", error);
+      toast.error("Erro ao buscar o endereço pelo CEP");
+    }
+  };
+
+  useEffect(() => {
+    if (cep && cep.length === 8 && !watch("endereco")) {
+      fetchAddress(cep);
+    }
+  }, [cep, setValue]);
 
   const handleZipCodeChange = (e) => {
     const value = e.target.value.replace(/\D/g, "");
     setValue("zip_code", value);
 
-    if (value.length === 0) {
+    if (value.length === 8) {
+      fetchAddress(value); // Chama a função para buscar o endereço
+    } else if (value.length === 0) {
+      // Limpa os campos relacionados ao endereço
       setValue("endereco", "");
       setValue("bairro", "");
       setValue("cidade", "");
@@ -61,18 +70,18 @@ const Address = () => {
         <InputMask
           mask="99999-999"
           maskChar=" "
-          {...register("zip_code", { required: "CEP é obrigatório" })}
+          {...register("cep", { required: "CEP é obrigatório" })}
           onChange={handleZipCodeChange}
         >
           {(inputProps) => (
             <TextField
               {...inputProps}
               fullWidth
-              error={!!errors.zip_code}
+              error={!!errors.cep}
               InputProps={{
                 readOnly: !isEditing && !isCreating,
               }}
-              helperText={errors.zip_code?.message}
+              helperText={errors.cep?.message}
               type="text"
             />
           )}
