@@ -17,11 +17,12 @@ const General = ({ data }) => {
     setValue,
   } = useFormContext();
 
-  const { isEditing, isCreating } = useClientForm();
+  const { isEditing, isCreating, auditErrors } = useClientForm();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
       <Box>
+        {console.log("data", data)}
         <InputLabel required>Tipo de Pessoa</InputLabel>
         <Select
           {...register("tipo_pessoa", {
@@ -30,13 +31,16 @@ const General = ({ data }) => {
           readOnly={!isEditing && !isCreating}
           value={watch("tipo_pessoa") || ""}
           fullWidth
-          error={!!errors.tipo_pessoa}
+          error={!!errors.tipo_pessoa || !!auditErrors.tipo_pessoa}
         >
           <MenuItem value="F">Física</MenuItem>
           <MenuItem value="J">Jurídica</MenuItem>
+          <MenuItem value="E">Estrangeira</MenuItem>
         </Select>
-        {errors.tipo_pessoa && (
-          <FormHelperText error>{errors.tipo_pessoa.message}</FormHelperText>
+        {(auditErrors.tipo_pessoa || errors.tipo_pessoa) && (
+          <FormHelperText error>
+            {errors.tipo_pessoa?.message || auditErrors.tipo_pessoa?.message}
+          </FormHelperText>
         )}
       </Box>
       <Box className="lg:col-span-3">
@@ -52,10 +56,12 @@ const General = ({ data }) => {
           {...register("razao", { required: "Nome é obrigatório" })}
           defaultValue={data?.razao || ""}
           fullWidth
-          error={!!errors.razao}
-          helperText={errors.razao?.message}
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          error={!!errors.razao || !!auditErrors.razao}
+          helperText={errors.razao?.message ?? auditErrors.razao?.message}
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
         />
       </Box>
@@ -74,17 +80,17 @@ const General = ({ data }) => {
             required: "CPF/CNPJ é obrigatório",
           })}
           defaultValue={data?.cnpj_cpf || ""}
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
-          }}
           fullWidth
           slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
             htmlInput: {
               maxLength: watch("tipo_pessoa") === "F" ? 14 : 18,
             },
           }}
-          error={!!errors.cnpj_cpf}
-          helperText={errors.cnpj_cpf?.message}
+          error={!!auditErrors.cnpj_cpf || !!errors.cnpj_cpf}
+          helperText={errors.cnpj_cpf?.message ?? auditErrors.cnpj_cpf?.message}
           onChange={(e) => {
             const value = e.target.value.replace(/\D/g, "");
             let formatted = value;
@@ -117,7 +123,7 @@ const General = ({ data }) => {
           value={watch("tipo_cliente_scm") || ""}
           readOnly={!isEditing && !isCreating}
           fullWidth
-          error={!!errors.tipo_cliente_scm}
+          error={!!errors.tipo_cliente_scm || !!auditErrors.tipo_cliente_scm}
         >
           <MenuItem value="01">Comercial</MenuItem>
           <MenuItem value="02">Industrial</MenuItem>
@@ -134,9 +140,10 @@ const General = ({ data }) => {
           <MenuItem value="08">Igrejas e templos de qualquer natureza</MenuItem>
           <MenuItem value="99">Outros</MenuItem>
         </Select>
-        {errors.tipo_cliente_scm && (
+        {(auditErrors.tipo_cliente_scm || errors.tipo_cliente_scm) && (
           <FormHelperText error>
-            {errors.tipo_cliente_scm.message}
+            {auditErrors.tipo_cliente_scm.message ??
+              errors.tipo_cliente_scm.message}
           </FormHelperText>
         )}
       </Box>
@@ -150,14 +157,17 @@ const General = ({ data }) => {
             value={watch("contribuinte_icms") || ""}
             readOnly={!isEditing && !isCreating}
             fullWidth
-            error={!!errors.contribuinte_icms}
+            error={
+              !!auditErrors.contribuinte_icms || !!errors.contribuinte_icms
+            }
           >
             <MenuItem value="1">Sim</MenuItem>
             <MenuItem value="0">Não</MenuItem>
           </Select>
-          {errors.contribuinte_icms && (
+          {(auditErrors.contribuinte_icms || errors.contribuinte_icms) && (
             <FormHelperText error>
-              {errors.contribuinte_icms.message}
+              {auditErrors.contribuinte_icms.message ??
+                errors.contribuinte_icms?.message}
             </FormHelperText>
           )}
         </Box>
@@ -171,15 +181,18 @@ const General = ({ data }) => {
               required: "Data de nascimento é obrigatória",
             })}
             defaultValue={data?.data_nascimento || ""}
-            InputProps={{
-              readOnly: !isEditing && !isCreating,
-            }}
             fullWidth
             slotProps={{
+              input: {
+                readOnly: !isEditing && !isCreating,
+              },
               htmlInput: { max: new Date().toISOString().split("T")[0] },
             }}
-            error={!!errors.data_nascimento}
-            helperText={errors.data_nascimento?.message}
+            error={!!auditErrors.data_nascimento || !!errors.data_nascimento}
+            helperText={
+              auditErrors.data_nascimento?.message ??
+              errors.data_nascimento?.message
+            }
           />
         </Box>
       )}
@@ -200,12 +213,16 @@ const General = ({ data }) => {
                 : "IE é obrigatório",
           })}
           defaultValue={data?.ie_identidade || ""}
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
           fullWidth
-          error={!!errors.ie_identidade}
-          helperText={errors.ie_identidade?.message}
+          error={!!auditErrors.ie_identidade || !!errors.ie_identidade}
+          helperText={
+            auditErrors.ie_identidade?.message ?? errors.ie_identidade?.message
+          }
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -216,12 +233,16 @@ const General = ({ data }) => {
             required: "Nacionalidade é obrigatória",
           })}
           defaultValue={data?.nacionalidade || ""}
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
           fullWidth
-          error={!!errors.nacionalidade}
-          helperText={errors.nacionalidade?.message}
+          error={!!auditErrors.nacionalidade || !!errors.nacionalidade}
+          helperText={
+            auditErrors.nacionalidade?.message ?? errors.nacionalidade?.message
+          }
         />
       </Box>
       {watch("tipo_pessoa") === "F" && (
@@ -234,13 +255,15 @@ const General = ({ data }) => {
             value={watch("sexo") || ""}
             readOnly={!isEditing && !isCreating}
             fullWidth
-            error={!!errors.sexo}
+            error={!!auditErrors.sexo || !!errors.sexo}
           >
             <MenuItem value="M">Masculino</MenuItem>
             <MenuItem value="F">Feminino</MenuItem>
           </Select>
-          {errors.sexo && (
-            <FormHelperText error>{errors.sexo.message}</FormHelperText>
+          {(auditErrors.sexo || errors.sexo) && (
+            <FormHelperText error>
+              {auditErrors.sexo?.message ?? errors.sexo?.message}
+            </FormHelperText>
           )}
         </Box>
       )}
@@ -253,12 +276,16 @@ const General = ({ data }) => {
               required: "Profissão é obrigatória",
             })}
             defaultValue={data?.profissao || ""}
-            InputProps={{
-              readOnly: !isEditing && !isCreating,
+            slotProps={{
+              input: {
+                readOnly: !isEditing && !isCreating,
+              },
             }}
             fullWidth
-            error={!!errors.profissao}
-            helperText={errors.profissao?.message}
+            error={!!auditErrors.profissao || !!errors.profissao}
+            helperText={
+              auditErrors.profissao?.message ?? errors.profissao?.message
+            }
           />
         </Box>
       )}
@@ -271,7 +298,7 @@ const General = ({ data }) => {
           value={watch("tipo_assinante") || ""}
           readOnly={!isEditing && !isCreating}
           fullWidth
-          error={!!errors.tipo_assinante}
+          error={!!auditErrors.tipo_assinante || !!errors.tipo_assinante}
         >
           <MenuItem value="1">Comercial/Industrial</MenuItem>
           <MenuItem value="2">Poder público</MenuItem>
@@ -280,8 +307,11 @@ const General = ({ data }) => {
           <MenuItem value="5">Semi-público</MenuItem>
           <MenuItem value="6">Outros</MenuItem>
         </Select>
-        {errors.tipo_assinante && (
-          <FormHelperText error>{errors.tipo_assinante.message}</FormHelperText>
+        {(auditErrors.tipo_assinante || errors.tipo_assinante) && (
+          <FormHelperText error>
+            {auditErrors.tipo_assinante?.message ??
+              errors.tipo_assinante?.message}
+          </FormHelperText>
         )}
       </Box>
       {watch("tipo_pessoa") === "J" && (
@@ -291,12 +321,16 @@ const General = ({ data }) => {
             type="text"
             {...register("filial_id")}
             defaultValue={data?.filial_id || ""}
-            InputProps={{
-              readOnly: !isEditing && !isCreating,
+            slotProps={{
+              input: {
+                readOnly: !isEditing && !isCreating,
+              },
             }}
             fullWidth
-            error={!!errors.filial_id}
-            helperText={errors.filial_id?.message}
+            error={!!auditErrors.filial_id || !!errors.filial_id}
+            helperText={
+              auditErrors.filial_id?.message ?? errors.filial_id?.message
+            }
           />
         </Box>
       )}

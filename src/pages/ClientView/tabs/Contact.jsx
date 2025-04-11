@@ -9,7 +9,7 @@ const Contact = () => {
     formState: { errors },
   } = useFormContext();
 
-  const { isEditing, isCreating } = useClientForm();
+  const { isEditing, isCreating, auditErrors } = useClientForm();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
@@ -25,11 +25,13 @@ const Contact = () => {
             },
           })}
           fullWidth
-          error={!!errors.email}
-          InputProps={{
-            readOnly: !isEditing && !isCreating,
+          error={!!auditErrors.email || !!errors.email}
+          slotProps={{
+            input: {
+              readOnly: !isEditing && !isCreating,
+            },
           }}
-          helperText={errors.email?.message}
+          helperText={auditErrors.email?.message ?? errors.email?.message}
         />
       </Box>
       <Box className="lg:col-span-2">
@@ -45,10 +47,17 @@ const Contact = () => {
             <TextField
               {...inputProps}
               fullWidth
-              error={!!errors.telefone_celular}
-              helperText={errors.telefone_celular?.message}
-              InputProps={{
-                readOnly: !isEditing && !isCreating,
+              error={
+                !!auditErrors.telefone_celular || !!errors.telefone_celular
+              }
+              helperText={
+                auditErrors.telefone_celular?.message ??
+                errors.telefone_celular?.message
+              }
+              slotProps={{
+                input: {
+                  readOnly: !isEditing && !isCreating,
+                },
               }}
               type="text"
             />
@@ -66,10 +75,14 @@ const Contact = () => {
             <TextField
               {...inputProps}
               fullWidth
-              error={!!errors.whatsapp}
-              helperText={errors.whatsapp?.message}
-              InputProps={{
-                readOnly: !isEditing && !isCreating,
+              error={!!auditErrors.whatsapp || !!errors.whatsapp}
+              helperText={
+                auditErrors.whatsapp?.message ?? errors.whatsapp?.message
+              }
+              slotProps={{
+                input: {
+                  readOnly: !isEditing && !isCreating,
+                },
               }}
               type="text"
             />

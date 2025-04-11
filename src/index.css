@@ -15,12 +15,14 @@
 [data-theme="light"] {
   --background-color: #ffffff;
   --foreground-color: #000000;
+  --border: #00000033;
 }
 
 .dark,
 [data-theme="dark"] {
   --background-color: #121212;
   --foreground-color: #ffffff;
+  --border: #ffffff33;
 }
 
 body {

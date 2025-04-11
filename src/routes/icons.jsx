@@ -13,6 +13,8 @@ import {
   PersonOutline,
   RuleFolder,
   RuleFolderOutlined,
+  Science,
+  ScienceOutlined,
   Settings,
   SettingsOutlined,
   Subject,
@@ -64,6 +66,10 @@ const icons = {
   "/logs": {
     icon: Subject,
     activeIcon: Subject,
+  },
+  "/regras": {
+    icon: ScienceOutlined,
+    activeIcon: Science,
   },
 };
 

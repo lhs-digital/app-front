@@ -2,9 +2,10 @@ import { createBrowserRouter } from "react-router-dom";
 import PrivateRoute from "../layout/PrivateRoute";
 import PublicRoute from "../layout/PublicRoute";
 import Assignments from "../pages/Assignments";
+import AuditRules from "../pages/AuditRules";
 import Clients from "../pages/Clients";
+import ClientView from "../pages/ClientView";
 import Companies from "../pages/Companies";
-import CreateClient from "../pages/CreateClient";
 import FirstAccess from "../pages/FirstAccess";
 import Home from "../pages/Home";
 import ListActivities from "../pages/ListActivities";
@@ -19,7 +20,7 @@ import RoleView from "../pages/RoleView";
 import SignIn from "../pages/SignIn";
 import Users from "../pages/Users";
 import { pagePermissions } from "../services/permissions";
-import { RouteIcon } from "./utils";
+import { RouteIcon } from "./icons";
 
 const publicRoutes = [
   {
@@ -87,6 +88,11 @@ export const privateRoutes = [
     element: <Priorities />,
   },
   {
+    label: "Regras de Auditoria (novo)",
+    path: "/regras",
+    element: <AuditRules />,
+  },
+  {
     label: "Minhas Permissões",
     path: "/permissoes",
     element: <MyPermissions />,
@@ -102,7 +108,7 @@ export const privateSubRoutes = [
   {
     label: "Cliente",
     path: "/clientes/:id",
-    element: <CreateClient />,
+    element: <ClientView />,
   },
   {
     label: "Cargo",

@@ -53,14 +53,16 @@ export const dateFormatted = (date) => {
   }
 
   if (date.includes(" ")) {
-    const dateObj = new Date(date.includes(" ") ? date.replace(" ", "T") + "Z" : date);
+    const dateObj = new Date(
+      date.includes(" ") ? date.replace(" ", "T") + "Z" : date,
+    );
     const datePart = dateObj.toLocaleDateString("pt-BR", {
       timeZone: "UTC",
     });
     const timePart = dateObj.toLocaleTimeString("pt-BR", {
       timeZone: "UTC",
-      hour: '2-digit',
-      minute: '2-digit'
+      hour: "2-digit",
+      minute: "2-digit",
     });
     return `${datePart} às ${timePart}`;
   } else {
@@ -164,7 +166,7 @@ export const formatUserObject = (user) => ({
     level: user?.role?.nivel,
   },
   company: user?.company,
-  isLighthouse: user?.company?.is_super_admin || false,
+  isLighthouse: user?.company?.is_super_admin === 1 ? true : false,
   permissions: user?.role?.permissions ?? [],
 });
 
@@ -191,4 +193,89 @@ export const handlePermissionName = (name) => {
 
 export const hasPermission = (permissions, permission) => {
   return permissions.some((p) => p.name === permission);
+};
+
+export const validations = [
+  {
+    id: 1,
+    name: "required",
+    label: "É obrigatório(a)",
+    has_params: 0,
+    description: "Campo obrigatório",
+    field: null,
+  },
+  {
+    id: 2,
+    name: "cpf_cnpj",
+    label: "É um CPF ou CNPJ",
+    has_params: 1,
+    description:
+      "Verifica se é um CPF ou CNPJ. Esta regra depende de valores como: F (pessoa física), J (Pessoa jurídica) e E (Estrangeiro).",
+    field: null,
+  },
+  {
+    id: 3,
+    name: "is_of_legal_age",
+    label: "É maior de idade",
+    has_params: 0,
+    description:
+      "Verifica se a idade da pessoa é igual ou superior ao limite definido como maioridade",
+    field: null,
+  },
+  {
+    id: 4,
+    name: "date",
+    label: "É uma data",
+    has_params: 0,
+    description: "Verifica se é uma data válida",
+    field: null,
+  },
+  {
+    id: 5,
+    name: "multi_email",
+    label: "É um email",
+    has_params: 0,
+    description: "Verifica se é um email válido.",
+    field: null,
+  },
+  {
+    id: 6,
+    name: "in",
+    label: "Está em",
+    has_params: 1,
+    description:
+      "Verifica se os valores inseridos estão dentro do grupo de valores aceitos por essa regra.",
+    field: "array",
+  },
+  {
+    id: 7,
+    name: "not_in",
+    label: "Não está em",
+    has_params: 1,
+    description:
+      "Verifica se os valores inseridos não estão dentro do grupo de valores aceitos por essa regra.",
+    field: "array",
+  },
+];
+
+export const validationLabels = {
+  required: "É obrigatório(a)",
+  cpf_cnpj: "É um CPF ou CNPJ",
+  is_of_legal_age: "É maior de idade",
+  date: "É uma data",
+  multi_email: "É um email",
+  in: "Está em",
+  not_in: "Não está em",
+};
+
+export const severities = [
+  { label: "Baixa", name: "low", value: 1 },
+  { label: "Moderada", name: "medium", value: 2 },
+  { label: "Urgente", name: "high", value: 3 },
+];
+
+export const severityLabels = {
+  1: "Baixa",
+  2: "Moderada",
+  3: "Urgente",
 };
