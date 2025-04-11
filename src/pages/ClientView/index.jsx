@@ -9,7 +9,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle";
 import api from "../../services/api";
-import { formatClient } from "../../services/clientFormatter";
 import {
   address,
   complimentary,
@@ -93,7 +92,16 @@ const ClientForm = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
-  const { isEditing, setIsEditing, isCreating, client, id, resetAuditErrors, recordId, status } =
+  const {
+    isEditing,
+    setIsEditing,
+    isCreating,
+    client,
+    id,
+    resetAuditErrors,
+    recordId,
+    status
+  } =
     useClientForm();
 
   const methods = useForm({
@@ -169,7 +177,7 @@ const ClientForm = () => {
       return toast.error("Preencha todos os campos corretamente");
     }
 
-    if (isCreating) return createClient(formatClient(data));
+    if (isCreating) return createClient(data);
 
     return updateClient(data);
   };
