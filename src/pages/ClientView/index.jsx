@@ -1,4 +1,5 @@
 import { EditNote, Save } from "@mui/icons-material";
+import { useQueryClient } from "@tanstack/react-query";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Tab } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -31,17 +32,21 @@ export const ClientFormProvider = ({ children }) => {
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const recordId = location.state?.recordId;
   const errorColumns = location.state?.columns;
+  const status = location.state?.status;
   const isCreating = id === "novo";
-  const [auditErrors, setAuditErrors] = useState(
-    errorColumns
-      ? errorColumns?.reduce((acc, column) => {
-          acc[column.name] = {
-            message: column.message,
-          };
-          return acc;
-        }, {})
-      : {},
-  );
+  const [auditErrors, setAuditErrors] = useState(() => {
+    if (status === 1) {
+      return {};
+    }
+    return errorColumns
+      ? errorColumns.reduce((acc, column) => {
+        acc[column.name] = {
+          message: column.message,
+        };
+        return acc;
+      }, {})
+      : {};
+  });
 
   const resetAuditErrors = () => {
     setAuditErrors({});
@@ -64,6 +69,7 @@ export const ClientFormProvider = ({ children }) => {
         setIsEditing,
         auditErrors,
         resetAuditErrors,
+        status,
         recordId,
         client,
         id,
@@ -83,6 +89,7 @@ export const useClientForm = () => {
 };
 
 const ClientForm = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
   const {
@@ -93,7 +100,9 @@ const ClientForm = () => {
     id,
     resetAuditErrors,
     recordId,
-  } = useClientForm();
+    status
+  } =
+    useClientForm();
 
   const methods = useForm({
     defaultValues: {
@@ -129,6 +138,7 @@ const ClientForm = () => {
 
   const { mutate: updateClient, isPending: updateIsPending } = useMutation({
     mutationFn: async (data) => {
+      console.log("data", data)
       const response = await api.put(`/clients/${id}`, data);
       return response.data;
     },
@@ -138,6 +148,7 @@ const ClientForm = () => {
         await api.put(`/auditing/${recordId}/toggle_status`);
         toast.success("Auditoria corrigida com sucesso");
       }
+      queryClient.invalidateQueries(["client", id]);
     },
     onError: (error) => {
       console.error("Erro ao atualizar o cliente", error);
@@ -187,8 +198,11 @@ const ClientForm = () => {
           }
           icon={<EditNote />}
           buttons={
-            isEditing || isCreating
-              ? [
+            status !== 1 &&
+            (
+
+              isEditing || isCreating
+                ? [
                   <Button
                     key="create-client-button"
                     type="submit"
@@ -199,7 +213,7 @@ const ClientForm = () => {
                     SALVAR
                   </Button>,
                 ]
-              : [
+                : [
                   <Button
                     key="edit-client-button"
                     type="button"
@@ -211,6 +225,7 @@ const ClientForm = () => {
                     EDITAR
                   </Button>,
                 ]
+            )
           }
         />
         <TabContext value={activeTab}>
@@ -228,25 +243,25 @@ const ClientForm = () => {
             <Tab label="Documentação" value={7} />
           </TabList>
           <TabPanel value={1} sx={{ padding: 0 }}>
-            <General data={client} />
+            <General data={client} status={status} />
           </TabPanel>
           <TabPanel value={2} sx={{ padding: 0 }}>
-            <Address data={client} />
+            <Address data={client} status={status} />
           </TabPanel>
           <TabPanel value={3} sx={{ padding: 0 }}>
-            <Contact />
+            <Contact status={status} />
           </TabPanel>
           <TabPanel value={4} sx={{ padding: 0 }}>
-            <Crm />
+            <Crm status={status} />
           </TabPanel>
           <TabPanel value={5} sx={{ padding: 0 }}>
-            <Complementary />
+            <Complementary status={status} />
           </TabPanel>
           {/* <TabPanel value={6} sx={{ padding: 0 }}>
             <Contract />
           </TabPanel> */}
           <TabPanel value={7} sx={{ padding: 0 }}>
-            <Documentation />
+            <Documentation status={status} />
           </TabPanel>
         </TabContext>
       </form>

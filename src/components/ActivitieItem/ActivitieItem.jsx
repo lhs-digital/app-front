@@ -32,10 +32,10 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   const navigate = useNavigate();
 
   const handleView = () => {
-    console.log("activi", activitie.record_id);
+    console.log("activi", activitie);
 
-    return navigate(`/clientes/${activitie?.id}`, {
-      state: { edit: true, columns: activitie?.columns, recordId: Number(activitie?.record_id) },
+    return navigate(`/clientes/${activitie?.record_id}`, {
+      state: { edit: true, columns: activitie?.columns, recordId: Number(activitie?.id), status: activitie?.status },
     });
   };
 

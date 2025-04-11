@@ -22,6 +22,7 @@ const General = ({ data }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-8 gap-4 w-full">
       <Box>
+        {console.log("data", data)}
         <InputLabel required>Tipo de Pessoa</InputLabel>
         <Select
           {...register("tipo_pessoa", {
@@ -34,6 +35,7 @@ const General = ({ data }) => {
         >
           <MenuItem value="F">Física</MenuItem>
           <MenuItem value="J">Jurídica</MenuItem>
+          <MenuItem value="E">Estrangeira</MenuItem>
         </Select>
         {(auditErrors.tipo_pessoa || errors.tipo_pessoa) && (
           <FormHelperText error>

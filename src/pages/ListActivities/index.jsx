@@ -65,7 +65,7 @@ const ListActivities = () => {
 
         setCurrentPage(response.data.meta.current_page);
         setData(response.data.data);
-        console.log("response", response.data.data);
+        console.log("response", response.data);
         setTotalCount(response.data.meta.total);
       } catch (error) {
         console.error("Erro ao filtrar as tasks", error);
