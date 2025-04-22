@@ -31,7 +31,6 @@ const RoleView = () => {
     queryKey: ["companies", id],
     queryFn: async () => {
       const response = await api.get("/companies");
-      console.log("companies", response.data.data);
       return response.data.data;
     },
   });
@@ -40,7 +39,6 @@ const RoleView = () => {
     queryKey: ["role", id],
     queryFn: async () => {
       const response = await api.get(`/roles/${id}`);
-      console.log("response", response.data.data);
       return response.data.data;
     },
     enabled: !isCreating && isCompanyFetched,
@@ -51,6 +49,7 @@ const RoleView = () => {
     methods.setValue("name", role.name);
     methods.setValue("nivel", parseInt(role.nivel));
     methods.setValue("company", role.company);
+    methods.setValue("company.name", role.company.name);
     setSelectedPermissions(role.permissions);
   }, [role]);
 
@@ -227,7 +226,7 @@ const RoleView = () => {
                       getOptionLabel={(option) => option.name}
                       getOptionKey={(option) => option.id}
                       loadingText="Carregando..."
-                      inputValue={role.company?.name || ""}
+                      inputValue={role?.company?.name || ""}
                       onInputChange={(e, newValue) => {
                         field.onChange(newValue);
                       }}
