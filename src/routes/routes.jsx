@@ -51,56 +51,67 @@ export const privateRoutes = [
     label: "Início",
     path: "/painel",
     element: <Home />,
+    super: true,
   },
   {
     label: "Auditorias",
     path: "/auditorias",
     element: <ListActivities />,
+    super: false,
   },
   {
     label: "Empresas",
     path: "/empresas",
     element: <Companies />,
+    super: true,
   },
   {
     label: "Papéis & Permissões",
     path: "/papeis",
     element: <Roles />,
+    super: true,
   },
   {
     label: "Usuários",
     path: "/usuarios",
     element: <Users />,
+    super: true,
   },
   {
     label: "Clientes",
     path: "/clientes",
     element: <Clients />,
+    super: false,
   },
   {
     label: "Atribuições",
     path: "/atribuicoes",
     element: <Assignments />,
+    super: false,
   },
   {
     label: "Regras de Auditorias",
     path: "/prioridades",
     element: <Priorities />,
+    super: true,
   },
   {
     label: "Regras de Auditoria (novo)",
     path: "/regras",
     element: <AuditRules />,
+    super: false,
   },
   {
     label: "Minhas Permissões",
     path: "/permissoes",
     element: <MyPermissions />,
+    super: true,
   },
   {
     label: "Logs",
     path: "/logs",
     element: <Logs />,
+    super: true,
   },
 ];
 
@@ -122,7 +133,12 @@ export const navigationRoutes = privateRoutes.map((route) => ({
   icon: RouteIcon({ path: route.path }).icon,
   activeIcon: RouteIcon({ path: route.path }).activeIcon,
   permissions: pagePermissions(route.path),
+  super: route.super,
 }));
+
+export const superPaths = privateRoutes
+  .filter((route) => route.super)
+  .map((route) => route.path);
 
 export const AppRoutes = createBrowserRouter([
   {
@@ -131,7 +147,10 @@ export const AppRoutes = createBrowserRouter([
   },
   {
     element: <PrivateRoute />,
-    children: [...privateRoutes, ...privateSubRoutes],
+    children: privateRoutes.map((route) => ({
+      ...route,
+      permissions: pagePermissions(route.path),
+    })),
   },
   {
     path: "/logout",

@@ -27,6 +27,7 @@ import {
   navigationRoutes,
   privateRoutes,
   privateSubRoutes,
+  superPaths,
 } from "../routes/routes";
 import { handleMode } from "../theme";
 
@@ -85,7 +86,7 @@ const Layout = ({ children }) => {
   const theme = handleMode(useThemeMode().mode);
   const navigate = useNavigate();
   const location = window.location.pathname.split("/").slice(1);
-  const { permissions } = useUserState().state;
+  const { permissions, isLighthouse } = useUserState().state;
   const isActive = (url) => window.location.pathname === url;
 
   const handleLogout = async () => {
@@ -123,6 +124,10 @@ const Layout = ({ children }) => {
               item.permissions.length > 0 &&
               !hasPermission(item.permissions)
             ) {
+              return null;
+            }
+
+            if (isLighthouse && !superPaths.includes(item.path)) {
               return null;
             }
 
