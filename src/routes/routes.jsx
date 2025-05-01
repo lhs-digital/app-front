@@ -81,7 +81,7 @@ export const privateRoutes = [
     label: "Clientes",
     path: "/clientes",
     element: <Clients />,
-    super: false,
+    super: true,
   },
   {
     label: "Atribuições",
