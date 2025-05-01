@@ -1,5 +1,6 @@
 import { Add, Delete, Edit, RemoveRedEye, Search } from "@mui/icons-material";
 import {
+  Autocomplete,
   Button,
   CircularProgress,
   IconButton,
@@ -34,30 +35,34 @@ const Clients = () => {
     direction: "desc",
   });
   const navigate = useNavigate();
+  const [company, setCompany] = useState(null);
   const { permissions, isLighthouse } = useUserState().state;
-
-  useEffect(() => {
-    if (isLighthouse) {
-      toast.info("Use uma conta de provedor para ver esta página.");
-    }
-  }, [navigate]);
-
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const [sortedData, setSortedData] = useState([]);
 
+  const { data: availableCompanies = [] } = useQuery({
+    queryKey: ["companies"],
+    queryFn: async () => {
+      const response = await api.get("/companies");
+      return response.data.data;
+    },
+  });
+
   const { data, isFetching, isSuccess } = useQuery({
     queryKey: ["clients", currentPage, rowsPerPage, search],
     queryFn: async () => {
-      const response = await api.get(
-        `/module/cliente?page=${currentPage}&per_page=${rowsPerPage}`,
-        {
-          params: { search: search },
+      const response = await api.get("/module/cliente", {
+        params: {
+          page: currentPage,
+          per_page: rowsPerPage,
+          company_id: company?.id || undefined,
         },
-      );
+      });
       setTotalCount(response.data.total);
       return response.data.data;
     },
+    enabled: !!company,
   });
 
   const handleSort = (key) => {
@@ -133,25 +138,41 @@ const Clients = () => {
           </Button>
         }
       />
-      <TextField
-        mt={4}
-        placeholder="Buscar cliente"
-        size="lg"
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setCurrentPage(1);
-        }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      <div className="grid grid-cols-3 lg:grid-cols-8 gap-4">
+        <TextField
+          mt={4}
+          className={`${isLighthouse ? "col-span-2 lg:col-span-6" : "col-span-2 lg:col-span-8"}`}
+          placeholder="Buscar cliente"
+          size="lg"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        {isLighthouse && (
+          <Autocomplete
+            className="col-span-2"
+            value={company}
+            noOptionsText="Nenhuma empresa encontrada."
+            options={availableCompanies}
+            getOptionLabel={(option) => option.name}
+            getOptionKey={(option) => option.id}
+            loadingText="Carregando..."
+            renderInput={(params) => <TextField {...params} label="Empresa" />}
+            onChange={(e, newValue) => setCompany(newValue)}
+          />
+        )}
+      </div>
       <TableContainer>
         <Table>
           <TableHead>
