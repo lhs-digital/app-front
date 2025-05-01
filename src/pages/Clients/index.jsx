@@ -34,7 +34,14 @@ const Clients = () => {
     direction: "desc",
   });
   const navigate = useNavigate();
-  const { permissions } = useUserState().state;
+  const { permissions, isLighthouse } = useUserState().state;
+
+  useEffect(() => {
+    if (isLighthouse) {
+      toast.info("Use uma conta de provedor para ver esta página.");
+    }
+  }, [navigate]);
+
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const [sortedData, setSortedData] = useState([]);
@@ -43,7 +50,7 @@ const Clients = () => {
     queryKey: ["clients", currentPage, rowsPerPage, search],
     queryFn: async () => {
       const response = await api.get(
-        `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
+        `/module/cliente?page=${currentPage}&per_page=${rowsPerPage}`,
         {
           params: { search: search },
         },
