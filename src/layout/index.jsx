@@ -27,7 +27,6 @@ import {
   navigationRoutes,
   privateRoutes,
   privateSubRoutes,
-  superPaths,
 } from "../routes/routes";
 import { handleMode } from "../theme";
 
@@ -126,11 +125,6 @@ const Layout = ({ children }) => {
             ) {
               return null;
             }
-
-            if (isLighthouse && !superPaths.includes(item.path)) {
-              return null;
-            }
-
             return (
               <Tooltip
                 title={item.label}

@@ -1,18 +1,12 @@
 import { CircularProgress } from "@mui/material";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import Layout from ".";
 import { useUserState } from "../hooks/useUserState";
-import { superPaths } from "../routes/routes";
 
 const PrivateRoute = ({ allowedPermissions = [], ...rest }) => {
   const isAuthenticated = useIsAuthenticated();
   const { state, userStateIsFetching } = useUserState();
-  const location = useLocation();
-
-  if (!superPaths.includes(location.pathname) && state?.isLighthouse) {
-    return <Navigate to="/" />;
-  }
 
   if (!state && userStateIsFetching) {
     return (
