@@ -47,11 +47,13 @@ export default function TaskFilter({
         entity_type: filterParams.entity_type || undefined,
         status: filterParams.status || undefined,
       };
-      const response = await api.get("/tasks", { params });
+      const response = await api.get("/work_order", { params });
       setAssignments(response?.data?.data);
     } catch (error) {
       console.error("Erro ao obter as atribuições", error);
-      toast.error("Erro ao obter as atribuições");
+      toast.error("Erro ao obter as atribuições", {
+        toastId: "assignmentError",
+      });
     }
     setIsFetching(false);
   };
