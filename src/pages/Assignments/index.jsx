@@ -8,6 +8,7 @@ import { useUserState } from "../../hooks/useUserState";
 import CreateTask from "./CreateTask";
 import TaskCard from "./TaskCard";
 import TaskFilter from "./TaskFilter";
+import ViewTask from "./ViewTask";
 
 const Assignments = () => {
   const [assignments, setAssignments] = useState([]);
@@ -73,7 +74,11 @@ const Assignments = () => {
         </Masonry>
       )}
       <CreateTask open={createOpen} onClose={() => setCreateOpen(false)} />
-      {/* <ViewTask open={!!selectedAssignment} onClose={() => setSelectedAssignment(null)} assignment={selectedAssignment} /> */}
+      <ViewTask
+        open={!!selectedAssignment}
+        onClose={() => setSelectedAssignment(null)}
+        assignment={selectedAssignment}
+      />
     </div>
   );
 };
