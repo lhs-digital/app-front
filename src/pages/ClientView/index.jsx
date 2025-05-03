@@ -1,14 +1,15 @@
 import { EditNote, Save } from "@mui/icons-material";
-import { useQueryClient } from "@tanstack/react-query";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Tab } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle";
 import api from "../../services/api";
+import { qc } from "../../services/queryClient";
 import {
   address,
   complimentary,
@@ -33,6 +34,7 @@ export const ClientFormProvider = ({ children }) => {
   const recordId = location.state?.recordId;
   const errorColumns = location.state?.columns;
   const status = location.state?.status;
+  const companyId = location.state?.companyId;
   const isCreating = id === "novo";
   const [auditErrors, setAuditErrors] = useState(() => {
     if (status === 1) {
@@ -40,11 +42,11 @@ export const ClientFormProvider = ({ children }) => {
     }
     return errorColumns
       ? errorColumns.reduce((acc, column) => {
-        acc[column.name] = {
-          message: column.message,
-        };
-        return acc;
-      }, {})
+          acc[column.name] = {
+            message: column.message,
+          };
+          return acc;
+        }, {})
       : {};
   });
 
@@ -55,8 +57,12 @@ export const ClientFormProvider = ({ children }) => {
   const { data: client } = useQuery({
     queryKey: ["client", id],
     queryFn: async () => {
-      const response = await api.get(`/clients/${id}`);
-      return response.data;
+      const response = await api.get(`/module/cliente/${id}`, {
+        params: {
+          company_id: companyId,
+        },
+      });
+      return response.data.data;
     },
     enabled: !isCreating,
   });
@@ -89,7 +95,6 @@ export const useClientForm = () => {
 };
 
 const ClientForm = () => {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(1);
   const {
@@ -100,9 +105,8 @@ const ClientForm = () => {
     id,
     resetAuditErrors,
     recordId,
-    status
-  } =
-    useClientForm();
+    status,
+  } = useClientForm();
 
   const methods = useForm({
     defaultValues: {
@@ -138,8 +142,8 @@ const ClientForm = () => {
 
   const { mutate: updateClient, isPending: updateIsPending } = useMutation({
     mutationFn: async (data) => {
-      console.log("data", data)
-      const response = await api.put(`/clients/${id}`, data);
+      console.log("data", data);
+      const response = await api.put(`/module/cliente/${id}`, data);
       return response.data;
     },
     onSuccess: async () => {
@@ -148,7 +152,7 @@ const ClientForm = () => {
         await api.put(`/auditing/${recordId}/toggle_status`);
         toast.success("Auditoria corrigida com sucesso");
       }
-      queryClient.invalidateQueries(["client", id]);
+      qc.invalidateQueries(["client", id]);
     },
     onError: (error) => {
       console.error("Erro ao atualizar o cliente", error);
@@ -199,10 +203,8 @@ const ClientForm = () => {
           icon={<EditNote />}
           buttons={
             status !== 1 &&
-            (
-
-              isEditing || isCreating
-                ? [
+            (isEditing || isCreating
+              ? [
                   <Button
                     key="create-client-button"
                     type="submit"
@@ -213,7 +215,7 @@ const ClientForm = () => {
                     SALVAR
                   </Button>,
                 ]
-                : [
+              : [
                   <Button
                     key="edit-client-button"
                     type="button"
@@ -224,8 +226,7 @@ const ClientForm = () => {
                   >
                     EDITAR
                   </Button>,
-                ]
-            )
+                ])
           }
         />
         <TabContext value={activeTab}>

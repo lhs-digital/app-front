@@ -5,29 +5,30 @@ import {
   RuleFolder,
   Work,
 } from "@mui/icons-material";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import {
   Box,
   Button,
   Card,
   colors,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { PieChart } from "@mui/x-charts";
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ModalReport from "../../components/ModalReport";
 import { useThemeMode } from "../../contexts/themeModeContext";
+import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import { handleMode } from "../../theme";
@@ -41,9 +42,7 @@ const AuditSection = () => {
   const user = useAuthUser();
   const [data, setData] = useState([]);
   const [dataLastAudit, setDataLastAudit] = useState([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState(
-    user.isLighthouse ? null : user.company.id,
-  );
+  const { company, setCompany, availableCompanies } = useCompany();
   const [updateInterval, setUpdateInterval] = useState(600);
   const [selectedTableId, setSelectedTableId] = useState(null);
   const [chartData, setChartData] = useState({
@@ -59,7 +58,7 @@ const AuditSection = () => {
 
   const confirmIntervalChange = async () => {
     try {
-      await api.put(`/company/${selectedCompanyId}/update_interval`, {
+      await api.put(`/company/${company?.id}/update_interval`, {
         audit_interval: updateInterval,
       });
       setIsConfirmModalOpen(false);
@@ -83,7 +82,6 @@ const AuditSection = () => {
           // Verifique se audit_interval existe antes de atualizar o estado
           if (data[0].audit_interval !== undefined) {
             setUpdateInterval(data[0].audit_interval);
-
           } else {
             console.warn("audit_interval não encontrado, usando valor padrão");
             setUpdateInterval(600); // Valor padrão
@@ -103,7 +101,7 @@ const AuditSection = () => {
   useEffect(() => {
     if (data.length > 0) {
       const selectedCompany = data.find(
-        (item) => item.company.id === selectedCompanyId,
+        (item) => item.company.id === company?.id,
       );
       const tables = selectedCompany ? selectedCompany.per_tables : [];
       const selectedTable = tables.find(
@@ -118,13 +116,9 @@ const AuditSection = () => {
         });
       }
     }
-  }, [data, selectedCompanyId, selectedTableId]);
+  }, [data, company?.id, selectedTableId]);
 
-  const companies = data?.map((item) => item.company) || [];
-
-  const selectedCompany = data?.find(
-    (item) => item.company.id === selectedCompanyId,
-  );
+  const selectedCompany = data?.find((item) => item.company.id === company?.id);
   const tables = selectedCompany ? selectedCompany.per_tables : [];
 
   const handleTableChange = (event) => {
@@ -141,8 +135,7 @@ const AuditSection = () => {
   };
 
   const handleCompanyChange = (event) => {
-    const companyId = Number(event.target.value);
-    setSelectedCompanyId(companyId);
+    setCompany(event.target.value);
     setSelectedTableId(null);
     setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
   };
@@ -217,13 +210,13 @@ const AuditSection = () => {
             <FormControl fullWidth>
               <InputLabel id="company">Empresa</InputLabel>
               <Select
-                value={selectedCompanyId || ""}
+                value={company?.id || ""}
                 onChange={handleCompanyChange}
                 label="Empresa"
                 disabled={!user.isLighthouse}
               >
                 {user.isLighthouse ? (
-                  companies.map((company) => (
+                  availableCompanies.map((company) => (
                     <MenuItem key={company.id} value={company.id}>
                       {company.name}
                     </MenuItem>

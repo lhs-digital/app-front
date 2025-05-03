@@ -54,7 +54,8 @@ const Logs = () => {
       try {
         const params = {
           search: filterParams?.search || undefined,
-          method: filterParams?.method === -1 ? undefined : filterParams?.method,
+          method:
+            filterParams?.method === -1 ? undefined : filterParams?.method,
           nivel: filterParams?.nivel === -1 ? undefined : filterParams?.nivel,
           created_at:
             filterParams?.createdAt && filterParams?.createdAt.length > 0
@@ -67,9 +68,12 @@ const Logs = () => {
           Object.entries(params).filter(([_, v]) => v !== undefined),
         );
 
-        const response = await api.get(`/logs?page=${currentPage}&per_page=${rowsPerPage}`, {
-          params: filteredParams,
-        });
+        const response = await api.get(
+          `/logs?page=${currentPage}&per_page=${rowsPerPage}`,
+          {
+            params: filteredParams,
+          },
+        );
 
         setCurrentPage(response.data.meta.current_page);
         setData(response.data.data);
@@ -142,7 +146,6 @@ const Logs = () => {
     setCurrentPage(1);
     setRefresh((prev) => !prev);
   };
-
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -373,9 +376,7 @@ const Logs = () => {
           <TableBody>
             {data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} textAlign="center">
-                  Não há Logs
-                </TableCell>
+                <TableCell colSpan={4}>Não há Logs</TableCell>
               </TableRow>
             ) : (
               (!search

@@ -7,107 +7,67 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
+import { useCompany } from "../../hooks/useCompany";
 import api from "../../services/api";
-
+import { qc } from "../../services/queryClient";
 const CreateTask = ({ open, onClose }) => {
-  const [availableUsers, setAvailableUsers] = useState([]);
-  const [availableCompanies, setAvailableCompanies] = useState([]);
-  const [isFetching, setIsFetching] = useState(false);
+  const { company, setCompany, availableCompanies } = useCompany();
   const user = useAuthUser();
-  const [entityTypes, setEntityTypes] = useState([]);
-  const [availableEntities, setAvailableEntities] = useState([]);
 
   const [data, setData] = useState({
     assigned_to: null,
     assigned_by: null,
-    company: null,
-    deadline: null,
+    deadline: "",
     entity_id: null,
     entity_type: null,
-    description: null,
+    description: "",
   });
 
-  const entitySearch = async () => {
-    const response = await api.get(`/entities/${data.entity_type}`);
-    return response.data;
-  };
+  const { data: entityTypes = [], isLoading } = useQuery({
+    queryKey: ["entityTypes"],
+    queryFn: async () => {
+      const response = await api.get("/assignables");
+      return response.data;
+    },
+  });
 
-  useEffect(() => {
-    if (!open) return;
-    setIsFetching(true);
-    const fetchEntityTypes = async () => {
-      try {
-        const response = await api.get("/assignables");
-        setEntityTypes(response.data);
-      } catch (error) {
-        console.error("Erro ao buscar os tipos de entidades", error);
-      }
-    };
+  const { data: availableUsers = [] } = useQuery({
+    queryKey: ["availableUsers", company?.id],
+    queryFn: async () => {
+      const response = await api.get("/users", {
+        params: {
+          company_id: company?.id,
+        },
+      });
+      return response.data.data;
+    },
+    enabled: !!company,
+  });
 
-    const fetchCompanies = async () => {
-      try {
-        const response = await api.get("/companies");
-        setAvailableCompanies(response.data.data);
-      } catch (error) {
-        console.error("Erro ao buscar as empresas", error);
-      }
-    };
-
-    if (user.isLighthouse) {
-      fetchCompanies();
-    } else {
-      setData({ ...data, company: user.company });
-    }
-
-    fetchEntityTypes();
-    setIsFetching(false);
-  }, []);
-
-  useEffect(() => {
-    if (data.entity_type) {
-      entitySearch()
-        .then((entities) => {
-          setAvailableEntities(entities);
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar as entidades", error);
-        });
-    }
-
-    if (data.company) {
-      console.log(data.company);
-      api
-        .get(`/users?company_id=${data.company.id}`)
-        .then((res) => {
-          setAvailableUsers(res.data.data);
-        })
-        .catch((error) => console.error("Erro ao buscar os usuários", error));
-    }
-  }, [data.entity_type, data.company]);
-
-  useEffect(() => {
-    api
-      .get("/assignables")
-      .then((res) => setEntityTypes(res.data))
-      .catch((error) => console.error("Erro ao buscar entity types", error));
-  }, []);
+  const { data: availableEntities = [] } = useQuery({
+    queryKey: ["availableEntities", data.entity_type],
+    queryFn: async () => {
+      const response = await api.get(`/entities/${data.entity_type}`);
+      console.log(response.data);
+      return response.data;
+    },
+    enabled: !!data.entity_type,
+  });
 
   const submit = (e) => {
     e.preventDefault();
 
     api
-      .post("/tasks", {
+      .post("/work_order", {
         ...data,
         assigned_to: data.assigned_to.id,
         assigned_by: data.assigned_by.id,
-        company_id: data.company.id,
+        company_id: company?.id,
         entity_id: data.entity_id.id,
-      })
-      .then(() => {
-        console.log("Tarefa criada com sucesso");
       })
       .then(() => {
         toast.success("Tarefa criada com sucesso");
@@ -116,6 +76,9 @@ const CreateTask = ({ open, onClose }) => {
       .catch((error) => {
         console.error("Erro ao criar tarefa", error);
         toast.error("Erro ao criar tarefa");
+      })
+      .finally(() => {
+        qc.invalidateQueries(["workOrders"]);
       });
   };
 
@@ -124,32 +87,32 @@ const CreateTask = ({ open, onClose }) => {
       title="Nova tarefa"
       open={open}
       onClose={onClose}
+      scroll="body"
+      maxWidth="sm"
+      fullWidth
       aria-labelledby="modal-criar-tarefa"
       aria-describedby="modal-criar-tarefa"
     >
-      <DialogTitle>Nova tarefa</DialogTitle>
-      <DialogContent className="w-[480px] flex flex-col gap-4">
+      <DialogTitle>Nova ordem de serviço</DialogTitle>
+      <DialogContent className="flex flex-col gap-4">
         <form
           id="create-task-form"
-          className="flex flex-col gap-4 pt-2"
+          className="flex flex-col gap-6 pt-2"
           onSubmit={submit}
         >
           {user.isLighthouse && (
             <Autocomplete
-              fullWidth
+              className="col-span-8"
+              value={company}
+              noOptionsText="Nenhuma empresa encontrada."
               options={availableCompanies}
-              noOptionsText="Nenhuma empresa encontrada"
               getOptionLabel={(option) => option.name}
               getOptionKey={(option) => option.id}
-              loading={isFetching}
               loadingText="Carregando..."
               renderInput={(params) => (
                 <TextField {...params} label="Empresa" />
               )}
-              value={data.company_id}
-              onChange={(e, newValue) =>
-                setData({ ...data, company: newValue })
-              }
+              onChange={(e, newValue) => setCompany(newValue)}
             />
           )}
           <Autocomplete
@@ -158,13 +121,13 @@ const CreateTask = ({ open, onClose }) => {
             noOptionsText="Nenhum usuário encontrado"
             getOptionLabel={(option) => option.name}
             getOptionKey={(option) => option.id}
-            loading={isFetching}
+            loading={isLoading}
             loadingText="Carregando..."
             renderInput={(params) => (
               <TextField
                 {...params}
                 label={
-                  !data.company
+                  !company
                     ? "Selecione uma empresa para pesquisar"
                     : "Atribuído por"
                 }
@@ -187,13 +150,13 @@ const CreateTask = ({ open, onClose }) => {
             noOptionsText="Nenhum usuário encontrado"
             getOptionLabel={(option) => option.name}
             getOptionKey={(option) => option.id}
-            loading={isFetching}
+            loading={isLoading}
             loadingText="Carregando..."
             renderInput={(params) => (
               <TextField
                 {...params}
                 label={
-                  !data.company
+                  !company
                     ? "Selecione uma empresa para pesquisar"
                     : "Atribuído para"
                 }
@@ -209,7 +172,7 @@ const CreateTask = ({ open, onClose }) => {
             options={entityTypes}
             noOptionsText="Nenhum tipo encontrado"
             getOptionLabel={(option) => option}
-            loading={isFetching}
+            loading={isLoading}
             loadingText="Carregando..."
             renderInput={(params) => (
               <TextField {...params} label="Tipo de entidade" />
@@ -225,7 +188,7 @@ const CreateTask = ({ open, onClose }) => {
             noOptionsText="Nenhuma entidade encontrada"
             getOptionLabel={(option) => option.name}
             getOptionKey={(option) => option.id}
-            loading={isFetching}
+            loading={isLoading}
             loadingText="Carregando..."
             renderInput={(params) => <TextField {...params} label="Entidade" />}
             value={data.entity_id}

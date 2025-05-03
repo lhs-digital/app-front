@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import PageTitle from "../../components/PageTitle";
+import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import { hasPermission } from "../../services/utils";
@@ -35,19 +36,11 @@ const Clients = () => {
     direction: "desc",
   });
   const navigate = useNavigate();
-  const [company, setCompany] = useState(null);
   const { permissions, isLighthouse } = useUserState().state;
+  const { company, setCompany, availableCompanies } = useCompany();
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const [sortedData, setSortedData] = useState([]);
-
-  const { data: availableCompanies = [] } = useQuery({
-    queryKey: ["companies"],
-    queryFn: async () => {
-      const response = await api.get("/companies");
-      return response.data.data;
-    },
-  });
 
   const { data, isFetching, isSuccess } = useQuery({
     queryKey: ["clients", currentPage, rowsPerPage, search],
@@ -88,7 +81,7 @@ const Clients = () => {
 
   const handleRemove = async () => {
     try {
-      await api.delete(`/clients/${deleteId}`);
+      await api.delete(`/module/cliente/${deleteId}`);
       toast.success("Cliente removido com sucesso!");
       setDeleteOpen(false);
     } catch (error) {
@@ -235,9 +228,7 @@ const Clients = () => {
             )}
             {!isFetching && sortedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan="5" textAlign="center">
-                  Nenhum cliente encontrado
-                </TableCell>
+                <TableCell colSpan="5">Nenhum cliente encontrado</TableCell>
               </TableRow>
             ) : (
               sortedData
@@ -266,7 +257,11 @@ const Clients = () => {
                       {hasPermission(permissions, "view_clients") && (
                         <IconButton
                           onClick={() => {
-                            navigate(`/clientes/${client.id}`, {});
+                            navigate(`/clientes/${client.id}`, {
+                              state: {
+                                companyId: company?.id,
+                              },
+                            });
                           }}
                         >
                           <RemoveRedEye fontSize="small" />
