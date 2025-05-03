@@ -1,20 +1,25 @@
 import { Add, ContentPaste } from "@mui/icons-material";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CircularProgress,
-} from "@mui/material";
+import { Masonry } from "@mui/lab";
+import { Button, CircularProgress } from "@mui/material";
 import { useState } from "react";
 import PageTitle from "../../components/PageTitle";
+import { useCompany } from "../../hooks/useCompany";
+import { useUserState } from "../../hooks/useUserState";
 import CreateTask from "./CreateTask";
+import TaskCard from "./TaskCard";
 import TaskFilter from "./TaskFilter";
 
 const Assignments = () => {
   const [assignments, setAssignments] = useState([]);
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const user = useUserState().state;
+  const { company } = useCompany();
+
+  // For superadmin, wait for company selection
+  const showContent = user.isLighthouse ? !!company : true;
+
   return (
     <div className="flex flex-col gap-8">
       <PageTitle
@@ -26,6 +31,7 @@ const Assignments = () => {
             variant="contained"
             startIcon={<Add />}
             onClick={() => setCreateOpen(true)}
+            disabled={!showContent}
           >
             ATRIBUIR
           </Button>,
@@ -36,30 +42,38 @@ const Assignments = () => {
         isFetching={isFetching}
         setIsFetching={setIsFetching}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {isFetching ? (
-          <div className="col-span-full flex justify-center items-center h-32 lg:h-64">
-            <CircularProgress size="1.5rem" />
-          </div>
-        ) : (
-          assignments.map((assignment) => (
-            <Card key={assignment.id} variant="outlined">
-              <CardHeader title={assignment.entity_type} />
-              <CardContent className="flex flex-col gap-2">
-                <p>Descrição: {assignment.description}</p>
-                <p>Empresa: {assignment.company.name}</p>
-                <p>Atribuído por: {assignment.assigned_by.name}</p>
-                <p>Atribuído para: {assignment.assigned_to.name}</p>
-                <p>
-                  Deadline:{" "}
-                  {new Date(assignment.deadline).toLocaleDateString("pt-Br")}
-                </p>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+      {isFetching ? (
+        <div className="col-span-full flex justify-center items-center h-32 lg:h-64">
+          <CircularProgress size="1.5rem" />
+        </div>
+      ) : assignments.length === 0 ? (
+        <div className="col-span-full flex justify-center items-center h-32 text-gray-500">
+          {showContent
+            ? "Nenhuma ordem de serviço encontrada"
+            : "Selecione uma empresa para visualizar as ordens de serviço"}
+        </div>
+      ) : (
+        <Masonry
+          columns={{
+            xs: 1,
+            sm: 2,
+            lg: 3,
+            xl: 4,
+          }}
+          spacing={2}
+          width="100%"
+        >
+          {assignments.map((assignment) => (
+            <TaskCard
+              key={assignment.id}
+              assignment={assignment}
+              setSelectedAssignment={setSelectedAssignment}
+            />
+          ))}
+        </Masonry>
+      )}
       <CreateTask open={createOpen} onClose={() => setCreateOpen(false)} />
+      {/* <ViewTask open={!!selectedAssignment} onClose={() => setSelectedAssignment(null)} assignment={selectedAssignment} /> */}
     </div>
   );
 };

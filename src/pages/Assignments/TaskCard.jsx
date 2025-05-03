@@ -1,55 +1,31 @@
-import {
-  AccessTime as AccessTimeIcon,
-  Business as BusinessIcon,
-  Description as DescriptionIcon,
-} from "@mui/icons-material";
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { CalendarToday, Person } from "@mui/icons-material";
+import { Card, CardContent, Chip, Divider } from "@mui/material";
+// import { useUserState } from "../../hooks/useUserState";
 
 const TaskCard = ({ assignment, setSelectedAssignment }) => {
-  // Format deadline date
-  const deadlineDate = new Date(assignment.deadline);
-  const formattedDeadline = deadlineDate.toLocaleDateString("pt-BR");
-
-  // Check if deadline is approaching (within 3 days)
-  const isDeadlineApproaching = () => {
-    const today = new Date();
-    const diffTime = deadlineDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 3 && diffDays >= 0;
-  };
-
-  // Check if deadline has passed
-  const isDeadlinePassed = () => {
-    const today = new Date();
-    return deadlineDate < today;
-  };
-
-  // Get color based on deadline status
-  const getDeadlineColor = () => {
-    if (isDeadlinePassed()) return "error";
-    if (isDeadlineApproaching()) return "warning";
-    return "default";
-  };
-
-  // Get first letters of assigned person for avatar
-  const getInitials = (name) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
+  // const { isLighthouse } = useUserState().state;
 
   const handleCardClick = () => {
     setSelectedAssignment(assignment);
+  };
+
+  const statusInfo = {
+    not_started: {
+      label: "Não iniciado",
+      severity: "info",
+    },
+    in_progress: {
+      label: "Em andamento",
+      severity: "warning",
+    },
+    completed: {
+      label: "Concluído",
+      severity: "success",
+    },
+    overdue: {
+      label: "Atrasado",
+      severity: "error",
+    },
   };
 
   return (
@@ -67,92 +43,24 @@ const TaskCard = ({ assignment, setSelectedAssignment }) => {
       }}
       onClick={handleCardClick}
     >
-      {/* Type label at the top */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          bgcolor: "primary.main",
-          color: "white",
-          px: 1,
-          py: 0.5,
-          borderBottomRightRadius: 8,
-        }}
-      >
-        <Typography variant="caption" fontWeight="bold">
-          {assignment.entity_type}
-        </Typography>
-      </Box>
-
-      <CardContent sx={{ pt: 4 }}>
-        {/* Description */}
-        <Box sx={{ display: "flex", alignItems: "flex-start", mb: 2 }}>
-          <DescriptionIcon
-            fontSize="small"
-            sx={{ mr: 1, color: "text.secondary", mt: 0.5 }}
-          />
-          <Typography
-            variant="body1"
-            fontWeight="medium"
-            sx={{ wordBreak: "break-word" }}
-          >
-            {assignment.description}
-          </Typography>
-        </Box>
-
-        {/* Company */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <BusinessIcon
-            fontSize="small"
-            sx={{ mr: 1, color: "text.secondary" }}
-          />
-          <Typography variant="body2" color="text.secondary">
-            {assignment.company.name}
-          </Typography>
-        </Box>
-
-        {/* Deadline with color indicator */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <AccessTimeIcon
-            fontSize="small"
-            sx={{ mr: 1, color: getDeadlineColor() + ".main" }}
-          />
-          <Chip
-            label={`Prazo: ${formattedDeadline}`}
-            size="small"
-            color={getDeadlineColor()}
-            variant={isDeadlinePassed() ? "filled" : "outlined"}
-          />
-        </Box>
-
-        {/* Footer with assigned person */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mt: 2,
-          }}
-        >
-          <Tooltip title={`Atribuído para: ${assignment.assigned_to.name}`}>
-            <Avatar
-              sx={{
-                width: 32,
-                height: 32,
-                bgcolor: "secondary.main",
-                fontSize: "0.875rem",
-              }}
-            >
-              {getInitials(assignment.assigned_to.name)}
-            </Avatar>
-          </Tooltip>
-          <Tooltip title={`Atribuído por: ${assignment.assigned_by.name}`}>
-            <Typography variant="caption" color="text.secondary">
-              Por: {assignment.assigned_by.name}
-            </Typography>
-          </Tooltip>
-        </Box>
+      <CardContent className="flex flex-col gap-4">
+        <p className="text-lg font-medium">{assignment.description}</p>
+        <Divider />
+        <div className="flex items-center gap-4">
+          <Person fontSize="small" />
+          <p>{assignment.assigned_to.name}</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <CalendarToday fontSize="small" />
+          <p>{new Date(assignment.deadline).toLocaleDateString("pt-Br")}</p>
+        </div>
+        <Divider />
+        <Chip
+          label={statusInfo[assignment.status].label}
+          color={statusInfo[assignment.status].severity}
+          variant="outlined"
+          size="small"
+        />
       </CardContent>
     </Card>
   );
