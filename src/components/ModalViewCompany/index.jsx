@@ -35,7 +35,7 @@ const ModalViewCompany = ({ selectedCompany, isOpen, onClose }) => {
           <b>Razão Social:</b> {selectedCompany?.name}
         </Box>
         <Box>
-          <b>Nome Fantasia:</b> {selectedCompany?.dba}
+          <b>Nome Fantasia:</b> {selectedCompany?.dba || "Não informado"}
         </Box>
         <Box>
           <b>CNPJ:</b> {selectedCompany?.cnpj}
@@ -48,28 +48,29 @@ const ModalViewCompany = ({ selectedCompany, isOpen, onClose }) => {
           <b>Endereço:</b>
         </Typography>
         <Box>
-          <b>CEP:</b> {selectedCompany?.address?.postal_code}
+          {console.log("selectedCompany", selectedCompany)}
+          <b>CEP:</b> {selectedCompany?.address?.postal_code || "Não informado"}
         </Box>
         <Box>
-          <b>Logradouro:</b> {selectedCompany?.address?.street}
+          <b>Logradouro:</b> {selectedCompany?.address?.street || "Não informado"}
         </Box>
         <Box>
-          <b>Número:</b> {selectedCompany?.address?.number}
+          <b>Número:</b> {selectedCompany?.address?.number || "Não informado"}
         </Box>
         <Box>
-          <b>Complemento:</b> {selectedCompany?.address?.complement}
+          <b>Complemento:</b> {selectedCompany?.address?.complement || "Não informado"}
         </Box>
         <Box>
-          <b>Bairro:</b> {selectedCompany?.address?.neighborhood}
+          <b>Bairro:</b> {selectedCompany?.address?.neighborhood || "Não informado"}
         </Box>
         <Box>
-          <b>Cidade:</b> {selectedCompany?.address?.city}
+          <b>Cidade:</b> {selectedCompany?.address?.city || "Não informado"}
         </Box>
         <Box>
-          <b>Estado:</b> {selectedCompany?.address?.state}
+          <b>Estado:</b> {selectedCompany?.address?.state || "Não informado"}
         </Box>
         <Box>
-          <b>País:</b> {selectedCompany?.address?.country}
+          <b>País:</b> {selectedCompany?.address?.country || "Não informado"}
         </Box>
         <Typography sx={{ mt: 2 }}>
           <b>Roles:</b>

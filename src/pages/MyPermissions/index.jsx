@@ -24,6 +24,7 @@ const MyPermissions = () => {
         subtitle="Visualização das suas permissões"
       />
       <Box>
+        {console.log(permissions)}
         {permissions.length > 0 ? (
           <TableContainer>
             <Table>

@@ -10,6 +10,7 @@ import {
   FaRegSun,
   FaTimes,
   FaUserAlt,
+  FaUsers
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useUserState } from "../../hooks/useUserState";
@@ -90,6 +91,9 @@ const Sidebar = ({ active }) => {
             <SidebarItem Icon={FaUserAlt} Text="Usuários" />
           </Link>
         ) : null}
+        <Link to="/hierarquia">
+          <SidebarItem Icon={FaUsers} Text="Hierarquia" />
+        </Link>
         <Link to="/clientes">
           <SidebarItem Icon={FaFolder} Text="Clientes" />
         </Link>

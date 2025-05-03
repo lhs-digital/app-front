@@ -1,5 +1,7 @@
 import { useDisclosure } from "@chakra-ui/react";
 import { Add, Delete, Edit, Search } from "@mui/icons-material";
+import GroupRemoveIcon from '@mui/icons-material/GroupRemove';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import {
   Button,
   IconButton,
@@ -23,10 +25,20 @@ import ModalView from "../../components/ModalView";
 import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import ModalHierarchy from "../../components/ModalHierarchy";
 
 const Users = () => {
   const [viewOnly, setViewOnly] = useState(false);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isCreateOpen,
+    onOpen: onOpenCreate,
+    onClose: onCloseCreate,
+  } = useDisclosure();
+  const {
+    isOpen: isHierarchyOpen,
+    onOpen: onOpenHierarchy,
+    onClose: onHierarchyClose,
+  } = useDisclosure();
   const {
     isOpen: isDeleteOpen,
     onOpen: onOpenDelete,
@@ -38,12 +50,14 @@ const Users = () => {
     onClose: onCloseView,
   } = useDisclosure();
   const [data, setData] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [dataEdit, setDataEdit] = useState({});
   const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
+  const [desHierarchy, setDesHierarchy] = useState(false);
   //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
@@ -69,6 +83,7 @@ const Users = () => {
             },
           },
         );
+        console.log(response.data);
         setCurrentPage(response.data.meta.current_page);
         setData(response.data.data);
         setTotalCount(response.data.meta.total);
@@ -127,6 +142,17 @@ const Users = () => {
     onOpenView();
   };
 
+  const handleHierarchy = (user) => {
+    setSelectedUser(user);
+    onOpenHierarchy();
+  };
+
+  const handleDesHierarchy = (user) => {
+    setDesHierarchy(true);
+    setSelectedUser(user);
+    onOpenHierarchy();
+  };
+
   const handleDelete = (id) => {
     setDeleteId(id);
     onOpenDelete();
@@ -146,14 +172,38 @@ const Users = () => {
   const renderButtons = () => {
     if (permissions.some((permissions) => permissions.name === "create_users"))
       return (
-        <Button
-          onClick={() => [setDataEdit({}), onOpen()]}
-          variant="contained"
-          color="primary"
-          startIcon={<Add />}
-        >
-          NOVO USUÁRIO
-        </Button>
+        <>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation(); ''
+              handleDesHierarchy();
+            }}
+            variant="contained"
+            color="primary"
+            startIcon={<GroupRemoveIcon />}
+          >
+            DESVINCULAR USUÁRIOS
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation(); ''
+              handleHierarchy();
+            }}
+            variant="contained"
+            color="primary"
+            startIcon={<GroupAddIcon />}
+          >
+            ASSOCIAR USUÁRIOS
+          </Button>
+          <Button
+            onClick={() => [setDataEdit({}), onOpenCreate()]}
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+          >
+            NOVO USUÁRIO
+          </Button>
+        </>
       );
     else return null;
   };
@@ -161,12 +211,21 @@ const Users = () => {
   return (
     <div className="flex flex-col gap-6 w-full">
       <ModalComp
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isCreateOpen}
+        onClose={onCloseCreate}
         data={data}
         setRefresh={setRefresh}
         refresh={refresh}
         setData={setData}
+      />
+      <ModalHierarchy
+        isOpen={isHierarchyOpen}
+        selectedUser={selectedUser}
+        onClose={onHierarchyClose}
+        setRefresh={setRefresh}
+        desHierarchy={desHierarchy}
+        setDesHierarchy={setDesHierarchy}
+        refresh={refresh}
       />
       <ModalDelete
         isOpen={isDeleteOpen}
@@ -280,6 +339,28 @@ const Users = () => {
                   Empresa
                 </TableSortLabel>
               </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "responsible"
+                    ? sortConfig.direction
+                    : false
+                }
+                sx={{
+                  display: isMobile ? "none" : undefined,
+                }}
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "responsible"}
+                  direction={
+                    sortConfig.key === "responsible"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("responsible")}
+                >
+                  Usuário Responsável
+                </TableSortLabel>
+              </TableCell>
               <TableCell sx={{ padding: 0 }}>Ações</TableCell>
             </TableRow>
           </TableHead>
@@ -287,12 +368,12 @@ const Users = () => {
             {(!search
               ? data
               : data.filter(
-                  (user) =>
-                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                    user.email.toLowerCase().includes(search.toLowerCase()) ||
-                    user.role.name.toLowerCase().includes(search.toLowerCase()),
-                )
-            ).map(({ name, email, role, company, id }, index) => (
+                (user) =>
+                  user.name.toLowerCase().includes(search.toLowerCase()) ||
+                  user.email.toLowerCase().includes(search.toLowerCase()) ||
+                  user.role.name.toLowerCase().includes(search.toLowerCase()),
+              )
+            ).map(({ name, email, role, company, id, responsible }, index) => (
               <TableRow
                 key={index}
                 style={{
@@ -321,31 +402,51 @@ const Users = () => {
                   {" "}
                   {company.name}{" "}
                 </TableCell>
+                <TableCell
+                  sx={{
+                    maxWidth: isMobile ? 5 : 100,
+                    display: isMobile ? "none" : undefined,
+                  }}
+                >
+                  {responsible ? responsible : <span>N/A</span>}
+                </TableCell>
                 <TableCell sx={{ padding: 0 }}>
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(index);
-                      }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(index);
+                        }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(id);
-                      }}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    )}
+                  {/* {permissions.some(
+                    (permissions) => permissions.name === "delete_users",
+                  ) && (
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleHierarchy({ name, email, role, company, id });
+                        }}
+                      >
+                        <GroupAddIcon fontSize="small" />
+                      </IconButton>
+                    )} */}
                 </TableCell>
               </TableRow>
             ))}

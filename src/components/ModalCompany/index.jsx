@@ -201,7 +201,13 @@ const ModalCompany = ({
   };
 
   const handleSave = () => {
-    if (!name || !cnpj || !responsible_cpf || !dba || !address.postalCode || !address.street || !address.neighborhood || !address.city || !address.state || !address.country || !address.number) {
+    console.log("name", name);
+    console.log("cnpj", cnpj);
+    console.log("dba", dba);
+    console.log("responsible_cpf", responsible_cpf);
+    console.log("address", address);
+
+    if (!name || !cnpj || !responsible_cpf || !dba || !address.postalCode || !address.street || !address.neighborhood || !address.city || !address.state || !address.country || !address.number || !address.complement) {
       toast.warning("Preencha os campos obrigatórios: Nome, CNPJ, Nome Fantasia, CPF do Responsável e Endereço!");
       return;
     }
@@ -434,21 +440,6 @@ const ModalCompany = ({
             />
           </Grid>
 
-          <Grid item xs={12}>
-            <TextField
-              label="Complemento"
-              type="text"
-              value={address.complement}
-              onChange={(e) => setAddress({ ...address, complement: e.target.value })}
-              fullWidth
-              margin="dense"
-            />
-          </Grid>
-        </Grid>
-        <Typography sx={{ mt: 2 }}>
-          <b>Auditoria</b>
-        </Typography>
-        <Grid container spacing={0}>
           <Grid item xs={12}>
             <TextField
               label="Complemento"

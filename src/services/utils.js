@@ -279,3 +279,24 @@ export const severityLabels = {
   2: "Moderada",
   3: "Urgente",
 };
+
+export const formatInterval = (interval) => {
+  const intervals = {
+    600: "10 minutos",
+    900: "15 minutos",
+    1800: "30 minutos",
+    3600: "1 hora",
+    7200: "2 horas",
+    14400: "4 horas",
+    21600: "6 horas",
+    43200: "12 horas",
+    86400: "1 dia",
+    604800: "1 semana",
+    2592000: "1 mês",
+    7776000: "3 meses",
+    15552000: "6 meses",
+    31536000: "1 ano",
+  };
+
+  return intervals[interval];
+};

@@ -31,7 +31,7 @@ import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import { handleMode } from "../../theme";
-import { dateFormatted } from "../../services/utils";
+import { dateFormatted, formatInterval } from "../../services/utils";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,7 +63,7 @@ const AuditSection = () => {
         audit_interval: updateInterval,
       });
       setIsConfirmModalOpen(false);
-      toast.success("Intervalo de auditoria atualizado com sucesso!");
+      toast.success(`Intervalo de auditoria atualizado para ${formatInterval(updateInterval)} com sucesso!`);
     } catch (error) {
       console.error("Erro ao atualizar o intervalo de auditoria", error);
       toast.error("Erro ao atualizar o intervalo de auditoria");
@@ -296,7 +296,10 @@ const AuditSection = () => {
               >
                 <DialogTitle id="confirm-dialog-title">Confirmar Alteração</DialogTitle>
                 <DialogContent>
-                  <p>Deseja confirmar a alteração do intervalo de auditoria?</p>
+                  <p>
+                    Deseja confirmar a alteração do intervalo de auditoria para
+                    <strong> {formatInterval(updateInterval)}?</strong>
+                  </p>
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={() => setIsConfirmModalOpen(false)} color="error">

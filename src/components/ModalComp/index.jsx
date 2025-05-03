@@ -93,6 +93,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
       setRefresh((prev) => !prev);
       toast.success("Usuário cadastrado com sucesso!");
     } catch (error) {
+      toast.error("Erro ao cadastrar usuário " + error.response?.data?.message);
       console.error("Erro ao salvar usuário", error);
     }
   };

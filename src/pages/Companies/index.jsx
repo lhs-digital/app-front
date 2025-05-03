@@ -251,7 +251,7 @@ const Companies = () => {
                     onClick={() => handleView(index)}
                   >
                     <TableCell> {name} </TableCell>
-                    <TableCell> {dba} </TableCell>
+                    <TableCell> {dba || "Não informado"} </TableCell>
                     <TableCell> {cnpj} </TableCell>
                     <TableCell> {responsible_cpf} </TableCell>
                     <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
