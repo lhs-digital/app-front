@@ -74,7 +74,7 @@ const AuditList = () => {
       const response = await api.get(`/company/auditable_tables`, {
         params: { company_id: company },
       });
-      console.log("auditable", response.data.data);
+      setTable(response.data.data[0]);
       return response.data.data;
     },
     enabled: !!company,
@@ -236,6 +236,70 @@ const AuditList = () => {
     });
   };
 
+  const renderAuditContent = () => {
+    if (isLighthouse && !company) {
+      return (
+        <div className="p-8 lg:py-12">
+          <p className="text-lg text-center text-gray-500">
+            Selecione uma empresa para visualizar as atividades.
+          </p>
+        </div>
+      );
+    }
+
+    if (!table) {
+      return (
+        <div className="p-8 lg:py-12">
+          <p className="text-lg text-center text-gray-500">
+            Selecione uma tabela para visualizar as atividades.
+          </p>
+        </div>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <div className="w-full min-h-80 flex items-center justify-center">
+          <CircularProgress />
+        </div>
+      );
+    }
+
+    if (data?.length === 0) {
+      return (
+        <div className="p-8 lg:py-12">
+          <p className="text-lg text-center text-gray-500">
+            Não há atividades pendentes ou concluídas.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <Box className="w-full flex flex-col items-center px-2 py-4 border rounded-md lg:min-h-80">
+        <Masonry
+          columns={{
+            xs: 1,
+            lg: 2,
+            xl: 3,
+          }}
+          spacing={2}
+          width="100%"
+        >
+          {data.map((item) => (
+            <AuditItem
+              key={item.id}
+              auditRecord={item}
+              setRefresh={setRefresh}
+              refresh={refresh}
+              onClick={() => handleView(item)}
+            />
+          ))}
+        </Masonry>
+      </Box>
+    );
+  };
+
   return (
     <div className="flex flex-col w-full gap-6 items-center">
       <PageTitle
@@ -380,51 +444,7 @@ const AuditList = () => {
           ))}
         </Box>
       </Box>
-      {isLighthouse && !company ? (
-        <div className="p-8 lg:py-12">
-          <p className="text-lg text-center text-gray-500">
-            Selecione uma empresa para visualizar as atividades.
-          </p>
-        </div>
-      ) : !table ? (
-        <div className="p-8 lg:py-12">
-          <p className="text-lg text-center text-gray-500">
-            Selecione uma tabela para visualizar as atividades.
-          </p>
-        </div>
-      ) : isLoading ? (
-        <div className="w-full min-h-80 flex items-center justify-center">
-          <CircularProgress />
-        </div>
-      ) : data?.length === 0 ? (
-        <div className="p-8 lg:py-12">
-          <p className="text-lg text-center text-gray-500">
-            Não há atividades pendentes ou concluídas.
-          </p>
-        </div>
-      ) : (
-        <Box className="w-full flex flex-col items-center px-2 py-4 border rounded-md lg:min-h-80">
-          <Masonry
-            columns={{
-              xs: 1,
-              lg: 2,
-              xl: 3,
-            }}
-            spacing={2}
-            width="100%"
-          >
-            {data.map((item) => (
-              <AuditItem
-                key={item.id}
-                auditRecord={item}
-                setRefresh={setRefresh}
-                refresh={refresh}
-                onClick={() => handleView(item)}
-              />
-            ))}
-          </Masonry>
-        </Box>
-      )}
+      {renderAuditContent()}
       <Box display="flex" justifyContent="flex-end" width="100%">
         <TablePagination
           rowsPerPageOptions={[5, 10, 20]}
