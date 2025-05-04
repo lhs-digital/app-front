@@ -36,7 +36,7 @@ import AuditWorkOrder from "./components/AuditWorkOrder";
 const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
   const theme = handleMode(useThemeMode().mode);
-  const [currentFilterCount, setCurrentFilterCount] = useState(1);
+  const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company, setCompany, availableCompanies } = useCompany();
   const [table, setTable] = useState("");
   const [workOrderOpen, setWorkOrderOpen] = useState(false);
@@ -48,7 +48,7 @@ const AuditList = () => {
     search: "",
     priorityOrder: "desc",
     createdAt: [null, null],
-    status: -1,
+    status: 0,
     priority: -1,
   };
 
@@ -59,13 +59,11 @@ const AuditList = () => {
   });
 
   const [filters, setFilters] = useState({
-    ...filterDefaults,
-    status: 0,
+    ...filterDefaults, // removed explicit status override
   });
 
   const [appliedFilters, setAppliedFilters] = useState({
-    ...filterDefaults,
-    status: 0,
+    ...filterDefaults, // removed explicit status override
   });
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -139,21 +137,17 @@ const AuditList = () => {
   }, [availableTables]);
 
   const handleClean = () => {
-    setFilters({
-      search: "",
-      priorityOrder: "desc",
-      createdAt: [null, null],
-      status: -1,
-      priority: -1,
-    });
-    setAppliedFilters({
-      search: "",
-      priorityOrder: "desc",
-      createdAt: [null, null],
-      status: -1,
-      priority: -1,
-    });
-    qc.invalidateQueries(["audits"]);
+    setFilters(filterDefaults);
+    setAppliedFilters(filterDefaults);
+    setCurrentFilterCount(0);
+    qc.invalidateQueries([
+      "audits",
+      pagination.currentPage,
+      pagination.perPage,
+      appliedFilters,
+      company?.id,
+      table,
+    ]);
   };
 
   const handleSearch = (event) => {
@@ -173,6 +167,7 @@ const AuditList = () => {
     let count = 0;
     Object.keys(filters).forEach((key) => {
       if (appliedFilters[key] !== filterDefaults[key]) {
+        console.log(appliedFilters[key], filterDefaults[key]);
         count += 1;
       }
     });
