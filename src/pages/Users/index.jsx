@@ -1,11 +1,23 @@
 import { useDisclosure } from "@chakra-ui/react";
-import { Add, Delete, Edit, Search } from "@mui/icons-material";
-import GroupRemoveIcon from '@mui/icons-material/GroupRemove';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import {
+  Add,
+  Delete,
+  Edit,
+  ExpandLess,
+  ExpandMore,
+  Groups,
+  Search,
+} from "@mui/icons-material";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import GroupRemoveIcon from "@mui/icons-material/GroupRemove";
 import {
   Button,
   IconButton,
   InputAdornment,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -18,15 +30,15 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
 import ModalComp from "../../components/ModalComp";
 import ModalDelete from "../../components/ModalDelete";
+import ModalHierarchy from "../../components/ModalHierarchy";
 import ModalView from "../../components/ModalView";
 import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
-import ModalHierarchy from "../../components/ModalHierarchy";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const Users = () => {
   const [viewOnly, setViewOnly] = useState(false);
@@ -69,7 +81,12 @@ const Users = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const user = useAuthUser();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const hierarchyOpen = Boolean(anchorEl);
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const { permissions } = useUserState().state;
 
@@ -179,45 +196,71 @@ const Users = () => {
     setRefresh((prev) => !prev);
   };
 
+  const hierarchyMenu = () => (
+    <Menu
+      className="mt-2"
+      id="hierarchy-menu"
+      aria-labelledby="hierarchy-menu"
+      anchorEl={anchorEl}
+      open={hierarchyOpen}
+      onClose={handleClose}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "right",
+      }}
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+    >
+      <MenuItem
+        onClick={(e) => {
+          e.stopPropagation();
+          handleViewHierarchy();
+        }}
+      >
+        <ListItemIcon>
+          <Groups fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Visualizar equipe</ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={(e) => {
+          e.stopPropagation();
+          handleHierarchy();
+        }}
+      >
+        <ListItemIcon>
+          <GroupAddIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Adicionar membro</ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDesHierarchy();
+        }}
+      >
+        <ListItemIcon>
+          <GroupRemoveIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Remover membro</ListItemText>
+      </MenuItem>
+    </Menu>
+  );
+
   const renderButtons = () => {
     if (permissions.some((permissions) => permissions.name === "create_users"))
       return (
         <>
           <Button
-            onClick={(e) => {
-              e.stopPropagation(); ''
-              handleViewHierarchy();
-            }}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
             variant="contained"
             color="primary"
             disabled={user.isLighthouse}
-            startIcon={<GroupRemoveIcon />}
+            endIcon={hierarchyOpen ? <ExpandLess /> : <ExpandMore />}
           >
-            VISUALIZAR SUBORDINADOS
-          </Button>
-          <Button
-            onClick={(e) => {
-              e.stopPropagation(); ''
-              handleDesHierarchy();
-            }}
-            variant="contained"
-            color="primary"
-            disabled={user.isLighthouse}
-            startIcon={<GroupRemoveIcon />}
-          >
-            REMOVER SUBORDINADOS
-          </Button>
-          <Button
-            onClick={(e) => {
-              e.stopPropagation(); ''
-              handleHierarchy();
-            }}
-            variant="contained"
-            color="primary"
-            disabled={user.isLighthouse}
-            startIcon={<GroupAddIcon />}
-          >
-            ADICIONAR SUBORDINADOS
+            MINHA EQUIPE
           </Button>
           <Button
             onClick={() => [setDataEdit({}), onOpenCreate()]}
@@ -234,6 +277,7 @@ const Users = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full">
+      {hierarchyMenu()}
       <ModalComp
         isOpen={isCreateOpen}
         onClose={onCloseCreate}
@@ -394,11 +438,11 @@ const Users = () => {
             {(!search
               ? data
               : data.filter(
-                (user) =>
-                  user.name.toLowerCase().includes(search.toLowerCase()) ||
-                  user.email.toLowerCase().includes(search.toLowerCase()) ||
-                  user.role.name.toLowerCase().includes(search.toLowerCase()),
-              )
+                  (user) =>
+                    user.name.toLowerCase().includes(search.toLowerCase()) ||
+                    user.email.toLowerCase().includes(search.toLowerCase()) ||
+                    user.role.name.toLowerCase().includes(search.toLowerCase()),
+                )
             ).map(({ name, email, role, company, id, responsible }, index) => (
               <TableRow
                 key={index}
@@ -440,27 +484,27 @@ const Users = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(index);
-                        }}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    )}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(index);
+                      }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(id);
-                        }}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    )}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(id);
+                      }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  )}
                   {/* {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (

@@ -1,22 +1,30 @@
+import { Close } from "@mui/icons-material";
 import {
+  Autocomplete,
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   InputLabel,
-  Chip,
   TextField,
-  Autocomplete,
 } from "@mui/material";
-import { useState, useEffect } from "react";
-import { Close } from "@mui/icons-material";
-import api from "../../services/api";
-import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { toast } from "react-toastify";
+import api from "../../services/api";
 
-const ModalHierarchy = ({ isOpen, onClose, desHierarchy, setDesHierarchy, viewHierarchy, setViewHierarchy, setRefresh }) => {
+const ModalHierarchy = ({
+  isOpen,
+  onClose,
+  desHierarchy,
+  setDesHierarchy,
+  viewHierarchy,
+  setViewHierarchy,
+  setRefresh,
+}) => {
   const [responsibleUser, setResponsibleUser] = useState(null);
   const [associatedUsers, setAssociatedUsers] = useState([]);
   const [eligibleSubordinates, setEligibleSubordinates] = useState([]);
@@ -30,12 +38,12 @@ const ModalHierarchy = ({ isOpen, onClose, desHierarchy, setDesHierarchy, viewHi
         role.users.map((user) => ({
           id: user.id,
           name: user.name,
-        }))
+        })),
       );
       setEligibleSubordinates(formattedSubordinates || []);
     } catch (error) {
-      toast.error("Erro ao buscar subordinados elegíveis.");
-      console.error("Erro ao buscar subordinados elegíveis:", error);
+      toast.error("Erro ao buscar membros da equipe elegíveis.");
+      console.error("Erro ao buscar membros da equipe elegíveis:", error);
     }
   };
 
@@ -46,7 +54,7 @@ const ModalHierarchy = ({ isOpen, onClose, desHierarchy, setDesHierarchy, viewHi
         role.users.map((user) => ({
           id: user.id,
           name: user.name,
-        }))
+        })),
       );
       if (desHierarchy) {
         setEligibleSubordinates(formattedSubordinates || []);
@@ -54,10 +62,10 @@ const ModalHierarchy = ({ isOpen, onClose, desHierarchy, setDesHierarchy, viewHi
         setAssociatedUsers(formattedSubordinates || []);
       }
     } catch (error) {
-      toast.error("Erro ao buscar subordinados elegíveis.");
-      console.error("Erro ao buscar subordinados elegíveis:", error);
+      toast.error("Erro ao buscar membros da equipe elegíveis.");
+      console.error("Erro ao buscar membros da equipe elegíveis:", error);
     }
-  }
+  };
 
   useEffect(() => {
     if (isOpen && (desHierarchy || viewHierarchy)) {
@@ -70,14 +78,16 @@ const ModalHierarchy = ({ isOpen, onClose, desHierarchy, setDesHierarchy, viewHi
   const handleSave = async () => {
     try {
       const targetUserIds = associatedUsers.map((user) => user.id);
-      const targetUserNames = associatedUsers.map((user) => user.name).join(", ");
+      const targetUserNames = associatedUsers
+        .map((user) => user.name)
+        .join(", ");
 
       const payload = desHierarchy
         ? { target_user_ids: targetUserIds }
         : {
-          responsible_user_id: user?.id,
-          target_user_ids: targetUserIds,
-        };
+            responsible_user_id: user?.id,
+            target_user_ids: targetUserIds,
+          };
 
       const endpoint = desHierarchy
         ? "/users/unassign-responsible"
@@ -141,32 +151,40 @@ const ModalHierarchy = ({ isOpen, onClose, desHierarchy, setDesHierarchy, viewHi
     <Dialog open={isOpen} onClose={handleClose}>
       <DialogTitle>
         {viewHierarchy
-          ? "Seus subordinados"
+          ? "Membros da sua equipe"
           : desHierarchy
-            ? "Remover Subordinados"
-            : "Adicionar Subordinados"}
+            ? "Remover membros da sua equipe"
+            : "Adicionar membros à sua equipe"}
       </DialogTitle>
       <DialogContent className="w-[480px] flex flex-col gap-4">
         {viewHierarchy ? (
           <Box>
             {associatedUsers.map((user) => (
-              <Chip
-                key={user.id}
-                label={user.name}
-                style={{ margin: "4px" }}
-              />
+              <Chip key={user.id} label={user.name} style={{ margin: "4px" }} />
             ))}
           </Box>
         ) : (
           <>
             <Box>
-              <InputLabel>{desHierarchy ? "Usuários para Desvincular *" : "Usuários para Vincular *"}</InputLabel>
+              <InputLabel>
+                {desHierarchy
+                  ? "Usuários para remover *"
+                  : "Usuários para adicionar *"}
+              </InputLabel>
               <Autocomplete
                 options={eligibleSubordinates}
                 getOptionLabel={(option) => option.name}
                 onChange={(event, newValue) => handleAddUser(newValue)}
                 renderInput={(params) => (
-                  <TextField {...params} placeholder={desHierarchy ? "Selecione um usuário para desvincular" : "Selecione um usuário para vincular"} fullWidth />
+                  <TextField
+                    {...params}
+                    placeholder={
+                      desHierarchy
+                        ? "Selecione um usuário para remover da equipe"
+                        : "Selecione um usuário para adicionar à equipe"
+                    }
+                    fullWidth
+                  />
                 )}
               />
             </Box>
@@ -189,7 +207,6 @@ const ModalHierarchy = ({ isOpen, onClose, desHierarchy, setDesHierarchy, viewHi
           <Button color="info" onClick={handleClose}>
             VOLTAR
           </Button>
-
         ) : (
           <>
             <Button color="info" onClick={handleClose}>
