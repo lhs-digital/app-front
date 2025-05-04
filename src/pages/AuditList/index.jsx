@@ -95,7 +95,7 @@ const AuditList = () => {
 
     queryFn: async () => {
       try {
-        const response = await api.get("/audits", {
+        const response = await api.get("/audit", {
           params: {
             search:
               appliedFilters.search === "" ? undefined : appliedFilters.search,
