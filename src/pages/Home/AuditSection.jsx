@@ -72,7 +72,7 @@ const AuditSection = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await api.get(`/auditing/summary`);
+        const response = await api.get(`/audit/summary`);
         const data = response?.data?.data;
 
         if (Array.isArray(data) && data.length > 0) {
