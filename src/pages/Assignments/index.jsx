@@ -18,7 +18,6 @@ const Assignments = () => {
   const user = useUserState().state;
   const { company } = useCompany();
 
-  // For superadmin, wait for company selection
   const showContent = user.isLighthouse ? !!company : true;
 
   return (

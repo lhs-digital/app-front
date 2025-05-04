@@ -26,6 +26,7 @@ import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import ModalHierarchy from "../../components/ModalHierarchy";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const Users = () => {
   const [viewOnly, setViewOnly] = useState(false);
@@ -58,6 +59,7 @@ const Users = () => {
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
   const [desHierarchy, setDesHierarchy] = useState(false);
+  const [viewHierarchy, setViewHierarchy] = useState(false);
   //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
@@ -66,6 +68,8 @@ const Users = () => {
   });
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
+  const user = useAuthUser();
+
 
   const { permissions } = useUserState().state;
 
@@ -147,6 +151,12 @@ const Users = () => {
     onOpenHierarchy();
   };
 
+  const handleViewHierarchy = (user) => {
+    setViewHierarchy(true);
+    setSelectedUser(user);
+    onOpenHierarchy();
+  };
+
   const handleDesHierarchy = (user) => {
     setDesHierarchy(true);
     setSelectedUser(user);
@@ -176,13 +186,26 @@ const Users = () => {
           <Button
             onClick={(e) => {
               e.stopPropagation(); ''
+              handleViewHierarchy();
+            }}
+            variant="contained"
+            color="primary"
+            disabled={user.isLighthouse}
+            startIcon={<GroupRemoveIcon />}
+          >
+            VISUALIZAR SUBORDINADOS
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation(); ''
               handleDesHierarchy();
             }}
             variant="contained"
             color="primary"
+            disabled={user.isLighthouse}
             startIcon={<GroupRemoveIcon />}
           >
-            DESVINCULAR USUÁRIOS
+            REMOVER SUBORDINADOS
           </Button>
           <Button
             onClick={(e) => {
@@ -191,9 +214,10 @@ const Users = () => {
             }}
             variant="contained"
             color="primary"
+            disabled={user.isLighthouse}
             startIcon={<GroupAddIcon />}
           >
-            ASSOCIAR USUÁRIOS
+            ADICIONAR SUBORDINADOS
           </Button>
           <Button
             onClick={() => [setDataEdit({}), onOpenCreate()]}
@@ -225,6 +249,8 @@ const Users = () => {
         setRefresh={setRefresh}
         desHierarchy={desHierarchy}
         setDesHierarchy={setDesHierarchy}
+        viewHierarchy={viewHierarchy}
+        setViewHierarchy={setViewHierarchy}
         refresh={refresh}
       />
       <ModalDelete
@@ -408,7 +434,7 @@ const Users = () => {
                     display: isMobile ? "none" : undefined,
                   }}
                 >
-                  {responsible ? responsible : <span>N/A</span>}
+                  {responsible ? responsible.name : <span>N/A</span>}
                 </TableCell>
                 <TableCell sx={{ padding: 0 }}>
                   {permissions.some(

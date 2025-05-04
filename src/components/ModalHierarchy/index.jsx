@@ -16,7 +16,7 @@ import api from "../../services/api";
 import { toast } from "react-toastify";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
-const ModalHierarchy = ({ isOpen, onClose, selectedUser, desHierarchy, setDesHierarchy }) => {
+const ModalHierarchy = ({ isOpen, onClose, desHierarchy, setDesHierarchy, viewHierarchy, setViewHierarchy, setRefresh }) => {
   const [responsibleUser, setResponsibleUser] = useState(null);
   const [associatedUsers, setAssociatedUsers] = useState([]);
   const [eligibleSubordinates, setEligibleSubordinates] = useState([]);
@@ -39,15 +39,38 @@ const ModalHierarchy = ({ isOpen, onClose, selectedUser, desHierarchy, setDesHie
     }
   };
 
+  const fetchMySubordinates = async () => {
+    try {
+      const response = await api.get(`/users/my-subordinates`);
+      const formattedSubordinates = response.data?.flatMap((role) =>
+        role.users.map((user) => ({
+          id: user.id,
+          name: user.name,
+        }))
+      );
+      if (desHierarchy) {
+        setEligibleSubordinates(formattedSubordinates || []);
+      } else {
+        setAssociatedUsers(formattedSubordinates || []);
+      }
+    } catch (error) {
+      toast.error("Erro ao buscar subordinados elegíveis.");
+      console.error("Erro ao buscar subordinados elegíveis:", error);
+    }
+  }
+
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && (desHierarchy || viewHierarchy)) {
+      fetchMySubordinates();
+    } else if (isOpen) {
       fetchEligibleSubordinates();
     }
-  }, [isOpen, responsibleUser]);
+  }, [isOpen]);
 
   const handleSave = async () => {
     try {
       const targetUserIds = associatedUsers.map((user) => user.id);
+      const targetUserNames = associatedUsers.map((user) => user.name).join(", ");
 
       const payload = desHierarchy
         ? { target_user_ids: targetUserIds }
@@ -60,19 +83,18 @@ const ModalHierarchy = ({ isOpen, onClose, selectedUser, desHierarchy, setDesHie
         ? "/users/unassign-responsible"
         : "/users/assign-responsible";
 
-      console.log("Payload enviado:", payload);
-
       const response = await api.post(endpoint, payload);
 
       const successMessage = desHierarchy
-        ? "Usuários desvinculados com sucesso!"
-        : "Responsável atribuído com sucesso!";
+        ? `Usuários desvinculados com sucesso: ${targetUserNames}`
+        : `Responsável atribuído com sucesso para: ${targetUserNames}`;
       toast.success(successMessage);
+
+      setRefresh(true);
       console.log("Response:", response.data);
 
       handleClose();
     } catch (error) {
-      // Verifica se há erros na resposta da API
       if (error.response) {
         const apiErrors = error.response.data.errors;
         const apiMessage = error.response.data.message;
@@ -106,62 +128,78 @@ const ModalHierarchy = ({ isOpen, onClose, selectedUser, desHierarchy, setDesHie
 
   const handleClose = () => {
     setResponsibleUser(null);
-    if (desHierarchy) {
-      setTimeout(() => {
-        setDesHierarchy(false);
-      }, 1000);
-    }
+    setDesHierarchy(false);
+    setViewHierarchy(false);
     setAssociatedUsers([]);
+    setDesHierarchy(false);
+    setViewHierarchy(false);
     setEligibleSubordinates([]);
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onClose={handleClose}>
-      <DialogTitle>{desHierarchy ? "Desvincular Usuários" : "Associar Usuários"}</DialogTitle>
+      <DialogTitle>
+        {viewHierarchy
+          ? "Seus subordinados"
+          : desHierarchy
+            ? "Remover Subordinados"
+            : "Adicionar Subordinados"}
+      </DialogTitle>
       <DialogContent className="w-[480px] flex flex-col gap-4">
-        {selectedUser ? (
+        {viewHierarchy ? (
           <Box>
-            <p>Você deseja se tornar responsável por este usuário?</p>
-            <br />
-            <p>Nome: {selectedUser?.name}</p>
-            <p>Email: {selectedUser?.email}</p>
-            <p>Cargo: {selectedUser?.role.name}</p>
+            {associatedUsers.map((user) => (
+              <Chip
+                key={user.id}
+                label={user.name}
+                style={{ margin: "4px" }}
+              />
+            ))}
           </Box>
         ) : (
           <>
             <Box>
-              <InputLabel>Usuário Associado *</InputLabel>
+              <InputLabel>{desHierarchy ? "Usuários para Desvincular *" : "Usuários para Vincular *"}</InputLabel>
               <Autocomplete
                 options={eligibleSubordinates}
                 getOptionLabel={(option) => option.name}
                 onChange={(event, newValue) => handleAddUser(newValue)}
                 renderInput={(params) => (
-                  <TextField {...params} placeholder="Selecione um usuário para vincular" fullWidth />
+                  <TextField {...params} placeholder={desHierarchy ? "Selecione um usuário para desvincular" : "Selecione um usuário para vincular"} fullWidth />
                 )}
               />
             </Box>
+            <Box>
+              {associatedUsers.map((user) => (
+                <Chip
+                  key={user.id}
+                  label={user.name}
+                  onDelete={() => handleRemoveUser(user)}
+                  deleteIcon={<Close />}
+                  style={{ margin: "4px" }}
+                />
+              ))}
+            </Box>
           </>
         )}
-        <Box>
-          {associatedUsers.map((user) => (
-            <Chip
-              key={user.id}
-              label={user.name}
-              onDelete={() => handleRemoveUser(user)}
-              deleteIcon={<Close />}
-              style={{ margin: "4px" }}
-            />
-          ))}
-        </Box>
       </DialogContent>
       <DialogActions>
-        <Button color="info" onClick={handleClose}>
-          CANCELAR
-        </Button>
-        <Button color="primary" onClick={handleSave}>
-          CONFIRMAR
-        </Button>
+        {viewHierarchy ? (
+          <Button color="info" onClick={handleClose}>
+            VOLTAR
+          </Button>
+
+        ) : (
+          <>
+            <Button color="info" onClick={handleClose}>
+              CANCELAR
+            </Button>
+            <Button color="primary" onClick={handleSave}>
+              CONFIRMAR
+            </Button>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );
