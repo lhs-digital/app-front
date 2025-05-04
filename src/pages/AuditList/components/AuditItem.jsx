@@ -1,4 +1,10 @@
-import { ContentPasteGo, Info, KeyboardArrowDown } from "@mui/icons-material";
+import {
+  ContentPaste,
+  ContentPasteGo,
+  Info,
+  KeyboardArrowDown,
+  OpenInNew,
+} from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -12,6 +18,7 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
+import WorkOrderForm from "../../../components/WorkOrderForm";
 import { useThemeMode } from "../../../contexts/themeModeContext";
 import { useUserState } from "../../../hooks/useUserState";
 import {
@@ -90,13 +97,20 @@ const AuditItem = ({
           </Tooltip>
           {permissions.some((per) => per.name === "update_tasks") &&
             (auditRecord?.status === 0 ? (
-              <Tooltip title="Abrir O.S." aria-label="Abrir O.S.">
+              <Tooltip
+                title={auditRecord?.work_order ? "Ver O.S." : "Abrir O.S."}
+                aria-label="Abrir O.S."
+              >
                 <button
                   onClick={onClick}
                   className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
                   style={getPriorityColor(auditRecord?.priority, theme)}
                 >
-                  <ContentPasteGo fontSize="small" />
+                  {auditRecord?.work_order ? (
+                    <OpenInNew fontSize="small" />
+                  ) : (
+                    <ContentPasteGo fontSize="small" />
+                  )}
                 </button>
               </Tooltip>
             ) : (
@@ -185,6 +199,17 @@ const AuditItem = ({
           />
         </AccordionDetails>
       </Accordion>
+      {auditRecord?.work_order && (
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2 items-center">
+            <ContentPaste fontSize="2rem" />
+            <p>Ordem de Serviço</p>
+          </div>
+          <div className="border p-2.5 rounded-lg border-[--border]">
+            <WorkOrderForm assignment={auditRecord?.work_order} compact />
+          </div>
+        </div>
+      )}
       <Box
         textAlign="right"
         display="flex"

@@ -5,6 +5,7 @@ import { useState } from "react";
 import PageTitle from "../../components/PageTitle";
 import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
+import { hasPermission } from "../../services/utils";
 import CreateTask from "./CreateTask";
 import TaskCard from "./TaskCard";
 import TaskFilter from "./TaskFilter";
@@ -22,18 +23,21 @@ const Assignments = () => {
   return (
     <div className="flex flex-col gap-8">
       <PageTitle
-        title="Ordens de serviço"
+        title="Ordens de Serviço"
         icon={<ContentPaste />}
         buttons={[
-          <Button
-            key="add-task"
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setCreateOpen(true)}
-            disabled={!showContent}
-          >
-            ATRIBUIR
-          </Button>,
+          (hasPermission(user.permissions, "create_work_orders") ||
+            user.isLighthouse) && (
+            <Button
+              key="add-task"
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setCreateOpen(true)}
+              disabled={!showContent}
+            >
+              ATRIBUIR
+            </Button>
+          ),
         ]}
       />
       <TaskFilter

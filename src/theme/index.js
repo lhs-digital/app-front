@@ -82,6 +82,9 @@ export const getTheme = (mode) => {
         },
       },
       MuiPaper: {
+        defaultProps: {
+          variant: "outlined",
+        },
         styleOverrides: {
           root: {
             borderRadius: "0.75rem",

@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle";
@@ -71,7 +71,7 @@ const AuditList = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const openFilters = Boolean(anchorEl);
 
-  const { data: availableTables = [] } = useQuery({
+  const { data: availableTables = [], isLoading: isTablesLoading } = useQuery({
     queryKey: ["company_tables", company],
     queryFn: async () => {
       const response = await api.get(`/company/auditable_tables`, {
@@ -130,8 +130,13 @@ const AuditList = () => {
       toast.error("Erro ao carregar os dados.");
     },
     enabled: !!company && !!table,
-    refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    if (availableTables.length > 0) {
+      setTable(availableTables[0]);
+    }
+  }, [availableTables]);
 
   const handleClean = () => {
     setFilters({
@@ -266,7 +271,7 @@ const AuditList = () => {
       );
     }
 
-    if (isLoading) {
+    if (isLoading || isTablesLoading) {
       return (
         <div className="w-full min-h-80 flex items-center justify-center">
           <CircularProgress />
