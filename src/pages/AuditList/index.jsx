@@ -20,8 +20,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import AuditFilters from "../../components/AuditFilters/AuditFilters";
-import AuditItem from "../../components/AuditItem/AuditItem";
 import PageTitle from "../../components/PageTitle";
 import { useThemeMode } from "../../contexts/themeModeContext";
 import { useCompany } from "../../hooks/useCompany";
@@ -31,6 +29,9 @@ import { moduleRoutes } from "../../services/moduleRoutes";
 import { qc } from "../../services/queryClient";
 import { getPriorityColor, priorities } from "../../services/utils";
 import { handleMode } from "../../theme";
+import AuditFilters from "./components/AuditFilters";
+import AuditItem from "./components/AuditItem";
+import AuditWorkOrder from "./components/AuditWorkOrder";
 
 const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
@@ -38,6 +39,8 @@ const AuditList = () => {
   const [currentFilterCount, setCurrentFilterCount] = useState(1);
   const { company, setCompany, availableCompanies } = useCompany();
   const [table, setTable] = useState("");
+  const [workOrderOpen, setWorkOrderOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const navigate = useNavigate();
   const { isLighthouse } = useUserState().state;
 
@@ -92,7 +95,7 @@ const AuditList = () => {
 
     queryFn: async () => {
       try {
-        const response = await api.get("/auditing", {
+        const response = await api.get("/audits", {
           params: {
             search:
               appliedFilters.search === "" ? undefined : appliedFilters.search,
@@ -212,13 +215,19 @@ const AuditList = () => {
     setAnchorEl(null);
   };
 
-  const handleView = (auditRecord) => {
+  const handleWorkOrder = (auditRecord) => {
     console.log("auditRecord", auditRecord);
     if (!table) {
       toast.error("Selecione uma tabela para visualizar os dados.");
       return;
     }
 
+    setWorkOrderOpen(true);
+    setSelectedItem(auditRecord);
+  };
+
+  const handleView = (auditRecord) => {
+    console.log("auditRecord", auditRecord);
     const navigateRoute = [];
 
     navigateRoute.push(moduleRoutes[table?.name]);
@@ -292,7 +301,7 @@ const AuditList = () => {
               auditRecord={item}
               setRefresh={setRefresh}
               refresh={refresh}
-              onClick={() => handleView(item)}
+              onClick={() => handleWorkOrder(item)}
             />
           ))}
         </Masonry>
@@ -445,6 +454,12 @@ const AuditList = () => {
         </Box>
       </Box>
       {renderAuditContent()}
+      <AuditWorkOrder
+        open={workOrderOpen}
+        onClose={() => setWorkOrderOpen(false)}
+        handleView={handleView}
+        auditRecord={selectedItem}
+      />
       <Box display="flex" justifyContent="flex-end" width="100%">
         <TablePagination
           rowsPerPageOptions={[5, 10, 20]}

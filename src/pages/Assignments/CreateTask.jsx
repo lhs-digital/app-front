@@ -100,6 +100,15 @@ const CreateTask = ({ open, onClose }) => {
           className="flex flex-col gap-6 pt-2"
           onSubmit={submit}
         >
+          <TextField
+            type="text"
+            name="description"
+            multiline
+            minRows={2}
+            label="Descrição"
+            value={data.description}
+            onChange={(e) => setData({ ...data, description: e.target.value })}
+          />
           {user.isLighthouse && (
             <Autocomplete
               className="col-span-8"
@@ -203,15 +212,6 @@ const CreateTask = ({ open, onClose }) => {
             slotProps={{ inputLabel: { shrink: true } }}
             value={data.deadline}
             onChange={(e) => setData({ ...data, deadline: e.target.value })}
-          />
-          <TextField
-            type="text"
-            name="description"
-            multiline
-            minRows={2}
-            label="Descrição"
-            value={data.description}
-            onChange={(e) => setData({ ...data, description: e.target.value })}
           />
         </form>
         <DialogActions>

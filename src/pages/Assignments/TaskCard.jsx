@@ -1,5 +1,5 @@
-import { CalendarToday, Person } from "@mui/icons-material";
-import { Card, CardContent, Chip, Divider } from "@mui/material";
+import { Card, CardContent } from "@mui/material";
+import WorkOrderForm from "../../components/WorkOrderForm";
 // import { useUserState } from "../../hooks/useUserState";
 
 const TaskCard = ({ assignment, setSelectedAssignment }) => {
@@ -7,25 +7,6 @@ const TaskCard = ({ assignment, setSelectedAssignment }) => {
 
   const handleCardClick = () => {
     setSelectedAssignment(assignment);
-  };
-
-  const statusInfo = {
-    not_started: {
-      label: "Não iniciado",
-      severity: "info",
-    },
-    in_progress: {
-      label: "Em andamento",
-      severity: "warning",
-    },
-    completed: {
-      label: "Concluído",
-      severity: "success",
-    },
-    overdue: {
-      label: "Atrasado",
-      severity: "error",
-    },
   };
 
   return (
@@ -44,23 +25,7 @@ const TaskCard = ({ assignment, setSelectedAssignment }) => {
       onClick={handleCardClick}
     >
       <CardContent className="flex flex-col gap-4">
-        <p className="text-lg font-medium">{assignment.description}</p>
-        <Divider />
-        <div className="flex items-center gap-4">
-          <Person fontSize="small" />
-          <p>{assignment.assigned_to.name}</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <CalendarToday fontSize="small" />
-          <p>{new Date(assignment.deadline).toLocaleDateString("pt-Br")}</p>
-        </div>
-        <Divider />
-        <Chip
-          label={statusInfo[assignment.status].label}
-          color={statusInfo[assignment.status].severity}
-          variant="outlined"
-          size="small"
-        />
+        <WorkOrderForm assignment={assignment} />
       </CardContent>
     </Card>
   );

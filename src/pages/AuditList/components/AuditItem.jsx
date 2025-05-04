@@ -1,4 +1,4 @@
-import { Build, Info, KeyboardArrowDown } from "@mui/icons-material";
+import { ContentPasteGo, Info, KeyboardArrowDown } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -12,15 +12,15 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
-import { useThemeMode } from "../../contexts/themeModeContext";
-import { useUserState } from "../../hooks/useUserState";
+import { useThemeMode } from "../../../contexts/themeModeContext";
+import { useUserState } from "../../../hooks/useUserState";
 import {
   dateFormatted,
   formattedPriority,
   getPriorityColor,
-} from "../../services/utils";
-import { handleMode } from "../../theme";
-import ViewActivitie from "../ViewActivitie";
+} from "../../../services/utils";
+import { handleMode } from "../../../theme";
+import ViewAuditItem from "./ViewAuditItem";
 
 const AuditItem = ({
   auditRecord,
@@ -90,13 +90,13 @@ const AuditItem = ({
           </Tooltip>
           {permissions.some((per) => per.name === "update_tasks") &&
             (auditRecord?.status === 0 ? (
-              <Tooltip title="Corrigir" aria-label="Corrigir">
+              <Tooltip title="Abrir O.S." aria-label="Abrir O.S.">
                 <button
                   onClick={onClick}
                   className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
                   style={getPriorityColor(auditRecord?.priority, theme)}
                 >
-                  <Build fontSize="small" />
+                  <ContentPasteGo fontSize="small" />
                 </button>
               </Tooltip>
             ) : (
@@ -175,7 +175,7 @@ const AuditItem = ({
           Detalhes
         </AccordionSummary>
         <AccordionDetails>
-          <ViewActivitie
+          <ViewAuditItem
             selectedActivitie={dataView}
             setDataView={setDataView}
             id={auditRecord?.id}

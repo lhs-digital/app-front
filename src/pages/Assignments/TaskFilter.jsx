@@ -128,7 +128,7 @@ export default function TaskFilter({
     <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-4">
       {user.isLighthouse && (
         <Autocomplete
-          className="col-span-8"
+          className="col-span-1 md:col-span-2 lg:col-span-8"
           size="small"
           value={company}
           noOptionsText="Nenhuma empresa encontrada."
@@ -146,7 +146,7 @@ export default function TaskFilter({
         getOptionLabel={(option) => option.name}
         getOptionKey={(option) => option.id}
         options={availableUsers || []}
-        className="col-span-4"
+        className="col-span-1 md:col-span-2 lg:col-span-4"
         noOptionsText="Nenhum usuário disponível."
         loadingText="Carregando..."
         disabled={!company || isLoadingUsers}
@@ -174,7 +174,7 @@ export default function TaskFilter({
               )
             : availableUsers || []
         }
-        className="col-span-4"
+        className="col-span-1 md:col-span-2 lg:col-span-4"
         noOptionsText="Nenhum usuário disponível."
         loadingText="Carregando..."
         disabled={!company || isLoadingUsers}
@@ -192,7 +192,7 @@ export default function TaskFilter({
       />
       <Autocomplete
         size="small"
-        className="col-span-2"
+        className="col-span-1 md:col-span-2 lg:col-span-2"
         value={filters.entity_type}
         options={entityTypes || []}
         noOptionsText="Digite para pesquisar"
@@ -204,7 +204,7 @@ export default function TaskFilter({
       />
       <Autocomplete
         size="small"
-        className="col-span-3"
+        className="col-span-1 md:col-span-2 lg:col-span-2"
         value={filters.entity_id}
         options={availableEntities || []}
         noOptionsText="Digite para pesquisar"
@@ -213,7 +213,10 @@ export default function TaskFilter({
         renderInput={(params) => <TextField {...params} label="Entidade" />}
         onChange={(e, newValue) => updateFilter("entity_id", newValue)}
       />
-      <FormControl className="col-span-2" size="small">
+      <FormControl
+        className="col-span-1 md:col-span-2 lg:col-span-2"
+        size="small"
+      >
         <InputLabel id="status">Status</InputLabel>
         <Select
           size="small"

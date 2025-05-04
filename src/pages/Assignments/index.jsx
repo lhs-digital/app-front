@@ -14,11 +14,10 @@ const Assignments = () => {
   const [assignments, setAssignments] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
-  const [selectedAssignment, setSelectedAssignment] = useState(null);
   const user = useUserState().state;
-  const { company } = useCompany();
-
   const showContent = user.isLighthouse ? !!company : true;
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const { company } = useCompany();
 
   return (
     <div className="flex flex-col gap-8">

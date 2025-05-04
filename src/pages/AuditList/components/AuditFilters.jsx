@@ -29,10 +29,12 @@ const AuditFilters = ({
         vertical: "top",
         horizontal: "right",
       }}
-      PaperProps={{
-        style: {
-          width: "400px",
-          padding: "16px",
+      slotProps={{
+        paper: {
+          style: {
+            width: "400px",
+            padding: "16px",
+          },
         },
       }}
       title="Filtros"

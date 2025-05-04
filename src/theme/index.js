@@ -15,9 +15,9 @@ const lightPalette = {
     contrastText: "#fff",
   },
   info: {
-    main: "#6B7280",
-    light: "#8898AA",
-    dark: "#44515F",
+    main: "#7d7d7d",
+    light: "#a8a8a8",
+    dark: "#545454",
     contrastText: "#FFF",
   },
 };
@@ -37,9 +37,9 @@ const darkPalette = {
     contrastText: "#fff",
   },
   info: {
-    main: "#6B7280",
-    light: "#8898AA",
-    dark: "#44515F",
+    main: "#7d7d7d",
+    light: "#a8a8a8",
+    dark: "#545454",
     contrastText: "#FFF",
   },
 };
