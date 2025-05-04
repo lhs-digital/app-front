@@ -2,13 +2,13 @@ import { createBrowserRouter } from "react-router-dom";
 import PrivateRoute from "../layout/PrivateRoute";
 import PublicRoute from "../layout/PublicRoute";
 import Assignments from "../pages/Assignments";
+import AuditList from "../pages/AuditList";
 import AuditRules from "../pages/AuditRules";
 import Clients from "../pages/Clients";
 import ClientView from "../pages/ClientView";
 import Companies from "../pages/Companies";
 import FirstAccess from "../pages/FirstAccess";
 import Home from "../pages/Home";
-import ListActivities from "../pages/ListActivities";
 import Logout from "../pages/Logout";
 import Logs from "../pages/Logs";
 import MyPermissions from "../pages/MyPermissions";
@@ -55,7 +55,7 @@ export const privateRoutes = [
   {
     label: "Auditorias",
     path: "/auditorias",
-    element: <ListActivities />,
+    element: <AuditList />,
   },
   {
     label: "Empresas",
@@ -78,7 +78,7 @@ export const privateRoutes = [
     element: <Clients />,
   },
   {
-    label: "Atribuições",
+    label: "Ordens de Serviço",
     path: "/atribuicoes",
     element: <Assignments />,
   },
@@ -109,6 +109,7 @@ export const privateSubRoutes = [
     label: "Cliente",
     path: "/clientes/:id",
     element: <ClientView />,
+    super: true,
   },
   {
     label: "Cargo",
@@ -131,7 +132,10 @@ export const AppRoutes = createBrowserRouter([
   },
   {
     element: <PrivateRoute />,
-    children: [...privateRoutes, ...privateSubRoutes],
+    children: [...privateRoutes, ...privateSubRoutes].map((route) => ({
+      ...route,
+      permissions: pagePermissions(route.path),
+    })),
   },
   {
     path: "/logout",

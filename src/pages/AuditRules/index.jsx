@@ -82,8 +82,8 @@ const AuditRules = () => {
   });
 
   const updateTableData = (
-    page = pagination.page,
-    rows = pagination.rowsPerPage,
+    page = 1,
+    rows = pagination.rowsPerPage
   ) => {
     if (!data) return;
     const currentTable = data.find((t) => t.id === table);
@@ -92,6 +92,10 @@ const AuditRules = () => {
       const endIndex = startIndex + rows;
       setTableData(currentTable.columns.slice(startIndex, endIndex));
       setTotalCount(currentTable.columns.length);
+      setPagination((prev) => ({
+        ...prev,
+        page,
+      }));
     }
   };
 
@@ -151,6 +155,8 @@ const AuditRules = () => {
     onSuccess: () => {
       toast.success("Regra adicionada com sucesso");
       setIsOpen(false);
+      qc.invalidateQueries(["company_tables"]);
+      updateTableData();
     },
     onError: (error) => {
       toast.error("Erro ao adicionar regra");
@@ -166,6 +172,8 @@ const AuditRules = () => {
       toast.success("Regra atualizada com sucesso");
       setIsOpen(false);
       setDataEdit({});
+      qc.invalidateQueries(["company_tables"]);
+      updateTableData();
     },
     onError: (error) => {
       toast.error("Erro ao atualizar regra");
@@ -181,6 +189,7 @@ const AuditRules = () => {
       toast.success("Regra removida com sucesso");
       setDeleteId(null);
       qc.invalidateQueries(["company_tables"]);
+      updateTableData();
     },
     onError: (error) => {
       toast.error("Erro ao remover regra");

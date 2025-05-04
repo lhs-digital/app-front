@@ -1,4 +1,10 @@
-import { Build, Info, KeyboardArrowDown } from "@mui/icons-material";
+import {
+  ContentPaste,
+  ContentPasteGo,
+  Info,
+  KeyboardArrowDown,
+  OpenInNew,
+} from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -12,33 +18,28 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useThemeMode } from "../../contexts/themeModeContext";
-import { useUserState } from "../../hooks/useUserState";
+import WorkOrderForm from "../../../components/WorkOrderForm";
+import { useThemeMode } from "../../../contexts/themeModeContext";
+import { useUserState } from "../../../hooks/useUserState";
 import {
   dateFormatted,
   formattedPriority,
   getPriorityColor,
-} from "../../services/utils";
-import { handleMode } from "../../theme";
-import ViewActivitie from "../ViewActivitie";
+} from "../../../services/utils";
+import { handleMode } from "../../../theme";
+import ViewAuditItem from "./ViewAuditItem";
 
-const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
-  const [dataView, setDataView] = useState(activitie);
+const AuditItem = ({
+  auditRecord,
+  setRefresh,
+  refresh,
+  onClick = () => {},
+}) => {
+  const [dataView, setDataView] = useState(auditRecord);
   const { mode: themeMode } = useThemeMode();
   const theme = handleMode(themeMode);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { permissions } = useUserState().state;
-  const navigate = useNavigate();
-
-  const handleView = () => {
-    console.log("activi", activitie);
-
-    return navigate(`/clientes/${activitie?.record_id}`, {
-      state: { edit: true, columns: activitie?.columns, recordId: Number(activitie?.id), status: activitie?.status },
-    });
-  };
-
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
@@ -60,7 +61,7 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
         className="absolute h-[8px] left-0 right-0 top-0"
         style={{
           backgroundColor:
-            activitie?.status === 1
+            auditRecord?.status === 1
               ? theme === "light"
                 ? colors.green[100]
                 : colors.green[600]
@@ -76,39 +77,46 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
         gap={2}
       >
         <p className="text-lg">
-          ID do Cliente: <span>{activitie?.record_id}</span>
+          ID do Cliente: <span>{auditRecord?.record_id}</span>
         </p>
         <Box display="flex" gap={2}>
           <Tooltip
-            title={`Prioridade: ${formattedPriority(activitie?.priority, theme)}`}
+            title={`Prioridade: ${formattedPriority(auditRecord?.priority, theme)}`}
             aria-label="Prioridade"
           >
             <Chip
               size="large"
-              sx={getPriorityColor(activitie?.priority, theme)}
+              sx={getPriorityColor(auditRecord?.priority, theme)}
               label={
                 <div>
                   {isMobile ? "" : "Prioridade Geral:"}{" "}
-                  <b>{formattedPriority(activitie?.priority, theme)}</b>
+                  <b>{formattedPriority(auditRecord?.priority, theme)}</b>
                 </div>
               }
             />
           </Tooltip>
           {permissions.some((per) => per.name === "update_tasks") &&
-            (activitie?.status === 0 ? (
-              <Tooltip title="Corrigir" aria-label="Corrigir">
+            (auditRecord?.status === 0 ? (
+              <Tooltip
+                title={auditRecord?.work_order ? "Ver O.S." : "Abrir O.S."}
+                aria-label="Abrir O.S."
+              >
                 <button
-                  onClick={handleView}
+                  onClick={onClick}
                   className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
-                  style={getPriorityColor(activitie?.priority, theme)}
+                  style={getPriorityColor(auditRecord?.priority, theme)}
                 >
-                  <Build fontSize="small" />
+                  {auditRecord?.work_order ? (
+                    <OpenInNew fontSize="small" />
+                  ) : (
+                    <ContentPasteGo fontSize="small" />
+                  )}
                 </button>
               </Tooltip>
             ) : (
               <Tooltip title="Informação" aria-label="Informação">
                 <button
-                  onClick={handleView}
+                  onClick={onClick}
                   className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
                   style={{
                     color:
@@ -141,11 +149,11 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
                 color: theme === "light" ? colors.red[500] : colors.red[400],
               }}
             >
-              ({activitie?.columns.length})
+              ({auditRecord?.columns.length})
             </span>
             :{" "}
           </p>
-          {activitie?.columns.slice(0, 2).map((col, index) => (
+          {auditRecord?.columns.slice(0, 2).map((col, index) => (
             <Chip
               key={index}
               size="small"
@@ -154,20 +162,18 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
               sx={{
                 color: getPriorityColor(col?.priority, theme).color,
               }}
-            >
-              <p className="text-sm">&quot;{col?.label}&quot;</p>
-            </Chip>
+            />
           ))}
-          {activitie?.columns.length > 2 && (
+          {auditRecord?.columns.length > 2 && (
             <Tooltip
-              title={activitie?.columns
+              title={auditRecord?.columns
                 .slice(2)
                 .map((col) => col?.label)
                 .join(", ")}
               aria-label="Mais campos"
             >
               <div className="flex flex-col items-center justify-center bg-neutral-300 dark:bg-neutral-700 aspect-square rounded-full px-1 text-xs">
-                <p className="mr-0.5">+{activitie?.columns.length - 2}</p>
+                <p className="mr-0.5">+{auditRecord?.columns.length - 2}</p>
               </div>
             </Tooltip>
           )}
@@ -183,16 +189,27 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
           Detalhes
         </AccordionSummary>
         <AccordionDetails>
-          <ViewActivitie
+          <ViewAuditItem
             selectedActivitie={dataView}
             setDataView={setDataView}
-            id={activitie?.id}
-            status={activitie?.status}
+            id={auditRecord?.id}
+            status={auditRecord?.status}
             setRefresh={setRefresh}
             refresh={refresh}
           />
         </AccordionDetails>
       </Accordion>
+      {auditRecord?.work_order && (
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2 items-center">
+            <ContentPaste fontSize="2rem" />
+            <p>Ordem de Serviço</p>
+          </div>
+          <div className="border p-2.5 rounded-lg border-[--border]">
+            <WorkOrderForm assignment={auditRecord?.work_order} compact />
+          </div>
+        </div>
+      )}
       <Box
         textAlign="right"
         display="flex"
@@ -201,13 +218,13 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
         marginLeft="auto"
       >
         <Box>
-          {activitie?.status === 1 ? (
+          {auditRecord?.status === 1 ? (
             <Typography variant="body2" color="textSecondary">
-              Corrigido em: {dateFormatted(activitie?.updated_at)}
+              Corrigido em: {dateFormatted(auditRecord?.updated_at)}
             </Typography>
           ) : (
             <Typography variant="body2" color="textSecondary">
-              Auditado em: {dateFormatted(activitie?.created_at)}
+              Auditado em: {dateFormatted(auditRecord?.created_at)}
             </Typography>
           )}
         </Box>
@@ -216,4 +233,4 @@ const ActivitieItem = ({ activitie, setRefresh, refresh }) => {
   );
 };
 
-export default ActivitieItem;
+export default AuditItem;

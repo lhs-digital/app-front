@@ -10,6 +10,10 @@ import {
   Button,
   Card,
   colors,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   InputLabel,
   MenuItem,
@@ -20,12 +24,15 @@ import { PieChart } from "@mui/x-charts";
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ModalReport from "../../components/ModalReport";
 import { useThemeMode } from "../../contexts/themeModeContext";
+import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import { dateFormatted, formatInterval } from "../../services/utils";
 import { handleMode } from "../../theme";
-import { dateFormatted } from "../../services/utils";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,23 +42,52 @@ const AuditSection = () => {
   const user = useAuthUser();
   const [data, setData] = useState([]);
   const [dataLastAudit, setDataLastAudit] = useState([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState(
-    user.isLighthouse ? null : user.company.id,
-  );
+  const { company, setCompany, availableCompanies } = useCompany();
+  const [updateInterval, setUpdateInterval] = useState(600);
   const [selectedTableId, setSelectedTableId] = useState(null);
   const [chartData, setChartData] = useState({
     errorsCount: 0,
     fixedErrorsCount: 0,
   });
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  const handleIntervalChange = (event) => {
+    setUpdateInterval(event.target.value);
+    setIsConfirmModalOpen(true);
+  };
+
+  const confirmIntervalChange = async () => {
+    try {
+      await api.put(`/company/${company?.id}/update_interval`, {
+        audit_interval: updateInterval,
+      });
+      setIsConfirmModalOpen(false);
+      toast.success(
+        `Intervalo de auditoria atualizado para ${formatInterval(updateInterval)} com sucesso!`,
+      );
+    } catch (error) {
+      console.error("Erro ao atualizar o intervalo de auditoria", error);
+      toast.error("Erro ao atualizar o intervalo de auditoria");
+    }
+  };
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await api.get(`/auditing/summary`);
+        const response = await api.get(`/audit/summary`);
         const data = response?.data?.data;
-        setDataLastAudit(data[0].last_audit_date);
-        if (Array.isArray(data)) {
+
+        if (Array.isArray(data) && data.length > 0) {
           setData(data);
+          setDataLastAudit(data[0].last_audit_date);
+
+          // Verifique se audit_interval existe antes de atualizar o estado
+          if (data[0].audit_interval !== undefined) {
+            setUpdateInterval(data[0].audit_interval);
+          } else {
+            console.warn("audit_interval não encontrado, usando valor padrão");
+            setUpdateInterval(600); // Valor padrão
+          }
         } else {
           console.error("A resposta não é um array:", data);
           setData([]);
@@ -67,7 +103,7 @@ const AuditSection = () => {
   useEffect(() => {
     if (data.length > 0) {
       const selectedCompany = data.find(
-        (item) => item.company.id === selectedCompanyId,
+        (item) => item.company.id === company?.id,
       );
       const tables = selectedCompany ? selectedCompany.per_tables : [];
       const selectedTable = tables.find(
@@ -75,19 +111,16 @@ const AuditSection = () => {
       );
 
       if (selectedTable) {
+        setUpdateInterval(data[0]?.audit_interval);
         setChartData({
           errorsCount: selectedTable.errors_count,
           fixedErrorsCount: selectedTable.fixed_errors_count,
         });
       }
     }
-  }, [data, selectedCompanyId, selectedTableId]);
+  }, [data, company?.id, selectedTableId]);
 
-  const companies = data?.map((item) => item.company) || [];
-
-  const selectedCompany = data?.find(
-    (item) => item.company.id === selectedCompanyId,
-  );
+  const selectedCompany = data?.find((item) => item.company.id === company?.id);
   const tables = selectedCompany ? selectedCompany.per_tables : [];
 
   const handleTableChange = (event) => {
@@ -104,8 +137,7 @@ const AuditSection = () => {
   };
 
   const handleCompanyChange = (event) => {
-    const companyId = Number(event.target.value);
-    setSelectedCompanyId(companyId);
+    setCompany(event.target.value);
     setSelectedTableId(null);
     setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
   };
@@ -180,13 +212,13 @@ const AuditSection = () => {
             <FormControl fullWidth>
               <InputLabel id="company">Empresa</InputLabel>
               <Select
-                value={selectedCompanyId || ""}
+                value={company?.id || ""}
                 onChange={handleCompanyChange}
                 label="Empresa"
                 disabled={!user.isLighthouse}
               >
                 {user.isLighthouse ? (
-                  companies.map((company) => (
+                  availableCompanies.map((company) => (
                     <MenuItem key={company.id} value={company.id}>
                       {company.name}
                     </MenuItem>
@@ -223,28 +255,82 @@ const AuditSection = () => {
               </Select>
             </FormControl>
           </Card>
-          {
-            selectedTableId && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
-              >
-                <p>Entidades auditadas</p>
-                <p className="text-lg lg:text-2xl font-bold">
-                  {stats.audittedEntities}
+          {selectedTableId && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <FormControl fullWidth>
+                <InputLabel id="interval">Intervalo de auditoria</InputLabel>
+                <Select
+                  value={updateInterval || ""}
+                  onChange={handleIntervalChange}
+                  label="Intervalo de auditoria"
+                >
+                  <MenuItem value={600}>10 minutos</MenuItem>
+                  <MenuItem value={1800}>30 minutos</MenuItem>
+                  <MenuItem value={3600}>1 hora</MenuItem>
+                  <MenuItem value={21600}>6 horas</MenuItem>
+                  <MenuItem value={43200}>12 horas</MenuItem>
+                  <MenuItem value={86400}>1 dia</MenuItem>
+                  <MenuItem value={604800}>1 semana</MenuItem>
+                  <MenuItem value={2592000}>1 mês</MenuItem>
+                  <MenuItem value={31536000}>1 ano</MenuItem>
+                </Select>
+              </FormControl>
+            </Card>
+          )}
+          {selectedTableId && (
+            <Dialog
+              open={isConfirmModalOpen}
+              onClose={() => setIsConfirmModalOpen(false)}
+              aria-labelledby="confirm-dialog-title"
+              aria-describedby="confirm-dialog-description"
+            >
+              <DialogTitle id="confirm-dialog-title">
+                Confirmar Alteração
+              </DialogTitle>
+              <DialogContent>
+                <p>
+                  Deseja confirmar a alteração do intervalo de auditoria para
+                  <strong> {formatInterval(updateInterval)}?</strong>
                 </p>
-              </Card>
-            )}
-          {
-            selectedTableId && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
-              >
-                <p>Última auditoria</p>
-                <p className="text-xl font-bold">{dateFormatted(dataLastAudit)}</p>
-              </Card>
-            )}
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  color="error"
+                >
+                  Cancelar
+                </Button>
+                <Button onClick={confirmIntervalChange} color="primary">
+                  Confirmar
+                </Button>
+              </DialogActions>
+            </Dialog>
+          )}
+          {selectedTableId && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <p>Última auditoria</p>
+              <p className="text-xl font-bold">
+                {dateFormatted(dataLastAudit)}
+              </p>
+            </Card>
+          )}
+          {selectedTableId && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <p>Entidades auditadas</p>
+              <p className="text-lg lg:text-2xl font-bold">
+                {stats.audittedEntities}
+              </p>
+            </Card>
+          )}
           {hasPermission(["report_generate"]) && (
             <Card
               className="p-4 flex flex-col gap-2 justify-center"

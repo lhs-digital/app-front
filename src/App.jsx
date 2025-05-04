@@ -5,6 +5,7 @@ import createStore from "react-auth-kit/createStore";
 import { RouterProvider } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { CompanyContextProvider } from "./contexts/companyContext";
 import { ThemeModeProvider } from "./contexts/themeModeContext";
 import { UserStateProvider } from "./contexts/userState";
 import { AppRoutes } from "./routes/routes";
@@ -30,8 +31,10 @@ function App() {
     <QueryClientProvider client={qc}>
       <AuthProvider store={store}>
         <UserStateProvider>
-          <RouterProvider router={AppRoutes} />
-          <ToastContainer position="bottom-right" />
+          <CompanyContextProvider>
+            <RouterProvider router={AppRoutes} />
+            <ToastContainer position="bottom-right" />
+          </CompanyContextProvider>
         </UserStateProvider>
       </AuthProvider>
     </QueryClientProvider>

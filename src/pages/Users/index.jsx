@@ -1,9 +1,23 @@
 import { useDisclosure } from "@chakra-ui/react";
-import { Add, Delete, Edit, Search } from "@mui/icons-material";
+import {
+  Add,
+  Delete,
+  Edit,
+  ExpandLess,
+  ExpandMore,
+  Groups,
+  Search,
+} from "@mui/icons-material";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import GroupRemoveIcon from "@mui/icons-material/GroupRemove";
 import {
   Button,
   IconButton,
   InputAdornment,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -16,9 +30,11 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
 import ModalComp from "../../components/ModalComp";
 import ModalDelete from "../../components/ModalDelete";
+import ModalHierarchy from "../../components/ModalHierarchy";
 import ModalView from "../../components/ModalView";
 import PageTitle from "../../components/PageTitle";
 import { useUserState } from "../../hooks/useUserState";
@@ -26,7 +42,16 @@ import api from "../../services/api";
 
 const Users = () => {
   const [viewOnly, setViewOnly] = useState(false);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isCreateOpen,
+    onOpen: onOpenCreate,
+    onClose: onCloseCreate,
+  } = useDisclosure();
+  const {
+    isOpen: isHierarchyOpen,
+    onOpen: onOpenHierarchy,
+    onClose: onHierarchyClose,
+  } = useDisclosure();
   const {
     isOpen: isDeleteOpen,
     onOpen: onOpenDelete,
@@ -38,12 +63,15 @@ const Users = () => {
     onClose: onCloseView,
   } = useDisclosure();
   const [data, setData] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [dataEdit, setDataEdit] = useState({});
   const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
+  const [desHierarchy, setDesHierarchy] = useState(false);
+  const [viewHierarchy, setViewHierarchy] = useState(false);
   //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
@@ -52,6 +80,13 @@ const Users = () => {
   });
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
+  const user = useAuthUser();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const hierarchyOpen = Boolean(anchorEl);
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const { permissions } = useUserState().state;
 
@@ -69,6 +104,7 @@ const Users = () => {
             },
           },
         );
+        console.log(response.data);
         setCurrentPage(response.data.meta.current_page);
         setData(response.data.data);
         setTotalCount(response.data.meta.total);
@@ -127,6 +163,23 @@ const Users = () => {
     onOpenView();
   };
 
+  const handleHierarchy = (user) => {
+    setSelectedUser(user);
+    onOpenHierarchy();
+  };
+
+  const handleViewHierarchy = (user) => {
+    setViewHierarchy(true);
+    setSelectedUser(user);
+    onOpenHierarchy();
+  };
+
+  const handleDesHierarchy = (user) => {
+    setDesHierarchy(true);
+    setSelectedUser(user);
+    onOpenHierarchy();
+  };
+
   const handleDelete = (id) => {
     setDeleteId(id);
     onOpenDelete();
@@ -143,30 +196,106 @@ const Users = () => {
     setRefresh((prev) => !prev);
   };
 
+  const hierarchyMenu = () => (
+    <Menu
+      className="mt-2"
+      id="hierarchy-menu"
+      aria-labelledby="hierarchy-menu"
+      anchorEl={anchorEl}
+      open={hierarchyOpen}
+      onClose={handleClose}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "right",
+      }}
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+    >
+      <MenuItem
+        onClick={(e) => {
+          e.stopPropagation();
+          handleViewHierarchy();
+        }}
+      >
+        <ListItemIcon>
+          <Groups fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Visualizar equipe</ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={(e) => {
+          e.stopPropagation();
+          handleHierarchy();
+        }}
+      >
+        <ListItemIcon>
+          <GroupAddIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Adicionar membro</ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDesHierarchy();
+        }}
+      >
+        <ListItemIcon>
+          <GroupRemoveIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Remover membro</ListItemText>
+      </MenuItem>
+    </Menu>
+  );
+
   const renderButtons = () => {
     if (permissions.some((permissions) => permissions.name === "create_users"))
       return (
-        <Button
-          onClick={() => [setDataEdit({}), onOpen()]}
-          variant="contained"
-          color="primary"
-          startIcon={<Add />}
-        >
-          NOVO USUÁRIO
-        </Button>
+        <>
+          <Button
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            variant="contained"
+            color="primary"
+            disabled={user.isLighthouse}
+            endIcon={hierarchyOpen ? <ExpandLess /> : <ExpandMore />}
+          >
+            MINHA EQUIPE
+          </Button>
+          <Button
+            onClick={() => [setDataEdit({}), onOpenCreate()]}
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+          >
+            NOVO USUÁRIO
+          </Button>
+        </>
       );
     else return null;
   };
 
   return (
     <div className="flex flex-col gap-6 w-full">
+      {hierarchyMenu()}
       <ModalComp
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isCreateOpen}
+        onClose={onCloseCreate}
         data={data}
         setRefresh={setRefresh}
         refresh={refresh}
         setData={setData}
+      />
+      <ModalHierarchy
+        isOpen={isHierarchyOpen}
+        selectedUser={selectedUser}
+        onClose={onHierarchyClose}
+        setRefresh={setRefresh}
+        desHierarchy={desHierarchy}
+        setDesHierarchy={setDesHierarchy}
+        viewHierarchy={viewHierarchy}
+        setViewHierarchy={setViewHierarchy}
+        refresh={refresh}
       />
       <ModalDelete
         isOpen={isDeleteOpen}
@@ -280,6 +409,28 @@ const Users = () => {
                   Empresa
                 </TableSortLabel>
               </TableCell>
+              <TableCell
+                sortDirection={
+                  sortConfig.key === "responsible"
+                    ? sortConfig.direction
+                    : false
+                }
+                sx={{
+                  display: isMobile ? "none" : undefined,
+                }}
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "responsible"}
+                  direction={
+                    sortConfig.key === "responsible"
+                      ? sortConfig.direction
+                      : "asc"
+                  }
+                  onClick={createSortHandler("responsible")}
+                >
+                  Usuário Responsável
+                </TableSortLabel>
+              </TableCell>
               <TableCell sx={{ padding: 0 }}>Ações</TableCell>
             </TableRow>
           </TableHead>
@@ -292,7 +443,7 @@ const Users = () => {
                     user.email.toLowerCase().includes(search.toLowerCase()) ||
                     user.role.name.toLowerCase().includes(search.toLowerCase()),
                 )
-            ).map(({ name, email, role, company, id }, index) => (
+            ).map(({ name, email, role, company, id, responsible }, index) => (
               <TableRow
                 key={index}
                 style={{
@@ -321,6 +472,14 @@ const Users = () => {
                   {" "}
                   {company.name}{" "}
                 </TableCell>
+                <TableCell
+                  sx={{
+                    maxWidth: isMobile ? 5 : 100,
+                    display: isMobile ? "none" : undefined,
+                  }}
+                >
+                  {responsible ? responsible.name : <span>N/A</span>}
+                </TableCell>
                 <TableCell sx={{ padding: 0 }}>
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
@@ -346,6 +505,18 @@ const Users = () => {
                       <Delete fontSize="small" />
                     </IconButton>
                   )}
+                  {/* {permissions.some(
+                    (permissions) => permissions.name === "delete_users",
+                  ) && (
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleHierarchy({ name, email, role, company, id });
+                        }}
+                      >
+                        <GroupAddIcon fontSize="small" />
+                      </IconButton>
+                    )} */}
                 </TableCell>
               </TableRow>
             ))}

@@ -31,7 +31,6 @@ const RoleView = () => {
     queryKey: ["companies", id],
     queryFn: async () => {
       const response = await api.get("/companies");
-      console.log("companies", response.data.data);
       return response.data.data;
     },
   });
@@ -40,7 +39,6 @@ const RoleView = () => {
     queryKey: ["role", id],
     queryFn: async () => {
       const response = await api.get(`/roles/${id}`);
-      console.log("response", response.data.data);
       return response.data.data;
     },
     enabled: !isCreating && isCompanyFetched,
@@ -51,6 +49,7 @@ const RoleView = () => {
     methods.setValue("name", role.name);
     methods.setValue("nivel", parseInt(role.nivel));
     methods.setValue("company", role.company);
+    methods.setValue("company.name", role.company.name);
     setSelectedPermissions(role.permissions);
   }, [role]);
 
@@ -85,8 +84,8 @@ const RoleView = () => {
       }
       return toast.error("Erro ao criar o cargo");
     },
-    onSettled: (data) => {
-      navigate(`/papeis/${data.data.id}`);
+    onSettled: () => {
+      navigate(`/papeis`);
     },
   });
 
@@ -117,17 +116,17 @@ const RoleView = () => {
       return toast.error("Preencha todos os campos corretamente");
     }
 
-    if (isCreating)
-      return createRole({
-        ...data,
-        company_id: data.company.id,
-      });
-
-    return updateRole({
+    const payload = {
       ...data,
       company_id: data.company.id,
       permissions: selectedPermissions.map((permission) => permission.id),
-    });
+    };
+
+    if (isCreating) {
+      return createRole(payload);
+    }
+
+    return updateRole(payload);
   };
 
   return (
@@ -139,29 +138,29 @@ const RoleView = () => {
           buttons={
             isEditing || isCreating
               ? [
-                  <Button
-                    key="save-role-form"
-                    loading={updateIsPending || createIsPending}
-                    type="submit"
-                    form="role-form"
-                    variant="contained"
-                    startIcon={<Save fontSize="small" />}
-                  >
-                    SALVAR
-                  </Button>,
-                ]
+                <Button
+                  key="save-role-form"
+                  loading={updateIsPending || createIsPending}
+                  type="submit"
+                  form="role-form"
+                  variant="contained"
+                  startIcon={<Save fontSize="small" />}
+                >
+                  SALVAR
+                </Button>,
+              ]
               : [
-                  <Button
-                    key="edit-role-form"
-                    loading={updateIsPending}
-                    variant="contained"
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                    startIcon={<Edit fontSize="small" />}
-                  >
-                    EDITAR
-                  </Button>,
-                ]
+                <Button
+                  key="edit-role-form"
+                  loading={updateIsPending}
+                  variant="contained"
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  startIcon={<Edit fontSize="small" />}
+                >
+                  EDITAR
+                </Button>,
+              ]
           }
         />
         <form
@@ -224,16 +223,12 @@ const RoleView = () => {
                       className="col-span-8"
                       noOptionsText="Nenhuma empresa encontrada."
                       options={companies || []}
-                      getOptionLabel={(option) => option.name}
-                      getOptionKey={(option) => option.id}
-                      loadingText="Carregando..."
-                      inputValue={role.company?.name || ""}
-                      onInputChange={(e, newValue) => {
-                        field.onChange(newValue);
-                      }}
+                      getOptionLabel={(option) => option.name || ""}
+                      isOptionEqualToValue={(option, value) => option.id === value.id} // Garante que a opção selecionada seja comparada corretamente
+                      value={field.value || null} // Define o valor selecionado
+                      onChange={(e, newValue) => field.onChange(newValue)} // Atualiza o valor no estado do formulário
                       readOnly={!isEditing && !isCreating}
-                      renderInput={(params) => <TextField {...params} />}
-                      onChange={(e, newValue) => field.onChange(newValue)}
+                      renderInput={(params) => <TextField {...params} placeholder="Selecione uma empresa" />}
                     />
                   )}
                 />

@@ -1,5 +1,6 @@
 import { Add, Delete, Edit, RemoveRedEye, Search } from "@mui/icons-material";
 import {
+  Autocomplete,
   Button,
   CircularProgress,
   IconButton,
@@ -20,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../components/ModalDelete";
 import PageTitle from "../../components/PageTitle";
+import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
 import { hasPermission } from "../../services/utils";
@@ -34,7 +36,8 @@ const Clients = () => {
     direction: "desc",
   });
   const navigate = useNavigate();
-  const { permissions } = useUserState().state;
+  const { permissions, isLighthouse } = useUserState().state;
+  const { company, setCompany, availableCompanies } = useCompany();
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const [sortedData, setSortedData] = useState([]);
@@ -42,15 +45,17 @@ const Clients = () => {
   const { data, isFetching, isSuccess } = useQuery({
     queryKey: ["clients", currentPage, rowsPerPage, search],
     queryFn: async () => {
-      const response = await api.get(
-        `/clients?page=${currentPage}&per_page=${rowsPerPage}`,
-        {
-          params: { search: search },
+      const response = await api.get("/module/cliente", {
+        params: {
+          page: currentPage,
+          per_page: rowsPerPage,
+          company_id: company?.id || undefined,
         },
-      );
+      });
       setTotalCount(response.data.total);
       return response.data.data;
     },
+    enabled: !!company,
   });
 
   const handleSort = (key) => {
@@ -76,7 +81,7 @@ const Clients = () => {
 
   const handleRemove = async () => {
     try {
-      await api.delete(`/clients/${deleteId}`);
+      await api.delete(`/module/cliente/${deleteId}`);
       toast.success("Cliente removido com sucesso!");
       setDeleteOpen(false);
     } catch (error) {
@@ -126,25 +131,41 @@ const Clients = () => {
           </Button>
         }
       />
-      <TextField
-        mt={4}
-        placeholder="Buscar cliente"
-        size="lg"
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setCurrentPage(1);
-        }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      <div className="grid grid-cols-3 lg:grid-cols-8 gap-4">
+        <TextField
+          mt={4}
+          className={`${isLighthouse ? "col-span-2 lg:col-span-6" : "col-span-2 lg:col-span-8"}`}
+          placeholder="Buscar cliente"
+          size="lg"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        {isLighthouse && (
+          <Autocomplete
+            className="col-span-2"
+            value={company}
+            noOptionsText="Nenhuma empresa encontrada."
+            options={availableCompanies}
+            getOptionLabel={(option) => option.name}
+            getOptionKey={(option) => option.id}
+            loadingText="Carregando..."
+            renderInput={(params) => <TextField {...params} label="Empresa" />}
+            onChange={(e, newValue) => setCompany(newValue)}
+          />
+        )}
+      </div>
       <TableContainer>
         <Table>
           <TableHead>
@@ -207,9 +228,7 @@ const Clients = () => {
             )}
             {!isFetching && sortedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan="5" textAlign="center">
-                  Nenhum cliente encontrado
-                </TableCell>
+                <TableCell colSpan="5">Nenhum cliente encontrado</TableCell>
               </TableRow>
             ) : (
               sortedData
@@ -238,7 +257,11 @@ const Clients = () => {
                       {hasPermission(permissions, "view_clients") && (
                         <IconButton
                           onClick={() => {
-                            navigate(`/clientes/${client.id}`, {});
+                            navigate(`/clientes/${client.id}`, {
+                              state: {
+                                companyId: company?.id,
+                              },
+                            });
                           }}
                         >
                           <RemoveRedEye fontSize="small" />

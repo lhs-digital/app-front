@@ -11,10 +11,10 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import api from "../../services/api";
-import { formattedPriority, getPriorityColor } from "../../services/utils";
+import api from "../../../services/api";
+import { formattedPriority, getPriorityColor } from "../../../services/utils";
 
-const ViewActivitie = ({ id, selectedActivitie, setRefresh, refresh }) => {
+const ViewAuditItem = ({ id, selectedActivitie, setRefresh, refresh }) => {
   //eslint-disable-next-line
   const formattedDate = (date) => new Date(date).toLocaleDateString("pt-BR");
 
@@ -68,4 +68,4 @@ const ViewActivitie = ({ id, selectedActivitie, setRefresh, refresh }) => {
   );
 };
 
-export default ViewActivitie;
+export default ViewAuditItem;

@@ -74,7 +74,7 @@ const SubAccordion = ({ column, data, handleEdit, handleDelete, refresh }) => {
           <TableBody>
             {data?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} textAlign="center">
+                <TableCell colSpan={4}>
                   Não existem Regras de Auditorias no sistema
                 </TableCell>
               </TableRow>

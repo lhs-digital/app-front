@@ -11,9 +11,9 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
 import api from "../../services/api";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
   const [name, setName] = useState("");
@@ -28,10 +28,9 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
     const getData = async () => {
       try {
         if (user.isLighthouse) {
-
           const responseCompany = await api.get(`/companies/get_companies`);
           setCompanies(responseCompany?.data?.data);
-          
+
           const responseRole = await api.get(`/roles/roles_from_company`, {
             params: { company_id: dataEdit.company.id },
           });
@@ -39,7 +38,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
         } else {
           const responseCompany = await api.get(`/companies/get_companies`);
           setCompanies(responseCompany?.data?.data);
-          
+
           const responseRole = await api.get(`/roles/roles_from_company`, {
             params: { company_id: user.company.id },
           });
@@ -87,12 +86,14 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
           name,
           email,
           role_id: role,
+          password: "123456",
         });
       }
 
       setRefresh((prev) => !prev);
       toast.success("Usuário cadastrado com sucesso!");
     } catch (error) {
+      toast.error("Erro ao cadastrar usuário " + error.response?.data?.message);
       console.error("Erro ao salvar usuário", error);
     }
   };
@@ -121,7 +122,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
     setEmail("");
     setCompany("");
     setRole("");
-  }
+  };
 
   const emailAlreadyExists = () => {
     if (data?.length) {
@@ -154,38 +155,30 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
             fullWidth
           />
         </Box>
-        {
-          user.isLighthouse ? (
-            <Box>
-              <InputLabel>Empresa *</InputLabel>
-              <Select
-                placeholder="Selecione uma opção"
-                value={company}
-                onChange={handleCompanyChange}
-                fullWidth
-              >
-                {companies.map((companyItem) => (
-                  <MenuItem key={companyItem.id} value={companyItem.id}>
-                    {companyItem.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-          ) : (
-            <Box>
-              <InputLabel>Empresa *</InputLabel>
-              <Select
-                value={user.company.id}
-                disabled
-                fullWidth
-              >
-                <MenuItem value={user.company.id}>
-                  {user.company.name}
+        {user.isLighthouse ? (
+          <Box>
+            <InputLabel>Empresa *</InputLabel>
+            <Select
+              placeholder="Selecione uma opção"
+              value={company}
+              onChange={handleCompanyChange}
+              fullWidth
+            >
+              {companies.map((companyItem) => (
+                <MenuItem key={companyItem.id} value={companyItem.id}>
+                  {companyItem.name}
                 </MenuItem>
-              </Select>
-            </Box>
-          )
-        }
+              ))}
+            </Select>
+          </Box>
+        ) : (
+          <Box>
+            <InputLabel>Empresa *</InputLabel>
+            <Select value={user.company.id} disabled fullWidth>
+              <MenuItem value={user.company.id}>{user.company.name}</MenuItem>
+            </Select>
+          </Box>
+        )}
         <Box>
           <InputLabel>Role *</InputLabel>
           <Select
@@ -204,7 +197,13 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button color="info" mr={3} onClick={() => { onClose(), cleanFields() }}>
+        <Button
+          color="info"
+          mr={3}
+          onClick={() => {
+            onClose(), cleanFields();
+          }}
+        >
           CANCELAR
         </Button>
         <Button color="primary" onClick={handleSave}>

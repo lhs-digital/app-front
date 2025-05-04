@@ -85,7 +85,7 @@ const Layout = ({ children }) => {
   const theme = handleMode(useThemeMode().mode);
   const navigate = useNavigate();
   const location = window.location.pathname.split("/").slice(1);
-  const { permissions } = useUserState().state;
+  const { permissions, isLighthouse } = useUserState().state;
   const isActive = (url) => window.location.pathname === url;
 
   const handleLogout = async () => {
@@ -103,7 +103,7 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="flex flex-row h-screen w-full">
+    <div className="flex flex-row h-screen w-screen overflow-hidden">
       <Drawer
         variant="permanent"
         anchor="left"
@@ -125,7 +125,6 @@ const Layout = ({ children }) => {
             ) {
               return null;
             }
-
             return (
               <Tooltip
                 title={item.label}
@@ -209,7 +208,7 @@ const Layout = ({ children }) => {
             <ThemeSwitcher />
           </div>
         </div>
-        <div className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6">
+        <div className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll w-[calc(100vw-64px)] space-y-6">
           {location[0] !== "painel" && (
             <Breadcrumbs
               aria-label="breadcrumb"
