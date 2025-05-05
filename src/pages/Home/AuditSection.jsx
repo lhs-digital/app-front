@@ -90,7 +90,9 @@ const AuditSection = () => {
           }
         } else {
           console.error("A resposta não é um array:", data);
-          setData([]);
+          setData([data]);
+          setDataLastAudit(data.last_audit_date);
+          setUpdateInterval(data.audit_interval || 600); // Valor padrão
         }
       } catch (error) {
         console.error("Erro ao verificar lista de usuários", error);
