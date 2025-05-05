@@ -83,13 +83,13 @@ export const privateRoutes = [
     path: "/atribuicoes",
     element: <Assignments />,
   },
+  // {
+  //   label: "Regras de Auditorias",
+  //   path: "/prioridades",
+  //   element: <Priorities />,
+  // },
   {
-    label: "Regras de Auditorias",
-    path: "/prioridades",
-    element: <Priorities />,
-  },
-  {
-    label: "Regras de Auditoria (novo)",
+    label: "Regras de Auditoria",
     path: "/regras",
     element: <AuditRules />,
   },

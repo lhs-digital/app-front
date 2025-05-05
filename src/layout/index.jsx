@@ -94,8 +94,8 @@ const Layout = ({ children }) => {
   };
 
   const hasPermission = (thePermissions) => {
-    if (!permissions || !permissions.length) {
-      return false;
+    if (!permissions || permissions.length === 0) {
+      return null;
     }
     return permissions.some((permission) =>
       thePermissions.includes(permission.name),
@@ -104,6 +104,7 @@ const Layout = ({ children }) => {
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden">
+      {console.log("permissionsa", permissions)}
       <Drawer
         variant="permanent"
         anchor="left"
@@ -119,9 +120,9 @@ const Layout = ({ children }) => {
         <List className="grow">
           {navigationRoutes.map((item, index) => {
             if (
-              item.permissions &&
-              item.permissions.length > 0 &&
-              !hasPermission(item.permissions)
+              item?.permissions &&
+              item?.permissions.length > 0 &&
+              !hasPermission(item?.permissions)
             ) {
               return null;
             }

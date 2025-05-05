@@ -213,46 +213,75 @@ const Users = () => {
         horizontal: "right",
       }}
     >
-      <MenuItem
-        onClick={(e) => {
-          e.stopPropagation();
-          handleViewHierarchy();
-        }}
-      >
-        <ListItemIcon>
-          <Groups fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Visualizar equipe</ListItemText>
-      </MenuItem>
-      <MenuItem
-        onClick={(e) => {
-          e.stopPropagation();
-          handleHierarchy();
-        }}
-      >
-        <ListItemIcon>
-          <GroupAddIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Adicionar membro</ListItemText>
-      </MenuItem>
-      <MenuItem
-        onClick={(e) => {
-          e.stopPropagation();
-          handleDesHierarchy();
-        }}
-      >
-        <ListItemIcon>
-          <GroupRemoveIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Remover membro</ListItemText>
-      </MenuItem>
+      {/* Visualizar equipe: Qualquer uma das permissões */}
+      {(permissions.some(
+        (permission) =>
+          permission.name === "assign_responsible_users" ||
+          permission.name === "unassign_responsible_users"
+      )) && (
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewHierarchy();
+            }}
+          >
+            <ListItemIcon>
+              <Groups fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Visualizar equipe</ListItemText>
+          </MenuItem>
+        )}
+
+      {/* Adicionar membro: Permissão específica */}
+      {permissions.some(
+        (permission) => permission.name === "assign_responsible_users"
+      ) && (
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleHierarchy();
+            }}
+          >
+            <ListItemIcon>
+              <GroupAddIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Adicionar membro</ListItemText>
+          </MenuItem>
+        )}
+
+      {/* Remover membro: Permissão específica */}
+      {permissions.some(
+        (permission) => permission.name === "unassign_responsible_users"
+      ) && (
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDesHierarchy();
+            }}
+          >
+            <ListItemIcon>
+              <GroupRemoveIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Remover membro</ListItemText>
+          </MenuItem>
+        )}
     </Menu>
   );
 
   const renderButtons = () => {
-    if (permissions.some((permissions) => permissions.name === "create_users"))
-      return (
-        <>
+    const canCreateUsers = permissions.some(
+      (permission) => permission.name === "create_users"
+    );
+
+    const canManageTeam = permissions.some(
+      (permission) =>
+        permission.name === "assign_responsible_users" ||
+        permission.name === "unassign_responsible_users"
+    );
+
+    return (
+      <>
+        {canManageTeam && (
           <Button
             onClick={(e) => setAnchorEl(e.currentTarget)}
             variant="contained"
@@ -262,6 +291,8 @@ const Users = () => {
           >
             MINHA EQUIPE
           </Button>
+        )}
+        {canCreateUsers && (
           <Button
             onClick={() => [setDataEdit({}), onOpenCreate()]}
             variant="contained"
@@ -270,9 +301,9 @@ const Users = () => {
           >
             NOVO USUÁRIO
           </Button>
-        </>
-      );
-    else return null;
+        )}
+      </>
+    );
   };
 
   return (
@@ -438,11 +469,11 @@ const Users = () => {
             {(!search
               ? data
               : data.filter(
-                  (user) =>
-                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                    user.email.toLowerCase().includes(search.toLowerCase()) ||
-                    user.role.name.toLowerCase().includes(search.toLowerCase()),
-                )
+                (user) =>
+                  user.name.toLowerCase().includes(search.toLowerCase()) ||
+                  user.email.toLowerCase().includes(search.toLowerCase()) ||
+                  user.role.name.toLowerCase().includes(search.toLowerCase()),
+              )
             ).map(({ name, email, role, company, id, responsible }, index) => (
               <TableRow
                 key={index}
@@ -484,27 +515,27 @@ const Users = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(index);
-                      }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(index);
+                        }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(id);
-                      }}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    )}
                   {/* {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
