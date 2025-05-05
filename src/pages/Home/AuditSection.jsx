@@ -102,6 +102,7 @@ const AuditSection = () => {
 
   useEffect(() => {
     if (data.length > 0) {
+      console.log(company?.id, "company id");
       const selectedCompany = data.find(
         (item) => item.company.id === company?.id,
       );
@@ -162,7 +163,7 @@ const AuditSection = () => {
     "delete_users",
   ];
   //eslint-disable-next-line
-  const auditoriaPermissions = ["view_any_tasks", "update_tasks"]
+  const auditoriaPermissions = ["view_any_tasks", "update_tasks"];
   const clientPermissions = [
     "view_clients",
     "view_any_clients",
@@ -216,35 +217,41 @@ const AuditSection = () => {
           gap={2}
           gridTemplateColumns={{ xs: "1fr", lg: "1fr 1fr" }}
         >
-          <Card
-            className="p-4 flex flex-col gap-2 justify-center"
-            variant="outlined"
-          >
-            <FormControl fullWidth>
-              <InputLabel id="company">Empresa</InputLabel>
-              <Select
-                value={availableCompanies.length > 0 ? company?.id : ""}
-                onChange={handleCompanyChange}
-                label="Empresa"
-                disabled={!user.isLighthouse || availableCompanies.length === 0}
-              >
-                {user.isLighthouse ? (
-                  availableCompanies.map((company) => (
-                    <MenuItem key={company.id} value={company.id}>
-                      {company.name}
+          {user.isLighthouse && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <FormControl fullWidth>
+                <InputLabel id="company">Empresa</InputLabel>
+                <Select
+                  value={availableCompanies.length > 0 ? company?.id : ""}
+                  onChange={handleCompanyChange}
+                  label="Empresa"
+                  disabled={
+                    !user.isLighthouse || availableCompanies.length === 0
+                  }
+                >
+                  {user.isLighthouse ? (
+                    availableCompanies.map((company) => (
+                      <MenuItem key={company.id} value={company.id}>
+                        {company.name}
+                      </MenuItem>
+                    ))
+                  ) : (
+                    <MenuItem value={user.company.id}>
+                      {user.company.name}
                     </MenuItem>
-                  ))
-                ) : (
-                  <MenuItem value={user.company.id}>
-                    {user.company.name}
-                  </MenuItem>
-                )}
-              </Select>
-            </FormControl>
-          </Card>
+                  )}
+                </Select>
+              </FormControl>
+            </Card>
+          )}
 
           <Card
-            className="p-4 flex flex-col gap-2 justify-center"
+            className={`p-4 flex flex-col gap-2 justify-center ${
+              !user.isLighthouse ? "col-span-2" : ""
+            }`}
             variant="outlined"
           >
             <FormControl fullWidth>

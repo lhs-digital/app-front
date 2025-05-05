@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { qc } from "../services/queryClient";
 
 export const useAssignmentFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +27,7 @@ export const useAssignmentFilters = () => {
 
   const updateFilter = useCallback((key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
+    qc.invalidateQueries(["workOrders"]);
   }, []);
 
   const resetFilters = useCallback(() => {

@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import WorkOrderForm from "../../../components/WorkOrderForm";
 import { useUserState } from "../../../hooks/useUserState";
 import api from "../../../services/api";
+import { qc } from "../../../services/queryClient";
 
 const AuditWorkOrder = ({ open, onClose, auditRecord, handleView }) => {
   const user = useUserState().state;
@@ -57,6 +58,7 @@ const AuditWorkOrder = ({ open, onClose, auditRecord, handleView }) => {
     },
     onSuccess: () => {
       toast.success("Ordem de serviço criada com sucesso!");
+      qc.invalidateQueries(["audits"]);
       onClose();
     },
     onError: (error) => {

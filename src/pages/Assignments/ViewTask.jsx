@@ -12,18 +12,25 @@ import {
   Select,
 } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import { moduleEndpoints, moduleRoutes } from "../../services/moduleRoutes";
+import { qc } from "../../services/queryClient";
 import { statusInfo, taskStatuses } from "./utils";
 
 const ViewTask = ({ assignment, open, onClose }) => {
+  console.log("assignment", assignment);
   const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState(
     assignment?.status || "not_started",
   );
+  const [pendingStatus, setPendingStatus] = useState("");
+
+  useEffect(() => {
+    setSelectedStatus(assignment?.status || "not_started");
+  }, [assignment]);
 
   const fetchEntityDetails = async (path, id) => {
     try {
@@ -47,10 +54,13 @@ const ViewTask = ({ assignment, open, onClose }) => {
 
   const { mutate: updateStatus, isPending } = useMutation({
     mutationFn: async (data) => {
+      setPendingStatus(data.status);
       await api.put(`/work_order/${assignment.id}/status`, data);
     },
-    onSuccess: (data) => {
-      setSelectedStatus(data.status);
+    onSuccess: () => {
+      qc.invalidateQueries(["work_orders"]);
+      setSelectedStatus(pendingStatus);
+      setPendingStatus("");
     },
   });
 

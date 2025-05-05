@@ -1,12 +1,5 @@
-import {
-  Autocomplete,
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
+import { FilterAltOff } from "@mui/icons-material";
+import { Autocomplete, Button, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -15,6 +8,7 @@ import { useAssignmentFilters } from "../../hooks/useAssignmentFilters";
 import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
+import { qc } from "../../services/queryClient";
 
 export default function TaskFilter({
   setAssignments,
@@ -89,7 +83,7 @@ export default function TaskFilter({
   }, [availableEntities, searchParams]);
 
   const { isLoading: isLoadingAssignments } = useQuery({
-    queryKey: ["workOrders", company?.id, JSON.stringify(filters)],
+    queryKey: ["workOrders", company?.id, filters],
     queryFn: async () => {
       const params = {
         assigned_to: filters.assigned_to?.id || undefined,
@@ -122,10 +116,11 @@ export default function TaskFilter({
   const handleClean = () => {
     resetFilters();
     navigate(location.pathname);
+    qc.invalidateQueries(["workOrders"]);
   };
 
   return (
-    <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-4">
+    <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-4">
       {user.isLighthouse && (
         <Autocomplete
           className="col-span-1 md:col-span-2 lg:col-span-8"
@@ -190,7 +185,7 @@ export default function TaskFilter({
         )}
         onChange={(e, newValue) => updateFilter("assigned_to", newValue)}
       />
-      <Autocomplete
+      {/* <Autocomplete
         size="small"
         className="col-span-1 md:col-span-2 lg:col-span-2"
         value={filters.entity_type}
@@ -228,12 +223,12 @@ export default function TaskFilter({
           <MenuItem value="complete">Concluído</MenuItem>
           <MenuItem value="incomplete">Pendente</MenuItem>
         </Select>
-      </FormControl>
+      </FormControl> */}
       <Button
         size="small"
         onClick={handleClean}
-        variant="contained"
         disabled={isFetching}
+        startIcon={<FilterAltOff fontSize="small" />}
       >
         Limpar
       </Button>
