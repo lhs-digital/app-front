@@ -159,7 +159,14 @@ const AuditSection = () => {
     "delete_users",
   ];
   //eslint-disable-next-line
-  const auditoriaPermissions = ["view_any_tasks", "update_tasks"];
+  const auditoriaPermissions = ["view_any_tasks", "update_tasks"]
+  const clientPermissions = [
+    "view_clients",
+    "view_any_clients",
+    "create_clients",
+    "update_clients",
+    "delete_clients",
+  ];
 
   const quickActions = [
     {
@@ -172,6 +179,7 @@ const AuditSection = () => {
       icon: <Work fontSize="small" />,
       fn: () => navigate("/clientes"),
       label: "Clientes",
+      permissions: clientPermissions,
     },
     {
       icon: <Person fontSize="small" />,
