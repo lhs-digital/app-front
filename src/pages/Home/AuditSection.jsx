@@ -137,7 +137,10 @@ const AuditSection = () => {
   };
 
   const handleCompanyChange = (event) => {
-    setCompany(event.target.value);
+    const newCompany = availableCompanies.find(
+      (company) => company.id === event.target.value,
+    );
+    setCompany(newCompany);
     setSelectedTableId(null);
     setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
   };
@@ -212,10 +215,10 @@ const AuditSection = () => {
             <FormControl fullWidth>
               <InputLabel id="company">Empresa</InputLabel>
               <Select
-                value={company?.id || ""}
+                value={availableCompanies.length > 0 ? company?.id : ""}
                 onChange={handleCompanyChange}
                 label="Empresa"
-                disabled={!user.isLighthouse}
+                disabled={!user.isLighthouse || availableCompanies.length === 0}
               >
                 {user.isLighthouse ? (
                   availableCompanies.map((company) => (

@@ -24,7 +24,6 @@ export const CompanyContextProvider = ({ children }) => {
   }, [user]);
 
   const changeCompany = (company) => {
-    console.log("Company changed to: ", company);
     setCompany(company);
     localStorage.setItem("company", JSON.stringify(company));
   };
