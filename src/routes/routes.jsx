@@ -79,7 +79,7 @@ export const privateRoutes = [
     element: <Clients />,
   },
   {
-    label: "Atribuições",
+    label: "Ordens de Serviço",
     path: "/atribuicoes",
     element: <Assignments />,
   },

@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle";
@@ -36,7 +36,7 @@ import AuditWorkOrder from "./components/AuditWorkOrder";
 const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
   const theme = handleMode(useThemeMode().mode);
-  const [currentFilterCount, setCurrentFilterCount] = useState(1);
+  const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company, setCompany, availableCompanies } = useCompany();
   const [table, setTable] = useState("");
   const [workOrderOpen, setWorkOrderOpen] = useState(false);
@@ -48,7 +48,7 @@ const AuditList = () => {
     search: "",
     priorityOrder: "desc",
     createdAt: [null, null],
-    status: -1,
+    status: 0,
     priority: -1,
   };
 
@@ -59,19 +59,17 @@ const AuditList = () => {
   });
 
   const [filters, setFilters] = useState({
-    ...filterDefaults,
-    status: 0,
+    ...filterDefaults, // removed explicit status override
   });
 
   const [appliedFilters, setAppliedFilters] = useState({
-    ...filterDefaults,
-    status: 0,
+    ...filterDefaults, // removed explicit status override
   });
 
   const [anchorEl, setAnchorEl] = useState(null);
   const openFilters = Boolean(anchorEl);
 
-  const { data: availableTables = [] } = useQuery({
+  const { data: availableTables = [], isLoading: isTablesLoading } = useQuery({
     queryKey: ["company_tables", company],
     queryFn: async () => {
       const response = await api.get(`/company/auditable_tables`, {
@@ -130,25 +128,26 @@ const AuditList = () => {
       toast.error("Erro ao carregar os dados.");
     },
     enabled: !!company && !!table,
-    refetchOnWindowFocus: false,
   });
 
+  useEffect(() => {
+    if (availableTables.length > 0) {
+      setTable(availableTables[0]);
+    }
+  }, [availableTables]);
+
   const handleClean = () => {
-    setFilters({
-      search: "",
-      priorityOrder: "desc",
-      createdAt: [null, null],
-      status: -1,
-      priority: -1,
-    });
-    setAppliedFilters({
-      search: "",
-      priorityOrder: "desc",
-      createdAt: [null, null],
-      status: -1,
-      priority: -1,
-    });
-    qc.invalidateQueries(["audits"]);
+    setFilters(filterDefaults);
+    setAppliedFilters(filterDefaults);
+    setCurrentFilterCount(0);
+    qc.invalidateQueries([
+      "audits",
+      pagination.currentPage,
+      pagination.perPage,
+      appliedFilters,
+      company?.id,
+      table,
+    ]);
   };
 
   const handleSearch = (event) => {
@@ -168,6 +167,7 @@ const AuditList = () => {
     let count = 0;
     Object.keys(filters).forEach((key) => {
       if (appliedFilters[key] !== filterDefaults[key]) {
+        console.log(appliedFilters[key], filterDefaults[key]);
         count += 1;
       }
     });
@@ -266,7 +266,7 @@ const AuditList = () => {
       );
     }
 
-    if (isLoading) {
+    if (isLoading || isTablesLoading) {
       return (
         <div className="w-full min-h-80 flex items-center justify-center">
           <CircularProgress />

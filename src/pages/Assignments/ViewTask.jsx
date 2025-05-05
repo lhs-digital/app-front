@@ -1,7 +1,9 @@
 import { CalendarToday, OpenInNew, Person } from "@mui/icons-material";
 import {
+  Button,
   Chip,
   Dialog,
+  DialogActions,
   DialogContent,
   Divider,
   FormControl,
@@ -11,14 +13,38 @@ import {
 } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../../services/api";
+import { moduleEndpoints, moduleRoutes } from "../../services/moduleRoutes";
 import { statusInfo, taskStatuses } from "./utils";
 
 const ViewTask = ({ assignment, open, onClose }) => {
-  console.log(assignment);
+  const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState(
     assignment?.status || "not_started",
   );
+
+  const fetchEntityDetails = async (path, id) => {
+    try {
+      const response = await api.get(`/${path}/${id}`);
+      return response.data.data;
+    } catch (error) {
+      if (error.response.status === 404) {
+        return toast.error("Entidade não encontrada");
+      }
+      if (error.response.status === 500) {
+        return toast.error("Erro interno do servidor");
+      }
+      if (error.response.status === 401) {
+        return toast.error("Não autorizado");
+      }
+      if (error.response.status === 403) {
+        return toast.error("Acesso negado");
+      }
+    }
+  };
+
   const { mutate: updateStatus, isPending } = useMutation({
     mutationFn: async (data) => {
       await api.put(`/work_order/${assignment.id}/status`, data);
@@ -33,7 +59,34 @@ const ViewTask = ({ assignment, open, onClose }) => {
     updateStatus({ status: newStatus });
   };
 
-  const handleEntity = () => {};
+  const handleView = (auditRecord) => {
+    console.log("auditRecord", auditRecord);
+    const navigateRoute = [];
+
+    navigateRoute.push(moduleRoutes[auditRecord?.table.name]);
+    navigateRoute.push(auditRecord?.record_id);
+    console.log("navigateRoute", navigateRoute);
+
+    return navigate(`/${navigateRoute.join("/")}`, {
+      state: {
+        edit: true,
+        columns: auditRecord?.columns,
+        recordId: Number(auditRecord?.id),
+        status: auditRecord?.status,
+        companyId: assignment.company?.id,
+      },
+    });
+  };
+
+  const handleEntity = async () => {
+    const response = await fetchEntityDetails(
+      moduleEndpoints[assignment.entity_type].show,
+      assignment.entity_id,
+    );
+    if (response) {
+      handleView(response);
+    }
+  };
 
   return (
     <Dialog
@@ -44,10 +97,6 @@ const ViewTask = ({ assignment, open, onClose }) => {
     >
       <DialogContent className="flex flex-col gap-4 w-96">
         <p className="text-lg font-medium">{assignment?.description}</p>
-        <a href="." className="flex gap-2 items-center w-fit">
-          <OpenInNew fontSize="small" />
-          <p className="underline">Ver entidade</p>
-        </a>
         <Divider />
         <div className="flex items-center gap-4">
           <Person fontSize="small" />
@@ -79,6 +128,15 @@ const ViewTask = ({ assignment, open, onClose }) => {
           </Select>
         </FormControl>
       </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={handleEntity}
+          className="flex gap-2 items-center w-fit"
+        >
+          <OpenInNew fontSize="small" />
+          <p className="underline">Ver entidade</p>
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

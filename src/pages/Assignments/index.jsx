@@ -5,35 +5,39 @@ import { useState } from "react";
 import PageTitle from "../../components/PageTitle";
 import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
+import { hasPermission } from "../../services/utils";
 import CreateTask from "./CreateTask";
 import TaskCard from "./TaskCard";
 import TaskFilter from "./TaskFilter";
 import ViewTask from "./ViewTask";
 
 const Assignments = () => {
+  const user = useUserState().state;
+  const { company } = useCompany();
+  const showContent = user.isLighthouse ? !!company : true;
   const [assignments, setAssignments] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
-  const user = useUserState().state;
-  const showContent = user.isLighthouse ? !!company : true;
   const [selectedAssignment, setSelectedAssignment] = useState(null);
-  const { company } = useCompany();
 
   return (
     <div className="flex flex-col gap-8">
       <PageTitle
-        title="Ordens de serviço"
+        title="Ordens de Serviço"
         icon={<ContentPaste />}
         buttons={[
-          <Button
-            key="add-task"
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setCreateOpen(true)}
-            disabled={!showContent}
-          >
-            ATRIBUIR
-          </Button>,
+          (hasPermission(user.permissions, "create_work_orders") ||
+            user.isLighthouse) && (
+            <Button
+              key="add-task"
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setCreateOpen(true)}
+              disabled={!showContent}
+            >
+              ATRIBUIR
+            </Button>
+          ),
         ]}
       />
       <TaskFilter

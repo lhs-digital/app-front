@@ -1,4 +1,4 @@
-import { Close } from "@mui/icons-material";
+import { BuildCircleOutlined, Close, Save } from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
@@ -73,7 +73,9 @@ const AuditWorkOrder = ({ open, onClose, auditRecord, handleView }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth scroll="body">
       <DialogTitle>
-        {auditRecord?.work_order ? "Detalhes da OS" : "Criar Ordem de Serviço"}
+        {auditRecord?.work_order
+          ? "Detalhes da O.S."
+          : "Criar Ordem de Serviço"}
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -134,6 +136,13 @@ const AuditWorkOrder = ({ open, onClose, auditRecord, handleView }) => {
         <Button
           variant="contained"
           loading={isPending}
+          startIcon={
+            auditRecord?.work_order ? (
+              <BuildCircleOutlined fontSize="small" />
+            ) : (
+              <Save />
+            )
+          }
           onClick={
             auditRecord?.work_order
               ? () => handleView(auditRecord)

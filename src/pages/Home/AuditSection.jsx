@@ -31,8 +31,8 @@ import { useThemeMode } from "../../contexts/themeModeContext";
 import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
 import api from "../../services/api";
-import { handleMode } from "../../theme";
 import { dateFormatted, formatInterval } from "../../services/utils";
+import { handleMode } from "../../theme";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +62,9 @@ const AuditSection = () => {
         audit_interval: updateInterval,
       });
       setIsConfirmModalOpen(false);
-      toast.success(`Intervalo de auditoria atualizado para ${formatInterval(updateInterval)} com sucesso!`);
+      toast.success(
+        `Intervalo de auditoria atualizado para ${formatInterval(updateInterval)} com sucesso!`,
+      );
     } catch (error) {
       console.error("Erro ao atualizar o intervalo de auditoria", error);
       toast.error("Erro ao atualizar o intervalo de auditoria");
@@ -253,80 +255,82 @@ const AuditSection = () => {
               </Select>
             </FormControl>
           </Card>
-          {
-            selectedTableId && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
-              >
-                <FormControl fullWidth>
-                  <InputLabel id="interval">Intervalo de auditoria</InputLabel>
-                  <Select
-                    value={updateInterval || ""}
-                    onChange={handleIntervalChange}
-                    label="Intervalo de auditoria"
-                  >
-                    <MenuItem value={600}>10 minutos</MenuItem>
-                    <MenuItem value={1800}>30 minutos</MenuItem>
-                    <MenuItem value={3600}>1 hora</MenuItem>
-                    <MenuItem value={21600}>6 horas</MenuItem>
-                    <MenuItem value={43200}>12 horas</MenuItem>
-                    <MenuItem value={86400}>1 dia</MenuItem>
-                    <MenuItem value={604800}>1 semana</MenuItem>
-                    <MenuItem value={2592000}>1 mês</MenuItem>
-                    <MenuItem value={31536000}>1 ano</MenuItem>
-                  </Select>
-                </FormControl>
-              </Card>
-            )}
-          {
-            selectedTableId && (
-              <Dialog
-                open={isConfirmModalOpen}
-                onClose={() => setIsConfirmModalOpen(false)}
-                aria-labelledby="confirm-dialog-title"
-                aria-describedby="confirm-dialog-description"
-              >
-                <DialogTitle id="confirm-dialog-title">Confirmar Alteração</DialogTitle>
-                <DialogContent>
-                  <p>
-                    Deseja confirmar a alteração do intervalo de auditoria para
-                    <strong> {formatInterval(updateInterval)}?</strong>
-                  </p>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={() => setIsConfirmModalOpen(false)} color="error">
-                    Cancelar
-                  </Button>
-                  <Button onClick={confirmIntervalChange} color="primary">
-                    Confirmar
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            )
-          }
-          {
-            selectedTableId && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
-              >
-                <p>Última auditoria</p>
-                <p className="text-xl font-bold">{dateFormatted(dataLastAudit)}</p>
-              </Card>
-            )}
-          {
-            selectedTableId && (
-              <Card
-                className="p-4 flex flex-col gap-2 justify-center"
-                variant="outlined"
-              >
-                <p>Entidades auditadas</p>
-                <p className="text-lg lg:text-2xl font-bold">
-                  {stats.audittedEntities}
+          {selectedTableId && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <FormControl fullWidth>
+                <InputLabel id="interval">Intervalo de auditoria</InputLabel>
+                <Select
+                  value={updateInterval || ""}
+                  onChange={handleIntervalChange}
+                  label="Intervalo de auditoria"
+                >
+                  <MenuItem value={600}>10 minutos</MenuItem>
+                  <MenuItem value={1800}>30 minutos</MenuItem>
+                  <MenuItem value={3600}>1 hora</MenuItem>
+                  <MenuItem value={21600}>6 horas</MenuItem>
+                  <MenuItem value={43200}>12 horas</MenuItem>
+                  <MenuItem value={86400}>1 dia</MenuItem>
+                  <MenuItem value={604800}>1 semana</MenuItem>
+                  <MenuItem value={2592000}>1 mês</MenuItem>
+                  <MenuItem value={31536000}>1 ano</MenuItem>
+                </Select>
+              </FormControl>
+            </Card>
+          )}
+          {selectedTableId && (
+            <Dialog
+              open={isConfirmModalOpen}
+              onClose={() => setIsConfirmModalOpen(false)}
+              aria-labelledby="confirm-dialog-title"
+              aria-describedby="confirm-dialog-description"
+            >
+              <DialogTitle id="confirm-dialog-title">
+                Confirmar Alteração
+              </DialogTitle>
+              <DialogContent>
+                <p>
+                  Deseja confirmar a alteração do intervalo de auditoria para
+                  <strong> {formatInterval(updateInterval)}?</strong>
                 </p>
-              </Card>
-            )}
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  color="error"
+                >
+                  Cancelar
+                </Button>
+                <Button onClick={confirmIntervalChange} color="primary">
+                  Confirmar
+                </Button>
+              </DialogActions>
+            </Dialog>
+          )}
+          {selectedTableId && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <p>Última auditoria</p>
+              <p className="text-xl font-bold">
+                {dateFormatted(dataLastAudit)}
+              </p>
+            </Card>
+          )}
+          {selectedTableId && (
+            <Card
+              className="p-4 flex flex-col gap-2 justify-center"
+              variant="outlined"
+            >
+              <p>Entidades auditadas</p>
+              <p className="text-lg lg:text-2xl font-bold">
+                {stats.audittedEntities}
+              </p>
+            </Card>
+          )}
           {hasPermission(["report_generate"]) && (
             <Card
               className="p-4 flex flex-col gap-2 justify-center"
