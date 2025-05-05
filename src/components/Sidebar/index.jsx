@@ -10,7 +10,6 @@ import {
   FaRegSun,
   FaTimes,
   FaUserAlt,
-  FaUsers
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useUserState } from "../../hooks/useUserState";
@@ -35,13 +34,18 @@ const Sidebar = ({ active }) => {
   const rolesPermissions = [
     "view_roles",
     "view_any_roles",
+    "create_roles",
     "update_roles",
     "delete_roles",
+    "view_from_company",
+    "view_tasks"
   ];
   //eslint-disable-next-line
   const auditoriaPermissions = ["view_any_tasks", "update_tasks"];
   const relatorioPermissions = ["view_any_reports", "report_generate"];
+  const osPermissions = ["view_any_work_orders", "update_work_orders", "create_work_orders", "view_work_orders", "delete_work_orders", "assign_work_orders", "be_assigned_work_orders"];
   const defineRules = ["define_rules"];
+  const logPermissions = ["view_any_logs"];
 
   const sidebarRef = useRef();
 
@@ -91,9 +95,6 @@ const Sidebar = ({ active }) => {
             <SidebarItem Icon={FaUserAlt} Text="Usuários" />
           </Link>
         ) : null}
-        <Link to="/hierarquia">
-          <SidebarItem Icon={FaUsers} Text="Hierarquia" />
-        </Link>
         <Link to="/clientes">
           <SidebarItem Icon={FaFolder} Text="Clientes" />
         </Link>
@@ -110,14 +111,16 @@ const Sidebar = ({ active }) => {
         <Link to="/permissoes">
           <SidebarItem Icon={FaRegSun} Text="Minhas Permissões" />
         </Link>
-        {hasPermission("view_any_logs") ? (
+        {hasPermission(logPermissions) ? (
           <Link to="/logs">
             <SidebarItem Icon={FaBook} Text="Logs" />
           </Link>
         ) : null}
-        <Link to={"/atribuicoes"}>
-          <SidebarItem Icon={FaBook} Text="Ordens de serviço" />
-        </Link>
+        {hasPermission(osPermissions) ? (
+          <Link to={"/atribuicoes"}>
+            <SidebarItem Icon={FaBook} Text="Ordens de serviço" />
+          </Link>
+        ) : null}
       </Content>
     </Container>
   );

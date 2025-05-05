@@ -121,14 +121,16 @@ const Clients = () => {
         title="Clientes"
         subtitle="Administre, edite e remova clientes conforme necessário"
         buttons={
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={() => navigate("/clientes/novo")}
-          >
-            NOVO CADASTRO
-          </Button>
+          hasPermission(permissions, "create_clients") && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={() => navigate("/clientes/novo")}
+            >
+              NOVO CADASTRO
+            </Button>
+          )
         }
       />
       <div className="grid grid-cols-3 lg:grid-cols-8 gap-4">

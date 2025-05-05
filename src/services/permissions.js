@@ -1,6 +1,12 @@
 const permissions = {
   "/painel": [],
-  "/auditorias": ["view_any_tasks", "update_tasks"],
+  "/auditorias": [
+    "view_any_tasks",
+    "update_tasks",
+    "view_any_reports",
+    "report_generate",
+    "define_rules"
+  ],
   "/empresas": [
     "view_companies",
     "view_any_companies",
@@ -14,6 +20,8 @@ const permissions = {
     "create_roles",
     "update_roles",
     "delete_roles",
+    "view_from_company",
+    "view_tasks",
   ],
   "/usuarios": [
     "view_users",
@@ -21,6 +29,8 @@ const permissions = {
     "create_users",
     "update_users",
     "delete_users",
+    "assign_responsible_users",
+    "unassign_responsible_users",
   ],
   "/clientes": [
     "view_clients",
@@ -30,10 +40,18 @@ const permissions = {
     "delete_clients",
   ],
   "/clientes/criar": ["create_clients"],
-  "/atribuicoes": [],
+  "/atribuicoes": [
+    "view_any_work_orders",
+    "view_work_orders",
+    "update_work_orders", 
+    "create_work_orders",
+    "delete_work_orders",
+    "assign_work_orders",
+    "be_assigned_work_orders",
+  ],
   "/prioridades": ["define_rules"],
   "/permissoes": [],
-  "/logs": [],
+  "/logs": ["view_any_logs"],
   "/regras": ["define_rules"],
   "/regras/criar": ["create_audit_rules"],
 };
