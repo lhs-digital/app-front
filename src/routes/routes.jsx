@@ -21,6 +21,7 @@ import SignIn from "../pages/SignIn";
 import Users from "../pages/Users";
 import { pagePermissions } from "../services/permissions";
 import { RouteIcon } from "./icons";
+import FinancialAuditView from "../pages/FinancialView";
 
 const publicRoutes = [
   {
@@ -109,6 +110,12 @@ export const privateSubRoutes = [
     label: "Cliente",
     path: "/clientes/:id",
     element: <ClientView />,
+    super: true,
+  },
+  {
+    label: "Financeiro",
+    path: "/financeiro/:id",
+    element: <FinancialAuditView />,
     super: true,
   },
   {
