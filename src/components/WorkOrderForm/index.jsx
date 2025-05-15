@@ -4,7 +4,7 @@ import {
   PersonOutline,
 } from "@mui/icons-material";
 import { Chip, Divider } from "@mui/material";
-import { statusInfo } from "../../pages/Assignments/utils";
+import { statusInfo } from "../../modules/base/WorkOrder/utils";
 
 const WorkOrderForm = ({ assignment, compact = false }) => {
   return (

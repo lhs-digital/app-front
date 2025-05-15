@@ -1,27 +1,26 @@
 import { createBrowserRouter } from "react-router-dom";
 import PrivateRoute from "../layout/PrivateRoute";
 import PublicRoute from "../layout/PublicRoute";
-import Assignments from "../pages/Assignments";
-import AuditList from "../pages/AuditList";
-import AuditRules from "../pages/AuditRules";
-import Clients from "../pages/Clients";
-import ClientView from "../pages/ClientView";
-import Companies from "../pages/Companies";
-import FirstAccess from "../pages/FirstAccess";
-import Home from "../pages/Home";
-import Logout from "../pages/Logout";
-import Logs from "../pages/Logs";
-import MyPermissions from "../pages/MyPermissions";
-import PasswordUpdate from "../pages/PasswordUpdate";
-import Priorities from "../pages/Priorities";
-import RecoverPassword from "../pages/RecoverPassword";
-import Roles from "../pages/Roles";
-import RoleView from "../pages/RoleView";
-import SignIn from "../pages/SignIn";
-import Users from "../pages/Users";
+import WorkOrder from "../modules/base/WorkOrder";
+import AuditList from "../modules/audit/AuditList";
+import AuditRules from "../modules/audit/AuditRules";
+import Clients from "../modules/base/Clients";
+import ClientView from "../modules/base/ClientView";
+import Companies from "../modules/lighthouse/Companies";
+import FinancialAuditView from "../modules/base/FinancialView";
+import FirstAccess from "../modules/base/FirstAccess";
+import Home from "../modules/base/Home";
+import Logout from "../modules/public/Logout";
+import Logs from "../modules/lighthouse/Logs";
+import MyPermissions from "../modules/base/MyPermissions";
+import PasswordUpdate from "../modules/public/PasswordUpdate";
+import RecoverPassword from "../modules/public/RecoverPassword";
+import Roles from "../modules/base/Roles";
+import RoleView from "../modules/base/RoleView";
+import SignIn from "../modules/public/SignIn";
+import Users from "../modules/base/Users";
 import { pagePermissions } from "../services/permissions";
-import { RouteIcon } from "./icons";
-import FinancialAuditView from "../pages/FinancialView";
+import { RouteIcon } from "../layout/components/RouteIcon";
 
 const publicRoutes = [
   {
@@ -81,7 +80,7 @@ export const privateRoutes = [
   {
     label: "Ordens de Serviço",
     path: "/atribuicoes",
-    element: <Assignments />,
+    element: <WorkOrder />,
   },
   // {
   //   label: "Regras de Auditorias",

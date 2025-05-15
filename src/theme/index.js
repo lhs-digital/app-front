@@ -16,7 +16,7 @@ const lightPalette = {
   },
   info: {
     main: "#7d7d7d",
-    light: "#a8a8a8",
+    light: "#a8a8a8", 
     dark: "#545454",
     contrastText: "#FFF",
   },
