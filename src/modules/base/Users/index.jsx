@@ -1,4 +1,3 @@
-import { useDisclosure } from "@chakra-ui/react";
 import {
   Add,
   Delete,
@@ -32,36 +31,16 @@ import {
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
-import ModalComp from "./components/ModalComp";
 import ModalDelete from "../../../components/ModalDelete";
+import { useUserState } from "../../../hooks/useUserState";
+import PageTitle from "../../../layout/components/PageTitle";
+import api from "../../../services/api";
+import ModalComp from "./components/ModalComp";
 import ModalHierarchy from "./components/ModalHierarchy";
 import ModalView from "./components/ModalView";
-import PageTitle from "../../../layout/components/PageTitle";
-import { useUserState } from "../../../hooks/useUserState";
-import api from "../../../services/api";
 
 const Users = () => {
   const [viewOnly, setViewOnly] = useState(false);
-  const {
-    isOpen: isCreateOpen,
-    onOpen: onOpenCreate,
-    onClose: onCloseCreate,
-  } = useDisclosure();
-  const {
-    isOpen: isHierarchyOpen,
-    onOpen: onOpenHierarchy,
-    onClose: onHierarchyClose,
-  } = useDisclosure();
-  const {
-    isOpen: isDeleteOpen,
-    onOpen: onOpenDelete,
-    onClose: onCloseDelete,
-  } = useDisclosure();
-  const {
-    isOpen: isViewOpen,
-    onOpen: onOpenView,
-    onClose: onCloseView,
-  } = useDisclosure();
   const [data, setData] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [dataEdit, setDataEdit] = useState({});
@@ -72,6 +51,23 @@ const Users = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [desHierarchy, setDesHierarchy] = useState(false);
   const [viewHierarchy, setViewHierarchy] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isHierarchyOpen, setIsHierarchyOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+
+  const onOpenCreate = () => setIsCreateOpen(true);
+  const onCloseCreate = () => setIsCreateOpen(false);
+
+  const onOpenHierarchy = () => setIsHierarchyOpen(true);
+  const onHierarchyClose = () => setIsHierarchyOpen(false);
+
+  const onOpenDelete = () => setIsDeleteOpen(true);
+  const onCloseDelete = () => setIsDeleteOpen(false);
+
+  const onOpenView = () => setIsViewOpen(true);
+  const onCloseView = () => setIsViewOpen(false);
+
   //eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
@@ -214,69 +210,69 @@ const Users = () => {
       }}
     >
       {/* Visualizar equipe: Qualquer uma das permissões */}
-      {(permissions.some(
+      {permissions.some(
         (permission) =>
           permission.name === "assign_responsible_users" ||
-          permission.name === "unassign_responsible_users"
-      )) && (
-          <MenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewHierarchy();
-            }}
-          >
-            <ListItemIcon>
-              <Groups fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Visualizar equipe</ListItemText>
-          </MenuItem>
-        )}
+          permission.name === "unassign_responsible_users",
+      ) && (
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            handleViewHierarchy();
+          }}
+        >
+          <ListItemIcon>
+            <Groups fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Visualizar equipe</ListItemText>
+        </MenuItem>
+      )}
 
       {/* Adicionar membro: Permissão específica */}
       {permissions.some(
-        (permission) => permission.name === "assign_responsible_users"
+        (permission) => permission.name === "assign_responsible_users",
       ) && (
-          <MenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              handleHierarchy();
-            }}
-          >
-            <ListItemIcon>
-              <GroupAddIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Adicionar membro</ListItemText>
-          </MenuItem>
-        )}
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            handleHierarchy();
+          }}
+        >
+          <ListItemIcon>
+            <GroupAddIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Adicionar membro</ListItemText>
+        </MenuItem>
+      )}
 
       {/* Remover membro: Permissão específica */}
       {permissions.some(
-        (permission) => permission.name === "unassign_responsible_users"
+        (permission) => permission.name === "unassign_responsible_users",
       ) && (
-          <MenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDesHierarchy();
-            }}
-          >
-            <ListItemIcon>
-              <GroupRemoveIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Remover membro</ListItemText>
-          </MenuItem>
-        )}
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDesHierarchy();
+          }}
+        >
+          <ListItemIcon>
+            <GroupRemoveIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Remover membro</ListItemText>
+        </MenuItem>
+      )}
     </Menu>
   );
 
   const renderButtons = () => {
     const canCreateUsers = permissions.some(
-      (permission) => permission.name === "create_users"
+      (permission) => permission.name === "create_users",
     );
 
     const canManageTeam = permissions.some(
       (permission) =>
         permission.name === "assign_responsible_users" ||
-        permission.name === "unassign_responsible_users"
+        permission.name === "unassign_responsible_users",
     );
 
     return (
@@ -469,11 +465,11 @@ const Users = () => {
             {(!search
               ? data
               : data.filter(
-                (user) =>
-                  user.name.toLowerCase().includes(search.toLowerCase()) ||
-                  user.email.toLowerCase().includes(search.toLowerCase()) ||
-                  user.role.name.toLowerCase().includes(search.toLowerCase()),
-              )
+                  (user) =>
+                    user.name.toLowerCase().includes(search.toLowerCase()) ||
+                    user.email.toLowerCase().includes(search.toLowerCase()) ||
+                    user.role.name.toLowerCase().includes(search.toLowerCase()),
+                )
             ).map(({ name, email, role, company, id, responsible }, index) => (
               <TableRow
                 key={index}
@@ -515,27 +511,27 @@ const Users = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(index);
-                        }}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    )}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(index);
+                      }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(id);
-                        }}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    )}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(id);
+                      }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  )}
                   {/* {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (

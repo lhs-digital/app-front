@@ -1,7 +1,9 @@
-import { Logout, Menu } from "@mui/icons-material";
+import { ExpandLess, ExpandMore, Logout, Menu } from "@mui/icons-material";
 import {
   Avatar,
+  Collapse,
   colors,
+  Divider,
   IconButton,
   List,
   ListItem,
@@ -20,6 +22,7 @@ import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
 import { modules } from "../../routes/modules";
 import { handleMode } from "../../theme";
+import { routeIcon } from "./RouteIcon";
 
 const drawerWidth = 320;
 
@@ -69,11 +72,11 @@ const Drawer = styled(MuiDrawer, {
   ],
 }));
 
-const Sidebar = () => {
-  const [open, setOpen] = useState(false);
+const Sidebar = ({ open, setOpen }) => {
   const user = useAuthUser();
   const signOut = useSignOut();
   const theme = handleMode(useThemeMode().mode);
+  const [collapsedChildren, setCollapsedChildren] = useState({});
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
   const isActive = (url) => window.location.pathname === url;
@@ -92,70 +95,125 @@ const Sidebar = () => {
     );
   };
 
+  const openChildren = (key) => {
+    const isOpen = collapsedChildren[key] || false;
+    setCollapsedChildren((prev) => ({
+      ...prev,
+      [key]: !isOpen,
+    }));
+  };
+
+  const renderRouteItem = (item) => {
+    if (item?.permissions && item?.permissions.length > 0) {
+      if (!hasPermission(item?.permissions)) {
+        return null;
+      }
+    }
+
+    const hasChildren = item.children && item.children.length > 0;
+    const isItemOpen = collapsedChildren[item.label] || false;
+    const isPathActive = item.path && isActive(item.path);
+
+    return (
+      <ListItem disablePadding key={item.path || item.label}>
+        <ListItemButton
+          color="primary"
+          disableGutters
+          onClick={
+            hasChildren
+              ? () => openChildren(item.label)
+              : () => item.path && navigate(item.path)
+          }
+          selected={isPathActive}
+          sx={[
+            { minHeight: 48, px: 3 },
+            open ? { justifyContent: "initial" } : { justifyContent: "center" },
+          ]}
+        >
+          <ListItemIcon
+            color="primary"
+            sx={[
+              { minWidth: 0, justifyContent: "center" },
+              open ? { mr: 2 } : { mr: 0 },
+              isItemOpen ? { opacity: 0.5 } : { opacity: 1 },
+              isPathActive && {
+                color: colors.grey[theme === "light" ? 900 : 200],
+              },
+            ]}
+          >
+            {routeIcon(item, isPathActive || isItemOpen)}
+          </ListItemIcon>
+          {open && (
+            <>
+              <ListItemText primary={item.label} />
+              {hasChildren && (isItemOpen ? <ExpandLess /> : <ExpandMore />)}
+            </>
+          )}
+        </ListItemButton>
+      </ListItem>
+    );
+  };
+
+  const renderModule = (items = []) => {
+    if (!items || items.length === 0) return null;
+
+    return items.map((item) => {
+      if (
+        item?.permissions &&
+        item?.permissions.length > 0 &&
+        !hasPermission(item?.permissions)
+      ) {
+        return null;
+      }
+
+      const isItemOpen = collapsedChildren[item.label] || false;
+      const hasChildren = item.children && item.children.length > 0;
+
+      return (
+        <div key={item.path || item.label}>
+          <Tooltip title={!open ? item.label : ""} placement="right" arrow>
+            {renderRouteItem(item)}
+          </Tooltip>
+          {hasChildren && (
+            <Collapse
+              in={collapsedChildren[item.label] || false}
+              timeout="auto"
+              unmountOnExit
+            >
+              <List component="div" disablePadding>
+                {renderModule(item.children)}
+              </List>
+            </Collapse>
+          )}
+          {isItemOpen && <Divider />}
+        </div>
+      );
+    });
+  };
+
   return (
     <Drawer
       variant="permanent"
       anchor="left"
       open={open}
       onClose={() => setOpen(false)}
-      PaperProps={{ style: { borderRadius: 0 } }}
+      slotProps={{
+        paper: { style: { borderRadius: 0 } },
+      }}
     >
       <div className="h-16 p-4 w-full flex flex-row items-center border-b border-b-black/10 dark:border-b-white/15 justify-end">
         <IconButton size="small" onClick={() => setOpen(!open)}>
           <Menu />
         </IconButton>
       </div>
-      <List className="grow">
-        {modules.map((item, index) => {
-          if (
-            item?.permissions &&
-            item?.permissions.length > 0 &&
-            !hasPermission(item?.permissions)
-          ) {
-            return null;
-          }
-          return (
-            <Tooltip
-              title={item.label}
-              key={index}
-              hidden={!open}
-              placement="right"
-            >
-              <ListItem disablePadding>
-                <ListItemButton
-                  onClick={() => navigate(item.path)}
-                  selected={isActive(item.path)}
-                  sx={[
-                    { minHeight: 48, px: 3 },
-                    open
-                      ? { justifyContent: "initial" }
-                      : { justifyContent: "center" },
-                  ]}
-                >
-                  <ListItemIcon
-                    sx={[
-                      { minWidth: 0, justifyContent: "center" },
-                      open ? { mr: 3 } : { mr: "auto" },
-                      isActive(item.path) && {
-                        color: colors.grey[theme === "light" ? 900 : 200],
-                      },
-                    ]}
-                  >
-                    {isActive(item.path) ? item.activeIcon : item.icon}
-                  </ListItemIcon>
-                  {open && <ListItemText primary={item.label} />}
-                </ListItemButton>
-              </ListItem>
-            </Tooltip>
-          );
-        })}
-      </List>
+      {renderModule(modules)}
+      <Divider />
       {open ? (
-        <div className="p-4">
+        <div className="p-2 w-full flex flex-row items-center justify-between gap-2">
           <button
             aria-label="Perfil"
             onClick={() => navigate("/permissoes")}
-            className="w-full text-left p-2 flex flex-row items-center border rounded-lg gap-2 hover:bg-gray-50"
+            className="flex flex-row gap-4 text-left hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg p-2 pr-3"
           >
             <Avatar
               src={user?.avatar}
@@ -167,21 +225,26 @@ const Sidebar = () => {
               <p className="text-sm">{user?.company?.name}</p>
             </div>
           </button>
+          <IconButton color="info" onClick={handleLogout}>
+            <Logout fontSize="small" />
+          </IconButton>
         </div>
       ) : (
-        <div className="p-2 mx-auto">
-          <Avatar
-            src={user?.user?.avatar}
-            alt="Avatar"
-            sx={{ width: 32, height: 32 }}
-          />
+        <div className="p-2 py-4 mx-auto flex flex-col gap-4">
+          <Tooltip title={user?.name} placement="right" arrow>
+            <Avatar
+              src={user?.user?.avatar}
+              alt="Avatar"
+              sx={{ width: 32, height: 32 }}
+            />
+          </Tooltip>
+          <Tooltip title="Sair" placement="right" arrow>
+            <IconButton color="info" onClick={handleLogout}>
+              <Logout fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </div>
       )}
-      <div className="py-2 flex flex-col items-center justify-center">
-        <IconButton color="info" onClick={handleLogout}>
-          <Logout fontSize="small" />
-        </IconButton>
-      </div>
     </Drawer>
   );
 };

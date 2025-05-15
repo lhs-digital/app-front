@@ -1,5 +1,6 @@
 import { HomeOutlined, NavigateNext } from "@mui/icons-material";
 import { Box, Breadcrumbs } from "@mui/material";
+import { useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { Link } from "react-router-dom";
 import blackLogo from "../assets/lh_black.svg";
@@ -14,10 +15,11 @@ const Layout = ({ children }) => {
   const user = useAuthUser();
   const theme = handleMode(useThemeMode().mode);
   const location = window.location.pathname.split("/").slice(1);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden">
-      <Sidebar />
+      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="grow flex flex-col">
         <div className="h-16 border-b border-b-black/10 dark:border-b-white/15 flex flex-row items-center justify-between px-4">
           <Box className="flex flex-row gap-2 items-center">
@@ -32,7 +34,13 @@ const Layout = ({ children }) => {
             <ThemeSwitcher />
           </div>
         </div>
-        <div className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll w-[calc(100vw-64px)] space-y-6">
+        <div
+          className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6"
+          style={{
+            width: sidebarOpen ? "calc(100vw - 320px)" : "calc(100vw - 65px)",
+            transition: "width 0.3s ease-in-out",
+          }}
+        >
           {location[0] !== "painel" && (
             <Breadcrumbs
               aria-label="breadcrumb"

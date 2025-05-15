@@ -1,26 +1,25 @@
 import { createBrowserRouter } from "react-router-dom";
-import PrivateRoute from "../layout/PrivateRoute";
-import PublicRoute from "../layout/PublicRoute";
-import WorkOrder from "../modules/base/WorkOrder";
 import AuditList from "../modules/audit/AuditList";
 import AuditRules from "../modules/audit/AuditRules";
 import Clients from "../modules/base/Clients";
 import ClientView from "../modules/base/ClientView";
-import Companies from "../modules/lighthouse/Companies";
 import FinancialAuditView from "../modules/base/FinancialView";
 import FirstAccess from "../modules/base/FirstAccess";
 import Home from "../modules/base/Home";
-import Logout from "../modules/public/Logout";
-import Logs from "../modules/lighthouse/Logs";
 import MyPermissions from "../modules/base/MyPermissions";
-import PasswordUpdate from "../modules/public/PasswordUpdate";
-import RecoverPassword from "../modules/public/RecoverPassword";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
-import SignIn from "../modules/public/SignIn";
 import Users from "../modules/base/Users";
+import WorkOrder from "../modules/base/WorkOrder";
+import Companies from "../modules/lighthouse/Companies";
+import Logs from "../modules/lighthouse/Logs";
+import Logout from "../modules/public/Logout";
+import PasswordUpdate from "../modules/public/PasswordUpdate";
+import RecoverPassword from "../modules/public/RecoverPassword";
+import SignIn from "../modules/public/SignIn";
 import { pagePermissions } from "../services/permissions";
-import { RouteIcon } from "../layout/components/RouteIcon";
+import PrivateRoute from "./components/PrivateRoute";
+import PublicRoute from "./components/PublicRoute";
 
 const publicRoutes = [
   {
@@ -123,13 +122,6 @@ export const privateSubRoutes = [
     element: <RoleView />,
   },
 ];
-
-export const navigationRoutes = privateRoutes.map((route) => ({
-  ...route,
-  icon: RouteIcon({ path: route.path }).icon,
-  activeIcon: RouteIcon({ path: route.path }).activeIcon,
-  permissions: pagePermissions(route.path),
-}));
 
 export const AppRoutes = createBrowserRouter([
   {

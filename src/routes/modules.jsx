@@ -1,6 +1,8 @@
 import {
-  AssignmentTurnedIn,
-  AssignmentTurnedInOutlined,
+  Assignment,
+  AssignmentLate,
+  AssignmentLateOutlined,
+  AssignmentOutlined,
   Build,
   BuildOutlined,
   Home as HomeIcon,
@@ -9,10 +11,14 @@ import {
   LockOutlined,
   Person,
   PersonOutline,
+  PieChart,
+  PieChartOutlined,
   RuleFolder,
   RuleFolderOutlined,
-  Settings,
-  SettingsOutlined,
+  Shield,
+  ShieldOutlined,
+  Store,
+  StoreOutlined,
   Subject,
   TableChart,
   TableChartOutlined,
@@ -20,7 +26,6 @@ import {
 import AuditList from "../modules/audit/AuditList";
 import AuditRules from "../modules/audit/AuditRules";
 import Home from "../modules/base/Home";
-import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
@@ -28,14 +33,16 @@ import Companies from "../modules/lighthouse/Companies";
 import Logs from "../modules/lighthouse/Logs";
 
 const auditModule = {
-  title: "Auditoria",
+  label: "Auditoria",
+  icon: BuildOutlined,
+  activeIcon: Build,
   children: [
     {
       label: "Itens auditados",
       path: "/auditorias",
       element: <AuditList />,
-      icon: BuildOutlined,
-      activeIcon: Build,
+      icon: AssignmentLateOutlined,
+      activeIcon: AssignmentLate,
     },
     {
       label: "Regras",
@@ -55,21 +62,23 @@ const auditModule = {
 };
 
 const baseModule = {
-  title: "Início",
+  label: "Início",
+  icon: HomeOutlined,
+  activeIcon: HomeIcon,
   children: [
     {
-      label: "Início",
+      label: "Painel",
       path: "/painel",
       element: <Home />,
-      icon: HomeOutlined,
-      activeIcon: HomeIcon,
+      icon: PieChartOutlined,
+      activeIcon: PieChart,
     },
     {
       label: "Ordens de Serviço",
       path: "/atribuicoes",
       element: <WorkOrder />,
-      icon: AssignmentTurnedInOutlined,
-      activeIcon: AssignmentTurnedIn,
+      icon: AssignmentOutlined,
+      activeIcon: Assignment,
     },
     {
       label: "Papéis & Permissões",
@@ -86,13 +95,6 @@ const baseModule = {
       activeIcon: Person,
     },
     {
-      label: "Minhas Permissões",
-      path: "/permissoes",
-      element: <MyPermissions />,
-      icon: SettingsOutlined,
-      activeIcon: Settings,
-    },
-    {
       label: "Logs",
       path: "/logs",
       element: <Logs />,
@@ -103,12 +105,16 @@ const baseModule = {
 };
 
 const lighthouseModule = {
-  title: "Administração",
+  label: "Administração",
+  icon: ShieldOutlined,
+  activeIcon: Shield,
   children: [
     {
       label: "Empresas",
       path: "/empresas",
       element: <Companies />,
+      icon: StoreOutlined,
+      activeIcon: Store,
     },
   ],
 };

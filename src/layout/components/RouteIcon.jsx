@@ -1,15 +1,11 @@
-import { Subject } from "@mui/icons-material";
-
 const iconStyles = {
   fontSize: "small",
 };
 
-export const RouteIcon = ({ route }) => {
-  const Icon = route.icon || Subject;
-  const ActiveIcon = route.activeIcon || Subject;
-
-  return {
-    icon: <Icon {...iconStyles} />,
-    activeIcon: <ActiveIcon {...iconStyles} />,
-  };
+export const routeIcon = (item, active) => {
+  if (!item) return null;
+  const { icon: Icon, activeIcon: ActiveIcon } = item;
+  if (!Icon) return null;
+  if (!ActiveIcon) return <Icon {...iconStyles} />;
+  return active ? <ActiveIcon {...iconStyles} /> : <Icon {...iconStyles} />;
 };
