@@ -5,7 +5,8 @@ const permissions = {
     "update_tasks",
     "view_any_reports",
     "report_generate",
-    "define_rules"
+    "define_rules",
+    "view_tasks",
   ],
   "/empresas": [
     "view_companies",
@@ -21,7 +22,6 @@ const permissions = {
     "update_roles",
     "delete_roles",
     "view_from_company",
-    "view_tasks",
   ],
   "/usuarios": [
     "view_users",
@@ -43,7 +43,7 @@ const permissions = {
   "/atribuicoes": [
     "view_any_work_orders",
     "view_work_orders",
-    "update_work_orders", 
+    "update_work_orders",
     "create_work_orders",
     "delete_work_orders",
     "assign_work_orders",

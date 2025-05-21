@@ -1,10 +1,13 @@
 import { CircularProgress } from "@mui/material";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useUserState } from "../../hooks/useUserState";
 import Layout from "../../layout/";
+import { routePermissions } from "../modules";
 
-const PrivateRoute = ({ allowedPermissions = [], ...rest }) => {
+const PrivateRoute = () => {
+  const location = useLocation();
+  const allowedPermissions = routePermissions(location.pathname);
   const isAuthenticated = useIsAuthenticated();
   const { state, userStateIsFetching } = useUserState();
 
@@ -22,15 +25,13 @@ const PrivateRoute = ({ allowedPermissions = [], ...rest }) => {
       allowedPermissions.includes(permission.name),
     );
 
-  const hasAccess = isAuthenticated && hasPermissionAccess;
-
-  if (!hasAccess) {
+  if (!isAuthenticated || !hasPermissionAccess) {
     return <Navigate to="/" />;
   }
 
   return (
     <Layout>
-      <Outlet {...rest} />
+      <Outlet />
     </Layout>
   );
 };

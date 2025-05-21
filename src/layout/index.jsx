@@ -1,20 +1,31 @@
 import { HomeOutlined, NavigateNext } from "@mui/icons-material";
 import { Box, Breadcrumbs } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { Link } from "react-router-dom";
+import { Link, matchPath, useLocation } from "react-router-dom";
 import blackLogo from "../assets/lh_black.svg";
 import whiteLogo from "../assets/lh_white.svg";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { useThemeMode } from "../contexts/themeModeContext";
-import { privateRoutes, privateSubRoutes } from "../routes/routes";
+import { modules, unrenderedRoutes } from "../routes/modules";
 import { handleMode } from "../theme";
 import Sidebar from "./components/Sidebar";
 
 const Layout = ({ children }) => {
   const user = useAuthUser();
   const theme = handleMode(useThemeMode().mode);
-  const location = window.location.pathname.split("/").slice(1);
+  const location = useLocation();
+  const pathnames = location.pathname.split("/").filter(Boolean);
+  const flatRoutes = useMemo(() => {
+    const flatten = (items) =>
+      items.reduce((acc, item) => {
+        if (item.path && item.label)
+          acc.push({ path: item.path, label: item.label });
+        if (item.children) acc = acc.concat(flatten(item.children));
+        return acc;
+      }, []);
+    return flatten([...modules, ...unrenderedRoutes]);
+  }, []);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -41,7 +52,7 @@ const Layout = ({ children }) => {
             transition: "width 0.3s ease-in-out",
           }}
         >
-          {location[0] !== "painel" && (
+          {pathnames.length > 0 && pathnames[0] !== "painel" && (
             <Breadcrumbs
               aria-label="breadcrumb"
               className="items-center"
@@ -59,20 +70,19 @@ const Layout = ({ children }) => {
               >
                 <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
               </Link>
-              {location.map((path, index) => {
+              {pathnames.map((_, index) => {
+                const to = `/${pathnames.slice(0, index + 1).join("/")}`;
+                const match = flatRoutes.find((r) =>
+                  matchPath({ path: r.path, end: true }, to),
+                );
+                const label = match?.label || pathnames[index];
                 return (
                   <Link
-                    key={index}
-                    to={`/${location.slice(0, index + 1).join("/")}`}
+                    key={to}
+                    to={to}
                     className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color] hover:underline"
                   >
-                    {
-                      [...privateRoutes, ...privateSubRoutes].find(
-                        (route) =>
-                          route.path === `/${path}` ||
-                          route.path === `/${location[index - 1]}/:id`,
-                      )?.label
-                    }
+                    {label}
                   </Link>
                 );
               })}

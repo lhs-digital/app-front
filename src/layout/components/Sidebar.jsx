@@ -20,7 +20,7 @@ import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { useNavigate } from "react-router-dom";
 import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
-import { modules } from "../../routes/modules";
+import { modules, routes } from "../../routes/modules";
 import { handleMode } from "../../theme";
 import { routeIcon } from "./RouteIcon";
 
@@ -80,7 +80,7 @@ const Sidebar = ({ open, setOpen }) => {
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
   const isActive = (url) => window.location.pathname === url;
-
+  console.log(routes);
   const handleLogout = async () => {
     signOut();
     navigate("/");
@@ -110,7 +110,9 @@ const Sidebar = ({ open, setOpen }) => {
       }
     }
 
-    const hasChildren = item.children && item.children.length > 0;
+    const hasChildren =
+      item.children &&
+      item.children.filter((child) => !child.hidden).length > 0;
     const isItemOpen = collapsedChildren[item.label] || false;
     const isPathActive = item.path && isActive(item.path);
 
@@ -206,7 +208,7 @@ const Sidebar = ({ open, setOpen }) => {
           <Menu />
         </IconButton>
       </div>
-      {renderModule(modules)}
+      <div className="grow overflow-y-scroll">{renderModule(modules)}</div>
       <Divider />
       {open ? (
         <div className="p-2 w-full flex flex-row items-center justify-between gap-2">
