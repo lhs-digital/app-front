@@ -20,7 +20,7 @@ import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { useNavigate } from "react-router-dom";
 import { useThemeMode } from "../../contexts/themeModeContext";
 import { useUserState } from "../../hooks/useUserState";
-import { modules, routes } from "../../routes/modules";
+import { modules } from "../../routes/modules";
 import { handleMode } from "../../theme";
 import { routeIcon } from "./RouteIcon";
 
@@ -80,7 +80,6 @@ const Sidebar = ({ open, setOpen }) => {
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
   const isActive = (url) => window.location.pathname === url;
-  console.log(routes);
   const handleLogout = async () => {
     signOut();
     navigate("/");
