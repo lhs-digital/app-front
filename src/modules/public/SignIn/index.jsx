@@ -4,6 +4,7 @@ import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Lighthouse from "../../../assets/favicon_neutral.svg";
+import CompanyPicker from "../../../components/CompanyPicker";
 import { useUserState } from "../../../hooks/useUserState";
 import api from "../../../services/api";
 import { formatUserObject } from "../../../services/utils";
@@ -13,12 +14,26 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [companyPickerOpen, setCompanyPickerOpen] = useState(false);
   const signIn = useSignIn();
   const navigate = useNavigate();
   const { setUserState } = useUserState();
 
   const handleRememberMeChange = () => {
     setRememberMe(!rememberMe);
+  };
+
+  const onCompanyPickerClose = (success = false) => {
+    console.log("onCompanyPickerClose", success);
+    if (success) {
+      navigate("/painel");
+      setCompanyPickerOpen(false);
+    } else {
+      toast.error("Selecione uma empresa para continuar.");
+      setTimeout(() => {
+        setCompanyPickerOpen(true);
+      }, 1000);
+    }
   };
 
   const login = async (event) => {
@@ -43,7 +58,7 @@ const SignIn = () => {
         })
       ) {
         setUserState(formattedUser);
-        navigate("/painel");
+        setCompanyPickerOpen(true);
       } else {
         toast.error("Ocorreu um erro ao realizar login.");
       }
@@ -61,10 +76,11 @@ const SignIn = () => {
 
   return (
     <div className="relative bg-black flex flex-col items-center justify-center h-screen gap-8">
+      <CompanyPicker open={companyPickerOpen} onClose={onCompanyPickerClose} />
       <div className="absolute login-bg top-0 left-0 w-screen h-screen opacity-40 grayscale" />
       <form
         onSubmit={login}
-        className="z-20 bg-[--background-color] shadow-lg shadow-white/50 flex flex-col gap-4 w-[95vw] sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 border p-8 rounded-lg"
+        className={`z-20 ${companyPickerOpen && "hidden"} bg-[--background-color] shadow-lg shadow-white/50 flex flex-col gap-4 w-[95vw] sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 border p-8 rounded-lg`}
       >
         <h1 className="text-2xl">Entrar</h1>
         <TextField

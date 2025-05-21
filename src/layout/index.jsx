@@ -1,32 +1,46 @@
-import { HomeOutlined, NavigateNext } from "@mui/icons-material";
-import { Box, Breadcrumbs } from "@mui/material";
-import { useMemo, useState } from "react";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import {
+  HomeOutlined,
+  NavigateNext,
+  SaveOutlined,
+  SwapHoriz,
+} from "@mui/icons-material";
+import {
+  Box,
+  Breadcrumbs,
+  IconButton,
+  MenuItem,
+  Select,
+  Tooltip,
+} from "@mui/material";
+import { useState } from "react";
 import { Link, matchPath, useLocation } from "react-router-dom";
 import blackLogo from "../assets/lh_black.svg";
 import whiteLogo from "../assets/lh_white.svg";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { useThemeMode } from "../contexts/themeModeContext";
-import { modules, unrenderedRoutes } from "../routes/modules";
+import { useCompany } from "../hooks/useCompany";
+import { routes } from "../routes/modules";
 import { handleMode } from "../theme";
 import Sidebar from "./components/Sidebar";
 
 const Layout = ({ children }) => {
-  const user = useAuthUser();
+  const { company, availableCompanies, setCompany } = useCompany();
+  const [selectedCompany, setSelectedCompany] = useState(company || "");
   const theme = handleMode(useThemeMode().mode);
   const location = useLocation();
+  const [editingCompany, setEditingCompany] = useState(false);
   const pathnames = location.pathname.split("/").filter(Boolean);
-  const flatRoutes = useMemo(() => {
-    const flatten = (items) =>
-      items.reduce((acc, item) => {
-        if (item.path && item.label)
-          acc.push({ path: item.path, label: item.label });
-        if (item.children) acc = acc.concat(flatten(item.children));
-        return acc;
-      }, []);
-    return flatten([...modules, ...unrenderedRoutes]);
-  }, []);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const onCompanyChangeClick = () => {
+    if (!editingCompany) {
+      setEditingCompany(true);
+      return;
+    }
+
+    setCompany(selectedCompany);
+    setEditingCompany(false);
+  };
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden">
@@ -39,7 +53,38 @@ const Layout = ({ children }) => {
               alt="Lighthouse"
               className="h-10 mb-1"
             />
-            <p className="text-2xl font-bold">{user?.company?.name}</p>
+            {editingCompany ? (
+              <div className="min-w-[200px]">
+                <Select
+                  size="small"
+                  value={selectedCompany}
+                  onChange={(e) => setSelectedCompany(e.target.value)}
+                  fullWidth
+                  disabled={availableCompanies.length === 0}
+                >
+                  {availableCompanies.map((company) => (
+                    <MenuItem key={company.id} value={company}>
+                      {company.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </div>
+            ) : (
+              <p className="text-2xl font-bold">{company?.name}</p>
+            )}
+            <Tooltip
+              title={editingCompany ? "Salvar" : "Alterar empresa"}
+              arrow
+              placement="right"
+            >
+              <IconButton onClick={onCompanyChangeClick}>
+                {editingCompany ? (
+                  <SaveOutlined fontSize="small" />
+                ) : (
+                  <SwapHoriz fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
           </Box>
           <div className="flex flex-row gap-2">
             <ThemeSwitcher />
@@ -72,7 +117,7 @@ const Layout = ({ children }) => {
               </Link>
               {pathnames.map((_, index) => {
                 const to = `/${pathnames.slice(0, index + 1).join("/")}`;
-                const match = flatRoutes.find((r) =>
+                const match = routes.find((r) =>
                   matchPath({ path: r.path, end: true }, to),
                 );
                 const label = match?.label || pathnames[index];
