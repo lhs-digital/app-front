@@ -218,14 +218,16 @@ const getRoutes = (acc, items) => {
     }
 
     if (item.path) {
+      const Icon = item.icon;
+      const ActiveIcon = item.activeIcon;
       accRoutes = [
         ...accRoutes,
         {
           path: item.path,
           element: item.element,
           label: item.label,
-          icon: <item.icon />,
-          activeIcon: <item.activeIcon />,
+          icon: <Icon />,
+          activeIcon: <ActiveIcon />,
         },
       ];
     }
