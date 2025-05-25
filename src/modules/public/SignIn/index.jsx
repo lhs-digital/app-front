@@ -76,7 +76,12 @@ const SignIn = () => {
 
   return (
     <div className="relative bg-black flex flex-col items-center justify-center h-screen gap-8">
-      <CompanyPicker open={companyPickerOpen} onClose={onCompanyPickerClose} />
+      {companyPickerOpen && (
+        <CompanyPicker
+          open={companyPickerOpen}
+          onClose={onCompanyPickerClose}
+        />
+      )}
       <div className="absolute login-bg top-0 left-0 w-screen h-screen opacity-40 grayscale" />
       <form
         onSubmit={login}

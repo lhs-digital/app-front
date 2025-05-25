@@ -25,8 +25,8 @@ const CompanyPicker = ({ open, onClose }) => {
       onClose(false);
     } else {
       setLoading(true);
-      console.log(selectedCompany);
       setCompany(selectedCompany);
+      setSelectedCompany("");
       setTimeout(() => {
         setLoading(false);
         onClose(true);
