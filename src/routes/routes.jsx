@@ -7,6 +7,7 @@ import SignIn from "../modules/public/SignIn";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
 import { routes } from "./modules";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const publicRoutes = [
   {
@@ -36,13 +37,16 @@ export const AppRoutes = createBrowserRouter([
   {
     element: <PublicRoute />,
     children: publicRoutes,
+    errorElement: <ErrorBoundary />,
   },
   {
     element: <PrivateRoute />,
     children: routes,
+    errorElement: <ErrorBoundary />,
   },
   {
     path: "/logout",
     element: <Logout />,
+    errorElement: <ErrorBoundary />,
   },
 ]);
