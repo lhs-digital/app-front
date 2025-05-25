@@ -39,7 +39,7 @@ export function ErrorBoundary() {
         </div>
         <Divider className="w-1/2" />
         <div className="flex flex-col gap-4 w-1/2 px-6 grow overflow-y-scroll relative">
-          <p className="font-semibold">{error.message}</p>
+          <p className="font-semibold select-text">{error.message}</p>
           <code>{error.stack}</code>
         </div>
         <Divider className="w-1/2" />
