@@ -1,7 +1,11 @@
-import { FilterList, FilterListOff, List, Search } from "@mui/icons-material";
+import {
+  AssignmentLate,
+  FilterList,
+  FilterListOff,
+  Search,
+} from "@mui/icons-material";
 import Masonry from "@mui/lab/Masonry";
 import {
-  Autocomplete,
   Badge,
   Box,
   CircularProgress,
@@ -17,13 +21,12 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import PageTitle from "../../../layout/components/PageTitle";
 import { useThemeMode } from "../../../contexts/themeModeContext";
 import { useCompany } from "../../../hooks/useCompany";
-import { useUserState } from "../../../hooks/useUserState";
+import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { moduleRoutes } from "../../../services/moduleRoutes";
 import { qc } from "../../../services/queryClient";
@@ -37,12 +40,12 @@ const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
   const theme = handleMode(useThemeMode().mode);
   const [currentFilterCount, setCurrentFilterCount] = useState(0);
-  const { company, setCompany, availableCompanies } = useCompany();
+  const { company } = useCompany();
   const [table, setTable] = useState("");
   const [workOrderOpen, setWorkOrderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const navigate = useNavigate();
-  const { isLighthouse } = useUserState().state;
+  // const { isLighthouse } = useUserState().state;
 
   const filterDefaults = {
     search: "",
@@ -73,7 +76,7 @@ const AuditList = () => {
     queryKey: ["company_tables", company],
     queryFn: async () => {
       const response = await api.get(`/company/auditable_tables`, {
-        params: { company_id: company },
+        params: { company_id: company.id },
       });
       setTable(response.data.data[0]);
       return response.data.data;
@@ -129,12 +132,6 @@ const AuditList = () => {
     },
     enabled: !!company && !!table,
   });
-
-  useEffect(() => {
-    if (availableTables.length > 0) {
-      setTable(availableTables[0]);
-    }
-  }, [availableTables]);
 
   const handleClean = () => {
     setFilters(filterDefaults);
@@ -246,7 +243,7 @@ const AuditList = () => {
   };
 
   const renderAuditContent = () => {
-    if (isLighthouse && !company) {
+    if (!company) {
       return (
         <div className="p-8 lg:py-12">
           <p className="text-lg text-center text-gray-500">
@@ -312,8 +309,8 @@ const AuditList = () => {
   return (
     <div className="flex flex-col w-full gap-6 items-center">
       <PageTitle
-        icon={<List fontSize="small" />}
-        title="Lista de Atividades"
+        icon={<AssignmentLate fontSize="small" />}
+        title="Itens auditados"
         subtitle="Gerencie todas as suas atividades pendentes e concluídas."
       />
       <div className="flex flex-col lg:flex-row w-full gap-4">
@@ -354,7 +351,7 @@ const AuditList = () => {
             </Select>
           </FormControl>
         </div>
-        {isLighthouse && (
+        {/* {isLighthouse && (
           <div className="w-full lg:w-1/3">
             <Autocomplete
               value={company}
@@ -369,7 +366,7 @@ const AuditList = () => {
               onChange={(e, newValue) => setCompany(newValue)}
             />
           </div>
-        )}
+        )} */}
         <div className="grow lg:shrink gap-4 flex flex-row col-span-2">
           <Tooltip title="Filtrar" aria-label="Filtrar">
             <Badge badgeContent={currentFilterCount} color="primary">

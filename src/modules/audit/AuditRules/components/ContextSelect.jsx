@@ -7,20 +7,19 @@ import {
   Select,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useUserState } from "../../../../hooks/useUserState";
 import api from "../../../../services/api";
 
-const ContextSelect = ({ company, setCompany, table, setTable }) => {
-  const { isLighthouse } = useUserState().state;
+const ContextSelect = ({ company, table, setTable }) => {
+  // const { isLighthouse } = useUserState().state;
 
-  const { data: companies } = useQuery({
-    queryKey: ["companies"],
-    queryFn: async () => {
-      const response = await api.get("/companies/get_companies");
-      return response.data.data;
-    },
-    enabled: isLighthouse,
-  });
+  // const { data: companies } = useQuery({
+  //   queryKey: ["companies"],
+  //   queryFn: async () => {
+  //     const response = await api.get("/companies/get_companies");
+  //     return response.data.data;
+  //   },
+  //   enabled: isLighthouse,
+  // });
 
   const { data: tables } = useQuery({
     queryKey: ["company_tables", company],
@@ -37,7 +36,7 @@ const ContextSelect = ({ company, setCompany, table, setTable }) => {
   return (
     <Card variant="outlined">
       <CardContent className="flex flex-row gap-4">
-        {isLighthouse && (
+        {/* {isLighthouse && (
           <div className="w-3/4">
             <FormControl fullWidth>
               <FormLabel id="company-label">Empresa</FormLabel>
@@ -53,7 +52,7 @@ const ContextSelect = ({ company, setCompany, table, setTable }) => {
               </Select>
             </FormControl>
           </div>
-        )}
+        )} */}
         <div className="grow">
           <FormControl fullWidth>
             <FormLabel id="company-label">Tabela</FormLabel>

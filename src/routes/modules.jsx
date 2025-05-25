@@ -65,10 +65,20 @@ const auditModule = {
     },
     {
       label: "Tabelas",
-      path: "/tabelas/(:table)/(:id)",
+      path: "/tabelas",
       element: <AuditTables />,
       icon: TableChartOutlined,
       activeIcon: TableChart,
+      children: [
+        {
+          label: "Tabela",
+          path: "/tabelas/:table",
+          element: <AuditTables />,
+          icon: TableChartOutlined,
+          activeIcon: TableChart,
+          hidden: true,
+        },
+      ],
       permissions: [
         "view_clients",
         "view_any_clients",
@@ -214,6 +224,8 @@ const getRoutes = (acc, items) => {
           path: item.path,
           element: item.element,
           label: item.label,
+          icon: <item.icon />,
+          activeIcon: <item.activeIcon />,
         },
       ];
     }
@@ -225,7 +237,13 @@ const getRoutes = (acc, items) => {
 export const routes = getRoutes([], [...modules, ...unrenderedRoutes]);
 
 export const routePermissions = (pathname) => {
-  const path = pathname.split("/")[0];
+  const path = pathname.split("/")[1];
   const route = routes.find((route) => route.path === path);
   return route?.permissions || [];
+};
+
+export const getIconByPath = (pathname) => {
+  const path = pathname.split("/")[1];
+  const route = routes.find((route) => route.path === `/${path}`);
+  return route?.icon || null;
 };

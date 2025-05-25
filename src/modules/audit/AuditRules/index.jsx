@@ -1,5 +1,4 @@
-/* eslint-disable */
-import { Add, Delete, Edit } from "@mui/icons-material";
+import { Add, Delete, Edit, RuleFolder } from "@mui/icons-material";
 import {
   Button,
   Chip,
@@ -11,15 +10,15 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  useMediaQuery,
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
-import PageTitle from "../../../layout/components/PageTitle";
 import { useThemeMode } from "../../../contexts/themeModeContext";
+import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
+import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
 import { getPriorityColor, severityLabels } from "../../../services/utils";
@@ -31,15 +30,10 @@ import Validation from "./components/Validation";
 const AuditRules = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dataEdit, setDataEdit] = useState({});
+  const { company } = useCompany();
   const [deleteId, setDeleteId] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [company, setCompany] = useState("");
   const [table, setTable] = useState("");
-  const {
-    permissions,
-    isLighthouse,
-    company: { id: companyId },
-  } = useUserState().state;
+  const { permissions } = useUserState().state;
   const [totalCount, setTotalCount] = useState(0);
   const [tableData, setTableData] = useState([]);
   const [pagination, setPagination] = useState({
@@ -52,11 +46,11 @@ const AuditRules = () => {
     createdAt: [],
     nivel: "",
   });
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  // const isMobile = useMediaQuery("(max-width: 768px)");
   const theme = handleMode(useThemeMode().mode);
 
   const { data } = useQuery({
-    queryKey: ["company_tables", currentPage, filterParams],
+    queryKey: ["company_tables", pagination.page, filterParams],
     queryFn: async () => {
       const params = {
         search: filterParams?.search || undefined,
@@ -69,22 +63,26 @@ const AuditRules = () => {
       };
 
       const filteredParams = Object.fromEntries(
+        // eslint-disable-next-line no-unused-vars
         Object.entries(params).filter(([_, v]) => v !== undefined),
       );
 
       const response = await api.get(`/company_tables`, {
-        params: { ...filteredParams, page: currentPage, company_id: company },
+        params: {
+          ...filteredParams,
+          page: pagination.page,
+          company_id: company.id,
+        },
       });
       console.log("tables", response.data.data);
+      setTable(response.data.data[0]?.id);
+      updateTableData(pagination.page, pagination.rowsPerPage);
       return response.data.data;
     },
     enabled: company !== "" && table !== "",
   });
 
-  const updateTableData = (
-    page = 1,
-    rows = pagination.rowsPerPage
-  ) => {
+  const updateTableData = (page = 1, rows = pagination.rowsPerPage) => {
     if (!data) return;
     const currentTable = data.find((t) => t.id === table);
     if (currentTable) {
@@ -99,24 +97,7 @@ const AuditRules = () => {
     }
   };
 
-  useEffect(() => {
-    if (!isLighthouse && companyId) {
-      setCompany(companyId);
-    }
-    if (data) {
-      const currentTable = data.filter((t) => t.id === table)[0];
-      if (currentTable) {
-        const rows = currentTable.columns.slice(
-          pagination.rowsPerPage * (currentPage - 1),
-          pagination.rowsPerPage * currentPage,
-        );
-        setTotalCount(currentTable.columns.length);
-        setTableData(rows);
-      }
-    }
-  }, [data, table, companyId]);
-
-  const handleEdit = (column, companyId) => {
+  const handleEdit = (column) => {
     setDataEdit({ ...column, company_table_id: table });
     setIsOpen(true);
   };
@@ -219,7 +200,7 @@ const AuditRules = () => {
   };
 
   const renderWarning = () => {
-    if (!isLighthouse && !company && !table) {
+    if (!company && !table) {
       return (
         <p className="text-sm text-gray-400">
           Selecione uma empresa e uma tabela para ver as regras de auditoria.
@@ -227,7 +208,7 @@ const AuditRules = () => {
       );
     }
 
-    if (!isLighthouse && !company) {
+    if (!company) {
       return <p className="text-sm text-gray-400">Selecione uma empresa</p>;
     }
 
@@ -261,6 +242,7 @@ const AuditRules = () => {
       />
       <PageTitle
         title="Regras de Auditoria"
+        icon={<RuleFolder />}
         subtitle="Administração e supervisão das regras das auditorias"
         buttons={
           permissions.some((per) => per.name === "define_rules") && (
@@ -277,12 +259,7 @@ const AuditRules = () => {
           )
         }
       />
-      <ContextSelect
-        company={company}
-        setCompany={setCompany}
-        table={table}
-        setTable={setTable}
-      />
+      <ContextSelect company={company} table={table} setTable={setTable} />
       {renderWarning()}
       <TableContainer>
         <Table>

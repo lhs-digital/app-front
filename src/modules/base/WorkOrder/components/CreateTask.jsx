@@ -9,14 +9,12 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
 import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
 import { qc } from "../../../../services/queryClient";
 const CreateTask = ({ open, onClose }) => {
-  const { company, setCompany, availableCompanies } = useCompany();
-  const user = useAuthUser();
+  const { company } = useCompany();
 
   const [data, setData] = useState({
     assigned_to: null,
@@ -109,7 +107,7 @@ const CreateTask = ({ open, onClose }) => {
             value={data.description}
             onChange={(e) => setData({ ...data, description: e.target.value })}
           />
-          {user.isLighthouse && (
+          {/* {user.isLighthouse && (
             <Autocomplete
               className="col-span-8"
               value={company}
@@ -123,7 +121,7 @@ const CreateTask = ({ open, onClose }) => {
               )}
               onChange={(e, newValue) => setCompany(newValue)}
             />
-          )}
+          )} */}
           <Autocomplete
             fullWidth
             options={availableUsers}

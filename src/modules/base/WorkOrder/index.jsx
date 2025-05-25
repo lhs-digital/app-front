@@ -2,9 +2,9 @@ import { Add, ContentPaste } from "@mui/icons-material";
 import { Masonry } from "@mui/lab";
 import { Button, CircularProgress } from "@mui/material";
 import { useState } from "react";
-import PageTitle from "../../../layout/components/PageTitle";
 import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
+import PageTitle from "../../../layout/components/PageTitle";
 import { hasPermission } from "../../../services/utils";
 import CreateTask from "./components/CreateTask";
 import TaskCard from "./components/TaskCard";
@@ -26,8 +26,7 @@ const WorkOrder = () => {
         title="Ordens de Serviço"
         icon={<ContentPaste />}
         buttons={[
-          (hasPermission(user.permissions, "create_work_orders") ||
-            user.isLighthouse) && (
+          hasPermission(user.permissions, "create_work_orders") && (
             <Button
               key="add-task"
               variant="contained"

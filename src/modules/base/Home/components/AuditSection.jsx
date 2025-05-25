@@ -22,7 +22,6 @@ import {
 import { grey } from "@mui/material/colors";
 import { PieChart } from "@mui/x-charts";
 import { useEffect, useState } from "react";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -39,10 +38,9 @@ const AuditSection = () => {
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
   const theme = handleMode(useThemeMode().mode);
-  const user = useAuthUser();
   const [data, setData] = useState([]);
   const [dataLastAudit, setDataLastAudit] = useState([]);
-  const { company, setCompany, availableCompanies } = useCompany();
+  const { company } = useCompany();
   const [updateInterval, setUpdateInterval] = useState(600);
   const [selectedTableId, setSelectedTableId] = useState(null);
   const [chartData, setChartData] = useState({
@@ -139,14 +137,14 @@ const AuditSection = () => {
     }
   };
 
-  const handleCompanyChange = (event) => {
-    const newCompany = availableCompanies.find(
-      (company) => company.id === event.target.value,
-    );
-    setCompany(newCompany);
-    setSelectedTableId(null);
-    setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
-  };
+  // const handleCompanyChange = (event) => {
+  //   const newCompany = availableCompanies.find(
+  //     (company) => company.id === event.target.value,
+  //   );
+  //   setCompany(newCompany);
+  //   setSelectedTableId(null);
+  //   setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
+  // };
 
   const completionData = [
     { id: 0, value: chartData?.errorsCount, label: "Pendentes" },
@@ -219,7 +217,7 @@ const AuditSection = () => {
           gap={2}
           gridTemplateColumns={{ xs: "1fr", lg: "1fr 1fr" }}
         >
-          {user.isLighthouse && (
+          {/* {user.isLighthouse && (
             <Card
               className="p-4 flex flex-col gap-2 justify-center"
               variant="outlined"
@@ -248,12 +246,10 @@ const AuditSection = () => {
                 </Select>
               </FormControl>
             </Card>
-          )}
+          )} */}
 
           <Card
-            className={`p-4 flex flex-col gap-2 justify-center ${
-              !user.isLighthouse ? "col-span-2" : ""
-            }`}
+            className="p-4 flex flex-col gap-2 justify-center col-span-2"
             variant="outlined"
           >
             <FormControl fullWidth>

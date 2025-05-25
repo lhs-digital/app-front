@@ -10,63 +10,44 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "react-toastify";
+import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
 
 const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
+  const { company } = useCompany();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
-  const [company, setCompany] = useState("");
-  const [companies, setCompanies] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const user = useAuthUser();
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        if (user.isLighthouse) {
-          const responseCompany = await api.get(`/companies/get_companies`);
-          setCompanies(responseCompany?.data?.data);
-
-          const responseRole = await api.get(`/roles/roles_from_company`, {
-            params: { company_id: dataEdit.company.id },
-          });
-          setRoles(responseRole?.data?.data);
-        } else {
-          const responseCompany = await api.get(`/companies/get_companies`);
-          setCompanies(responseCompany?.data?.data);
-
-          const responseRole = await api.get(`/roles/roles_from_company`, {
-            params: { company_id: user.company.id },
-          });
-          setRoles(responseRole?.data?.data);
-        }
-      } catch (error) {
-        console.error("Erro ao acessar as roles por empresa", error);
-      }
-    };
-
-    getData();
-  }, [company]);
-
-  const rolesFromCompany = async (companyId) => {
-    try {
+  const { data: roles = [], isLoading } = useQuery({
+    queryKey: ["roles"],
+    queryFn: async () => {
       const response = await api.get(`/roles/roles_from_company`, {
-        params: { company_id: companyId },
+        params: { company_id: company.id },
       });
-      setRoles(response?.data?.data);
-    } catch (error) {
-      console.error("Erro ao acessar as roles por empresa", error);
-    }
-  };
+      return response.data.data;
+    },
+    enabled: !!company.id,
+  });
 
-  const handleCompanyChange = (event) => {
-    setCompany(event.target.value);
-    rolesFromCompany(event.target.value);
-  };
+  // const rolesFromCompany = async (companyId) => {
+  //   try {
+  //     const response = await api.get(`/roles/roles_from_company`, {
+  //       params: { company_id: companyId },
+  //     });
+  //     setRoles(response?.data?.data);
+  //   } catch (error) {
+  //     console.error("Erro ao acessar as roles por empresa", error);
+  //   }
+  // };
+
+  // const handleCompanyChange = (event) => {
+  //   setCompany(event.target.value);
+  //   rolesFromCompany(event.target.value);
+  // };
 
   const handleRoleChange = (event) => {
     setRole(event.target.value);
@@ -74,21 +55,13 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
 
   const saveData = async () => {
     try {
-      if (user.isLighthouse) {
-        await api.post("/users", {
-          name,
-          email,
-          company_id: company,
-          role_id: role,
-        });
-      } else {
-        await api.post("/users", {
-          name,
-          email,
-          role_id: role,
-          password: "123456",
-        });
-      }
+      await api.post("/users", {
+        name,
+        email,
+        role_id: role,
+        company_id: company,
+        password: "123456",
+      });
 
       setRefresh((prev) => !prev);
       toast.success("Usuário cadastrado com sucesso!");
@@ -120,7 +93,6 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
   const cleanFields = () => {
     setName("");
     setEmail("");
-    setCompany("");
     setRole("");
   };
 
@@ -155,7 +127,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
             fullWidth
           />
         </Box>
-        {user.isLighthouse ? (
+        {/* {user.isLighthouse ? (
           <Box>
             <InputLabel>Empresa *</InputLabel>
             <Select
@@ -171,21 +143,21 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
               ))}
             </Select>
           </Box>
-        ) : (
-          <Box>
-            <InputLabel>Empresa *</InputLabel>
-            <Select value={user.company.id} disabled fullWidth>
-              <MenuItem value={user.company.id}>{user.company.name}</MenuItem>
-            </Select>
-          </Box>
-        )}
+        ) : ( */}
+        <Box>
+          <InputLabel>Empresa *</InputLabel>
+          <Select value={company.id} disabled fullWidth>
+            <MenuItem value={company.id}>{company.name}</MenuItem>
+          </Select>
+        </Box>
+        {/* )} */}
         <Box>
           <InputLabel>Role *</InputLabel>
           <Select
             placeholder="Selecione uma opção"
             value={role?.id}
             onChange={handleRoleChange}
-            disabled={!company && user.isLighthouse}
+            disabled={!company || isLoading}
             fullWidth
           >
             {roles.map((roleItem) => (

@@ -1,6 +1,5 @@
 import { Add, Delete, Edit, RemoveRedEye, Search } from "@mui/icons-material";
 import {
-  Autocomplete,
   Button,
   CircularProgress,
   IconButton,
@@ -20,9 +19,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
-import PageTitle from "../../../layout/components/PageTitle";
 import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
+import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { hasPermission } from "../../../services/utils";
 
@@ -36,8 +35,8 @@ const Clients = () => {
     direction: "desc",
   });
   const navigate = useNavigate();
-  const { permissions, isLighthouse } = useUserState().state;
-  const { company, setCompany, availableCompanies } = useCompany();
+  const { permissions } = useUserState().state;
+  const { company } = useCompany();
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const [sortedData, setSortedData] = useState([]);
@@ -136,7 +135,7 @@ const Clients = () => {
       <div className="grid grid-cols-3 lg:grid-cols-8 gap-4">
         <TextField
           mt={4}
-          className={`${isLighthouse ? "col-span-2 lg:col-span-6" : "col-span-2 lg:col-span-8"}`}
+          className="col-span-2 lg:col-span-8"
           placeholder="Buscar cliente"
           size="lg"
           value={search}
@@ -154,7 +153,7 @@ const Clients = () => {
             },
           }}
         />
-        {isLighthouse && (
+        {/* {isLighthouse && (
           <Autocomplete
             className="col-span-2"
             value={company}
@@ -166,7 +165,7 @@ const Clients = () => {
             renderInput={(params) => <TextField {...params} label="Empresa" />}
             onChange={(e, newValue) => setCompany(newValue)}
           />
-        )}
+        )} */}
       </div>
       <TableContainer>
         <Table>

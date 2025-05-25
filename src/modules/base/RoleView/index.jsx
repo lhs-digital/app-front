@@ -1,11 +1,5 @@
 import { Edit, LockOpen, Save } from "@mui/icons-material";
-import {
-  Autocomplete,
-  Button,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
+import { Button, MenuItem, Select, TextField } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
@@ -13,9 +7,8 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../../components/FormField";
 import PageTitle from "../../../layout/components/PageTitle";
-import PermissionCategory from "./components/PermissionCategory";
-import { useUserState } from "../../../hooks/useUserState";
 import api from "../../../services/api";
+import PermissionCategory from "./components/PermissionCategory";
 
 const RoleView = () => {
   const { id } = useParams();
@@ -24,16 +17,16 @@ const RoleView = () => {
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const navigate = useNavigate();
-  const { isLighthouse } = useUserState().state;
+  // const { isLighthouse } = useUserState().state;
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
-  const { data: companies, isFetched: isCompanyFetched } = useQuery({
-    queryKey: ["companies", id],
-    queryFn: async () => {
-      const response = await api.get("/companies");
-      return response.data.data;
-    },
-  });
+  // const { data: companies, isFetched: isCompanyFetched } = useQuery({
+  //   queryKey: ["companies", id],
+  //   queryFn: async () => {
+  //     const response = await api.get("/companies");
+  //     return response.data.data;
+  //   },
+  // });
 
   const { data: role } = useQuery({
     queryKey: ["role", id],
@@ -41,7 +34,7 @@ const RoleView = () => {
       const response = await api.get(`/roles/${id}`);
       return response.data.data;
     },
-    enabled: !isCreating && isCompanyFetched,
+    enabled: !isCreating,
   });
 
   useEffect(() => {
@@ -138,29 +131,29 @@ const RoleView = () => {
           buttons={
             isEditing || isCreating
               ? [
-                <Button
-                  key="save-role-form"
-                  loading={updateIsPending || createIsPending}
-                  type="submit"
-                  form="role-form"
-                  variant="contained"
-                  startIcon={<Save fontSize="small" />}
-                >
-                  SALVAR
-                </Button>,
-              ]
+                  <Button
+                    key="save-role-form"
+                    loading={updateIsPending || createIsPending}
+                    type="submit"
+                    form="role-form"
+                    variant="contained"
+                    startIcon={<Save fontSize="small" />}
+                  >
+                    SALVAR
+                  </Button>,
+                ]
               : [
-                <Button
-                  key="edit-role-form"
-                  loading={updateIsPending}
-                  variant="contained"
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  startIcon={<Edit fontSize="small" />}
-                >
-                  EDITAR
-                </Button>,
-              ]
+                  <Button
+                    key="edit-role-form"
+                    loading={updateIsPending}
+                    variant="contained"
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    startIcon={<Edit fontSize="small" />}
+                  >
+                    EDITAR
+                  </Button>,
+                ]
           }
         />
         <form
@@ -171,7 +164,7 @@ const RoleView = () => {
           <FormField
             label="Nome"
             required={isCreating}
-            containerClass={`${isLighthouse ? "lg:col-span-3" : "lg:col-span-5"}`}
+            containerClass="lg:col-span-5"
           >
             <TextField
               fullWidth
@@ -207,7 +200,7 @@ const RoleView = () => {
               )}
             />
           </FormField>
-          {isLighthouse ? (
+          {/* {isLighthouse ? (
             isCreating || isEditing ? (
               <FormField
                 label="Empresa"
@@ -224,11 +217,18 @@ const RoleView = () => {
                       noOptionsText="Nenhuma empresa encontrada."
                       options={companies || []}
                       getOptionLabel={(option) => option.name || ""}
-                      isOptionEqualToValue={(option, value) => option.id === value.id} // Garante que a opção selecionada seja comparada corretamente
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                      } // Garante que a opção selecionada seja comparada corretamente
                       value={field.value || null} // Define o valor selecionado
                       onChange={(e, newValue) => field.onChange(newValue)} // Atualiza o valor no estado do formulário
                       readOnly={!isEditing && !isCreating}
-                      renderInput={(params) => <TextField {...params} placeholder="Selecione uma empresa" />}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Selecione uma empresa"
+                        />
+                      )}
                     />
                   )}
                 />
@@ -254,7 +254,7 @@ const RoleView = () => {
                 />
               </FormField>
             )
-          ) : null}
+          ) : null} */}
           <div className="col-span-full flex flex-col">
             <h2 className="text-lg font-semibold mb-4">Permissões</h2>
             {permissions &&

@@ -1,8 +1,8 @@
 import { Box, Button } from "@mui/material";
 import { useState } from "react";
 import ModalReport from "../../../components/ModalReport";
-import PageTitle from "../../../layout/components/PageTitle";
 import { useUserState } from "../../../hooks/useUserState";
+import PageTitle from "../../../layout/components/PageTitle";
 
 const AuditReports = () => {
   const [isOpen, setIsOpen] = useState(false);

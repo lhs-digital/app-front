@@ -6,7 +6,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAssignmentFilters } from "../../../../hooks/useAssignmentFilters";
 import { useCompany } from "../../../../hooks/useCompany";
-import { useUserState } from "../../../../hooks/useUserState";
 import api from "../../../../services/api";
 import { qc } from "../../../../services/queryClient";
 
@@ -15,21 +14,20 @@ export default function TaskFilter({
   isFetching,
   setIsFetching,
 }) {
-  const user = useUserState().state;
-  const { company, setCompany, availableCompanies } = useCompany();
+  const { company } = useCompany();
   const navigate = useNavigate();
   const location = useLocation();
   const { filters, updateFilter, resetFilters, searchParams } =
     useAssignmentFilters();
 
-  const { data: entityTypes = [] } = useQuery({
-    queryKey: ["entityTypes", company?.id],
-    queryFn: async () => {
-      const response = await api.get("/assignables");
-      return response.data;
-    },
-    enabled: !!company,
-  });
+  // const { data: entityTypes = [] } = useQuery({
+  //   queryKey: ["entityTypes", company?.id],
+  //   queryFn: async () => {
+  //     const response = await api.get("/assignables");
+  //     return response.data;
+  //   },
+  //   enabled: !!company,
+  // });
 
   const { data: availableEntities = [] } = useQuery({
     queryKey: ["availableEntities", filters.entity_type, company?.id],
@@ -121,7 +119,7 @@ export default function TaskFilter({
 
   return (
     <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-4">
-      {user.isLighthouse && (
+      {/* {user.isLighthouse && (
         <Autocomplete
           className="col-span-1 md:col-span-2 lg:col-span-8"
           size="small"
@@ -134,7 +132,7 @@ export default function TaskFilter({
           renderInput={(params) => <TextField {...params} label="Empresa" />}
           onChange={(e, newValue) => setCompany(newValue)}
         />
-      )}
+      )} */}
       <Autocomplete
         size="small"
         value={filters.assigned_by}
