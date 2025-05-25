@@ -1,4 +1,11 @@
-import { Add, Delete, Edit, RemoveRedEye, Search } from "@mui/icons-material";
+import {
+  Add,
+  Delete,
+  Edit,
+  Lock,
+  RemoveRedEye,
+  Search,
+} from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
@@ -19,8 +26,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
-import PageTitle from "../../../layout/components/PageTitle";
 import { useUserState } from "../../../hooks/useUserState";
+import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
 import { hasPermission } from "../../../services/utils";
@@ -130,6 +137,7 @@ const Roles = () => {
         onConfirm={handleRemove}
       />
       <PageTitle
+        icon={<Lock />}
         title="Papéis e permissões"
         subtitle="Administração e atribuição de permissões e funções de usuários"
         buttons={

@@ -1,5 +1,6 @@
 import {
   Add,
+  BusinessCenterOutlined,
   Delete,
   Edit,
   KeyboardArrowDown,
@@ -162,6 +163,7 @@ const Companies = () => {
       />
       <PageTitle
         title="Empresas"
+        icon={<BusinessCenterOutlined />}
         subtitle="Administração e supervisão das informações empresariais"
         buttons={
           permissions.some((per) => per.name === "create_companies") && (

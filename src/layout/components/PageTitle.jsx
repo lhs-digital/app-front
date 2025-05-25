@@ -15,7 +15,7 @@ const PageTitle = ({
     <div className="flex flex-row items-center justify-between w-full">
       <div>
         <div className="flex flex-row gap-2 items-center">
-          {icon}
+          <span className="mb-0.5">{icon}</span>
           <p className="text-xl font-bold">{title}</p>
         </div>
         <div className="text-sm text-gray-400">{subtitle}</div>

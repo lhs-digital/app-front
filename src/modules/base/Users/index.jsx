@@ -5,6 +5,7 @@ import {
   ExpandLess,
   ExpandMore,
   Groups,
+  Person,
   Search,
 } from "@mui/icons-material";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
@@ -280,7 +281,7 @@ const Users = () => {
         {canManageTeam && (
           <Button
             onClick={(e) => setAnchorEl(e.currentTarget)}
-            variant="contained"
+          variant="contained"
             color="primary"
             disabled={user.isLighthouse}
             endIcon={hierarchyOpen ? <ExpandLess /> : <ExpandMore />}
@@ -341,6 +342,7 @@ const Users = () => {
       />
       <PageTitle
         title="Usuários"
+        icon={<Person />}
         subtitle="Administre, edite e remova usuários conforme necessário."
         buttons={renderButtons()}
       />

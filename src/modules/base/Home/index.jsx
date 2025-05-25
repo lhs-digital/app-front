@@ -1,4 +1,4 @@
-import HomeIcon from "@mui/icons-material/Home";
+import { AutoAwesomeMosaic } from "@mui/icons-material";
 import { useEffect } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import PageTitle from "../../../layout/components/PageTitle";
@@ -30,8 +30,8 @@ const Home = () => {
   return (
     <div className="flex flex-col gap-8">
       <PageTitle
-        title="Dashboard"
-        icon={<HomeIcon />}
+        title="Painel "
+        icon={<AutoAwesomeMosaic />}
         subtitle={`Bem vindo, ${user.name}`}
       />
       <AuditSection
