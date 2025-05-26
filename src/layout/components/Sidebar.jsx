@@ -199,7 +199,7 @@ const Sidebar = ({ open, setOpen }) => {
       open={open}
       onClose={() => setOpen(false)}
       slotProps={{
-        paper: { style: { borderRadius: 0 } },
+        paper: { style: { borderRadius: 0, borderTop: 0, borderBottom: 0 } },
       }}
     >
       <div className="h-16 p-4 w-full flex flex-row items-center border-b border-b-black/10 dark:border-b-white/15 justify-end">
