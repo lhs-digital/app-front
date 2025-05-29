@@ -41,7 +41,7 @@ export default function TaskFilter({
   const { data: availableUsers = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["availableUsers", company?.id],
     queryFn: async () => {
-      const response = await api.get(`/users?company_id=${company?.id}`);
+      const response = await api.get(`/users`);
       return response.data.data;
     },
     enabled: !!company,

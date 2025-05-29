@@ -1,4 +1,4 @@
-import { Add, ContentPaste } from "@mui/icons-material";
+import { Add, Assignment } from "@mui/icons-material";
 import { Masonry } from "@mui/lab";
 import { Button, CircularProgress } from "@mui/material";
 import { useState } from "react";
@@ -24,7 +24,8 @@ const WorkOrder = () => {
     <div className="flex flex-col gap-8">
       <PageTitle
         title="Ordens de Serviço"
-        icon={<ContentPaste />}
+        subtitle="Gerencie as ordens de serviço atribuídas a você ou à sua equipe."
+        icon={<Assignment />}
         buttons={[
           hasPermission(user.permissions, "create_work_orders") && (
             <Button
