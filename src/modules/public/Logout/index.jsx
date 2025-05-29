@@ -1,19 +1,19 @@
-import { useEffect } from "react";
-import useSignOut from "react-auth-kit/hooks/useSignOut";
-import { Navigate } from "react-router-dom";
-import { useCompany } from "../../../hooks/useCompany";
+import { CircularProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const Logout = () => {
-  const signOut = useSignOut();
-  const { setCompany } = useCompany();
+  const navigate = useNavigate();
 
-  setCompany(null);
+  setTimeout(() => {
+    navigate("/");
+  }, 1000);
 
-  useEffect(() => {
-    signOut();
-  }, [signOut]);
-
-  return <Navigate to="/" />;
+  return (
+    <div className="flex flex-col items-center justify-center h-screen gap-4">
+      <h1 className="text-2xl font-bold">Até mais!</h1>
+      <CircularProgress className="ml-4" />
+    </div>
+  );
 };
 
 export default Logout;

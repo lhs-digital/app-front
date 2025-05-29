@@ -1,5 +1,6 @@
 import { Button, Checkbox, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
+import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -13,8 +14,11 @@ const SignIn = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
+  const isAuthenticated = useIsAuthenticated();
   const [rememberMe, setRememberMe] = useState(false);
-  const [companyPickerOpen, setCompanyPickerOpen] = useState(false);
+  const [companyPickerOpen, setCompanyPickerOpen] = useState(
+    isAuthenticated || false,
+  );
   const signIn = useSignIn();
   const navigate = useNavigate();
   const { setUserState } = useUserState();

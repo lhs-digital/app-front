@@ -35,13 +35,7 @@ const CompanyPicker = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => onClose()}
-      maxWidth="xs"
-      fullWidth
-      scroll="body"
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth scroll="body">
       <DialogTitle>Selecione a empresa</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         <p>Para acessar o sistema, escolha uma empresa.</p>
