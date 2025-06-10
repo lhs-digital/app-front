@@ -2,9 +2,11 @@ import { TableChart } from "@mui/icons-material";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import GenericTable from "../../../components/DynamicForm/GenericTable";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import { mockClientTable } from "../../../services/mock/clientTable";
 
 const AuditTables = () => {
   const { company } = useCompany();
@@ -28,7 +30,7 @@ const AuditTables = () => {
         icon={<TableChart />}
         subtitle="Visualize entidades das tabelas auditáveis"
       />
-      <div className="w-full lg:w-1/3">
+      <div className="w-full">
         <FormControl fullWidth>
           <InputLabel id="table-select">Tabela</InputLabel>
           <Select
@@ -48,6 +50,7 @@ const AuditTables = () => {
           </Select>
         </FormControl>
       </div>
+      <GenericTable {...mockClientTable} tableName={table.name} />
     </div>
   );
 };

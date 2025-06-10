@@ -5,6 +5,8 @@ import {
   AssignmentOutlined,
   AutoAwesomeMosaic,
   AutoAwesomeMosaicOutlined,
+  BugReport,
+  BugReportOutlined,
   Build,
   BuildOutlined,
   BusinessCenter,
@@ -26,10 +28,12 @@ import {
 import AuditList from "../modules/audit/AuditList";
 import AuditRules from "../modules/audit/AuditRules";
 import AuditTables from "../modules/audit/AuditTables";
+import EntityForm from "../modules/audit/EntityForm";
 import Home from "../modules/base/Home";
 import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
+import TestPage from "../modules/base/Test";
 import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
@@ -74,6 +78,14 @@ const auditModule = {
           label: "Tabela",
           path: "/tabelas/:table",
           element: <AuditTables />,
+          icon: TableChartOutlined,
+          activeIcon: TableChart,
+          hidden: true,
+        },
+        {
+          label: "Entidade",
+          path: "/tabelas/:table/:id",
+          element: <EntityForm />,
           icon: TableChartOutlined,
           activeIcon: TableChart,
           hidden: true,
@@ -174,6 +186,13 @@ const baseModule = {
       activeIcon: Subject,
       permissions: ["view_any_logs"],
     },
+    {
+      label: "DEV",
+      path: "/dev",
+      element: <TestPage />,
+      icon: BugReportOutlined,
+      activeIcon: BugReport,
+    },
   ],
 };
 
@@ -226,8 +245,8 @@ const getRoutes = (acc, items) => {
           path: item.path,
           element: item.element,
           label: item.label,
-          icon: <Icon />,
-          activeIcon: <ActiveIcon />,
+          ...(Icon && { icon: <Icon /> }),
+          ...(ActiveIcon && { activeIcon: <ActiveIcon /> }),
         },
       ];
     }

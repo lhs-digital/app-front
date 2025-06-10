@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
 import { useThemeMode } from "../../../contexts/themeModeContext";
@@ -29,7 +29,7 @@ import Validation from "./components/Validation";
 
 const AuditRules = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dataEdit, setDataEdit] = useState({});
+  const [dataEdit, setDataEdit] = useState(null);
   const { company } = useCompany();
   const [deleteId, setDeleteId] = useState(null);
   const [table, setTable] = useState("");
@@ -40,16 +40,15 @@ const AuditRules = () => {
     page: 1,
     rowsPerPage: 5,
   });
-  const [filterParams, setFilterParams] = useState({
+  const [filterParams] = useState({
     search: "",
     method: "",
     createdAt: [],
     nivel: "",
   });
-  // const isMobile = useMediaQuery("(max-width: 768px)");
   const theme = handleMode(useThemeMode().mode);
 
-  const { data } = useQuery({
+  const { data = [] } = useQuery({
     queryKey: ["company_tables", pagination.page, filterParams],
     queryFn: async () => {
       const params = {
@@ -75,27 +74,27 @@ const AuditRules = () => {
         },
       });
       console.log("tables", response.data.data);
-      setTable(response.data.data[0]?.id);
-      updateTableData(pagination.page, pagination.rowsPerPage);
       return response.data.data;
     },
-    enabled: company !== "" && table !== "",
+    enabled: company !== "",
   });
 
-  const updateTableData = (page = 1, rows = pagination.rowsPerPage) => {
-    if (!data) return;
+  useEffect(() => {
+    if (data && data.length > 0 && !table) {
+      setTable(data[0].id);
+    }
+  }, [data, table]);
+
+  useEffect(() => {
+    if (!data || !table) return;
     const currentTable = data.find((t) => t.id === table);
     if (currentTable) {
-      const startIndex = (page - 1) * rows;
-      const endIndex = startIndex + rows;
+      const startIndex = (pagination.page - 1) * pagination.rowsPerPage;
+      const endIndex = startIndex + pagination.rowsPerPage;
       setTableData(currentTable.columns.slice(startIndex, endIndex));
       setTotalCount(currentTable.columns.length);
-      setPagination((prev) => ({
-        ...prev,
-        page,
-      }));
     }
-  };
+  }, [data, table, pagination]);
 
   const handleEdit = (column) => {
     setDataEdit({ ...column, company_table_id: table });
@@ -137,7 +136,6 @@ const AuditRules = () => {
       toast.success("Regra adicionada com sucesso");
       setIsOpen(false);
       qc.invalidateQueries(["company_tables"]);
-      updateTableData();
     },
     onError: (error) => {
       toast.error("Erro ao adicionar regra");
@@ -152,9 +150,8 @@ const AuditRules = () => {
     onSuccess: () => {
       toast.success("Regra atualizada com sucesso");
       setIsOpen(false);
-      setDataEdit({});
+      setDataEdit(null);
       qc.invalidateQueries(["company_tables"]);
-      updateTableData();
     },
     onError: (error) => {
       toast.error("Erro ao atualizar regra");
@@ -170,7 +167,6 @@ const AuditRules = () => {
       toast.success("Regra removida com sucesso");
       setDeleteId(null);
       qc.invalidateQueries(["company_tables"]);
-      updateTableData();
     },
     onError: (error) => {
       toast.error("Erro ao remover regra");
@@ -221,6 +217,11 @@ const AuditRules = () => {
     }
   };
 
+  const handleDialogClose = () => {
+    setIsOpen(false);
+    setDataEdit(null);
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <ModalDelete
@@ -237,7 +238,7 @@ const AuditRules = () => {
       <AddRule
         open={isOpen}
         data={dataEdit}
-        onClose={() => setIsOpen(false)}
+        onClose={handleDialogClose}
         submit={dataEdit?.id ? updateRule : addRule}
       />
       <PageTitle
@@ -251,7 +252,7 @@ const AuditRules = () => {
               variant="contained"
               color="primary"
               disabled={!company || !table}
-              onClick={() => [setDataEdit({}), setIsOpen(true)]}
+              onClick={() => [setDataEdit(null), setIsOpen(true)]}
               startIcon={<Add />}
             >
               NOVA REGRA

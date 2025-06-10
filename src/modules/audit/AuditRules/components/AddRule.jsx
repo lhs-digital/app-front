@@ -2,12 +2,15 @@ import { Add, Close, Save } from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
   FormControl,
+  FormControlLabel,
+  FormGroup,
   FormHelperText,
   FormLabel,
   MenuItem,
@@ -91,7 +94,7 @@ const AddRule = ({
 
   useEffect(() => {
     if (data) {
-      console.log(data);
+      console.log("addRule", data);
       reset({
         column: {
           name: data.name || "",
@@ -208,7 +211,9 @@ const AddRule = ({
       maxWidth="sm"
       scroll="body"
     >
-      <DialogTitle>{data ? "Editar coluna" : "Adicionar coluna"}</DialogTitle>
+      <DialogTitle>
+        {data !== null ? "Editar coluna" : "Adicionar coluna"}
+      </DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         <form
           id="rule-form"
@@ -264,7 +269,73 @@ const AddRule = ({
               </FormControl>
             )}
           />
-          <div className="flex flex-col gap-2 border-t border-[--border] pt-4">
+          <div className="flex flex-col gap-4 border-t border-[--border] pt-4">
+            <h2 className="font-semibold">Configurações de formulário</h2>
+            <FormControl>
+              <FormLabel>Tipo de campo</FormLabel>
+              <Select>
+                <MenuItem value="autocomplete">Autocomplete</MenuItem>
+                <MenuItem value="checkbox">Checkbox</MenuItem>
+                <MenuItem value="combobox">Combobox</MenuItem>
+                <MenuItem value="cpf-cnpj">CPF/CNPJ</MenuItem>
+                <MenuItem value="date">Data</MenuItem>
+                <MenuItem value="datetime">Data e hora</MenuItem>
+                <MenuItem value="email">Email</MenuItem>
+                <MenuItem value="file">Arquivo</MenuItem>
+                <MenuItem value="number">Número</MenuItem>
+                <MenuItem value="radio">Radio</MenuItem>
+                <MenuItem value="search">Search</MenuItem>
+                <MenuItem value="select">Select</MenuItem>
+                <MenuItem value="tel">Telefone</MenuItem>
+                <MenuItem value="text">Texto</MenuItem>
+                <MenuItem value="textarea">Textarea</MenuItem>
+                <MenuItem value="time">Hora</MenuItem>
+                <MenuItem value="url">URL</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Tamanho</FormLabel>
+              <Select>
+                <MenuItem value="grow">Máximo disponível</MenuItem>
+                <MenuItem value="small">Pequeno</MenuItem>
+                <MenuItem value="medium">Médio</MenuItem>
+                <MenuItem value="large">Grande</MenuItem>
+              </Select>
+              <FormHelperText>
+                Tamanho do campo a ser exibido no formulário da tabela em que se
+                encontra a coluna.
+              </FormHelperText>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Texto de ajuda</FormLabel>
+              <TextField {...register("column.help_text")} />
+              <FormHelperText>
+                Texto que será exibido como ajuda para o usuário.
+              </FormHelperText>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Texto placeholder</FormLabel>
+              <TextField {...register("column.placeholder")} />
+              <FormHelperText>
+                Opcional. Texto para indicar ao usuário o que deve ser digitado
+                no campo.
+              </FormHelperText>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Propriedades</FormLabel>
+              <FormGroup>
+                <FormControlLabel
+                  control={<Checkbox />}
+                  label="Campo de busca"
+                />
+                <FormControlLabel
+                  control={<Checkbox />}
+                  label="Foco automático"
+                />
+              </FormGroup>
+            </FormControl>
+          </div>
+          <div className="flex flex-col gap-4 border-t border-[--border] pt-4">
             <h2 className="font-semibold">Nova regra</h2>
             <Controller
               name="rule.name"
