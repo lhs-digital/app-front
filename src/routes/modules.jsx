@@ -5,12 +5,12 @@ import {
   AssignmentOutlined,
   AutoAwesomeMosaic,
   AutoAwesomeMosaicOutlined,
-  BugReport,
-  BugReportOutlined,
   Build,
   BuildOutlined,
   BusinessCenter,
   BusinessCenterOutlined,
+  Computer,
+  ComputerOutlined,
   Home as HomeIcon,
   HomeOutlined,
   Lock,
@@ -24,12 +24,18 @@ import {
   Subject,
   TableChart,
   TableChartOutlined,
+  Web,
+  WebOutlined,
+  Widgets,
+  WidgetsOutlined,
 } from "@mui/icons-material";
 import AuditList from "../modules/audit/AuditList";
 import AuditRules from "../modules/audit/AuditRules";
 import AuditTables from "../modules/audit/AuditTables";
 import EntityForm from "../modules/audit/EntityForm";
+import CompanyModules from "../modules/base/CompanyModules";
 import Home from "../modules/base/Home";
+import ModuleForm from "../modules/base/ModuleForm";
 import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
@@ -179,19 +185,29 @@ const baseModule = {
       ],
     },
     {
+      label: "Módulos",
+      path: "/modulos",
+      element: <CompanyModules />,
+      icon: WidgetsOutlined,
+      activeIcon: Widgets,
+      children: [
+        {
+          label: "Módulo",
+          path: "/modulos/:table/criar",
+          element: <ModuleForm />,
+          icon: WidgetsOutlined,
+          activeIcon: Widgets,
+          hidden: true,
+        },
+      ],
+    },
+    {
       label: "Logs",
       path: "/logs",
       element: <Logs />,
       icon: Subject,
       activeIcon: Subject,
       permissions: ["view_any_logs"],
-    },
-    {
-      label: "DEV",
-      path: "/dev",
-      element: <TestPage />,
-      icon: BugReportOutlined,
-      activeIcon: BugReport,
     },
   ],
 };
@@ -218,6 +234,21 @@ const lighthouseModule = {
   ],
 };
 
+const devModule = {
+  label: "Desenvolvimento",
+  icon: ComputerOutlined,
+  activeIcon: Computer,
+  children: [
+    {
+      label: "Página genérica",
+      path: "/dev",
+      element: <TestPage />,
+      icon: Web,
+      activeIcon: WebOutlined,
+    },
+  ],
+};
+
 export const unrenderedRoutes = [
   {
     label: "Minhas Permissões",
@@ -226,7 +257,12 @@ export const unrenderedRoutes = [
   },
 ];
 
-export const modules = [baseModule, auditModule, lighthouseModule];
+export const modules = [
+  baseModule,
+  auditModule,
+  lighthouseModule,
+  ...(import.meta.env.MODE !== "production" ? [devModule] : []),
+];
 
 const getRoutes = (acc, items) => {
   let accRoutes = acc;
