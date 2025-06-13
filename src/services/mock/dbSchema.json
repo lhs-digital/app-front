@@ -1,0 +1,1105 @@
+{
+  "database": "teste_provedor",
+  "structure": {
+    "cache": {
+      "columns": [
+        {
+          "name": "key",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "value",
+          "type": "mediumtext",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "expiration",
+          "type": "int(11)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "cache_locks": {
+      "columns": [
+        {
+          "name": "key",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "owner",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "expiration",
+          "type": "int(11)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "clients": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": "auto_increment"
+        },
+        {
+          "name": "tipo_pessoa",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "data_nascimento",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "cnpj_cpf",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "ie_identidade",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "razao",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "fantasia",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "tipo_cliente_scm",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_tipo_cliente",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "contribuinte_icms",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "nacionalidade",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "ativo",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "sexo",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "profissao",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "tipo_assinante",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "filial_id",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "cep",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "endereco",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "numero",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "complemento",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "bairro",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "cidade",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "referencia",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "moradia",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "cep_cob",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "endereco_cob",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "numero_cob",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "complemento_cob",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "bairro_cob",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "cidade_cob",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "referencia_cob",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "telefone_celular",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "whatsapp",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_campanha",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_concorrente",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_perfil",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "responsavel",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_conta",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "cond_pagamento",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_vendedor",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "nome_pai",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "nome_mae",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "contratos": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": "auto_increment"
+        },
+        {
+          "name": "id_cliente",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_vd_contrato",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_tipo_contrato",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_modelo",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "assinatura_digital",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "filial_id",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "indicado_contrato_id",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_tipo_documento",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_carteira_cobranca",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_vendedor",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "renovacao_automatica",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_contrato_principal",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "tipo_doc_opc",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "tipo_doc_opc2",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_tipo_doc_ativ",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_produto_ativ",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "taxa_instalacao",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_cond_pag_ativ",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "id_vendedor_ativ",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "fidelidade",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "desconto_fidelidade",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "taxa_improdutiva",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "failed_jobs": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": "auto_increment"
+        },
+        {
+          "name": "uuid",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "UNI",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "connection",
+          "type": "text",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "queue",
+          "type": "text",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "payload",
+          "type": "longtext",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "exception",
+          "type": "longtext",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "failed_at",
+          "type": "timestamp",
+          "nullable": false,
+          "key": "",
+          "default": "current_timestamp()",
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "job_batches": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "total_jobs",
+          "type": "int(11)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "pending_jobs",
+          "type": "int(11)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "failed_jobs",
+          "type": "int(11)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "failed_job_ids",
+          "type": "longtext",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "options",
+          "type": "mediumtext",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "cancelled_at",
+          "type": "int(11)",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "created_at",
+          "type": "int(11)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "finished_at",
+          "type": "int(11)",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "jobs": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": "auto_increment"
+        },
+        {
+          "name": "queue",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "MUL",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "payload",
+          "type": "longtext",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "attempts",
+          "type": "tinyint(3) unsigned",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "reserved_at",
+          "type": "int(10) unsigned",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "available_at",
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "created_at",
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "migrations": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": "auto_increment"
+        },
+        {
+          "name": "migration",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "batch",
+          "type": "int(11)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "password_reset_tokens": {
+      "columns": [
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "token",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "personal_access_tokens": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": "auto_increment"
+        },
+        {
+          "name": "tokenable_type",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "MUL",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "tokenable_id",
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "token",
+          "type": "varchar(64)",
+          "nullable": false,
+          "key": "UNI",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "abilities",
+          "type": "text",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "last_used_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "sessions": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "user_id",
+          "type": "bigint(20) unsigned",
+          "nullable": true,
+          "key": "MUL",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "ip_address",
+          "type": "varchar(45)",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "user_agent",
+          "type": "text",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "payload",
+          "type": "longtext",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "last_activity",
+          "type": "int(11)",
+          "nullable": false,
+          "key": "MUL",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "users": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "key": "PRI",
+          "default": null,
+          "extra": "auto_increment"
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "UNI",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "email_verified_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "password",
+          "type": "varchar(255)",
+          "nullable": false,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "remember_token",
+          "type": "varchar(100)",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": true,
+          "key": "",
+          "default": null,
+          "extra": ""
+        }
+      ],
+      "foreign_keys": []
+    }
+  }
+}
