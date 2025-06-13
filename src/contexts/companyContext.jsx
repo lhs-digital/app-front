@@ -8,19 +8,17 @@ export const CompanyContext = createContext();
 export const CompanyContextProvider = ({ children }) => {
   const { state: user } = useUserState();
 
-  const [company, setCompany] = useState(
-    JSON.parse(localStorage.getItem("company")) || null,
-  );
+  const [company, setCompany] = useState(null);
 
-  const changeCompany = (company) => {
-    if (!company) {
-      setCompany(null);
-      localStorage.removeItem("company");
-      return;
-    }
-    setCompany(company);
-    localStorage.setItem("company", JSON.stringify(company));
-  };
+  // const changeCompany = (company) => {
+  //   if (!company) {
+  //     setCompany(null);
+  //     localStorage.removeItem("company");
+  //     return;
+  //   }
+  //   setCompany(company);
+  //   localStorage.setItem("company", JSON.stringify(company));
+  // };
 
   const { data: availableCompanies = [], refetch: refetchAvailableCompanies } =
     useQuery({
@@ -53,7 +51,7 @@ export const CompanyContextProvider = ({ children }) => {
     <CompanyContext.Provider
       value={{
         company,
-        setCompany: changeCompany,
+        setCompany,
         availableCompanies,
         refetchAvailableCompanies,
       }}
