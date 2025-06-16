@@ -1,12 +1,5 @@
 import { Remove } from "@mui/icons-material";
-import {
-  Button,
-  Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
-} from "@mui/material";
+import { Button, Chip, Divider } from "@mui/material";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import TableColumn from "../../CompanyModules/components/TableColumn";
@@ -33,12 +26,6 @@ const FieldsTab = ({ table }) => {
     setValue("columns", columns);
   };
 
-  const addAllColumns = () => {
-    let columns = getValues("columns") || [];
-    columns = [...columns, ...table.columns];
-    setValue("columns", columns);
-  };
-
   const openEditColumn = (column) => {
     setPendingColumn({
       ...column,
@@ -52,6 +39,11 @@ const FieldsTab = ({ table }) => {
     columns = columns.map((c) => (c.name === column.name ? column : c));
     setValue("columns", columns);
     setOpenDialog(false);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setPendingColumn(null);
   };
 
   return (
@@ -75,16 +67,14 @@ const FieldsTab = ({ table }) => {
               />
             ))}
           </div>
-          <div className="flex flex-row gap-4 justify-end">
-            <Button
-              color="primary"
-              startIcon={<Remove />}
-              disabled={columnList.length === 0}
-              onClick={() => setValue("columns", [])}
-            >
-              Remover todas
-            </Button>
-          </div>
+          <Button
+            color="primary"
+            startIcon={<Remove />}
+            disabled={columnList.length === 0}
+            onClick={() => setValue("columns", [])}
+          >
+            Remover todas
+          </Button>
         </div>
       </div>
       <Divider />
@@ -101,26 +91,14 @@ const FieldsTab = ({ table }) => {
           onRemoveColumn={() => handleRemoveColumn(column)}
         />
       ))}
-      <Dialog
+      <AddColumn
         open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        maxWidth="lg"
-        fullWidth
-      >
-        <DialogTitle>
-          {pendingColumn && !pendingColumn.edit
-            ? "Adicionar coluna"
-            : "Editar coluna"}
-        </DialogTitle>
-        <DialogContent>
-          <AddColumn
-            column={pendingColumn}
-            onAddColumn={handleAddColumn}
-            onEditColumn={handleEditColumn}
-            onRemoveColumn={handleRemoveColumn}
-          />
-        </DialogContent>
-      </Dialog>
+        onClose={handleCloseDialog}
+        column={pendingColumn}
+        onAddColumn={handleAddColumn}
+        onEditColumn={handleEditColumn}
+        onRemoveColumn={handleRemoveColumn}
+      />
     </div>
   );
 };
