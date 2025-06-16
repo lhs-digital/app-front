@@ -2,7 +2,7 @@ import { Edit, Save, Widgets } from "@mui/icons-material";
 
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Tab } from "@mui/material";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import PageTitle from "../../../layout/components/PageTitle";
 
 import { FormProvider, useForm } from "react-hook-form";
@@ -13,12 +13,16 @@ import InformationTab from "./components/InformationTab";
 const ModuleFormContext = createContext();
 
 export const ModuleForm = () => {
-  const { id } = useParams();
+  const { table: tableName, id } = useParams();
   const location = useLocation();
-  const { table } = useLocation().state;
-  const currentAction = useLocation().pathname.includes("criar")
+  const { table } = location.state || {
+    table: {
+      name: tableName,
+    },
+  };
+  const currentAction = location.pathname.includes("criar")
     ? "create"
-    : useLocation().pathname.includes("editar")
+    : location.pathname.includes("editar")
       ? "edit"
       : "view";
 
@@ -46,15 +50,13 @@ export const useModuleForm = () => {
 
 const Form = () => {
   const [tab, setTab] = useState("1");
-  const formRef = useRef();
   const navigate = useNavigate();
   const { table, currentAction } = useModuleForm();
   const methods = useForm();
 
   const handleEditModule = () => {
     console.log("Editar módulo");
-    formRef.current.submit();
-    // navigate(`/modulos/${table.name}`);
+    navigate(`/modulos/${table.name}`);
   };
 
   const handleCreateModule = () => {

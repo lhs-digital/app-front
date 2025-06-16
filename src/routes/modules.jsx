@@ -192,11 +192,19 @@ const baseModule = {
       activeIcon: Widgets,
       children: [
         {
-          label: "Módulo",
+          label: "Criar módulo",
           path: "/modulos/:table/criar",
           element: <ModuleForm />,
           icon: WidgetsOutlined,
           activeIcon: Widgets,
+          hidden: true,
+        },
+        {
+          label: "Módulo",
+          path: "/modulos/:table",
+          element: <ModuleForm />,
+          icon: TableChartOutlined,
+          activeIcon: TableChart,
           hidden: true,
         },
       ],
