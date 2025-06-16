@@ -2,7 +2,7 @@ import { Edit, Save, Widgets } from "@mui/icons-material";
 
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Tab } from "@mui/material";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 import PageTitle from "../../../layout/components/PageTitle";
 
 import { FormProvider, useForm } from "react-hook-form";
@@ -46,15 +46,19 @@ export const useModuleForm = () => {
 
 const Form = () => {
   const [tab, setTab] = useState("1");
+  const formRef = useRef();
   const navigate = useNavigate();
   const { table, currentAction } = useModuleForm();
   const methods = useForm();
+
   const handleEditModule = () => {
     console.log("Editar módulo");
-    navigate(`/modulos/${table.name}`);
+    formRef.current.submit();
+    // navigate(`/modulos/${table.name}`);
   };
 
   const handleCreateModule = () => {
+    console.log(methods.getValues());
     console.log("Criar módulo");
   };
 
@@ -79,6 +83,10 @@ const Form = () => {
     },
   };
 
+  const onSubmit = (data) => {
+    console.log(data);
+  };
+
   return (
     <div>
       <PageTitle
@@ -87,6 +95,7 @@ const Form = () => {
         buttons={[
           <Button
             key="create-module"
+            type="button"
             variant="contained"
             color="primary"
             onClick={actions[currentAction].onClick}
@@ -97,18 +106,20 @@ const Form = () => {
         ]}
       />
       <FormProvider {...methods}>
-        <TabContext value={tab}>
-          <TabList onChange={(e, value) => setTab(value)}>
-            <Tab label="Informações" value="1" />
-            <Tab label="Campos" value="2" />
-          </TabList>
-          <TabPanel value="1" sx={{ px: 0 }}>
-            <InformationTab table={table} />
-          </TabPanel>
-          <TabPanel value="2" sx={{ px: 0 }}>
-            <FieldsTab table={table} />
-          </TabPanel>
-        </TabContext>
+        <form name="module-form" onSubmit={methods.handleSubmit(onSubmit)}>
+          <TabContext value={tab}>
+            <TabList onChange={(e, value) => setTab(value)}>
+              <Tab label="Informações" value="1" />
+              <Tab label="Campos" value="2" />
+            </TabList>
+            <TabPanel value="1" sx={{ px: 0 }}>
+              <InformationTab table={table} />
+            </TabPanel>
+            <TabPanel value="2" sx={{ px: 0 }}>
+              <FieldsTab table={table} />
+            </TabPanel>
+          </TabContext>
+        </form>
       </FormProvider>
     </div>
   );
