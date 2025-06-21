@@ -26,14 +26,40 @@ const ModalHierarchy = ({
   setRefresh,
 }) => {
   const [responsibleUser, setResponsibleUser] = useState(null);
+  const [eligibleResponsibleUsers, setEligibleResponsibleUsers] = useState([]);
   const [associatedUsers, setAssociatedUsers] = useState([]);
   const [eligibleSubordinates, setEligibleSubordinates] = useState([]);
   const user = useAuthUser();
 
-  const fetchEligibleSubordinates = async () => {
+  // fetchelegibleResposibleUsers
+  const fetchEligibleResponsibleUsers = async () => {
     try {
-      const id = responsibleUser?.id || user.id;
-      const response = await api.get(`/users/eligible-subordinates/${id}`);
+      const response = await api.get(`/users/potential-responsibles`);
+      const formattedUsers = response.data?.flatMap((responsible) =>
+        responsible.users.map((user) => ({
+          id: user.id,
+          name: user.name,
+        })),
+      );
+      setEligibleResponsibleUsers(formattedUsers || []);
+    } catch (error) {
+      toast.error("Erro ao buscar usuários responsáveis elegíveis.");
+      console.error("Erro ao buscar usuários responsáveis elegíveis:", error);
+    }
+  };
+
+  const fetchEligibleSubordinates = async (responsibleId) => {
+    try {
+      const id = responsibleId || responsibleUser?.id || user?.id;
+
+      const endpoint = desHierarchy
+        ? `/users/my-subordinates?userId=${id}`
+        : `/users/eligible-subordinates/${id}`;
+
+      const response = await api.get(endpoint);
+
+    console.log("response:", response)
+
       const formattedSubordinates = response.data?.flatMap((role) =>
         role.users.map((user) => ({
           id: user.id,
@@ -70,8 +96,10 @@ const ModalHierarchy = ({
   useEffect(() => {
     if (isOpen && (desHierarchy || viewHierarchy)) {
       fetchMySubordinates();
+      fetchEligibleResponsibleUsers();
     } else if (isOpen) {
       fetchEligibleSubordinates();
+      fetchEligibleResponsibleUsers();
     }
   }, [isOpen]);
 
@@ -83,11 +111,14 @@ const ModalHierarchy = ({
         .join(", ");
 
       const payload = desHierarchy
-        ? { target_user_ids: targetUserIds }
+        ? {
+          responsible_user_id: user.isLighthouse ? responsibleUser?.id : user?.id,
+          target_user_ids: targetUserIds
+        }
         : {
-            responsible_user_id: user?.id,
-            target_user_ids: targetUserIds,
-          };
+          responsible_user_id: user.isLighthouse ? responsibleUser?.id : user?.id,
+          target_user_ids: targetUserIds,
+        };
 
       const endpoint = desHierarchy
         ? "/users/unassign-responsible"
@@ -100,29 +131,38 @@ const ModalHierarchy = ({
         : `Responsável atribuído com sucesso para: ${targetUserNames}`;
       toast.success(successMessage);
 
-      setRefresh(true);
-      console.log("Response:", response.data);
+      setRefresh((prev) => !prev);
 
       handleClose();
     } catch (error) {
-      if (error.response) {
+      if (error?.response) {
         const apiErrors = error.response.data.errors;
         const apiMessage = error.response.data.message;
 
         if (apiErrors) {
           Object.values(apiErrors).forEach((err) => {
+            console.log("Toast erro (apiErrors):", err);
             toast.error(err);
           });
+
+          toast.error(apiErrors)
         } else if (apiMessage) {
+          console.log("Toast erro (apiMessage):", apiMessage);
           toast.error(apiMessage);
         } else {
+          console.log("Toast erro (default)");
           toast.error("Erro ao processar a solicitação. Tente novamente.");
+        }
+
+        if (error?.message) {
+          console.log("Toast erro (message):", error.message);
+          toast.error(apiMessage);
         }
       } else {
         toast.error("Erro ao conectar ao servidor. Tente novamente.");
       }
 
-      console.error("Erro:", error);
+      // console.error("Errdo:", error);
     }
   };
 
@@ -153,18 +193,55 @@ const ModalHierarchy = ({
         {viewHierarchy
           ? "Membros da sua equipe"
           : desHierarchy
-            ? "Remover membros da sua equipe"
-            : "Adicionar membros à sua equipe"}
+            ? "Remover membros de uma equipe"
+            : "Vincular membros em uma equipe"}
       </DialogTitle>
       <DialogContent className="w-[480px] flex flex-col gap-4">
         {viewHierarchy ? (
           <Box>
-            {associatedUsers.map((user) => (
-              <Chip key={user.id} label={user.name} style={{ margin: "4px" }} />
-            ))}
+            {associatedUsers.length === 0 ? (
+              <span>Não há usuários na sua equipe.</span>
+            ) : (
+              associatedUsers.map((user) => (
+                <Chip key={user.id} label={user.name} style={{ margin: "4px" }} />
+              ))
+            )}
           </Box>
         ) : (
           <>
+            {
+              user.isLighthouse && (
+                <Box>
+                  <InputLabel>
+                    Selecione o usuário responsável
+                  </InputLabel>
+                  <Autocomplete
+                    options={eligibleResponsibleUsers}
+                    value={responsibleUser}
+                    onChange={(event, newValue) => {
+                      console.log("newValue", newValue);
+                      setResponsibleUser(newValue);
+                      setAssociatedUsers([]);
+                      if (newValue) {
+                        fetchEligibleSubordinates(newValue.id);
+                      } else {
+                        setEligibleSubordinates([]);
+                      }
+                    }}
+                    getOptionLabel={(option) => option.name}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder={
+                          "Selecione um usuário responsável da equipe"
+                        }
+                        fullWidth
+                      />
+                    )}
+                  />
+                </Box>
+              )
+            }
             <Box>
               <InputLabel>
                 {desHierarchy

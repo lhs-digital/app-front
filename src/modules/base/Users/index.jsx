@@ -230,7 +230,7 @@ const Users = () => {
       )}
 
       {/* Adicionar membro: Permissão específica */}
-      {permissions.some(
+      {user.isLighthouse && permissions.some(
         (permission) => permission.name === "assign_responsible_users",
       ) && (
         <MenuItem
@@ -247,7 +247,7 @@ const Users = () => {
       )}
 
       {/* Remover membro: Permissão específica */}
-      {permissions.some(
+      {user.isLighthouse && permissions.some(
         (permission) => permission.name === "unassign_responsible_users",
       ) && (
         <MenuItem
@@ -281,12 +281,11 @@ const Users = () => {
         {canManageTeam && (
           <Button
             onClick={(e) => setAnchorEl(e.currentTarget)}
-          variant="contained"
+            variant="contained"
             color="primary"
-            disabled={user.isLighthouse}
             endIcon={hierarchyOpen ? <ExpandLess /> : <ExpandMore />}
           >
-            MINHA EQUIPE
+            EQUIPES
           </Button>
         )}
         {canCreateUsers && (
