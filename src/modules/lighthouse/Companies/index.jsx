@@ -6,8 +6,10 @@ import {
   KeyboardArrowDown,
   KeyboardArrowUp,
   Search,
+  SettingsOutlined,
 } from "@mui/icons-material";
 import {
+  Box,
   Button,
   IconButton,
   InputAdornment,
@@ -28,10 +30,12 @@ import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import ModalCompany from "./components/ModalCompany";
 import ModalViewCompany from "./components/ModalViewCompany";
+import ModalIntegration from "./components/ModalIntegration";
 
 const Companies = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [modalIntegrationOpen, setModalIntegrationOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [data, setData] = useState([]);
   const [dataEdit, setDataEdit] = useState({});
@@ -141,6 +145,12 @@ const Companies = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full">
+      <ModalIntegration
+        isOpen={modalIntegrationOpen}
+        onClose={() => setModalIntegrationOpen(false)}
+        setRefresh={setRefresh}
+        refresh={refresh}
+      />
       <ModalCompany
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -167,14 +177,24 @@ const Companies = () => {
         subtitle="Administração e supervisão das informações empresariais"
         buttons={
           permissions.some((per) => per.name === "create_companies") && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => [setDataEdit({}), setModalOpen(true)]}
-              startIcon={<Add />}
-            >
-              NOVA EMPRESA
-            </Button>
+            <Box display="flex" gap={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setModalIntegrationOpen(true)}
+                startIcon={<SettingsOutlined />}
+              >
+                CONFIGURAR INTEGRAÇÃO
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => [setDataEdit({}), setModalOpen(true)]}
+                startIcon={<Add />}
+              >
+                NOVA EMPRESA
+              </Button>
+            </Box>
           )
         }
       />
