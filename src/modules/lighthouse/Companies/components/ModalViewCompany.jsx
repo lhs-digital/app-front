@@ -8,71 +8,71 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
 
-const ModalViewCompany = ({ isOpen, onClose }) => {
+const ModalViewCompany = ({ isOpen, onClose, selectedCompany }) => {
   const [roles, setRoles] = useState([]);
-  const { company } = useCompany();
-
+  
   useEffect(() => {
     const getData = async () => {
+      if (!selectedCompany?.id) return;
       try {
         const responseRole = await api.get(`/roles/roles_from_company`, {
-          params: { company_id: company.id },
+          params: { company_id: selectedCompany.id },
         });
         setRoles(responseRole.data.data);
+        console.log("selectedCompany", selectedCompany);
       } catch (error) {
         console.error("Erro ao acessar as roles por empresa", error);
       }
     };
     getData();
-  }, [setRoles, company]);
+  }, [setRoles, selectedCompany]);
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <DialogTitle>Informações Gerais da Empresa</DialogTitle>
       <DialogContent>
         <Box>
-          <b>Razão Social:</b> {company?.name}
+          <b>Razão Social:</b> {selectedCompany?.name}
         </Box>
         <Box>
-          <b>Nome Fantasia:</b> {company?.dba || "Não informado"}
+          <b>Nome Fantasia:</b> {selectedCompany?.dba || "Não informado"}
         </Box>
         <Box>
-          <b>CNPJ:</b> {company?.cnpj}
+          <b>CNPJ:</b> {selectedCompany?.cnpj}
         </Box>
         <Box>
           <b>CPF da Pessoa Responsável pela Empresa:</b>{" "}
-          {company?.responsible_cpf}
+          {selectedCompany?.responsible_cpf}
         </Box>
 
         <Typography sx={{ mt: 2 }}>
           <b>Endereço:</b>
         </Typography>
         <Box>
-          <b>CEP:</b> {company?.address?.postal_code || "Não informado"}
+          <b>CEP:</b> {selectedCompany?.address?.postal_code || "Não informado"}
         </Box>
         <Box>
-          <b>Logradouro:</b> {company?.address?.street || "Não informado"}
+          <b>Logradouro:</b> {selectedCompany?.address?.street || "Não informado"}
         </Box>
         <Box>
-          <b>Número:</b> {company?.address?.number || "Não informado"}
+          <b>Número:</b> {selectedCompany?.address?.number || "Não informado"}
         </Box>
         <Box>
-          <b>Complemento:</b> {company?.address?.complement || "Não informado"}
+          <b>Complemento:</b> {selectedCompany?.address?.complement || "Não informado"}
         </Box>
         <Box>
-          <b>Bairro:</b> {company?.address?.neighborhood || "Não informado"}
+          <b>Bairro:</b> {selectedCompany?.address?.neighborhood || "Não informado"}
         </Box>
         <Box>
-          <b>Cidade:</b> {company?.address?.city || "Não informado"}
+          <b>Cidade:</b> {selectedCompany?.address?.city || "Não informado"}
         </Box>
         <Box>
-          <b>Estado:</b> {company?.address?.state || "Não informado"}
+          <b>Estado:</b> {selectedCompany?.address?.state || "Não informado"}
         </Box>
         <Box>
-          <b>País:</b> {company?.address?.country || "Não informado"}
+          <b>País:</b> {selectedCompany?.address?.country || "Não informado"}
         </Box>
         <Typography sx={{ mt: 2 }}>
           <b>Roles:</b>
