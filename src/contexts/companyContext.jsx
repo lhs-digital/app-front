@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useUserState } from "../hooks/useUserState";
 import api from "../services/api";
 
@@ -8,17 +8,29 @@ export const CompanyContext = createContext();
 export const CompanyContextProvider = ({ children }) => {
   const { state: user } = useUserState();
 
-  const [company, setCompany] = useState(null);
+  const [company, setCompany] = useState(
+    JSON.parse(localStorage.getItem("company")) || null,
+  );
 
-  // const changeCompany = (company) => {
-  //   if (!company) {
-  //     setCompany(null);
-  //     localStorage.removeItem("company");
-  //     return;
-  //   }
-  //   setCompany(company);
-  //   localStorage.setItem("company", JSON.stringify(company));
-  // };
+  const resetCompany = () => {
+    setCompany(null);
+    localStorage.removeItem("company");
+  };
+
+  const changeCompany = (company) => {
+    if (!company) {
+      return resetCompany();
+    }
+    setCompany(company);
+    localStorage.setItem("company", JSON.stringify(company));
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem("company") && !user) {
+      console.log("resetting company");
+      resetCompany();
+    }
+  }, [user]);
 
   const { data: availableCompanies = [], refetch: refetchAvailableCompanies } =
     useQuery({
@@ -40,6 +52,7 @@ export const CompanyContextProvider = ({ children }) => {
           setCompany: () => {},
           availableCompanies: [],
           refetchAvailableCompanies: () => {},
+          resetCompany: () => {},
         }}
       >
         {children}
@@ -51,9 +64,10 @@ export const CompanyContextProvider = ({ children }) => {
     <CompanyContext.Provider
       value={{
         company,
-        setCompany,
+        setCompany: changeCompany,
         availableCompanies,
         refetchAvailableCompanies,
+        resetCompany,
       }}
     >
       {children}
