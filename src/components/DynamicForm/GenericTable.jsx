@@ -1,4 +1,4 @@
-import { Edit, RemoveRedEye } from "@mui/icons-material";
+import { RemoveRedEye } from "@mui/icons-material";
 import {
   CircularProgress,
   IconButton,
@@ -83,14 +83,14 @@ const GenericTable = ({
     });
   };
 
-  const onEdit = (row) => {
-    navigate(`/tabelas/${tableName}/${row.id}/editar`, {
-      state: {
-        recordId: row.id,
-        edit: true,
-      },
-    });
-  };
+  // const onEdit = (row) => {
+  //   navigate(`/tabelas/${tableName}/${row.id}/editar`, {
+  //     state: {
+  //       recordId: row.id,
+  //       edit: true,
+  //     },
+  //   });
+  // };
 
   return (
     <TableContainer>
@@ -155,9 +155,9 @@ const GenericTable = ({
                   <IconButton onClick={() => onView(row)} key="view">
                     <RemoveRedEye fontSize="small" />
                   </IconButton>
-                  <IconButton onClick={() => onEdit(row)} key="edit">
+                  {/* <IconButton onClick={() => onEdit(row)} key="edit">
                     <Edit fontSize="small" />
-                  </IconButton>
+                  </IconButton> */}
                 </TableCell>
               </TableRow>
             ))
