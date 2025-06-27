@@ -30,12 +30,13 @@ import {
   WidgetsOutlined,
 } from "@mui/icons-material";
 import AuditList from "../modules/audit/AuditList";
+import AuditModules from "../modules/audit/AuditModules";
 import AuditRules from "../modules/audit/AuditRules";
 import AuditTables from "../modules/audit/AuditTables";
 import EntityForm from "../modules/audit/EntityForm";
-import CompanyModules from "../modules/base/CompanyModules";
+import ModuleForm from "../modules/audit/ModuleForm";
+import ModuleTables from "../modules/audit/ModuleTables";
 import Home from "../modules/base/Home";
-import ModuleForm from "../modules/base/ModuleForm";
 import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
@@ -103,6 +104,54 @@ const auditModule = {
         "create_clients",
         "update_clients",
         "delete_clients",
+      ],
+    },
+    {
+      label: "Módulos",
+      path: "/modulos",
+      element: <AuditModules />,
+      icon: WidgetsOutlined,
+      activeIcon: Widgets,
+      children: [
+        {
+          label: "Criar módulo",
+          path: "/modulos/criar",
+          element: <ModuleForm />,
+          icon: WidgetsOutlined,
+          activeIcon: Widgets,
+          hidden: true,
+        },
+        {
+          label: "Módulo",
+          path: "/modulos/:id",
+          element: <ModuleForm />,
+          icon: TableChartOutlined,
+          activeIcon: TableChart,
+          hidden: true,
+          children: [
+            {
+              label: "Tabelas",
+              path: "/modulos/:id/:table",
+              element: <ModuleTables />,
+            },
+          ],
+        },
+        {
+          label: "Módulo",
+          path: "/modulos/:id/editar",
+          element: <ModuleForm />,
+          icon: TableChartOutlined,
+          activeIcon: TableChart,
+          hidden: true,
+        },
+        {
+          label: "Adicionar tabela",
+          path: "/modulos/:id/adicionar-tabela",
+          element: <ModuleTables />,
+          icon: TableChartOutlined,
+          activeIcon: TableChart,
+          hidden: true,
+        },
       ],
     },
   ],
@@ -182,31 +231,6 @@ const baseModule = {
         "delete_users",
         "assign_responsible_users",
         "unassign_responsible_users",
-      ],
-    },
-    {
-      label: "Módulos",
-      path: "/modulos",
-      element: <CompanyModules />,
-      icon: WidgetsOutlined,
-      activeIcon: Widgets,
-      children: [
-        {
-          label: "Criar módulo",
-          path: "/modulos/:table/criar",
-          element: <ModuleForm />,
-          icon: WidgetsOutlined,
-          activeIcon: Widgets,
-          hidden: true,
-        },
-        {
-          label: "Módulo",
-          path: "/modulos/:table",
-          element: <ModuleForm />,
-          icon: TableChartOutlined,
-          activeIcon: TableChart,
-          hidden: true,
-        },
       ],
     },
     {

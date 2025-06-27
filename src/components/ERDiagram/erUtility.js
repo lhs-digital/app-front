@@ -18,11 +18,14 @@ const getColumn = (col) => {
   };
 };
 
-export const parseStructure = (structure) => {
+export const getTables = (structure) => {
   const tables = Object.keys(structure);
-  const tablesData = tables.map((table) => {
-    const { columns } = structure[table];
-    const columnsData = columns.map((column) => getColumn(column));
+  return tables;
+};
+
+export const parseStructure = (structure, existingTables) => {
+  const tablesData = structure.map((table) => {
+    const columnsData = table.columns.map((column) => getColumn(column));
     columnsData.sort((a, b) => {
       if (a.pk && !b.pk) {
         return -1;
@@ -39,9 +42,10 @@ export const parseStructure = (structure) => {
       return 0;
     });
     return {
-      name: table,
+      id: table.id,
+      name: table.name,
       columns: columnsData,
-      hasModule: Math.random() < 0.5,
+      isSelected: existingTables.includes(table.id),
     };
   });
   return tablesData;

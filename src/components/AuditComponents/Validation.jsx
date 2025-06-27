@@ -1,5 +1,5 @@
 import { Chip } from "@mui/material";
-import { validationLabels } from "../../../../services/utils";
+import { validationLabels } from "../../services/utils";
 
 const Validation = ({ rule, params, onDelete }) => {
   const formatParams = () => {

@@ -1,29 +1,25 @@
-import { Remove } from "@mui/icons-material";
+import { Remove, TableChart } from "@mui/icons-material";
 import { Button, Chip, Divider } from "@mui/material";
 import { useState } from "react";
-import { useFormContext } from "react-hook-form";
-import TableColumn from "../../CompanyModules/components/TableColumn";
-import AddColumn from "./AddColumn";
+import { useLocation } from "react-router-dom";
+import TableColumn from "../../../components/AuditComponents/TableColumn";
+import PageTitle from "../../../layout/components/PageTitle";
+import AddColumn from "./components/AddColumn";
 
-const FieldsTab = ({ table }) => {
-  const { setValue, getValues, watch } = useFormContext();
+const ModuleTableView = () => {
+  const { table } = useLocation().state;
   const [openDialog, setOpenDialog] = useState(false);
   const [pendingColumn, setPendingColumn] = useState(null);
-
-  const columnList = watch("columns") || [];
+  const [columns, setColumns] = useState([]);
 
   const handleAddColumn = (column) => {
     console.log(column);
-    let columns = getValues("columns") || [];
-    columns = [...columns, column];
-    setValue("columns", columns);
+    setColumns([...columns, column]);
     setOpenDialog(false);
   };
 
   const handleRemoveColumn = (column) => {
-    let columns = getValues("columns") || [];
-    columns = columns.filter((c) => c.name !== column.name);
-    setValue("columns", columns);
+    setColumns(columns.filter((c) => c.name !== column.name));
   };
 
   const openEditColumn = (column) => {
@@ -35,9 +31,7 @@ const FieldsTab = ({ table }) => {
   };
 
   const handleEditColumn = (column) => {
-    let columns = getValues("columns") || [];
-    columns = columns.map((c) => (c.name === column.name ? column : c));
-    setValue("columns", columns);
+    setColumns(columns.map((c) => (c.name === column.name ? column : c)));
     setOpenDialog(false);
   };
 
@@ -45,9 +39,13 @@ const FieldsTab = ({ table }) => {
     setOpenDialog(false);
     setPendingColumn(null);
   };
-
   return (
-    <div className="flex flex-col w-full gap-8">
+    <div className="flex flex-col gap-8 w-full">
+      <PageTitle
+        title="Tabela"
+        icon={<TableChart />}
+        subtitle="Tabela do módulo"
+      />
       <div className="flex flex-col gap-4">
         <div>
           <h2 className="font-semibold">Colunas adicionadas</h2>
@@ -57,7 +55,7 @@ const FieldsTab = ({ table }) => {
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex flex-row gap-2 flex-wrap px-2 py-4 border border-[--border] rounded-md min-h-24">
-            {columnList.map((column) => (
+            {columns.map((column) => (
               <Chip
                 key={column.name}
                 label={`${column.label} (${column.name})`}
@@ -67,14 +65,17 @@ const FieldsTab = ({ table }) => {
               />
             ))}
           </div>
-          <Button
-            color="primary"
-            startIcon={<Remove />}
-            disabled={columnList.length === 0}
-            onClick={() => setValue("columns", [])}
-          >
-            Remover todas
-          </Button>
+          <div className="flex flex-row w-full justify-end">
+            <Button
+              color="primary"
+              className="w-fit"
+              startIcon={<Remove />}
+              disabled={columns.length === 0}
+              onClick={() => setColumns([])}
+            >
+              Remover todas
+            </Button>
+          </div>
         </div>
       </div>
       <Divider />
@@ -82,8 +83,9 @@ const FieldsTab = ({ table }) => {
       {table?.columns.map((column) => (
         <TableColumn
           key={column.name}
+          table={table.table}
           column={column}
-          isAdded={columnList.includes(column)}
+          isAdded={columns.includes(column)}
           onAddColumn={() => {
             setPendingColumn(column);
             setOpenDialog(true);
@@ -103,4 +105,4 @@ const FieldsTab = ({ table }) => {
   );
 };
 
-export default FieldsTab;
+export default ModuleTableView;

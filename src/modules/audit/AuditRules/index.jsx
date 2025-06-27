@@ -14,6 +14,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import Validation from "../../../components/AuditComponents/Validation";
 import ModalDelete from "../../../components/ModalDelete";
 import { useThemeMode } from "../../../contexts/themeModeContext";
 import { useCompany } from "../../../hooks/useCompany";
@@ -25,7 +26,6 @@ import { getPriorityColor, severityLabels } from "../../../services/utils";
 import { handleMode } from "../../../theme";
 import AddRule from "./components/AddRule";
 import ContextSelect from "./components/ContextSelect";
-import Validation from "./components/Validation";
 
 const AuditRules = () => {
   const [isOpen, setIsOpen] = useState(false);
