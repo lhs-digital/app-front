@@ -57,13 +57,13 @@ const Layout = ({ children }) => {
               <div className="min-w-[200px]">
                 <Select
                   size="small"
-                  value={selectedCompany.id}
+                  value={selectedCompany}
                   onChange={(e) => setSelectedCompany(e.target.value)}
                   fullWidth
                   disabled={availableCompanies.length === 0}
                 >
                   {availableCompanies.map((company) => (
-                    <MenuItem key={company.id} value={company.id}>
+                    <MenuItem key={company.id} value={company}>
                       {company.name}
                     </MenuItem>
                   ))}
