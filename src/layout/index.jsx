@@ -3,6 +3,7 @@ import {
   NavigateNext,
   SaveOutlined,
   SwapHoriz,
+  WarningAmberOutlined,
 } from "@mui/icons-material";
 import {
   Box,
@@ -175,13 +176,19 @@ const Layout = ({ children }) => {
       </div>
       <Dialog
         open={confirmChangeOpen}
+        maxWidth="xs"
+        fullWidth
         onClose={() => setConfirmChangeOpen(false)}
       >
-        <DialogTitle>Alterar empresa</DialogTitle>
+        <DialogTitle className="flex flex-row gap-2 items-center">
+          <WarningAmberOutlined fontSize="small" />
+          <p className="text-lg font-bold">Alterar empresa</p>
+        </DialogTitle>
         <DialogContent>
-          <p>
-            Tem certeza que deseja alterar a empresa? Você será redirecionado
-            para a página inicial e poderá perder alterações não salvas.
+          <p className="text-justify">
+            <b>Tem certeza que deseja alterar a empresa?</b> Você será
+            redirecionado para a página inicial e poderá perder alterações não
+            salvas.
           </p>
         </DialogContent>
         <DialogActions>
