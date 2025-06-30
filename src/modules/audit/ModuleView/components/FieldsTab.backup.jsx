@@ -3,8 +3,8 @@ import { Button, Chip, Divider } from "@mui/material";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import TableColumn from "../../../../components/AuditComponents/TableColumn";
-import { useModuleForm } from "../../ModuleForm/index";
-import AddColumn from "../../ModuleTables/components/AddColumn";
+import { useModuleForm } from "../index";
+import AddColumn from "../../ModuleTable/components/AddColumn";
 
 const FieldsTab = () => {
   const { setValue, getValues, watch } = useFormContext();

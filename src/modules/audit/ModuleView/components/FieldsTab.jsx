@@ -15,7 +15,7 @@ import {
 import Validation from "../../../../components/AuditComponents/Validation";
 import { useThemeMode } from "../../../../contexts/themeModeContext";
 import { getPriorityColor, severityLabels } from "../../../../services/utils";
-import { useModuleForm } from "../../ModuleForm/index";
+import { useModuleForm } from "../index";
 
 const FieldsTab = () => {
   const theme = useThemeMode();
