@@ -38,8 +38,13 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const [editingCompany, setEditingCompany] = useState(false);
   const pathnames = location.pathname.split("/").filter(Boolean);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const sidebarOpen = localStorage.getItem("sidebarOpen");
+    setSidebarOpen(sidebarOpen === "true");
+  }, []);
 
   useEffect(() => {
     if (!company) {
@@ -68,9 +73,14 @@ const Layout = ({ children }) => {
     setConfirmChangeOpen(true);
   };
 
+  const onSidebarOpenChange = (value) => {
+    setSidebarOpen(value);
+    localStorage.setItem("sidebarOpen", value);
+  };
+
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden">
-      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+      <Sidebar open={sidebarOpen} setOpen={onSidebarOpenChange} />
       <div className="grow flex flex-col">
         <div className="h-16 border-b border-b-black/10 dark:border-b-white/15 flex flex-row items-center justify-between px-4">
           <Box className="flex flex-row gap-2 items-center">
