@@ -7,13 +7,19 @@ import {
 import {
   Box,
   Breadcrumbs,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   MenuItem,
   Select,
   Tooltip,
 } from "@mui/material";
-import { useState } from "react";
-import { Link, matchPath, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
 import blackLogo from "../assets/lh_black.svg";
 import whiteLogo from "../assets/lh_white.svg";
 import ThemeSwitcher from "../components/ThemeSwitcher";
@@ -26,11 +32,20 @@ import Sidebar from "./components/Sidebar";
 const Layout = ({ children }) => {
   const { company, availableCompanies, setCompany } = useCompany();
   const [selectedCompany, setSelectedCompany] = useState(company || "");
+  const [confirmChangeOpen, setConfirmChangeOpen] = useState(false);
   const theme = handleMode(useThemeMode().mode);
   const location = useLocation();
   const [editingCompany, setEditingCompany] = useState(false);
   const pathnames = location.pathname.split("/").filter(Boolean);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!company) {
+      navigate("/painel");
+      setEditingCompany(false);
+    }
+  }, [company]);
 
   const onCompanyChangeClick = () => {
     if (!editingCompany) {
@@ -40,6 +55,16 @@ const Layout = ({ children }) => {
 
     setCompany(selectedCompany);
     setEditingCompany(false);
+    navigate("/painel");
+  };
+
+  const onConfirmChange = () => {
+    setConfirmChangeOpen(false);
+    setEditingCompany(true);
+  };
+
+  const promptCompanyChange = () => {
+    setConfirmChangeOpen(true);
   };
 
   return (
@@ -77,7 +102,11 @@ const Layout = ({ children }) => {
               arrow
               placement="right"
             >
-              <IconButton onClick={onCompanyChangeClick}>
+              <IconButton
+                onClick={
+                  editingCompany ? onCompanyChangeClick : promptCompanyChange
+                }
+              >
                 {editingCompany ? (
                   <SaveOutlined fontSize="small" />
                 ) : (
@@ -90,11 +119,11 @@ const Layout = ({ children }) => {
             <ThemeSwitcher />
           </div>
         </div>
-        <div
+        <motion.div
           className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6"
           style={{
             width: sidebarOpen ? "calc(100vw - 320px)" : "calc(100vw - 65px)",
-            transition: "width 0.3s ease-in-out",
+            transition: "all 0.3s ease-in-out",
           }}
         >
           {pathnames.length > 0 && pathnames[0] !== "painel" && (
@@ -133,9 +162,40 @@ const Layout = ({ children }) => {
               })}
             </Breadcrumbs>
           )}
-          {children}
-        </div>
+          {editingCompany ? (
+            <div className="flex flex-col gap-4 items-center justify-center h-[calc(100vh-4rem)]">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Selecione uma empresa para continuar
+              </p>
+            </div>
+          ) : (
+            children
+          )}
+        </motion.div>
       </div>
+      <Dialog
+        open={confirmChangeOpen}
+        onClose={() => setConfirmChangeOpen(false)}
+      >
+        <DialogTitle>Alterar empresa</DialogTitle>
+        <DialogContent>
+          <p>
+            Tem certeza que deseja alterar a empresa? Você será redirecionado
+            para a página inicial e poderá perder alterações não salvas.
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => setConfirmChangeOpen(false)}
+          >
+            Cancelar
+          </Button>
+          <Button variant="outlined" onClick={onConfirmChange}>
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
