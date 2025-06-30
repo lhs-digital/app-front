@@ -38,20 +38,30 @@ export const ModuleForm = () => {
       const response = await api.get(
         `/companies/${company.id}/audit/modules/${id}`,
       );
-      console.log("activeModule", response.data);
+      console.log(
+        "🌐 [API] companies/${company.id}/audit/modules/${id}",
+        response.data,
+      );
       return response.data.data;
     },
     enabled: !!company,
     retry: false,
   });
 
-  const { data: tables = null, isLoading: isLoadingTables } = useQuery({
+  const { data: structure = [], isLoading: isLoadingStructure } = useQuery({
     queryKey: ["tables", company],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/structure`);
-      return parseStructure(response.data.data);
+      console.log(
+        "🌐 [API] companies/${company.id}/structure",
+        response.data.data,
+      );
+      const existingTables = activeModule.tables.map(
+        (table) => table.company_table_id,
+      );
+      return parseStructure(response.data.data, existingTables);
     },
-    enabled: !!company,
+    enabled: !!activeModule,
   });
 
   return (
@@ -61,9 +71,9 @@ export const ModuleForm = () => {
         location,
         currentAction,
         activeModule,
-        tables,
+        structure,
         isLoadingModules,
-        isLoadingTables,
+        isLoadingStructure,
       }}
     >
       <Form />
@@ -81,27 +91,14 @@ export const useModuleForm = () => {
 
 const Form = () => {
   const navigate = useNavigate();
-  const { company } = useCompany();
-  const { id, activeModule, currentAction } = useModuleForm();
+  const { id, activeModule, currentAction, structure, isLoadingStructure } =
+    useModuleForm();
   const methods = useForm({
     defaultValues: {
       name: "",
       description: "",
       tables: [],
     },
-  });
-
-  const { data: tables = [], isLoading: isLoadingTables } = useQuery({
-    queryKey: ["tables", company],
-    queryFn: async () => {
-      const response = await api.get(`/companies/${company.id}/structure`);
-      console.log("tables (structure)", response.data.data);
-      const existingTables = activeModule.tables.map(
-        (table) => table.company_table_id,
-      );
-      return parseStructure(response.data.data, existingTables);
-    },
-    enabled: !!activeModule,
   });
 
   useEffect(() => {
@@ -175,7 +172,7 @@ const Form = () => {
         >
           <InformationTab />
           <div className="flex flex-col gap-4">
-            {isLoadingTables ? (
+            {isLoadingStructure ? (
               <Skeleton
                 variant="rectangular"
                 height={400}
@@ -239,11 +236,10 @@ const Form = () => {
                     </div>
                     <div className="w-full h-[62.5vh] overflow-y-hidden border border-[--border] rounded-lg grid-bg relative">
                       <Diagram
-                        data={tables}
-                        isLoading={isLoadingTables}
+                        data={structure}
+                        isLoading={isLoadingStructure}
                         allowHover={true}
                         onSelectTable={(table) => {
-                          console.log(table);
                           navigate(`/modulos/${id}/${table.id}`, {
                             state: { table },
                           });

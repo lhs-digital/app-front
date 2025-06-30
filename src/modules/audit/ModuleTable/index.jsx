@@ -1,16 +1,37 @@
 import { Remove, TableChart } from "@mui/icons-material";
 import { Button, Chip, Divider } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import TableColumn from "../../../components/AuditComponents/TableColumn";
+import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
+import api from "../../../services/api";
 import AddColumn from "./components/AddColumn";
 
 const ModuleTableView = () => {
   const { table } = useLocation().state;
+  const { id } = useParams();
   const [openDialog, setOpenDialog] = useState(false);
   const [pendingColumn, setPendingColumn] = useState(null);
   const [columns, setColumns] = useState([]);
+
+  const { company } = useCompany();
+
+  const { data } = useQuery({
+    queryKey: ["tables", id],
+    queryFn: async () => {
+      const response = await api.get(
+        `/companies/${company.id}/audit/modules/${id}/tables`,
+      );
+      console.log(
+        "🌐 [API] companies/${company.id}/audit/modules/${id}/tables",
+        response.data.data,
+      );
+      return response.data.data;
+    },
+    enabled: !!table,
+  });
 
   const handleAddColumn = (column) => {
     console.log(column);
