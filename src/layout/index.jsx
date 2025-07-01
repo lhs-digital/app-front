@@ -148,14 +148,14 @@ const Layout = ({ children }) => {
               separator={
                 <NavigateNext
                   fontSize="small"
-                  className="mt-0.5 text-gray-500 dark:text-gray-400"
+                  className="mt-0.5 text-neutral-500 dark:text-neutral-400"
                 />
               }
             >
               <Link
                 key="base"
                 to="/"
-                className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color]"
+                className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-[--foreground-color]"
               >
                 <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
               </Link>
@@ -169,7 +169,7 @@ const Layout = ({ children }) => {
                   <Link
                     key={to}
                     to={to}
-                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-[--foreground-color] hover:underline"
+                    className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-[--foreground-color] hover:underline"
                   >
                     {label}
                   </Link>
@@ -179,7 +179,7 @@ const Layout = ({ children }) => {
           )}
           {editingCompany ? (
             <div className="flex flex-col gap-4 items-center justify-center h-[calc(100vh-4rem)]">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 Selecione uma empresa para continuar
               </p>
             </div>
