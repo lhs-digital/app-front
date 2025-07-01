@@ -1,22 +1,32 @@
-import { Add, InfoOutlined, Remove, Save } from "@mui/icons-material";
 import {
+  Add,
+  Check,
+  InfoOutlined,
+  Remove,
+  RuleFolderOutlined,
+  TextSnippetOutlined,
+} from "@mui/icons-material";
+import {
+  Autocomplete,
   Button,
-  Checkbox,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControl,
-  FormControlLabel,
+  FormHelperText,
   FormLabel,
   MenuItem,
   Select,
   TextField,
   Tooltip,
 } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import FormField from "../../../../components/FormField";
-import { priorities } from "../../../../services/utils";
+import { toast } from "react-toastify";
+import Validation from "../../../../components/AuditComponents/Validation";
+import { priorities, validations } from "../../../../services/utils";
 
 export const AddColumn = ({
   open,
@@ -26,7 +36,19 @@ export const AddColumn = ({
   onEditColumn,
   onRemoveColumn,
 }) => {
-  const { register, control, handleSubmit, setValue } = useForm({
+  const [rules, setRules] = useState([]);
+  const [ruleParams, setRuleParams] = useState(new Set());
+  const [inputValue, setInputValue] = useState();
+  const {
+    register,
+    getValues,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+    resetField,
+  } = useForm({
     defaultValues: {
       name: "",
       label: "",
@@ -35,45 +57,164 @@ export const AddColumn = ({
       type: "",
       help_text: "",
       placeholder: "",
-      is_search: false,
-      is_auto_focus: false,
+      rule: {
+        name: "",
+        message: "",
+        params: "",
+      },
     },
   });
 
   useEffect(() => {
     if (column) {
-      setValue("name", column.name);
-      setValue("label", column.label);
-      setValue("priority", column.priority);
-      setValue("size", column.size);
-      setValue("type", column.type);
-      setValue("help_text", column.help_text);
-      setValue("placeholder", column.placeholder);
-      setValue("is_search", column.is_search);
+      setValue("name", column.name || "");
+      setValue("label", column.label || "");
+      setValue("priority", column.priority || "");
+      setValue("size", column.size || "");
+      setValue("type", column.type || "");
+      setValue("help_text", column.help_text || "");
+      setValue("placeholder", column.placeholder || "");
+      if (column.rules && Object.keys(column.rules).length > 0) {
+        const formattedRules = column.rules.map((validation) => {
+          if (validation.params) {
+            const paramArray = validation.params.split(",");
+            setRuleParams((prev) => new Set([...prev, ...paramArray]));
+          }
+
+          return {
+            id: validation.id,
+            name: validation.name,
+            message: validation.message,
+            params: validation.params || "",
+            priority: validation.priority || "",
+          };
+        });
+
+        setRules(formattedRules);
+      }
     }
   }, [column]);
 
-  const onSubmit = (data) => {
+  const selectedValidation = watch("rule.name")?.split("/")[1];
+
+  const renderValidationField = () => {
+    const validation = validations.find(
+      (validation) => validation.name === selectedValidation,
+    );
+    if (!validation) return null;
+    if (validation.field === "array")
+      return (
+        <FormControl>
+          <FormLabel id="company-label">Valores possíveis</FormLabel>
+          <Autocomplete
+            multiple
+            key="rule-chips"
+            options={[...ruleParams, inputValue && inputValue.trim()].filter(
+              (item) => item !== "",
+            )}
+            noOptionsText="Digite para adicionar"
+            onChange={(event, value) => {
+              setRuleParams((prev) => new Set([...prev, ...value]));
+            }}
+            inputValue={inputValue}
+            onInputChange={(event, newInputValue) => {
+              setInputValue(newInputValue);
+            }}
+            getOptionLabel={(option) => option}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Comece a digitar para adicionar"
+              />
+            )}
+          />
+        </FormControl>
+      );
+  };
+
+  const onSubmit = (formData) => {
+    if (Object.keys(errors).length > 0) {
+      return toast.error("Preencha todos os campos corretamente");
+    }
+
+    const formattedData = {
+      ...column,
+      name: formData.name,
+      label: formData.label,
+      size: formData.size,
+      type: formData.type,
+      help_text: formData.help_text,
+      placeholder: formData.placeholder,
+      rules: rules,
+      // rules: rules.reduce((acc, rule) => {
+      //   acc[rule.id] = {
+      //     message: rule.message,
+      //     params: rule.params,
+      //   };
+      //   return acc;
+      // }, {}),
+    };
+
     if (column?.edit) {
-      onEditColumn({ ...column, ...data, edit: false });
+      onEditColumn(formattedData);
     } else {
-      onAddColumn({
-        ...column,
-        ...data,
-      });
+      onAddColumn(formattedData);
     }
   };
 
+  const addRule = () => {
+    const { rule } = getValues();
+    if (!rule.name || !rule.message) {
+      toast.error("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    if (
+      ruleParams.size === 0 &&
+      (selectedValidation === "in" || selectedValidation === "not_in")
+    ) {
+      toast.error("Adicione pelo menos um valor para a regra.");
+      return;
+    }
+
+    const newRule = {
+      id: rule.name.split("/")[0],
+      name: rule.name.split("/")[1],
+      message: rule.message,
+      params: [...ruleParams].join(","),
+    };
+    setRules((prev) => [...prev, newRule]);
+    resetField("rule.name");
+    resetField("rule.message");
+    resetField("rule.params");
+    setRuleParams(new Set());
+    setInputValue("");
+  };
+
+  const removeRule = (rule) => {
+    setRules((prev) => prev.filter((r) => r.id !== rule.id));
+    setRuleParams((prev) => {
+      const newParams = new Set([...prev]);
+      rule.params.split(",").forEach((param) => {
+        newParams.delete(param.trim());
+      });
+      return newParams;
+    });
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth scroll="body">
       <DialogTitle>
         {column && !column.edit ? "Adicionar coluna" : "Editar coluna"}
       </DialogTitle>
       <DialogContent>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 w-full"
-        >
+        <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 w-full">
+          <h2 className="font-semibold col-span-6 text-lg mb-2">
+            <span>
+              <TextSnippetOutlined fontSize="small" className="mb-0.5" />
+            </span>{" "}
+            Informações da coluna
+          </h2>
           <FormControl className="lg:col-span-2">
             <FormLabel>Nome da coluna</FormLabel>
             <TextField value={column?.name} disabled {...register(`name`)} />
@@ -97,34 +238,10 @@ export const AddColumn = ({
             />
           </FormControl>
           <Controller
-            name={`priority`}
-            control={control}
-            rules={{ required: "Este campo é obrigatório" }}
-            render={({ field }) => (
-              <FormControl className="grow lg:col-span-2">
-                <FormLabel required>Prioridade da coluna</FormLabel>
-                <Select
-                  key="priority"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
-                >
-                  {priorities.map((severity, index) => (
-                    <MenuItem
-                      key={`${severity.name}-priority-${index}`}
-                      value={severity.value}
-                    >
-                      {severity.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-          />
-          <Controller
             name={`size`}
             control={control}
             render={({ field }) => (
-              <FormControl className="lg:col-span-2">
+              <FormControl className="lg:col-span-3">
                 <FormLabel>
                   Tamanho{" "}
                   <span className="text-neutral-500 cursor-pointer">
@@ -152,34 +269,34 @@ export const AddColumn = ({
             name={`type`}
             control={control}
             render={({ field }) => (
-              <FormControl className="lg:col-span-2">
+              <FormControl className="lg:col-span-3">
                 <FormLabel>Tipo de campo</FormLabel>
                 <Select
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
                 >
-                  <MenuItem value="autocomplete">Autocomplete</MenuItem>
-                  <MenuItem value="checkbox">Checkbox</MenuItem>
-                  <MenuItem value="combobox">Combobox</MenuItem>
-                  <MenuItem value="cpf-cnpj">CPF/CNPJ</MenuItem>
+                  {/* <MenuItem value="autocomplete">Autocomplete</MenuItem> */}
+                  {/* <MenuItem value="checkbox">Checkbox</MenuItem> */}
+                  {/* <MenuItem value="combobox">Combobox</MenuItem> */}
+                  {/* <MenuItem value="cpf-cnpj">CPF/CNPJ</MenuItem> */}
                   <MenuItem value="date">Data</MenuItem>
-                  <MenuItem value="datetime">Data e hora</MenuItem>
+                  {/* <MenuItem value="datetime">Data e hora</MenuItem> */}
                   <MenuItem value="email">Email</MenuItem>
-                  <MenuItem value="file">Arquivo</MenuItem>
+                  {/* <MenuItem value="file">Arquivo</MenuItem> */}
                   <MenuItem value="number">Número</MenuItem>
-                  <MenuItem value="radio">Radio</MenuItem>
-                  <MenuItem value="search">Search</MenuItem>
+                  {/* <MenuItem value="radio">Radio</MenuItem> */}
+                  {/* <MenuItem value="search">Search</MenuItem> */}
                   <MenuItem value="select">Select</MenuItem>
                   <MenuItem value="tel">Telefone</MenuItem>
                   <MenuItem value="text">Texto</MenuItem>
                   <MenuItem value="textarea">Textarea</MenuItem>
-                  <MenuItem value="time">Hora</MenuItem>
+                  {/* <MenuItem value="time">Hora</MenuItem> */}
                   <MenuItem value="url">URL</MenuItem>
                 </Select>
               </FormControl>
             )}
           />
-          <FormControl className="lg:col-span-3">
+          <FormControl className="lg:col-span-6">
             <FormLabel>
               Texto de ajuda{" "}
               <span className="text-neutral-500 cursor-pointer">
@@ -193,13 +310,12 @@ export const AddColumn = ({
             </FormLabel>
             <TextField {...register(`help_text`)} />
           </FormControl>
-          <FormControl className="lg:col-span-3">
+          <FormControl className="lg:col-span-6">
             <FormLabel>
               Texto placeholder{" "}
               <span className="text-neutral-500 cursor-pointer">
                 <Tooltip
-                  title="Opcional. Texto para indicar ao usuário o que deve ser digitado no
-          campo."
+                  title="Opcional. Texto para indicar ao usuário o que deve ser digitado no campo."
                   arrow
                 >
                   <InfoOutlined fontSize="12px" className="mb-0.5" />
@@ -208,7 +324,7 @@ export const AddColumn = ({
             </FormLabel>
             <TextField {...register(`placeholder`)} />
           </FormControl>
-          <FormField label="Propriedades" containerClass="lg:col-span-6">
+          {/* <FormField label="Propriedades" containerClass="lg:col-span-6">
             <div className="flex flex-row gap-2">
               <FormControlLabel
                 control={<Checkbox />}
@@ -221,29 +337,121 @@ export const AddColumn = ({
                 {...register(`is_auto_focus`)}
               />
             </div>
-          </FormField>
-          <div className="col-span-1 gap-2 md:col-span-2 lg:col-span-6 flex justify-end">
-            {column?.edit && (
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<Remove />}
-                onClick={() => onRemoveColumn(column)}
-              >
-                Remover coluna
-              </Button>
+          </FormField> */}
+          <Divider className="col-span-6" />
+          <h2 className="font-semibold col-span-6 text-lg mb-2">
+            <span>
+              <RuleFolderOutlined fontSize="small" className="mb-0.5" />
+            </span>{" "}
+            Validações
+          </h2>
+          <h2 className="col-span-6">Nova regra</h2>
+          <Controller
+            name="rule.name"
+            control={control}
+            render={({ field }) => (
+              <FormControl className="col-span-1 md:col-span-2 lg:col-span-4">
+                <FormLabel>Condição</FormLabel>
+                <Select
+                  fullWidth
+                  key="validation"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                >
+                  {validations.map((validation) => (
+                    <MenuItem
+                      key={`${validation.id}/${validation.name}`}
+                      value={`${validation.id}/${validation.name}`}
+                    >
+                      {validation.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>
+                  {field.value &&
+                    validations.find(
+                      (c) => c.name === field.value.split("/")[1],
+                    )?.description}
+                </FormHelperText>
+              </FormControl>
             )}
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              startIcon={column?.edit ? <Save /> : <Add />}
-            >
-              {column?.edit ? "Salvar" : "Adicionar coluna"}
-            </Button>
+          />
+          <Controller
+            name="rule.priority"
+            control={control}
+            render={({ field }) => (
+              <FormControl className="col-span-1 md:col-span-2 lg:col-span-2">
+                <FormLabel>Prioridade</FormLabel>
+                <Select
+                  fullWidth
+                  key="validation"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                >
+                  {priorities.map((priority) => (
+                    <MenuItem
+                      key={`${priority.value}/${priority.label}`}
+                      value={priority.value}
+                    >
+                      {priority.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+          {renderValidationField()}
+          <FormControl className="col-span-1 md:col-span-2 lg:col-span-6">
+            <FormLabel>Mensagem de erro</FormLabel>
+            <TextField {...register("rule.message")} />
+            <FormHelperText>
+              Mensagem que será exibida quando a regra for violada.
+            </FormHelperText>
+          </FormControl>
+          <Button startIcon={<Add />} onClick={addRule} className="col-span-6">
+            ADICIONAR REGRA
+          </Button>
+          <Divider className="col-span-6" />
+          <h2 className="col-span-6">Regras definidas</h2>
+          <div className="flex flex-row gap-2 items-center col-span-6">
+            {rules.length === 0 ? (
+              <p className="text-sm text-gray-400">
+                Não há regras adicionadas.
+              </p>
+            ) : (
+              rules.map((rule, index) => (
+                <Validation
+                  key={`${rule.name}-${index}`}
+                  rule={rule}
+                  params={rule.params}
+                  onDelete={() => removeRule(rule)}
+                />
+              ))
+            )}
           </div>
         </form>
       </DialogContent>
+      <DialogActions>
+        {column?.edit && (
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<Remove />}
+            onClick={() => onRemoveColumn(column)}
+          >
+            Remover coluna
+          </Button>
+        )}
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          startIcon={column?.edit ? <Check /> : <Add />}
+          onClick={handleSubmit(onSubmit)}
+        >
+          {column?.edit ? "Atualizar coluna" : "Adicionar coluna"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };
