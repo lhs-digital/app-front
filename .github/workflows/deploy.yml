@@ -1,9 +1,10 @@
-name: CI & Deploy to Homolog
+name: Deploy to staging environment
 
 on:
   push:
     branches:
       - staging # Trigger only on pushes to the staging branch
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -11,10 +12,6 @@ jobs:
     concurrency: deploy-staging
 
     runs-on: ubuntu-latest
-
-    # Map this job to the "staging" GitHub environment so reviewers can approve
-    environment:
-      name: staging
 
     steps:
       # ----------------------------------------
@@ -54,12 +51,10 @@ jobs:
           path: dist
 
       # ----------------------------------------
-      # Set up SSH agent with provided private key
+      # Install sshpass for password-based SSH
       # ----------------------------------------
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
 
       # ----------------------------------------
       # Add remote host to known_hosts to avoid prompt
@@ -70,28 +65,14 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       # ----------------------------------------
-      # Deploy build directory to remote server using rsync over SSH
+      # Deploy build directory to remote server using rsync over SSH with password
       # ----------------------------------------
       - name: Deploy to VM
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || 'public_html' }}
         run: |
           echo "Deploying dist/ to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
-          rsync -az --delete dist/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
-
-      # ----------------------------------------
-      # Optional: clear cache / restart services on the VM
-      # Uncomment and adapt if needed
-      # ----------------------------------------
-      # - name: Post-deploy commands
-      #   env:
-      #     SSH_USER: ${{ secrets.SSH_USER }}
-      #     SSH_HOST: ${{ secrets.SSH_HOST }}
-      #   run: |
-      #     ssh "$SSH_USER@$SSH_HOST" <<'EOF'
-      #       # Example: restart nginx
-      #       sudo systemctl restart nginx
-      #     EOF
-      # ----------------------------------------
+          sshpass -p "$SSH_PASSWORD" rsync -az --delete dist/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
