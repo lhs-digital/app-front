@@ -1,0 +1,97 @@
+name: CI & Deploy to Homolog
+
+on:
+  push:
+    branches:
+      - staging # Trigger only on pushes to the staging branch
+
+jobs:
+  build-and-deploy:
+    # Prevent more than one deployment to the same environment at a time
+    concurrency: deploy-staging
+
+    runs-on: ubuntu-latest
+
+    # Map this job to the "staging" GitHub environment so reviewers can approve
+    environment:
+      name: staging
+
+    steps:
+      # ----------------------------------------
+      # Checkout repository
+      # ----------------------------------------
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # ----------------------------------------
+      # Set up Node.js with dependency caching
+      # ----------------------------------------
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "npm"
+
+      # ----------------------------------------
+      # Install dependencies (clean install)
+      # ----------------------------------------
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      # ----------------------------------------
+      # Build project – outputs to ./dist by default (Vite)
+      # ----------------------------------------
+      - name: Build
+        run: npm run build
+
+      # ----------------------------------------
+      # Upload build as workflow artefact (helpful for debugging)
+      # ----------------------------------------
+      - name: Upload build artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # ----------------------------------------
+      # Set up SSH agent with provided private key
+      # ----------------------------------------
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      # ----------------------------------------
+      # Add remote host to known_hosts to avoid prompt
+      # ----------------------------------------
+      - name: Add host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      # ----------------------------------------
+      # Deploy build directory to remote server using rsync over SSH
+      # ----------------------------------------
+      - name: Deploy to VM
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || 'public_html' }}
+        run: |
+          echo "Deploying dist/ to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
+          rsync -az --delete dist/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
+
+      # ----------------------------------------
+      # Optional: clear cache / restart services on the VM
+      # Uncomment and adapt if needed
+      # ----------------------------------------
+      # - name: Post-deploy commands
+      #   env:
+      #     SSH_USER: ${{ secrets.SSH_USER }}
+      #     SSH_HOST: ${{ secrets.SSH_HOST }}
+      #   run: |
+      #     ssh "$SSH_USER@$SSH_HOST" <<'EOF'
+      #       # Example: restart nginx
+      #       sudo systemctl restart nginx
+      #     EOF
+      # ----------------------------------------
