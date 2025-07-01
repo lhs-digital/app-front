@@ -20,7 +20,7 @@ const ModuleTableView = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const action = searchParams.get("action");
   const actions = {
-    add: {
+    create: {
       pageTitle: "Adicionar colunas",
       icon: <Save />,
       buttonLabel: "Salvar",
@@ -50,40 +50,6 @@ const ModuleTableView = () => {
   const [unselectedColumns, setUnselectedColumns] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
   const { company } = useCompany();
-
-  // const { data } = useQuery({
-  //   queryKey: ["tables", id],
-  //   queryFn: async () => {
-  //     const response = await api.get(
-  //       `/companies/${company.id}/audit/modules/${id}/tables/${table.id}/rules`,
-  //     );
-  //     console.log(
-  //       "🌐 [API] companies/${company.id}/audit/modules/${id}/tables/rules",
-  //       response.data.data,
-  //     );
-  //     console.log("[PAGE STATE] Module:", table);
-  //     const selectedColumns = response.data.data
-  //       .filter((c) => table.columns.some((col) => col.rules[0].id === c.id))
-  //       .map((c) => {
-  //         // console.log("[MAP] Column:", c);
-  //         const column = table.columns.find((col) => col.id === c.id);
-  //         return {
-  //           ...c,
-  //           name: column.name,
-  //           label: column.label,
-  //           type: column.type,
-  //           edit: false,
-  //         };
-  //       });
-  //     const unselectedColumns = table.columns.filter((col) =>
-  //       response.data.data.some((c) => c.id !== col.id),
-  //     );
-  //     setUnselectedColumns(unselectedColumns);
-  //     setColumns(selectedColumns);
-  //     return response.data.data;
-  //   },
-  //   enabled: !!table,
-  // });
 
   const { data: tableData = {}, isLoading: isLoadingTable } = useQuery({
     queryKey: ["tables", company, table],

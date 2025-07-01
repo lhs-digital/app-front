@@ -74,7 +74,7 @@ const ModuleForm = () => {
         `/companies/${company.id}/audit/modules`,
         data,
       );
-      navigate(`/modulos/${response.data.id}`);
+      navigate(`/modulos/${response?.data?.data?.id}`);
       return response.data.data;
     },
   });
@@ -160,94 +160,97 @@ const ModuleForm = () => {
           />
         </FormField>
       </form>
-      <div className="flex flex-col gap-4">
-        {isLoadingStructure || isLoadingModule ? (
-          <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
-              <span className="mb-0.5">
-                <DataObject fontSize="small" />
-              </span>{" "}
-              <span>Esquema</span>
-            </h2>
-            <Skeleton
-              variant="rectangular"
-              height={360}
-              className="rounded-lg"
-            />
-          </div>
-        ) : (
-          <TransformWrapper
-            limitToBounds={false}
-            initialPositionX={150}
-            initialPositionY={150}
-            initialScale={0.75}
-            minScale={0.5}
-            maxScale={1.5}
-            wrapperStyle={{ width: "100%", height: "100%" }}
-            centerZoomed
-            className="relative"
-          >
-            {({ zoomIn, zoomOut, centerView }) => (
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-row gap-2 items-center justify-between">
-                  <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
-                    <span className="mb-0.5">
-                      <DataObject fontSize="small" />
-                    </span>{" "}
-                    <span>Esquema</span>
-                  </h2>
-                  <div className="p-1 flex flex-row justify-between gap-2 border border-[--border] rounded-lg">
-                    <div className="flex flex-row gap-4">
-                      <Button
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          centerView();
-                        }}
-                        startIcon={<CenterFocusStrong />}
-                      >
-                        Centralizar
-                      </Button>
-                      <Button
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          zoomIn();
-                        }}
-                        startIcon={<ZoomIn />}
-                      >
-                        Aumentar
-                      </Button>
-                      <Button
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          zoomOut();
-                        }}
-                        startIcon={<ZoomOut />}
-                      >
-                        Diminuir
-                      </Button>
+      {/* se for criar quero esconder o esquema  */}
+      {currentAction === "create" ? null : (
+        <div className="flex flex-col gap-4">
+          {isLoadingStructure || isLoadingModule ? (
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
+                <span className="mb-0.5">
+                  <DataObject fontSize="small" />
+                </span>{" "}
+                <span>Esquema</span>
+              </h2>
+              <Skeleton
+                variant="rectangular"
+                height={360}
+                className="rounded-lg"
+              />
+            </div>
+          ) : (
+            <TransformWrapper
+              limitToBounds={false}
+              initialPositionX={150}
+              initialPositionY={150}
+              initialScale={0.75}
+              minScale={0.5}
+              maxScale={1.5}
+              wrapperStyle={{ width: "100%", height: "100%" }}
+              centerZoomed
+              className="relative"
+            >
+              {({ zoomIn, zoomOut, centerView }) => (
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-row gap-2 items-center justify-between">
+                    <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
+                      <span className="mb-0.5">
+                        <DataObject fontSize="small" />
+                      </span>{" "}
+                      <span>Esquema</span>
+                    </h2>
+                    <div className="p-1 flex flex-row justify-between gap-2 border border-[--border] rounded-lg">
+                      <div className="flex flex-row gap-4">
+                        <Button
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            centerView();
+                          }}
+                          startIcon={<CenterFocusStrong />}
+                        >
+                          Centralizar
+                        </Button>
+                        <Button
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            zoomIn();
+                          }}
+                          startIcon={<ZoomIn />}
+                        >
+                          Aumentar
+                        </Button>
+                        <Button
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            zoomOut();
+                          }}
+                          startIcon={<ZoomOut />}
+                        >
+                          Diminuir
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                  <div className="w-full h-[62.5vh] overflow-y-hidden border border-[--border] rounded-lg grid-bg relative">
+                    <Diagram
+                      data={structure}
+                      isLoading={isLoadingStructure}
+                      allowHover={true}
+                      onSelectTable={(table) => {
+                        navigate(
+                          `/modulos/${id}/${table.id}?action=${currentAction}`,
+                        );
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-[62.5vh] overflow-y-hidden border border-[--border] rounded-lg grid-bg relative">
-                  <Diagram
-                    data={structure}
-                    isLoading={isLoadingStructure}
-                    allowHover={true}
-                    onSelectTable={(table) => {
-                      navigate(
-                        `/modulos/${id}/${table.id}?action=${currentAction}`,
-                      );
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </TransformWrapper>
-        )}
-      </div>
+              )}
+            </TransformWrapper>
+          )}
+        </div>
+      )}
     </div>
   );
 };
