@@ -166,7 +166,7 @@ export const formatUserObject = (user) => ({
     level: user?.role?.nivel,
   },
   company: user?.company,
-  isLighthouse: user?.company?.is_super_admin === 1 ? true : false,
+  isLighthouse: user?.company?.is_super_admin === true,
   permissions: user?.role?.permissions ?? [],
 });
 

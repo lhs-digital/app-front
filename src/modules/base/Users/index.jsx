@@ -216,52 +216,52 @@ const Users = () => {
           permission.name === "assign_responsible_users" ||
           permission.name === "unassign_responsible_users",
       ) && (
-        <MenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            handleViewHierarchy();
-          }}
-        >
-          <ListItemIcon>
-            <Groups fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Visualizar equipe</ListItemText>
-        </MenuItem>
-      )}
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewHierarchy();
+            }}
+          >
+            <ListItemIcon>
+              <Groups fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Visualizar equipe</ListItemText>
+          </MenuItem>
+        )}
 
       {/* Adicionar membro: Permissão específica */}
-      {user.isLighthouse && permissions.some(
+      {permissions.some(
         (permission) => permission.name === "assign_responsible_users",
       ) && (
-        <MenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            handleHierarchy();
-          }}
-        >
-          <ListItemIcon>
-            <GroupAddIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Adicionar membro</ListItemText>
-        </MenuItem>
-      )}
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleHierarchy();
+            }}
+          >
+            <ListItemIcon>
+              <GroupAddIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Adicionar membro</ListItemText>
+          </MenuItem>
+        )}
 
       {/* Remover membro: Permissão específica */}
-      {user.isLighthouse && permissions.some(
+      {permissions.some(
         (permission) => permission.name === "unassign_responsible_users",
       ) && (
-        <MenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDesHierarchy();
-          }}
-        >
-          <ListItemIcon>
-            <GroupRemoveIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Remover membro</ListItemText>
-        </MenuItem>
-      )}
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDesHierarchy();
+            }}
+          >
+            <ListItemIcon>
+              <GroupRemoveIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Remover membro</ListItemText>
+          </MenuItem>
+        )}
     </Menu>
   );
 
@@ -458,6 +458,7 @@ const Users = () => {
                 >
                   Usuário Responsável
                 </TableSortLabel>
+                {console.log("user", user)}
               </TableCell>
               <TableCell sx={{ padding: 0 }}>Ações</TableCell>
             </TableRow>
@@ -466,11 +467,11 @@ const Users = () => {
             {(!search
               ? data
               : data.filter(
-                  (user) =>
-                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                    user.email.toLowerCase().includes(search.toLowerCase()) ||
-                    user.role.name.toLowerCase().includes(search.toLowerCase()),
-                )
+                (user) =>
+                  user.name.toLowerCase().includes(search.toLowerCase()) ||
+                  user.email.toLowerCase().includes(search.toLowerCase()) ||
+                  user.role.name.toLowerCase().includes(search.toLowerCase()),
+              )
             ).map(({ name, email, role, company, id, responsible }, index) => (
               <TableRow
                 key={index}
@@ -483,7 +484,12 @@ const Users = () => {
                   {" "}
                   {name}{" "}
                 </TableCell>
-                <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}>
+                <TableCell sx={{
+                  maxWidth: isMobile ? 100 : 200,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap"
+                }} a>
                   {" "}
                   {email}{" "}
                 </TableCell>
@@ -512,27 +518,27 @@ const Users = () => {
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(index);
-                      }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(index);
+                        }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    )}
                   {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(id);
-                      }}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  )}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    )}
                   {/* {permissions.some(
                     (permissions) => permissions.name === "delete_users",
                   ) && (

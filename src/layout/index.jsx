@@ -29,6 +29,7 @@ import { useCompany } from "../hooks/useCompany";
 import { routes } from "../routes/modules";
 import { handleMode } from "../theme";
 import Sidebar from "./components/Sidebar";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const Layout = ({ children }) => {
   const { company, availableCompanies, setCompany } = useCompany();
@@ -39,6 +40,7 @@ const Layout = ({ children }) => {
   const [editingCompany, setEditingCompany] = useState(false);
   const pathnames = location.pathname.split("/").filter(Boolean);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const user = useAuthUser();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -108,23 +110,29 @@ const Layout = ({ children }) => {
             ) : (
               <p className="text-2xl font-bold">{company?.name}</p>
             )}
-            <Tooltip
-              title={editingCompany ? "Salvar" : "Alterar empresa"}
-              arrow
-              placement="right"
-            >
-              <IconButton
-                onClick={
-                  editingCompany ? onCompanyChangeClick : promptCompanyChange
-                }
-              >
-                {editingCompany ? (
-                  <SaveOutlined fontSize="small" />
-                ) : (
-                  <SwapHoriz fontSize="small" />
-                )}
-              </IconButton>
-            </Tooltip>
+            {console.log("user2", user)}
+            {
+              user && user?.isLighthouse && (
+
+                <Tooltip
+                  title={editingCompany ? "Salvar" : "Alterar empresa"}
+                  arrow
+                  placement="right"
+                >
+                  <IconButton
+                    onClick={
+                      editingCompany ? onCompanyChangeClick : promptCompanyChange
+                    }
+                  >
+                    {editingCompany ? (
+                      <SaveOutlined fontSize="small" />
+                    ) : (
+                      <SwapHoriz fontSize="small" />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              )
+            }
           </Box>
           <div className="flex flex-row gap-2">
             <ThemeSwitcher />
