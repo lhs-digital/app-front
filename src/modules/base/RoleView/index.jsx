@@ -196,6 +196,7 @@ const RoleView = () => {
                   <MenuItem value={0}>Alto</MenuItem>
                   <MenuItem value={1}>Médio</MenuItem>
                   <MenuItem value={2}>Baixo</MenuItem>
+                  <MenuItem value={3}>Muito Baixo</MenuItem>
                 </Select>
               )}
             />

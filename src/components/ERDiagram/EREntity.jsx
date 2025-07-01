@@ -2,7 +2,12 @@ import { Key } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 
-const EREntity = ({ table, allowHover = false, onClick = () => {} }) => {
+const EREntity = ({
+  table,
+  allowHover = false,
+  onClick = () => {},
+  hideIfPresent = false,
+}) => {
   return (
     <motion.div
       initial={{
@@ -14,26 +19,30 @@ const EREntity = ({ table, allowHover = false, onClick = () => {} }) => {
         },
       }}
       onClick={() => {
-        if (allowHover && !table.hasModule) {
+        if (allowHover && (!hideIfPresent || table.isSelected)) {
           onClick();
         }
       }}
       whileHover={
-        allowHover && !table.hasModule
-          ? {
+        !allowHover || (hideIfPresent && table.isSelected)
+          ? {}
+          : {
               outline: "3px solid var(--foreground-color)",
               outlineOffset: "6px",
             }
-          : {}
       }
-      whileTap={allowHover && !table.hasModule ? { scale: 0.95 } : {}}
+      whileTap={
+        !allowHover || (hideIfPresent && table.isSelected)
+          ? {}
+          : { scale: 0.95 }
+      }
       className={`bg-[--background-color] w-48 border z-0 border-[--border] flex flex-col
                   items-center rounded-lg shadow-lg transition-all duration-200 ease-in-out ${
-                    allowHover
-                      ? table.hasModule
-                        ? "opacity-50 cursor-not-allowed"
-                        : "opacity-100 cursor-pointer"
-                      : ""
+                    table.isSelected
+                      ? allowHover && !hideIfPresent
+                        ? "cursor-pointer"
+                        : "opacity-50 cursor-not-allowed"
+                      : "opacity-100 cursor-pointer"
                   }`}
     >
       <div className="w-full py-1 bg-gray-500/10 border-b border-[--border] flex items-center justify-center">
@@ -74,11 +83,12 @@ EREntity.propTypes = {
     columns: PropTypes.arrayOf(
       PropTypes.shape({
         name: PropTypes.string.isRequired,
-        type: PropTypes.string.isRequired,
+        type: PropTypes.string,
         pk: PropTypes.bool.isRequired,
         fk: PropTypes.bool.isRequired,
       }),
     ).isRequired,
+    isSelected: PropTypes.bool.isRequired,
   }).isRequired,
 };
 

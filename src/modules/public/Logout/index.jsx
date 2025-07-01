@@ -1,10 +1,13 @@
 import { CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useCompany } from "../../../hooks/useCompany";
 
 const Logout = () => {
   const navigate = useNavigate();
+  const { resetCompany } = useCompany();
 
   setTimeout(() => {
+    resetCompany();
     navigate("/");
   }, 1000);
 

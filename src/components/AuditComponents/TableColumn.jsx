@@ -2,7 +2,13 @@ import { Add, Key, Remove } from "@mui/icons-material";
 import { IconButton, ListItem, Tooltip } from "@mui/material";
 import { Link } from "react-router-dom";
 
-const TableColumn = ({ column, onAddColumn, onRemoveColumn, isAdded }) => {
+const TableColumn = ({
+  table,
+  column,
+  onAddColumn,
+  onRemoveColumn,
+  isAdded,
+}) => {
   return (
     <ListItem
       className="flex flex-row gap-2 items-center justify-between"
@@ -23,12 +29,14 @@ const TableColumn = ({ column, onAddColumn, onRemoveColumn, isAdded }) => {
     >
       <div className="flex flex-row gap-2 items-center">
         <p className="font-medium">
-          {column.name}{" "}
+          {column.name}
           <span>
             {column.pk && <Key />} {column.fk && <Link />}
           </span>
         </p>
-        <p className="text-sm text-neutral-500">{column.type}</p>
+        <p className="text-sm text-neutral-500">
+          {column.type || "Tipo não definido"}
+        </p>
       </div>
     </ListItem>
   );

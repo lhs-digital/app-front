@@ -233,7 +233,80 @@ export const clientForm = {
     },
     {
       label: "Endereço",
-      fields: [...addressFields],
+      fields: [
+        {
+          name: "cep",
+          label: "CEP",
+          placeholder: "Digite o CEP",
+          type: "text",
+          size: "medium",
+          required: true,
+        },
+        {
+          name: "endereco",
+          label: "Endereço",
+          placeholder: "Digite o endereço",
+          type: "text",
+          size: "small",
+          required: true,
+        },
+        {
+          name: "bairro",
+          label: "Bairro",
+          placeholder: "Digite o bairro",
+          type: "text",
+          size: "small",
+          required: true,
+        },
+        {
+          name: "cidade",
+          label: "Cidade",
+          placeholder: "Digite a cidade",
+          type: "text",
+          size: "full",
+          required: true,
+        },
+        {
+          name: "numero",
+          label: "Número",
+          placeholder: "Digite o número",
+          type: "text",
+          size: "full",
+          required: true,
+        },
+        {
+          name: "complemento",
+          label: "Complemento",
+          placeholder: "Digite complemento (opcional)",
+          type: "text",
+          size: "full",
+          required: false,
+        },
+        {
+          name: "referencia",
+          label: "Referência",
+          placeholder: "Digite referência (opcional)",
+          type: "text",
+          size: "full",
+          required: false,
+        },
+        {
+          name: "moradia",
+          label: "Tipo de Moradia",
+          placeholder: "Digite o tipo de moradia",
+          type: "text",
+          size: "full",
+          required: true,
+        },
+        {
+          name: "id_conta",
+          label: "Endereço de Cobrança",
+          placeholder: "Digite endereço de cobrança",
+          type: "text",
+          size: "full",
+          required: true,
+        },
+      ],
     },
     {
       label: "Contato",
@@ -382,7 +455,6 @@ export const clientForm = {
           type: "text",
           required: true,
         },
-        // Faturamento Accordion
         {
           name: "invoice_document_type",
           label: "Tipo de documento fatura",
@@ -429,7 +501,6 @@ export const clientForm = {
           type: "text",
           required: true,
         },
-        // Taxa de Ativação Accordion
         {
           name: "activation_document_type",
           label: "Tipo de documento",

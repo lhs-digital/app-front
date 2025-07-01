@@ -20,8 +20,8 @@ import {
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import Validation from "../../../../components/AuditComponents/Validation";
 import { priorities, validations } from "../../../../services/utils";
-import Validation from "./Validation";
 
 const AddRule = ({
   open = true,

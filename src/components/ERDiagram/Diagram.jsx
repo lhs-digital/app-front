@@ -1,8 +1,15 @@
 import { Masonry } from "@mui/lab";
+import { Skeleton } from "@mui/material";
 import { TransformComponent } from "react-zoom-pan-pinch";
 import EREntity from "./EREntity";
 
-const Diagram = ({ data, allowHover = false, onSelectTable = () => {} }) => {
+const Diagram = ({
+  data,
+  allowHover = false,
+  onSelectTable = () => {},
+  hideIfPresent = false,
+  isLoading = false,
+}) => {
   return (
     <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
       <Masonry
@@ -15,16 +22,21 @@ const Diagram = ({ data, allowHover = false, onSelectTable = () => {} }) => {
         spacing={6}
         style={{ width: "1500px" }}
       >
-        {data.map((item) => (
-          <EREntity
-            key={item.name}
-            table={item}
-            allowHover={allowHover}
-            onClick={() => {
-              onSelectTable(item);
-            }}
-          />
-        ))}
+        {isLoading ? (
+          <Skeleton variant="rectangular" height={100} />
+        ) : (
+          data.map((item) => (
+            <EREntity
+              key={item.name}
+              table={item}
+              allowHover={allowHover}
+              hideIfPresent={hideIfPresent}
+              onClick={() => {
+                onSelectTable(item);
+              }}
+            />
+          ))
+        )}
       </Masonry>
     </TransformComponent>
   );

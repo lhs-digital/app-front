@@ -3,17 +3,24 @@ import {
   NavigateNext,
   SaveOutlined,
   SwapHoriz,
+  WarningAmberOutlined,
 } from "@mui/icons-material";
 import {
   Box,
   Breadcrumbs,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   MenuItem,
   Select,
   Tooltip,
 } from "@mui/material";
-import { useState } from "react";
-import { Link, matchPath, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
 import blackLogo from "../assets/lh_black.svg";
 import whiteLogo from "../assets/lh_white.svg";
 import ThemeSwitcher from "../components/ThemeSwitcher";
@@ -22,15 +29,31 @@ import { useCompany } from "../hooks/useCompany";
 import { routes } from "../routes/modules";
 import { handleMode } from "../theme";
 import Sidebar from "./components/Sidebar";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const Layout = ({ children }) => {
   const { company, availableCompanies, setCompany } = useCompany();
   const [selectedCompany, setSelectedCompany] = useState(company || "");
+  const [confirmChangeOpen, setConfirmChangeOpen] = useState(false);
   const theme = handleMode(useThemeMode().mode);
   const location = useLocation();
   const [editingCompany, setEditingCompany] = useState(false);
   const pathnames = location.pathname.split("/").filter(Boolean);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const user = useAuthUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const sidebarOpen = localStorage.getItem("sidebarOpen");
+    setSidebarOpen(sidebarOpen === "true");
+  }, []);
+
+  useEffect(() => {
+    if (!company) {
+      navigate("/painel");
+      setEditingCompany(false);
+    }
+  }, [company]);
 
   const onCompanyChangeClick = () => {
     if (!editingCompany) {
@@ -40,11 +63,26 @@ const Layout = ({ children }) => {
 
     setCompany(selectedCompany);
     setEditingCompany(false);
+    navigate("/painel");
+  };
+
+  const onConfirmChange = () => {
+    setConfirmChangeOpen(false);
+    setEditingCompany(true);
+  };
+
+  const promptCompanyChange = () => {
+    setConfirmChangeOpen(true);
+  };
+
+  const onSidebarOpenChange = (value) => {
+    setSidebarOpen(value);
+    localStorage.setItem("sidebarOpen", value);
   };
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden">
-      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+      <Sidebar open={sidebarOpen} setOpen={onSidebarOpenChange} />
       <div className="grow flex flex-col">
         <div className="h-16 border-b border-b-black/10 dark:border-b-white/15 flex flex-row items-center justify-between px-4">
           <Box className="flex flex-row gap-2 items-center">
@@ -72,29 +110,39 @@ const Layout = ({ children }) => {
             ) : (
               <p className="text-2xl font-bold">{company?.name}</p>
             )}
-            <Tooltip
-              title={editingCompany ? "Salvar" : "Alterar empresa"}
-              arrow
-              placement="right"
-            >
-              <IconButton onClick={onCompanyChangeClick}>
-                {editingCompany ? (
-                  <SaveOutlined fontSize="small" />
-                ) : (
-                  <SwapHoriz fontSize="small" />
-                )}
-              </IconButton>
-            </Tooltip>
+            {console.log("user2", user)}
+            {
+              user && user?.isLighthouse && (
+
+                <Tooltip
+                  title={editingCompany ? "Salvar" : "Alterar empresa"}
+                  arrow
+                  placement="right"
+                >
+                  <IconButton
+                    onClick={
+                      editingCompany ? onCompanyChangeClick : promptCompanyChange
+                    }
+                  >
+                    {editingCompany ? (
+                      <SaveOutlined fontSize="small" />
+                    ) : (
+                      <SwapHoriz fontSize="small" />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              )
+            }
           </Box>
           <div className="flex flex-row gap-2">
             <ThemeSwitcher />
           </div>
         </div>
-        <div
+        <motion.div
           className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6"
           style={{
             width: sidebarOpen ? "calc(100vw - 320px)" : "calc(100vw - 65px)",
-            transition: "width 0.3s ease-in-out",
+            transition: "all 0.3s ease-in-out",
           }}
         >
           {pathnames.length > 0 && pathnames[0] !== "painel" && (
@@ -133,9 +181,46 @@ const Layout = ({ children }) => {
               })}
             </Breadcrumbs>
           )}
-          {children}
-        </div>
+          {editingCompany ? (
+            <div className="flex flex-col gap-4 items-center justify-center h-[calc(100vh-4rem)]">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Selecione uma empresa para continuar
+              </p>
+            </div>
+          ) : (
+            children
+          )}
+        </motion.div>
       </div>
+      <Dialog
+        open={confirmChangeOpen}
+        maxWidth="xs"
+        fullWidth
+        onClose={() => setConfirmChangeOpen(false)}
+      >
+        <DialogTitle className="flex flex-row gap-2 items-center">
+          <WarningAmberOutlined fontSize="small" />
+          <p className="text-lg font-bold">Alterar empresa</p>
+        </DialogTitle>
+        <DialogContent>
+          <p className="text-justify">
+            <b>Tem certeza que deseja alterar a empresa?</b> Você será
+            redirecionado para a página inicial e poderá perder alterações não
+            salvas.
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => setConfirmChangeOpen(false)}
+          >
+            Cancelar
+          </Button>
+          <Button variant="outlined" onClick={onConfirmChange}>
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

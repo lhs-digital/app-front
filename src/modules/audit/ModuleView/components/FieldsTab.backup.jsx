@@ -2,13 +2,15 @@ import { Remove } from "@mui/icons-material";
 import { Button, Chip, Divider } from "@mui/material";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
-import TableColumn from "../../CompanyModules/components/TableColumn";
-import AddColumn from "./AddColumn";
+import TableColumn from "../../../../components/AuditComponents/TableColumn";
+import { useModuleForm } from "../index";
+import AddColumn from "../../ModuleTable/components/AddColumn";
 
-const FieldsTab = ({ table }) => {
+const FieldsTab = () => {
   const { setValue, getValues, watch } = useFormContext();
   const [openDialog, setOpenDialog] = useState(false);
   const [pendingColumn, setPendingColumn] = useState(null);
+  const { activeModule } = useModuleForm();
 
   const columnList = watch("columns") || [];
 
@@ -79,18 +81,21 @@ const FieldsTab = ({ table }) => {
       </div>
       <Divider />
       <h2 className="font-semibold">Detalhes das colunas</h2>
-      {table?.columns.map((column) => (
-        <TableColumn
-          key={column.name}
-          column={column}
-          isAdded={columnList.includes(column)}
-          onAddColumn={() => {
-            setPendingColumn(column);
-            setOpenDialog(true);
-          }}
-          onRemoveColumn={() => handleRemoveColumn(column)}
-        />
-      ))}
+      {activeModule?.tables.map((table) =>
+        table?.columns.map((column) => (
+          <TableColumn
+            key={column.name}
+            table={table.table}
+            column={column}
+            isAdded={columnList.includes(column)}
+            onAddColumn={() => {
+              setPendingColumn(column);
+              setOpenDialog(true);
+            }}
+            onRemoveColumn={() => handleRemoveColumn(column)}
+          />
+        )),
+      )}
       <AddColumn
         open={openDialog}
         onClose={handleCloseDialog}

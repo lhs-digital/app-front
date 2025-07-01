@@ -1,8 +1,8 @@
 import { Card, CardContent, Chip } from "@mui/material";
+import Validation from "../../../../components/AuditComponents/Validation";
 import { useThemeMode } from "../../../../contexts/themeModeContext";
 import { getPriorityColor, severityLabels } from "../../../../services/utils";
 import { handleMode } from "../../../../theme";
-import Validation from "./Validation";
 
 // const column = {
 //   id: 1,
@@ -10,7 +10,7 @@ import Validation from "./Validation";
 //   label: "Numero da residência",
 //   company_table_id: 1,
 //   priority: 1,
-//   validations: [
+//   validations: [ 
 //     {
 //       id: 1,
 //       table_column_id: 1,
