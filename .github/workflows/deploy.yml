@@ -79,7 +79,7 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || 'public_html' }}
+          REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || '/public_html' }}
         run: |
           echo "Deploying dist/ to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
           sshpass -p "$SSH_PASSWORD" rsync -azv --delete dist/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
@@ -92,6 +92,6 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || 'public_html' }}
+          REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || '/public_html' }}
         run: |
           sshpass -p "$SSH_PASSWORD" ssh "$SSH_USER@$SSH_HOST" "ls -l $REMOTE_DIR"
