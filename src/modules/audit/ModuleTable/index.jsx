@@ -15,19 +15,38 @@ const ModuleTableView = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [pendingColumn, setPendingColumn] = useState(null);
   const [columns, setColumns] = useState([]);
-
+  const [unselectedColumns, setUnselectedColumns] = useState([]);
   const { company } = useCompany();
 
   const { data } = useQuery({
     queryKey: ["tables", id],
     queryFn: async () => {
       const response = await api.get(
-        `/companies/${company.id}/audit/modules/${id}/tables`,
+        `/companies/${company.id}/audit/modules/${id}/tables/${table.id}/rules`,
       );
       console.log(
-        "🌐 [API] companies/${company.id}/audit/modules/${id}/tables",
+        "🌐 [API] companies/${company.id}/audit/modules/${id}/tables/rules",
         response.data.data,
       );
+      console.log("[PAGE STATE] Module:", table);
+      const selectedColumns = response.data.data
+        .filter((c) => table.columns.some((col) => col.rules[0].id === c.id))
+        .map((c) => {
+          // console.log("[MAP] Column:", c);
+          const column = table.columns.find((col) => col.id === c.id);
+          return {
+            ...c,
+            name: column.name,
+            label: column.label,
+            type: column.type,
+            edit: false,
+          };
+        });
+      const unselectedColumns = table.columns.filter((col) =>
+        response.data.data.some((c) => c.id !== col.id),
+      );
+      setUnselectedColumns(unselectedColumns);
+      setColumns(selectedColumns);
       return response.data.data;
     },
     enabled: !!table,
@@ -44,10 +63,7 @@ const ModuleTableView = () => {
   };
 
   const openEditColumn = (column) => {
-    setPendingColumn({
-      ...column,
-      edit: true,
-    });
+    setPendingColumn({ ...column, edit: true });
     setOpenDialog(true);
   };
 
@@ -60,6 +76,7 @@ const ModuleTableView = () => {
     setOpenDialog(false);
     setPendingColumn(null);
   };
+
   return (
     <div className="flex flex-col gap-8 w-full">
       <PageTitle
@@ -101,7 +118,7 @@ const ModuleTableView = () => {
       </div>
       <Divider />
       <h2 className="font-semibold">Detalhes das colunas</h2>
-      {table?.columns.map((column) => (
+      {unselectedColumns.map((column) => (
         <TableColumn
           key={column.name}
           table={table.table}

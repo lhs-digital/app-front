@@ -11,6 +11,7 @@ const isForeignKey = (col) => {
 
 const getColumn = (col) => {
   return {
+    ...col,
     name: col.name,
     type: col.type,
     pk: col.key === "PRI",

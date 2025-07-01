@@ -51,7 +51,9 @@ export const ModuleForm = () => {
   const { data: structure = [], isLoading: isLoadingStructure } = useQuery({
     queryKey: ["tables", company],
     queryFn: async () => {
-      const response = await api.get(`/companies/${company.id}/structure`);
+      const response = await api.get(`/companies/${company.id}/structure`, {
+        params: { with_rules: id },
+      });
       console.log(
         "🌐 [API] companies/${company.id}/structure",
         response.data.data,
@@ -94,11 +96,7 @@ const Form = () => {
   const { id, activeModule, currentAction, structure, isLoadingStructure } =
     useModuleForm();
   const methods = useForm({
-    defaultValues: {
-      name: "",
-      description: "",
-      tables: [],
-    },
+    defaultValues: { name: "", description: "", tables: [] },
   });
 
   useEffect(() => {
