@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
 import blackLogo from "../assets/lh_black.svg";
 import whiteLogo from "../assets/lh_white.svg";
@@ -29,7 +30,6 @@ import { useCompany } from "../hooks/useCompany";
 import { routes } from "../routes/modules";
 import { handleMode } from "../theme";
 import Sidebar from "./components/Sidebar";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 const Layout = ({ children }) => {
   const { company, availableCompanies, setCompany } = useCompany();
@@ -110,29 +110,25 @@ const Layout = ({ children }) => {
             ) : (
               <p className="text-2xl font-bold">{company?.name}</p>
             )}
-            {console.log("user2", user)}
-            {
-              user && user?.isLighthouse && (
-
-                <Tooltip
-                  title={editingCompany ? "Salvar" : "Alterar empresa"}
-                  arrow
-                  placement="right"
+            {user && user?.isLighthouse && (
+              <Tooltip
+                title={editingCompany ? "Salvar" : "Alterar empresa"}
+                arrow
+                placement="right"
+              >
+                <IconButton
+                  onClick={
+                    editingCompany ? onCompanyChangeClick : promptCompanyChange
+                  }
                 >
-                  <IconButton
-                    onClick={
-                      editingCompany ? onCompanyChangeClick : promptCompanyChange
-                    }
-                  >
-                    {editingCompany ? (
-                      <SaveOutlined fontSize="small" />
-                    ) : (
-                      <SwapHoriz fontSize="small" />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              )
-            }
+                  {editingCompany ? (
+                    <SaveOutlined fontSize="small" />
+                  ) : (
+                    <SwapHoriz fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
           <div className="flex flex-row gap-2">
             <ThemeSwitcher />
