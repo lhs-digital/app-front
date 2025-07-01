@@ -65,6 +65,13 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       # ----------------------------------------
+      # Create deploy log file
+      # ----------------------------------------
+      - name: Create deploy log file
+        run: |
+          echo "Deployed at $(date)" > dist/deploy-log.txt
+
+      # ----------------------------------------
       # Deploy build directory to remote server using rsync over SSH with password
       # ----------------------------------------
       - name: Deploy to VM
@@ -75,4 +82,16 @@ jobs:
           REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || 'public_html' }}
         run: |
           echo "Deploying dist/ to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
-          sshpass -p "$SSH_PASSWORD" rsync -az --delete dist/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
+          sshpass -p "$SSH_PASSWORD" rsync -azv --delete dist/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
+
+      # ----------------------------------------
+      # List files on remote server
+      # ----------------------------------------
+      - name: List files on remote server
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || 'public_html' }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh "$SSH_USER@$SSH_HOST" "ls -l $REMOTE_DIR"
