@@ -56,7 +56,7 @@ const AuditSection = () => {
 
   const confirmIntervalChange = async () => {
     try {
-      await api.put(`/companies/${company?.id}/audit/update_interval`, {
+      await api.put(`/company/${company?.id}/update_interval`, {
         audit_interval: updateInterval,
       });
       setIsConfirmModalOpen(false);

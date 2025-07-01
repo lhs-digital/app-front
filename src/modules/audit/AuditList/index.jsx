@@ -62,11 +62,11 @@ const AuditList = () => {
   });
 
   const [filters, setFilters] = useState({
-    ...filterDefaults, // removed explicit status override
+    ...filterDefaults, 
   });
 
   const [appliedFilters, setAppliedFilters] = useState({
-    ...filterDefaults, // removed explicit status override
+    ...filterDefaults, 
   });
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -75,9 +75,7 @@ const AuditList = () => {
   const { data: availableTables = [], isLoading: isTablesLoading } = useQuery({
     queryKey: ["company_tables", company],
     queryFn: async () => {
-      const response = await api.get(`/company/auditable_tables`, {
-        params: { company_id: company.id },
-      });
+      const response = await api.get(`/companies/3/audit/modules/1/tables`);
       setTable(response.data.data[0]);
       return response.data.data;
     },

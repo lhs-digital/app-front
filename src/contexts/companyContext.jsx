@@ -34,8 +34,12 @@ export const CompanyContextProvider = ({ children }) => {
 
   const { data: availableCompanies = [], refetch: refetchAvailableCompanies } =
     useQuery({
-      queryKey: ["available_companies"],
+      queryKey: ["available_companies", user?.isLighthouse],
       queryFn: async () => {
+        if (!user?.isLighthouse) {
+          return user?.company ? [user.company] : [];
+        }
+        
         const response = await api.get("/companies");
         return response.data.data.filter((company) => company.id !== 1);
       },

@@ -58,7 +58,7 @@ const ModalHierarchy = ({
 
       const response = await api.get(endpoint);
 
-    console.log("response:", response)
+      console.log("response:", response)
 
       const formattedSubordinates = response.data?.flatMap((role) =>
         role.users.map((user) => ({
@@ -210,37 +210,37 @@ const ModalHierarchy = ({
         ) : (
           <>
             {
-              user.isLighthouse && (
-                <Box>
-                  <InputLabel>
-                    Selecione o usuário responsável
-                  </InputLabel>
-                  <Autocomplete
-                    options={eligibleResponsibleUsers}
-                    value={responsibleUser}
-                    onChange={(event, newValue) => {
-                      console.log("newValue", newValue);
-                      setResponsibleUser(newValue);
-                      setAssociatedUsers([]);
-                      if (newValue) {
-                        fetchEligibleSubordinates(newValue.id);
-                      } else {
-                        setEligibleSubordinates([]);
+
+              <Box>
+                <InputLabel>
+                  Selecione o usuário responsável
+                </InputLabel>
+                <Autocomplete
+                  options={eligibleResponsibleUsers}
+                  value={responsibleUser}
+                  onChange={(event, newValue) => {
+                    console.log("newValue", newValue);
+                    setResponsibleUser(newValue);
+                    setAssociatedUsers([]);
+                    if (newValue) {
+                      fetchEligibleSubordinates(newValue.id);
+                    } else {
+                      setEligibleSubordinates([]);
+                    }
+                  }}
+                  getOptionLabel={(option) => option.name}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder={
+                        "Selecione um usuário responsável da equipe"
                       }
-                    }}
-                    getOptionLabel={(option) => option.name}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder={
-                          "Selecione um usuário responsável da equipe"
-                        }
-                        fullWidth
-                      />
-                    )}
-                  />
-                </Box>
-              )
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+
             }
             <Box>
               <InputLabel>
