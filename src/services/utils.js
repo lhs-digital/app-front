@@ -256,6 +256,48 @@ export const validations = [
       "Verifica se os valores inseridos não estão dentro do grupo de valores aceitos por essa regra.",
     field: "array",
   },
+  {
+            "id": 8,
+            "name": "gt",
+            "label": "Maior que",
+            "has_params": 1,
+            "description": "Verifica se o valor do campo é maior que o valor dado."
+        },
+        {
+            "id": 9,
+            "name": "lt",
+            "label": "Menor que",
+            "has_params": 1,
+            "description": "Verifica se o valor do campo é menor que o valor dado."
+        },
+        {
+            "id": 10,
+            "name": "regex",
+            "label": "Expressão regular",
+            "has_params": 1,
+            "description": "Verifica se o valor do campo está no padrão da expressão."
+        },
+        {
+            "id": 11,
+            "name": "gte",
+            "label": "Maior ou igual",
+            "has_params": 1,
+            "description": "Verifica se o valor do campo é maior ou igual ao valor dado."
+        },
+        {
+            "id": 12,
+            "name": "lte",
+            "label": "Menor ou igual",
+            "has_params": 1,
+            "description": "Verifica se o valor do campo é menor ou igual ao valor dado."
+        },
+        {
+            "id": 13,
+            "name": "same",
+            "label": "Igual a",
+            "has_params": 1,
+            "description": "Verifica se o valor do campo é igual ao valor dado."
+        }
 ];
 
 export const validationLabels = {

@@ -19,6 +19,7 @@ import FormField from "../../../components/FormField";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import { toast } from "react-toastify";
 
 const ModuleForm = () => {
   const { register, handleSubmit, reset } = useForm();
@@ -74,8 +75,11 @@ const ModuleForm = () => {
         `/companies/${company.id}/audit/modules`,
         data,
       );
-      navigate(`/modulos/${response?.data?.data?.id}`);
       return response.data.data;
+    },
+    onSuccess: (data) => {
+      navigate(`/modulos/${data.id}`);
+      toast.success(`Módulo "${data.name}" criado com sucesso!`);
     },
   });
 
@@ -87,6 +91,10 @@ const ModuleForm = () => {
       );
       return response.data.data;
     },
+    onSuccess: (data) => {
+      navigate(`/modulos/${id}`);
+      toast.success(`Módulo "${data.name}" atualizado com sucesso!`);
+    },
   });
 
   const onSubmit = (data) => {
@@ -96,7 +104,6 @@ const ModuleForm = () => {
         break;
       case "edit":
         updateModule(data);
-        navigate(`/modulos/${id}`);
         break;
       default:
         break;

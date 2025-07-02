@@ -164,6 +164,7 @@ export const AddColumn = ({
 
   const addRule = () => {
     const { rule } = getValues();
+    
     if (!rule.name || !rule.message) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
@@ -178,11 +179,13 @@ export const AddColumn = ({
     }
 
     const newRule = {
-      id: rule.name.split("/")[0],
+      // Não incluir ID para regras novas - deixar o backend gerar
       name: rule.name.split("/")[1],
       message: rule.message,
       params: [...ruleParams].join(","),
+      priority: rule.priority || 1,
     };
+    
     setRules((prev) => [...prev, newRule]);
     resetField("rule.name");
     resetField("rule.message");
@@ -192,12 +195,21 @@ export const AddColumn = ({
   };
 
   const removeRule = (rule) => {
-    setRules((prev) => prev.filter((r) => r.id !== rule.id));
+    setRules((prev) => prev.filter((r) => {
+      // Para regras com ID, comparar por ID
+      if (r.id && rule.id) {
+        return r.id !== rule.id;
+      }
+      // Para regras sem ID, comparar por name e message (identificação única)
+      return !(r.name === rule.name && r.message === rule.message);
+    }));
     setRuleParams((prev) => {
       const newParams = new Set([...prev]);
-      rule.params.split(",").forEach((param) => {
-        newParams.delete(param.trim());
-      });
+      if (rule.params) {
+        rule.params.split(",").forEach((param) => {
+          newParams.delete(param.trim());
+        });
+      }
       return newParams;
     });
   };
@@ -275,22 +287,13 @@ export const AddColumn = ({
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
                 >
-                  {/* <MenuItem value="autocomplete">Autocomplete</MenuItem> */}
-                  {/* <MenuItem value="checkbox">Checkbox</MenuItem> */}
-                  {/* <MenuItem value="combobox">Combobox</MenuItem> */}
-                  {/* <MenuItem value="cpf-cnpj">CPF/CNPJ</MenuItem> */}
                   <MenuItem value="date">Data</MenuItem>
-                  {/* <MenuItem value="datetime">Data e hora</MenuItem> */}
                   <MenuItem value="email">Email</MenuItem>
-                  {/* <MenuItem value="file">Arquivo</MenuItem> */}
                   <MenuItem value="number">Número</MenuItem>
-                  {/* <MenuItem value="radio">Radio</MenuItem> */}
-                  {/* <MenuItem value="search">Search</MenuItem> */}
                   <MenuItem value="select">Select</MenuItem>
                   <MenuItem value="tel">Telefone</MenuItem>
                   <MenuItem value="text">Texto</MenuItem>
                   <MenuItem value="textarea">Textarea</MenuItem>
-                  {/* <MenuItem value="time">Hora</MenuItem> */}
                   <MenuItem value="url">URL</MenuItem>
                 </Select>
               </FormControl>
@@ -324,20 +327,6 @@ export const AddColumn = ({
             </FormLabel>
             <TextField {...register(`placeholder`)} />
           </FormControl>
-          {/* <FormField label="Propriedades" containerClass="lg:col-span-6">
-            <div className="flex flex-row gap-2">
-              <FormControlLabel
-                control={<Checkbox />}
-                label="Campo de busca"
-                {...register(`is_search`)}
-              />
-              <FormControlLabel
-                control={<Checkbox />}
-                label="Foco automático"
-                {...register(`is_auto_focus`)}
-              />
-            </div>
-          </FormField> */}
           <Divider className="col-span-6" />
           <h2 className="font-semibold col-span-6 text-lg mb-2">
             <span>
@@ -421,7 +410,7 @@ export const AddColumn = ({
             ) : (
               rules.map((rule, index) => (
                 <Validation
-                  key={`${rule.name}-${index}`}
+                  key={rule.id ? `rule-${rule.id}` : `${rule.name}-${index}`}
                   rule={rule}
                   params={rule.params}
                   onDelete={() => removeRule(rule)}

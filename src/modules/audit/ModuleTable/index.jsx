@@ -14,25 +14,81 @@ import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import AddColumn from "./components/AddColumn";
+import { toast } from "react-toastify";
 
 const ModuleTableView = () => {
   const { id, table } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const action = searchParams.get("action");
+
+  const handleSaveChanges = async () => {
+    try {
+      // Validar se temos todos os dados necessários
+      if (!company?.id || !id || !columnsData.company_table_id) {
+        toast.error("Dados insuficientes para salvar. Recarregue a página.");
+        return;
+      }
+
+      const formattedData = {
+        company_table_id: columnsData.company_table_id,
+        columns: columnsData.columns.map(column => ({
+          id: column.id,
+          label: column.label,
+          rules: column.rules.map(rule => {
+            const formattedRule = {
+              name: rule.name,
+              message: rule.message,
+              params: rule.params || "",
+              priority: rule.priority || 1,
+            };
+            
+            const validationRule = validationRules.find(v => v.name === rule.name);
+            if (validationRule) {
+              formattedRule.id = validationRule.id;
+            } else if (rule.id && rule.audit_table_id) {
+              formattedRule.id = rule.id;
+            }
+            
+            if (rule.audit_table_id) {
+              formattedRule.audit_table_id = rule.audit_table_id;
+            }
+            
+            if (rule.label) {
+              formattedRule.label = rule.label;
+            }
+            
+            return formattedRule;
+          })
+        }))
+      };
+      
+      const response = await api.post(
+        `/companies/${company.id}/audit/modules/${id}/tables`,
+        formattedData
+      );
+      
+      setHasChanges(false);
+      setSearchParams({ action: "view" });
+      toast.success("Colunas salvas com sucesso!");
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      console.error("Detalhes do erro:", error.response?.data);
+      toast.error("Erro ao salvar colunas. Tente novamente.");
+    }
+  };
+
   const actions = {
     create: {
       pageTitle: "Adicionar colunas",
       icon: <Save />,
       buttonLabel: "Salvar",
-      onClick: () => {},
+      onClick: handleSaveChanges,
     },
     edit: {
       pageTitle: "Editar colunas",
       icon: <Save />,
       buttonLabel: "Salvar",
-      onClick: () => {
-        setSearchParams({ action: "view" });
-      },
+      onClick: handleSaveChanges,
     },
     view: {
       pageTitle: "Visualizar colunas",
@@ -46,10 +102,21 @@ const ModuleTableView = () => {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [pendingColumn, setPendingColumn] = useState(null);
-  const [columns, setColumns] = useState([]);
+  const [columnsData, setColumnsData] = useState({
+    company_table_id: null,
+    columns: []
+  });
   const [unselectedColumns, setUnselectedColumns] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
   const { company } = useCompany();
+
+  const { data: validationRules = [] } = useQuery({
+    queryKey: ["rules"],
+    queryFn: async () => {
+      const response = await api.get("/rules");
+      return response.data.data;
+    },
+  });
 
   const { data: tableData = {}, isLoading: isLoadingTable } = useQuery({
     queryKey: ["tables", company, table],
@@ -65,7 +132,10 @@ const ModuleTableView = () => {
       );
 
       setUnselectedColumns(unselectedColumns);
-      setColumns(selectedColumns);
+      setColumnsData({
+        company_table_id: data.id,
+        columns: selectedColumns
+      });
       setHasChanges(false);
       return data;
     },
@@ -73,14 +143,20 @@ const ModuleTableView = () => {
   });
 
   const handleAddColumn = (column) => {
-    setColumns([...columns, column]);
+    setColumnsData(prev => ({
+      ...prev,
+      columns: [...prev.columns, column]
+    }));
     setUnselectedColumns(unselectedColumns.filter((c) => c.id !== column.id));
     setOpenDialog(false);
     setHasChanges(true);
   };
 
   const handleRemoveColumn = (column) => {
-    setColumns(columns.filter((c) => c.id !== column.id));
+    setColumnsData(prev => ({
+      ...prev,
+      columns: prev.columns.filter((c) => c.id !== column.id)
+    }));
     setUnselectedColumns([...unselectedColumns, column]);
     setHasChanges(true);
     setOpenDialog(false);
@@ -92,7 +168,10 @@ const ModuleTableView = () => {
   };
 
   const handleEditColumn = (column) => {
-    setColumns(columns.map((c) => (c.id === column.id ? column : c)));
+    setColumnsData(prev => ({
+      ...prev,
+      columns: prev.columns.map((c) => (c.id === column.id ? column : c))
+    }));
     setOpenDialog(false);
     setHasChanges(true);
   };
@@ -103,7 +182,10 @@ const ModuleTableView = () => {
   };
 
   const removeAllColumns = () => {
-    setColumns([]);
+    setColumnsData(prev => ({
+      ...prev,
+      columns: []
+    }));
     setUnselectedColumns(tableData.columns);
     setHasChanges(true);
   };
@@ -142,7 +224,7 @@ const ModuleTableView = () => {
             </div>
           ) : (
             <div className="flex flex-row gap-2 flex-wrap px-2 py-4 border border-[--border] rounded-md min-h-24">
-              {columns.map((column) => (
+              {columnsData.columns.map((column) => (
                 <Chip
                   key={column.name}
                   label={`${column.label} (${column.name})`}
@@ -159,7 +241,7 @@ const ModuleTableView = () => {
                 color="primary"
                 className="w-fit"
                 startIcon={<Remove />}
-                disabled={columns.length === 0}
+                disabled={columnsData.columns.length === 0}
                 onClick={removeAllColumns}
               >
                 Remover todas
@@ -180,7 +262,7 @@ const ModuleTableView = () => {
             key={column.name}
             table={table.table}
             column={column}
-            isAdded={columns.includes(column)}
+            isAdded={columnsData.columns.includes(column)}
             onAddColumn={() => {
               setPendingColumn(column);
               setOpenDialog(true);
@@ -197,6 +279,8 @@ const ModuleTableView = () => {
         open={openDialog}
         onClose={handleCloseDialog}
         column={pendingColumn}
+        companyTableId={tableData.id}
+        moduleId={id}
         onAddColumn={handleAddColumn}
         onEditColumn={handleEditColumn}
         onRemoveColumn={handleRemoveColumn}
