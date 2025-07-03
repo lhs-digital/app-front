@@ -137,9 +137,7 @@ const AuditItem = ({
           {permissions.some((per) => per.name === "update_tasks") &&
             (auditRecord?.status === 0 ? (
               <Tooltip
-                title={
-                  auditRecord?.work_order ? "Ver O.S." : "Atribuir atividade"
-                }
+                title={auditRecord?.work_order ? "Ver O.S." : "Abrir O.S."}
                 aria-label="Abrir O.S."
               >
                 <button
