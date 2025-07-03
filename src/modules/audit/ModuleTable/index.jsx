@@ -9,12 +9,12 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import TableColumn from "../../../components/AuditComponents/TableColumn";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import AddColumn from "./components/AddColumn";
-import { toast } from "react-toastify";
 
 const ModuleTableView = () => {
   const { id, table } = useParams();
@@ -31,42 +31,44 @@ const ModuleTableView = () => {
 
       const formattedData = {
         company_table_id: columnsData.company_table_id,
-        columns: columnsData.columns.map(column => ({
+        columns: columnsData.columns.map((column) => ({
           id: column.id,
           label: column.label,
-          rules: column.rules.map(rule => {
+          rules: column.rules.map((rule) => {
             const formattedRule = {
               name: rule.name,
               message: rule.message,
               params: rule.params || "",
               priority: rule.priority || 1,
             };
-            
-            const validationRule = validationRules.find(v => v.name === rule.name);
+
+            const validationRule = validationRules.find(
+              (v) => v.name === rule.name,
+            );
             if (validationRule) {
               formattedRule.id = validationRule.id;
             } else if (rule.id && rule.audit_table_id) {
               formattedRule.id = rule.id;
             }
-            
+
             if (rule.audit_table_id) {
               formattedRule.audit_table_id = rule.audit_table_id;
             }
-            
+
             if (rule.label) {
               formattedRule.label = rule.label;
             }
-            
+
             return formattedRule;
-          })
-        }))
+          }),
+        })),
       };
-      
+
       const response = await api.post(
         `/companies/${company.id}/audit/modules/${id}/tables`,
-        formattedData
+        formattedData,
       );
-      
+
       setHasChanges(false);
       setSearchParams({ action: "view" });
       toast.success("Colunas salvas com sucesso!");
@@ -104,7 +106,7 @@ const ModuleTableView = () => {
   const [pendingColumn, setPendingColumn] = useState(null);
   const [columnsData, setColumnsData] = useState({
     company_table_id: null,
-    columns: []
+    columns: [],
   });
   const [unselectedColumns, setUnselectedColumns] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
@@ -134,7 +136,7 @@ const ModuleTableView = () => {
       setUnselectedColumns(unselectedColumns);
       setColumnsData({
         company_table_id: data.id,
-        columns: selectedColumns
+        columns: selectedColumns,
       });
       setHasChanges(false);
       return data;
@@ -143,9 +145,9 @@ const ModuleTableView = () => {
   });
 
   const handleAddColumn = (column) => {
-    setColumnsData(prev => ({
+    setColumnsData((prev) => ({
       ...prev,
-      columns: [...prev.columns, column]
+      columns: [...prev.columns, column],
     }));
     setUnselectedColumns(unselectedColumns.filter((c) => c.id !== column.id));
     setOpenDialog(false);
@@ -153,9 +155,9 @@ const ModuleTableView = () => {
   };
 
   const handleRemoveColumn = (column) => {
-    setColumnsData(prev => ({
+    setColumnsData((prev) => ({
       ...prev,
-      columns: prev.columns.filter((c) => c.id !== column.id)
+      columns: prev.columns.filter((c) => c.id !== column.id),
     }));
     setUnselectedColumns([...unselectedColumns, column]);
     setHasChanges(true);
@@ -168,9 +170,9 @@ const ModuleTableView = () => {
   };
 
   const handleEditColumn = (column) => {
-    setColumnsData(prev => ({
+    setColumnsData((prev) => ({
       ...prev,
-      columns: prev.columns.map((c) => (c.id === column.id ? column : c))
+      columns: prev.columns.map((c) => (c.id === column.id ? column : c)),
     }));
     setOpenDialog(false);
     setHasChanges(true);
@@ -182,9 +184,9 @@ const ModuleTableView = () => {
   };
 
   const removeAllColumns = () => {
-    setColumnsData(prev => ({
+    setColumnsData((prev) => ({
       ...prev,
-      columns: []
+      columns: [],
     }));
     setUnselectedColumns(tableData.columns);
     setHasChanges(true);
