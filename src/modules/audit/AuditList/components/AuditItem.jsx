@@ -1,11 +1,11 @@
 import {
+  AssignmentOutlined,
   CheckCircle,
   ContentPaste,
-  ContentPasteGo,
   Info,
   KeyboardArrowDown,
   OpenInNew,
-  PendingActions,
+  WatchLaterOutlined,
 } from "@mui/icons-material";
 import {
   Accordion,
@@ -57,7 +57,9 @@ const AuditItem = ({
       padding="16px 16px 16px 16px"
       position="relative"
       overflow="clip"
-      className="border-[--border] border"
+      border="1px solid"
+      borderColor="divider"
+      backgroundColor={theme === "light" ? "#fff" : "#121212"}
     >
       <Box
         display="flex"
@@ -97,12 +99,12 @@ const AuditItem = ({
               {auditRecord?.status === 1 ? (
                 <CheckCircle
                   fontSize="small"
-                  className="text-green-500 dark:text-green-600 mb-0.5"
+                  className="text-green-500 dark:text-green-600"
                 />
               ) : (
-                <PendingActions
+                <WatchLaterOutlined
                   fontSize="small"
-                  className="text-orange-500 dark:text-orange-600 mb-0.5"
+                  className="text-orange-500 dark:text-orange-600"
                 />
               )}
             </div>
@@ -135,7 +137,9 @@ const AuditItem = ({
           {permissions.some((per) => per.name === "update_tasks") &&
             (auditRecord?.status === 0 ? (
               <Tooltip
-                title={auditRecord?.work_order ? "Ver O.S." : "Abrir O.S."}
+                title={
+                  auditRecord?.work_order ? "Ver O.S." : "Atribuir atividade"
+                }
                 aria-label="Abrir O.S."
               >
                 <button
@@ -146,7 +150,7 @@ const AuditItem = ({
                   {auditRecord?.work_order ? (
                     <OpenInNew fontSize="small" />
                   ) : (
-                    <ContentPasteGo fontSize="small" />
+                    <AssignmentOutlined fontSize="small" />
                   )}
                 </button>
               </Tooltip>
