@@ -102,10 +102,9 @@ const Sidebar = ({ open, setOpen }) => {
 
   const openChildren = (key) => {
     const isOpen = collapsedChildren[key] || false;
-    setCollapsedChildren((prev) => ({
-      ...prev,
+    setCollapsedChildren({
       [key]: !isOpen,
-    }));
+    });
   };
 
   const renderRouteItem = (item) => {
@@ -122,7 +121,17 @@ const Sidebar = ({ open, setOpen }) => {
     const isPathActive = item.path && isActive(item.path);
 
     return (
-      <ListItem disablePadding key={item.path || item.label}>
+      <ListItem
+        disablePadding
+        key={item.path || item.label}
+        sx={{
+          ...(hasChildren &&
+            isItemOpen && {
+              borderTop: "1px solid",
+              borderColor: "primary.light",
+            }),
+        }}
+      >
         <ListItemButton
           color="primary"
           disableGutters
@@ -148,7 +157,7 @@ const Sidebar = ({ open, setOpen }) => {
               },
             ]}
           >
-            {routeIcon(item, isPathActive || isItemOpen)}
+            {routeIcon(item, isPathActive)}
           </ListItemIcon>
           {open && (
             <>
