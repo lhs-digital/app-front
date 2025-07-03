@@ -430,28 +430,26 @@ const AuditList = () => {
             />
           </div>
         )} */}
-        <div className="grow lg:shrink gap-4 flex flex-row col-span-2">
-          <Tooltip title="Filtrar" aria-label="Filtrar">
-            <Badge badgeContent={currentFilterCount} color="primary">
-              <IconButton
-                className="aspect-square"
-                onClick={handleOpenFilterMenu}
-                size="small"
-              >
-                <FilterList fontSize="small" />
-              </IconButton>
-            </Badge>
-          </Tooltip>
-          <Tooltip title="Limpar filtros" aria-label="Limpar filtros">
+        <Tooltip title="Filtrar" aria-label="Filtrar">
+          <Badge badgeContent={currentFilterCount} color="primary">
             <IconButton
               className="aspect-square"
-              onClick={handleClean}
+              onClick={handleOpenFilterMenu}
               size="small"
             >
-              <FilterListOff fontSize="small" />
+              <FilterList fontSize="small" />
             </IconButton>
-          </Tooltip>
-        </div>
+          </Badge>
+        </Tooltip>
+        <Tooltip title="Limpar filtros" aria-label="Limpar filtros">
+          <IconButton
+            className="aspect-square"
+            onClick={handleClean}
+            size="small"
+          >
+            <FilterListOff fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </div>
       <AuditFilters
         open={openFilters}
