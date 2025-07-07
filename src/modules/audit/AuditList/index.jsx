@@ -41,7 +41,7 @@ const AuditList = () => {
   const theme = handleMode(useThemeMode().mode);
   const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company } = useCompany();
-  const [table, setTable] = useState("");
+  const [auditModule, setAuditModule] = useState("");
   const [workOrderOpen, setWorkOrderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const navigate = useNavigate();
@@ -62,25 +62,30 @@ const AuditList = () => {
   });
 
   const [filters, setFilters] = useState({
-    ...filterDefaults, 
+    ...filterDefaults,
   });
 
   const [appliedFilters, setAppliedFilters] = useState({
-    ...filterDefaults, 
+    ...filterDefaults,
   });
 
   const [anchorEl, setAnchorEl] = useState(null);
   const openFilters = Boolean(anchorEl);
 
-  const { data: availableTables = [], isLoading: isTablesLoading } = useQuery({
-    queryKey: ["company_tables", company],
-    queryFn: async () => {
-      const response = await api.get(`/companies/3/audit/modules/1/tables`);
-      setTable(response.data.data[0]);
-      return response.data.data;
+  const { data: availableModules = [], isLoading: isModulesLoading } = useQuery(
+    {
+      queryKey: ["company_tables", company],
+      queryFn: async () => {
+        const response = await api.get(
+          `/companies/${company.id}/audit/modules`,
+        );
+        console.log("response.data.data", response.data.data);
+        setAuditModule(response.data.data[0]);
+        return response.data.data;
+      },
+      enabled: !!company,
     },
-    enabled: !!company,
-  });
+  );
 
   const { data = [], isLoading } = useQuery({
     queryKey: [
@@ -89,32 +94,33 @@ const AuditList = () => {
       pagination.perPage,
       appliedFilters,
       company?.id,
-      table,
+      auditModule,
     ],
 
     queryFn: async () => {
       try {
-        const response = await api.get("/audit", {
+        const response = await api.get(`/companies/${company.id}/audit`, {
           params: {
-            search:
-              appliedFilters.search === "" ? undefined : appliedFilters.search,
-            status:
-              appliedFilters.status === -1 ? undefined : appliedFilters.status,
-            priority:
-              appliedFilters.priority === -1
-                ? undefined
-                : appliedFilters.priority,
-            created_at:
-              appliedFilters.createdAt[0] || appliedFilters.createdAt[1]
-                ? [appliedFilters.createdAt[0], appliedFilters.createdAt[1]]
-                : undefined,
-            priority_order: appliedFilters.priorityOrder,
-            page: pagination.currentPage,
-            per_page: pagination.perPage,
-            company_id: company?.id,
-            table: table?.name,
+            // search:
+            //   appliedFilters.search === "" ? undefined : appliedFilters.search,
+            // status:
+            //   appliedFilters.status === -1 ? undefined : appliedFilters.status,
+            // priority:
+            //   appliedFilters.priority === -1
+            //     ? undefined
+            //     : appliedFilters.priority,
+            // created_at:
+            //   appliedFilters.createdAt[0] || appliedFilters.createdAt[1]
+            //     ? [appliedFilters.createdAt[0], appliedFilters.createdAt[1]]
+            //     : undefined,
+            // priority_order: appliedFilters.priorityOrder,
+            // page: pagination.currentPage,
+            // per_page: pagination.perPage,
+            // // module: auditModule?.id,
           },
         });
+
+        console.log("response.data.data", response.data.data);
 
         setPagination((prev) => ({
           ...prev,
@@ -128,7 +134,7 @@ const AuditList = () => {
     onError: () => {
       toast.error("Erro ao carregar os dados.");
     },
-    enabled: !!company && !!table,
+    enabled: !!company && !!auditModule,
   });
 
   const handleClean = () => {
@@ -141,7 +147,7 @@ const AuditList = () => {
       pagination.perPage,
       appliedFilters,
       company?.id,
-      table,
+      auditModule,
     ]);
   };
 
@@ -212,8 +218,8 @@ const AuditList = () => {
 
   const handleWorkOrder = (auditRecord) => {
     console.log("auditRecord", auditRecord);
-    if (!table) {
-      toast.error("Selecione uma tabela para visualizar os dados.");
+    if (!auditModule) {
+      toast.error("Selecione um módulo para visualizar os dados.");
       return;
     }
 
@@ -225,7 +231,7 @@ const AuditList = () => {
     console.log("auditRecord", auditRecord);
     const navigateRoute = [];
 
-    navigateRoute.push(moduleRoutes[table?.name]);
+    navigateRoute.push(moduleRoutes[auditModule?.name]);
     navigateRoute.push(auditRecord?.record_id);
     console.log("navigateRoute", navigateRoute);
 
@@ -251,7 +257,7 @@ const AuditList = () => {
       );
     }
 
-    if (!table) {
+    if (!auditModule) {
       return (
         <div className="p-8 lg:py-12">
           <p className="text-lg text-center text-gray-500">
@@ -261,7 +267,7 @@ const AuditList = () => {
       );
     }
 
-    if (isLoading || isTablesLoading) {
+    if (isLoading || isModulesLoading) {
       return (
         <div className="w-full min-h-80 flex items-center justify-center">
           <CircularProgress />
@@ -280,26 +286,87 @@ const AuditList = () => {
     }
 
     return (
-      <Box className="w-full flex flex-col items-center px-2 py-4 border rounded-md lg:min-h-80">
-        <Masonry
-          columns={{
-            xs: 1,
-            lg: 2,
-            xl: 3,
-          }}
-          spacing={2}
-          width="100%"
+      <Box width="100%">
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          width={"100%"}
+          gap={2}
+          border="1px solid"
+          borderBottom="none"
+          borderColor="divider"
+          borderRadius="8px 8px 0 0"
+          p={2}
         >
-          {data.map((item) => (
-            <AuditItem
-              key={item.id}
-              auditRecord={item}
-              setRefresh={setRefresh}
-              refresh={refresh}
-              onClick={() => handleWorkOrder(item)}
-            />
-          ))}
-        </Masonry>
+          <Box display="flex" alignItems="center" alignSelf="end" gap={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Box
+                width="12px"
+                height="12px"
+                borderRadius="30%"
+                bgcolor={colors.orange[theme === "light" ? 100 : 500]}
+              />
+              <p className="text-sm">Atividade Pendente</p>
+            </Box>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Box
+                width="12px"
+                height="12px"
+                borderRadius="30%"
+                bgcolor={colors.green[theme === "light" ? 100 : 500]}
+              />
+              <p className="text-sm">Atividade Concluída</p>
+            </Box>
+          </Box>
+          <Box display="flex" alignItems="center" alignSelf="end" gap={2}>
+            {priorities.map((item) => (
+              <Box key={item.label} display="flex" alignItems="center" gap={1}>
+                <Box
+                  width="12px"
+                  height="12px"
+                  borderRadius="30%"
+                  sx={{
+                    backgroundColor: getPriorityColor(item.value, theme)[
+                      theme === "light" ? "color" : "backgroundColor"
+                    ],
+                  }}
+                />
+                <p className="text-sm">Prioridade {item.label}</p>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        <Box
+          className="w-full flex flex-col items-center lg:min-h-80"
+          border="1px solid"
+          borderColor="divider"
+          borderRadius="0 0 8px 8px"
+          p={2}
+          py={3}
+          backgroundColor={theme === "light" ? colors.grey[50] : "#0f0f0f"}
+        >
+          <Masonry
+            columns={{
+              xs: 1,
+              lg: 2,
+              xl: 3,
+            }}
+            spacing={2}
+            className="m-0"
+            width="100%"
+          >
+            {data.map((item) => (
+              <AuditItem
+                key={item.id}
+                auditRecord={item}
+                setRefresh={setRefresh}
+                refresh={refresh}
+                onClick={() => handleWorkOrder(item)}
+              />
+            ))}
+          </Masonry>
+        </Box>
       </Box>
     );
   };
@@ -315,7 +382,6 @@ const AuditList = () => {
         <TextField
           fullWidth
           className="grow"
-          size="small"
           slotProps={{
             input: {
               startAdornment: (
@@ -330,20 +396,19 @@ const AuditList = () => {
           onChange={handleSearch}
         />
         <div className="w-full lg:w-1/3">
-          <FormControl fullWidth size="small">
-            <InputLabel id="table-select">Tabela</InputLabel>
+          <FormControl fullWidth>
+            <InputLabel id="table-select">Módulo</InputLabel>
             <Select
               fullWidth
               labelId="table-select"
               className="capitalize"
-              value={table}
-              label="Tabela"
-              onChange={(e) => setTable(e.target.value)}
-              size="small"
+              value={auditModule}
+              label="Módulo"
+              onChange={(e) => setAuditModule(e.target.value)}
             >
-              {availableTables.map((table) => (
-                <MenuItem key={table.id} value={table} className="capitalize">
-                  {table.label}
+              {availableModules.map((module) => (
+                <MenuItem key={module.id} value={module} className="capitalize">
+                  {module.name}
                 </MenuItem>
               ))}
             </Select>
@@ -365,28 +430,26 @@ const AuditList = () => {
             />
           </div>
         )} */}
-        <div className="grow lg:shrink gap-4 flex flex-row col-span-2">
-          <Tooltip title="Filtrar" aria-label="Filtrar">
-            <Badge badgeContent={currentFilterCount} color="primary">
-              <IconButton
-                className="aspect-square"
-                onClick={handleOpenFilterMenu}
-                size="small"
-              >
-                <FilterList fontSize="small" />
-              </IconButton>
-            </Badge>
-          </Tooltip>
-          <Tooltip title="Limpar filtros" aria-label="Limpar filtros">
+        <Tooltip title="Filtrar" aria-label="Filtrar">
+          <Badge badgeContent={currentFilterCount} color="primary">
             <IconButton
               className="aspect-square"
-              onClick={handleClean}
+              onClick={handleOpenFilterMenu}
               size="small"
             >
-              <FilterListOff fontSize="small" />
+              <FilterList fontSize="small" />
             </IconButton>
-          </Tooltip>
-        </div>
+          </Badge>
+        </Tooltip>
+        <Tooltip title="Limpar filtros" aria-label="Limpar filtros">
+          <IconButton
+            className="aspect-square"
+            onClick={handleClean}
+            size="small"
+          >
+            <FilterListOff fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </div>
       <AuditFilters
         open={openFilters}
@@ -402,52 +465,6 @@ const AuditList = () => {
         onApplyFilters={handleFilter}
         onCleanFilters={handleClean}
       />
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        width={"100%"}
-        gap={2}
-        mt={2}
-      >
-        <Box display="flex" alignItems="center" alignSelf="end" gap={2}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Box
-              width="12px"
-              height="12px"
-              borderRadius="30%"
-              bgcolor={colors.orange[theme === "light" ? 100 : 500]}
-            />
-            <p className="text-sm">Atividade Pendente</p>
-          </Box>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Box
-              width="12px"
-              height="12px"
-              borderRadius="30%"
-              bgcolor={colors.green[theme === "light" ? 100 : 500]}
-            />
-            <p className="text-sm">Atividade Concluída</p>
-          </Box>
-        </Box>
-        <Box display="flex" alignItems="center" alignSelf="end" gap={2}>
-          {priorities.map((item) => (
-            <Box key={item.label} display="flex" alignItems="center" gap={1}>
-              <Box
-                width="12px"
-                height="12px"
-                borderRadius="30%"
-                sx={{
-                  backgroundColor: getPriorityColor(item.value, theme)[
-                    theme === "light" ? "color" : "backgroundColor"
-                  ],
-                }}
-              />
-              <p className="text-sm">Prioridade {item.label}</p>
-            </Box>
-          ))}
-        </Box>
-      </Box>
       {renderAuditContent()}
       <AuditWorkOrder
         open={workOrderOpen}

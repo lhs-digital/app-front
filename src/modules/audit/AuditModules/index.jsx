@@ -11,12 +11,14 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
+import ModalDelete from "../../../components/ModalDelete";
 import api from "../../../services/api";
+import { toast } from "react-toastify";
 
 const AuditModules = () => {
   const { company } = useCompany();
@@ -25,10 +27,20 @@ const AuditModules = () => {
     perPage: 10,
     current: 1,
   });
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [moduleToDelete, setModuleToDelete] = useState(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Invalidar query quando o componente for montado (útil quando volta do breadcrumb)
+  useEffect(() => {
+    if (company) {
+      queryClient.invalidateQueries(["modules"]);
+    }
+  }, [company, queryClient]);
 
   const { data: modules = [], isLoading: isLoadingModules } = useQuery({
-    queryKey: ["modules", company],
+    queryKey: ["modules", company, pagination.current, pagination.perPage],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/audit/modules`, {
         params: {
@@ -37,17 +49,48 @@ const AuditModules = () => {
         },
       });
       if (response.data.meta) {
-        setPagination({
+        setPagination(prev => ({
+          ...prev,
           total: response.data.meta.total || response.data.data.length,
           perPage: response.data.meta.per_page,
           current: response.data.meta.current_page,
-        });
+        }));
       }
       return response.data.data;
     },
     enabled: !!company,
-    staleTime: 1000 * 60,
+    staleTime: 0, // Reduzir staleTime para garantir que os dados sejam atualizados
   });
+
+  const { mutate: deleteModule } = useMutation({
+    mutationFn: async (id) => {
+      const response = await api.delete(
+        `/companies/${company.id}/audit/modules/${id}`);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["modules"]);
+      toast.success(`Módulo "${moduleToDelete?.name}" excluído com sucesso!`);
+      setIsDeleteModalOpen(false);
+      setModuleToDelete(null);
+    },
+  });
+
+  const handleDeleteClick = (module) => {
+    setModuleToDelete(module);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (moduleToDelete) {
+      deleteModule(moduleToDelete.id);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setModuleToDelete(null);
+  };
 
   return (
     <div className="flex flex-col gap-8 w-full">
@@ -109,9 +152,7 @@ const AuditModules = () => {
                       <Edit />
                     </IconButton>
                     <IconButton
-                      onClick={() => {
-                        console.log(m.id);
-                      }}
+                      onClick={() => handleDeleteClick(m)}
                     >
                       <Delete />
                     </IconButton>
@@ -119,40 +160,6 @@ const AuditModules = () => {
                 </TableRow>
               ))
             )}
-            {/* {modules.length > 0 ? (
-              modules.map((m) => (
-                <TableRow key={m.id}>
-                  <TableCell className="w-10/12">{m.name}</TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => navigate(`/modulos/${m.id}`)}>
-                      <Visibility />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => navigate(`/modulos/${m.id}/editar`)}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => {
-                        console.log(m.id);
-                      }}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : isLoadingModules ? (
-              <TableRow>
-                <TableCell colSpan={2}>
-                  <Skeleton variant="text" height={100} />
-                </TableCell>
-              </TableRow>
-            ) : (
-              <TableRow>
-                <TableCell colSpan={2}>Nenhum módulo encontrado</TableCell>
-              </TableRow>
-            )} */}
           </TableBody>
         </Table>
         <TablePagination
@@ -169,6 +176,16 @@ const AuditModules = () => {
           }
         />
       </TableContainer>
+      <ModalDelete
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        content={
+          <p>
+            Você tem certeza que deseja excluir o módulo &quot;{moduleToDelete?.name}&quot;?
+          </p>
+        }
+      />
     </div>
   );
 };

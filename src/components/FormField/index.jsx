@@ -1,10 +1,19 @@
-import { Box, InputLabel } from "@mui/material";
+import { Box, InputLabel, Skeleton } from "@mui/material";
 
-const FormField = ({ children, label, containerClass, ...props }) => {
+const FormField = ({ children, label, containerClass, loading, ...props }) => {
   return (
     <Box className={containerClass}>
       <InputLabel {...props}>{label}</InputLabel>
-      {children}
+      {loading ? (
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height={56}
+          className="rounded-md"
+        />
+      ) : (
+        children
+      )}
     </Box>
   );
 };

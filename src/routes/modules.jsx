@@ -9,38 +9,38 @@ import {
   BuildOutlined,
   BusinessCenter,
   BusinessCenterOutlined,
-  Computer,
-  ComputerOutlined,
+  // Computer,
+  // ComputerOutlined,
   Home as HomeIcon,
   HomeOutlined,
   Lock,
   LockOutlined,
   Person,
   PersonOutline,
-  RuleFolder,
-  RuleFolderOutlined,
+  // RuleFolder,
+  // RuleFolderOutlined,
   Shield,
   ShieldOutlined,
   Subject,
   TableChart,
   TableChartOutlined,
-  Web,
-  WebOutlined,
+  // Web,
+  // WebOutlined,
   Widgets,
   WidgetsOutlined,
 } from "@mui/icons-material";
 import AuditList from "../modules/audit/AuditList";
 import AuditModules from "../modules/audit/AuditModules";
-import AuditRules from "../modules/audit/AuditRules";
-import AuditTables from "../modules/audit/AuditTables";
-import EntityForm from "../modules/audit/EntityForm";
-import ModuleForm from "../modules/audit/ModuleView";
+// import AuditRules from "../modules/audit/AuditRules";
+// import AuditTables from "../modules/audit/AuditTables";
+// import EntityForm from "../modules/audit/EntityForm";
 import ModuleTables from "../modules/audit/ModuleTable";
+import ModuleForm from "../modules/audit/ModuleView";
 import Home from "../modules/base/Home";
 import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
-import TestPage from "../modules/base/Test";
+// import TestPage from "../modules/base/Test";
 import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
@@ -66,46 +66,46 @@ const auditModule = {
         "define_rules",
       ],
     },
-    {
-      label: "Regras",
-      path: "/regras",
-      element: <AuditRules />,
-      icon: RuleFolderOutlined,
-      activeIcon: RuleFolder,
-      permissions: ["define_rules"],
-    },
-    {
-      label: "Tabelas",
-      path: "/tabelas",
-      element: <AuditTables />,
-      icon: TableChartOutlined,
-      activeIcon: TableChart,
-      children: [
-        {
-          label: "Tabela",
-          path: "/tabelas/:table",
-          element: <AuditTables />,
-          icon: TableChartOutlined,
-          activeIcon: TableChart,
-          hidden: true,
-        },
-        {
-          label: "Entidade",
-          path: "/tabelas/:table/:id",
-          element: <EntityForm />,
-          icon: TableChartOutlined,
-          activeIcon: TableChart,
-          hidden: true,
-        },
-      ],
-      permissions: [
-        "view_clients",
-        "view_any_clients",
-        "create_clients",
-        "update_clients",
-        "delete_clients",
-      ],
-    },
+    // {
+    //   label: "Regras",
+    //   path: "/regras",
+    //   element: <AuditRules />,
+    //   icon: RuleFolderOutlined,
+    //   activeIcon: RuleFolder,
+    //   permissions: ["define_rules"],
+    // },
+    // {
+    //   label: "Tabelas",
+    //   path: "/tabelas",
+    //   element: <AuditTables />,
+    //   icon: TableChartOutlined,
+    //   activeIcon: TableChart,
+    //   children: [
+    //     {
+    //       label: "Tabela",
+    //       path: "/tabelas/:table",
+    //       element: <AuditTables />,
+    //       icon: TableChartOutlined,
+    //       activeIcon: TableChart,
+    //       hidden: true,
+    //     },
+    //     {
+    //       label: "Entidade",
+    //       path: "/tabelas/:table/:id",
+    //       element: <EntityForm />,
+    //       icon: TableChartOutlined,
+    //       activeIcon: TableChart,
+    //       hidden: true,
+    //     },
+    //   ],
+    //   permissions: [
+    //     "view_clients",
+    //     "view_any_clients",
+    //     "create_clients",
+    //     "update_clients",
+    //     "delete_clients",
+    //   ],
+    // },
     {
       label: "Módulos",
       path: "/modulos",
@@ -233,14 +233,6 @@ const baseModule = {
         "unassign_responsible_users",
       ],
     },
-    {
-      label: "Logs",
-      path: "/logs",
-      element: <Logs />,
-      icon: Subject,
-      activeIcon: Subject,
-      permissions: ["view_any_logs"],
-    },
   ],
 };
 
@@ -263,23 +255,31 @@ const lighthouseModule = {
         "delete_companies",
       ],
     },
-  ],
-};
-
-const devModule = {
-  label: "Desenvolvimento",
-  icon: ComputerOutlined,
-  activeIcon: Computer,
-  children: [
     {
-      label: "Página genérica",
-      path: "/dev",
-      element: <TestPage />,
-      icon: Web,
-      activeIcon: WebOutlined,
+      label: "Logs",
+      path: "/logs",
+      element: <Logs />,
+      icon: Subject,
+      activeIcon: Subject,
+      permissions: ["view_any_logs"],
     },
   ],
 };
+
+// const devModule = {
+//   label: "Desenvolvimento",
+//   icon: ComputerOutlined,
+//   activeIcon: Computer,
+//   children: [
+//     {
+//       label: "Página genérica",
+//       path: "/dev",
+//       element: <TestPage />,
+//       icon: Web,
+//       activeIcon: WebOutlined,
+//     },
+//   ],
+// };
 
 export const unrenderedRoutes = [
   {
@@ -293,7 +293,7 @@ export const modules = [
   baseModule,
   auditModule,
   lighthouseModule,
-  ...(import.meta.env.MODE !== "production" ? [devModule] : []),
+  // ...(import.meta.env.MODE !== "production" ? [devModule] : []),
 ];
 
 const getRoutes = (acc, items) => {

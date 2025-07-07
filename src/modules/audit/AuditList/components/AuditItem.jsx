@@ -1,9 +1,11 @@
 import {
+  AssignmentOutlined,
+  CheckCircle,
   ContentPaste,
-  ContentPasteGo,
   Info,
   KeyboardArrowDown,
   OpenInNew,
+  WatchLaterOutlined,
 } from "@mui/icons-material";
 import {
   Accordion,
@@ -50,42 +52,79 @@ const AuditItem = ({
       display="flex"
       flexDirection="column"
       justifyContent="center"
-      border="1px solid #e2e8f0"
       borderRadius="8px"
       gap={2}
-      padding="24px 16px 16px 16px"
+      padding="16px 16px 16px 16px"
       position="relative"
       overflow="clip"
+      border="1px solid"
+      borderColor="divider"
+      backgroundColor={theme === "light" ? "#fff" : "#121212"}
     >
-      <div
-        className="absolute h-[8px] left-0 right-0 top-0"
-        style={{
-          backgroundColor:
-            auditRecord?.status === 1
-              ? theme === "light"
-                ? colors.green[100]
-                : colors.green[600]
-              : theme === "light"
-                ? colors.orange[100]
-                : colors.orange[500],
-        }}
-      />
       <Box
         display="flex"
         flexDirection="row"
         justifyContent="space-between"
+        alignItems="center"
         gap={2}
       >
-        <p className="text-lg">
-          ID do Cliente: <span>{auditRecord?.record_id}</span>
-        </p>
-        <Box display="flex" gap={2}>
+        <div className="flex flex-row gap-3 items-center">
+          {/* <Label
+              className="mb-1"
+              sx={{
+                color:
+                  auditRecord?.status === 1
+                    ? theme === "light"
+                      ? colors.green[100]
+                      : colors.green[300]
+                    : theme === "light"
+                      ? colors.orange[100]
+                      : colors.orange[300],
+              }}
+            /> */}
+          <Tooltip title={auditRecord?.status === 1 ? "Corrigido" : "Pendente"}>
+            <div
+              className="h-8 w-8 aspect-square rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor:
+                  auditRecord?.status === 1
+                    ? theme === "light"
+                      ? colors.green[100]
+                      : colors.green[200]
+                    : theme === "light"
+                      ? colors.orange[100]
+                      : colors.orange[200],
+              }}
+            >
+              {auditRecord?.status === 1 ? (
+                <CheckCircle
+                  fontSize="small"
+                  className="text-green-500 dark:text-green-600"
+                />
+              ) : (
+                <WatchLaterOutlined
+                  fontSize="small"
+                  className="text-orange-500 dark:text-orange-600"
+                />
+              )}
+            </div>
+          </Tooltip>
+          <div>
+            <p className="text-lg">
+              AUD{auditRecord?.record_id.toString().padStart(5, "0")}
+            </p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 -mt-1">
+              Entidade: #{auditRecord?.record_id}
+            </p>
+          </div>
+        </div>
+
+        <Box display="flex" gap={2} alignItems="center">
           <Tooltip
             title={`Prioridade: ${formattedPriority(auditRecord?.priority, theme)}`}
             aria-label="Prioridade"
           >
             <Chip
-              size="large"
               sx={getPriorityColor(auditRecord?.priority, theme)}
               label={
                 <div>
@@ -109,7 +148,7 @@ const AuditItem = ({
                   {auditRecord?.work_order ? (
                     <OpenInNew fontSize="small" />
                   ) : (
-                    <ContentPasteGo fontSize="small" />
+                    <AssignmentOutlined fontSize="small" />
                   )}
                 </button>
               </Tooltip>
