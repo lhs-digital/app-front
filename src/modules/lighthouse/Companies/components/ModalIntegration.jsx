@@ -30,18 +30,50 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
   const [buttonSave, setButtonSave] = useState(true);
 
   useEffect(() => {
-    const getData = async () => {
+    const getCompanies = async () => {
       try {
         const responseCompany = await api.get(`/companies/get_companies`);
         setCompanies(responseCompany?.data?.data);
         console.log("Empresas:", responseCompany?.data?.data);
-
       } catch (error) {
         console.error("Erro ao acessar a lista de empresas.", error);
       }
     };
 
-    getData();
+    getCompanies();
+  }, []);
+
+  useEffect(() => {
+    const getIntegration = async () => {
+      if (!company) return;
+      
+      try {
+        const responseIntegration = await api.get(`/companies/${company}/connection`);
+
+        console.log("Integração:", responseIntegration);
+
+        if (responseIntegration.data.data) {
+          if (responseIntegration.data.data.type === "api") {
+            setType("api");
+            setBaseUrl(responseIntegration.data.data.connection.api_base_url);
+            setApiToken(responseIntegration.data.data.connection.api_token);
+            setApiAuthType(responseIntegration.data.data.connection.api_auth_type);
+          } else {
+            setType("db");
+            setDbDriver(responseIntegration.data.data.connection.db_driver);
+            setDbHost(responseIntegration.data.data.connection.db_host);
+            setDbPort(responseIntegration.data.data.connection.db_port);
+            setDbName(responseIntegration.data.data.connection.db_name);
+            setDbUsername(responseIntegration.data.data.connection.db_username);
+            setDbPassword(responseIntegration.data.data.connection.db_password);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao acessar dados de integração.", error);
+      }
+    };
+
+    getIntegration();
   }, [company]);
 
   const handleCompanyChange = (event) => {
