@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
 import api from "../../../../services/api";
+import { useCompany } from "../../../../hooks/useCompany";
 
 const ModalHierarchy = ({
   isOpen,
@@ -30,11 +31,12 @@ const ModalHierarchy = ({
   const [associatedUsers, setAssociatedUsers] = useState([]);
   const [eligibleSubordinates, setEligibleSubordinates] = useState([]);
   const user = useAuthUser();
+  const {company} = useCompany();
 
   // fetchelegibleResposibleUsers
   const fetchEligibleResponsibleUsers = async () => {
     try {
-      const response = await api.get(`/users/potential-responsibles`);
+      const response = await api.get(`/users/potential-responsibles?companyId=${company?.id}`);
       const formattedUsers = response.data?.flatMap((responsible) =>
         responsible.users.map((user) => ({
           id: user.id,
@@ -52,13 +54,14 @@ const ModalHierarchy = ({
     try {
       const id = responsibleId || responsibleUser?.id || user?.id;
 
+      console.log("fetchEligibleSubordinates id:", id);
       const endpoint = desHierarchy
         ? `/users/my-subordinates?userId=${id}`
         : `/users/eligible-subordinates/${id}`;
 
       const response = await api.get(endpoint);
 
-      console.log("response:", response)
+      console.log("responseaaa:", response)
 
       const formattedSubordinates = response.data?.flatMap((role) =>
         role.users.map((user) => ({
