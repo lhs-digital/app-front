@@ -39,6 +39,8 @@ jobs:
       # Build project – outputs to ./dist by default (Vite)
       # ----------------------------------------
       - name: Build
+        env:
+          VITE_API_URL: ${{ secrets.STG_API_URL }}
         run: npm run build
 
       # ----------------------------------------
