@@ -83,7 +83,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
 
   const saveData = async (integrationData) => {
     try {
-      await api.put(`/company/${company}/update_connection`, integrationData);
+      await api.put(`/companies/${company}/update_connection`, integrationData);
 
       setRefresh((prev) => !prev);
       toast.success("Integração configurada com sucesso!");
@@ -201,6 +201,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
               onChange={handleCompanyChange}
               fullWidth
             >
+              {console.log("Empresas:", companies)}
               {companies.map((companyItem) => (
                 <MenuItem key={companyItem.id} value={companyItem.id}>
                   {companyItem.name}

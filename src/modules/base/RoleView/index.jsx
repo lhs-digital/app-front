@@ -1,6 +1,6 @@
 import { Edit, LockOpen, Save } from "@mui/icons-material";
 import { Button, MenuItem, Select, TextField } from "@mui/material";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import FormField from "../../../components/FormField";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import PermissionCategory from "./components/PermissionCategory";
+import { useCompany } from "../../../hooks/useCompany";
 
 const RoleView = () => {
   const { id } = useParams();
@@ -17,7 +18,9 @@ const RoleView = () => {
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   // const { isLighthouse } = useUserState().state;
+  const { company } = useCompany();
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   // const { data: companies, isFetched: isCompanyFetched } = useQuery({
@@ -89,6 +92,8 @@ const RoleView = () => {
     },
     onSuccess: () => {
       toast.success("Cargo atualizado com sucesso");
+      // Invalidar a query para recarregar os dados atualizados
+      queryClient.invalidateQueries({ queryKey: ["role", id] });
     },
     onError: (error) => {
       console.error("Erro ao atualizar o cargo", error);
@@ -109,11 +114,15 @@ const RoleView = () => {
       return toast.error("Preencha todos os campos corretamente");
     }
 
+    console.log("data", data);
+
     const payload = {
       ...data,
-      company_id: data.company.id,
+      company_id: company?.id,
       permissions: selectedPermissions.map((permission) => permission.id),
     };
+
+    console.log("payload", payload);
 
     if (isCreating) {
       return createRole(payload);
