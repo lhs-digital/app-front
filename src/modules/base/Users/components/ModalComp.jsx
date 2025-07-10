@@ -59,7 +59,7 @@ const ModalComp = ({ data, dataEdit, isOpen, onClose, setRefresh }) => {
         name,
         email,
         role_id: role,
-        company_id: company,
+        company_id: company?.id,
         password: "123456",
       });
 

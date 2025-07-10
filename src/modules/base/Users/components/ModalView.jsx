@@ -151,7 +151,7 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
             placeholder="Selecione uma opção"
             value={company}
             onChange={handleCompanyChange}
-            disabled={!user.isLighthouse || viewOnly}
+            disabled={true}
             fullWidth
           >
             {companies.map((companyItem) => (
