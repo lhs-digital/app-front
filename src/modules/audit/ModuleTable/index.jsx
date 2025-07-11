@@ -64,7 +64,7 @@ const ModuleTableView = () => {
         })),
       };
 
-      const response = await api.post(
+      await api.post(
         `/companies/${company.id}/audit/modules/${id}/tables`,
         formattedData,
       );
