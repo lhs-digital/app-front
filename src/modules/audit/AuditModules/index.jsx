@@ -12,13 +12,13 @@ import {
   TableRow,
 } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import ModalDelete from "../../../components/ModalDelete";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
-import ModalDelete from "../../../components/ModalDelete";
 import api from "../../../services/api";
-import { toast } from "react-toastify";
 
 const AuditModules = () => {
   const { company } = useCompany();
@@ -49,7 +49,7 @@ const AuditModules = () => {
         },
       });
       if (response.data.meta) {
-        setPagination(prev => ({
+        setPagination((prev) => ({
           ...prev,
           total: response.data.meta.total || response.data.data.length,
           perPage: response.data.meta.per_page,
@@ -65,7 +65,8 @@ const AuditModules = () => {
   const { mutate: deleteModule } = useMutation({
     mutationFn: async (id) => {
       const response = await api.delete(
-        `/companies/${company.id}/audit/modules/${id}`);
+        `/companies/${company.id}/audit/modules/${id}`,
+      );
       return response.data.data;
     },
     onSuccess: () => {
@@ -142,17 +143,22 @@ const AuditModules = () => {
               modules.map((m) => (
                 <TableRow key={m.id}>
                   <TableCell className="w-10/12">{m.name}</TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => navigate(`/modulos/${m.id}`)}>
+                  <TableCell className="space-x-2">
+                    <IconButton
+                      onClick={() => navigate(`/modulos/${m.id}`)}
+                      size="small"
+                    >
                       <Visibility />
                     </IconButton>
                     <IconButton
                       onClick={() => navigate(`/modulos/${m.id}/editar`)}
+                      size="small"
                     >
                       <Edit />
                     </IconButton>
                     <IconButton
                       onClick={() => handleDeleteClick(m)}
+                      size="small"
                     >
                       <Delete />
                     </IconButton>
@@ -182,7 +188,8 @@ const AuditModules = () => {
         onConfirm={handleDeleteConfirm}
         content={
           <p>
-            Você tem certeza que deseja excluir o módulo &quot;{moduleToDelete?.name}&quot;?
+            Você tem certeza que deseja excluir o módulo &quot;
+            {moduleToDelete?.name}&quot;?
           </p>
         }
       />

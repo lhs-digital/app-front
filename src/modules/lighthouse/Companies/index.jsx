@@ -29,8 +29,8 @@ import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import ModalCompany from "./components/ModalCompany";
-import ModalViewCompany from "./components/ModalViewCompany";
 import ModalIntegration from "./components/ModalIntegration";
+import ModalViewCompany from "./components/ModalViewCompany";
 
 const Companies = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -276,12 +276,13 @@ const Companies = () => {
                     <TableCell> {dba || "Não informado"} </TableCell>
                     <TableCell> {cnpj} </TableCell>
                     <TableCell> {responsible_cpf} </TableCell>
-                    <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
+                    <TableCell className="space-x-1">
                       {permissions.some(
                         (permissions) =>
                           permissions.name === "update_companies",
                       ) ? (
                         <IconButton
+                          size="small"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEdit({
@@ -304,6 +305,7 @@ const Companies = () => {
                           permissions.name === "delete_companies",
                       ) ? (
                         <IconButton
+                          size="small"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(id);
