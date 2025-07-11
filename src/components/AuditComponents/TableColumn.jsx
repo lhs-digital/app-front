@@ -3,7 +3,7 @@ import { IconButton, ListItem, Tooltip } from "@mui/material";
 import { Link } from "react-router-dom";
 
 const TableColumn = ({
-  table,
+  readOnly = false,
   column,
   onAddColumn,
   onRemoveColumn,
@@ -13,18 +13,20 @@ const TableColumn = ({
     <ListItem
       className="flex flex-row gap-2 items-center justify-between"
       secondaryAction={
-        <Tooltip
-          title={`${isAdded ? "Remover" : "Adicionar"} "${column.name}" ao módulo`}
-          placement="right"
-          arrow
-        >
-          <IconButton
-            size="small"
-            onClick={isAdded ? onRemoveColumn : onAddColumn}
+        readOnly ? null : (
+          <Tooltip
+            title={`${isAdded ? "Remover" : "Adicionar"} "${column.name}" ao módulo`}
+            placement="right"
+            arrow
           >
-            {isAdded ? <Remove /> : <Add />}
-          </IconButton>
-        </Tooltip>
+            <IconButton
+              size="small"
+              onClick={isAdded ? onRemoveColumn : onAddColumn}
+            >
+              {isAdded ? <Remove /> : <Add />}
+            </IconButton>
+          </Tooltip>
+        )
       }
     >
       <div className="flex flex-row gap-2 items-center">
