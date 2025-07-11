@@ -8,6 +8,7 @@ const EREntity = ({
   onClick = () => {},
   hideIfPresent = false,
 }) => {
+  console.log("EREntity table:", table);
   return (
     <motion.div
       initial={{
@@ -51,7 +52,7 @@ const EREntity = ({
       <div className="w-full flex flex-col gap-1 [&>*:not(:last-child)]:border-b">
         {table.columns.map((column) => (
           <div
-            className="flex flex-row w-full p-1 items-center justify-between border-[--border] relative"
+            className={`flex flex-row w-full p-1 items-center justify-between border-[--border] relative ${column.rules.length === 0 && "text-neutral-500"}`}
             key={column.name}
           >
             <div className="w-12 flex items-center justify-center ">
