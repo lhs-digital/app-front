@@ -1,9 +1,12 @@
 import {
+  Assignment,
+  AssignmentLate,
+  BoltOutlined,
   Build,
-  Description,
+  CheckCircleOutline,
+  DescriptionOutlined,
   Person,
-  RuleFolder,
-  Work,
+  WidgetsOutlined,
 } from "@mui/icons-material";
 import {
   Box,
@@ -21,7 +24,8 @@ import {
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { PieChart } from "@mui/x-charts";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -30,7 +34,7 @@ import { useThemeMode } from "../../../../contexts/themeModeContext";
 import { useCompany } from "../../../../hooks/useCompany";
 import { useUserState } from "../../../../hooks/useUserState";
 import api from "../../../../services/api";
-import { dateFormatted, formatInterval } from "../../../../services/utils";
+import { formatInterval } from "../../../../services/utils";
 import { handleMode } from "../../../../theme";
 
 const AuditSection = () => {
@@ -42,7 +46,7 @@ const AuditSection = () => {
   const [dataLastAudit, setDataLastAudit] = useState([]);
   const { company } = useCompany();
   const [updateInterval, setUpdateInterval] = useState(600);
-  const [selectedTableId, setSelectedTableId] = useState(null);
+  const [auditModule, setAuditModule] = useState(null);
   const [chartData, setChartData] = useState({
     errorsCount: 0,
     fixedErrorsCount: 0,
@@ -69,73 +73,75 @@ const AuditSection = () => {
     }
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await api.get(`/audit/summary`);
-        const data = response?.data?.data;
+  const { data: availableModules = [] } = useQuery({
+    queryKey: ["company_tables", company],
+    queryFn: async () => {
+      const response = await api.get(`/companies/${company.id}/audit/modules`);
+      return response.data.data;
+    },
+    enabled: !!company,
+  });
 
-        if (Array.isArray(data) && data.length > 0) {
-          setData(data);
-          setDataLastAudit(data[0].last_audit_date);
+  // const { data: summary } = useQuery({
+  //   queryKey: ["audit_summary", company],
+  //   queryFn: async () => {
+  //     const response = await api.get(`/companies/${company.id}/audit/summary`);
+  //     console.log("response.data.data", response.data.data);
+  //     return response.data.data;
+  //   },
+  // });
 
-          // Verifique se audit_interval existe antes de atualizar o estado
-          if (data[0].audit_interval !== undefined) {
-            setUpdateInterval(data[0].audit_interval);
-          } else {
-            console.warn("audit_interval não encontrado, usando valor padrão");
-            setUpdateInterval(600); // Valor padrão
-          }
-        } else {
-          console.error("A resposta não é um array:", data);
-          setData([data]);
-          setDataLastAudit(data.last_audit_date);
-          setUpdateInterval(data.audit_interval || 600); // Valor padrão
-        }
-      } catch (error) {
-        console.error("Erro ao verificar lista de usuários", error);
-      }
-    };
+  // useEffect(() => {
+  //   const getData = async () => {
+  //     try {
+  //       const response = await api.get(`/audit/summary`);
+  //       const data = response?.data?.data;
 
-    getData();
-  }, []);
+  //       if (Array.isArray(data) && data.length > 0) {
+  //         setData(data);
+  //         setDataLastAudit(data[0].last_audit_date);
 
-  useEffect(() => {
-    if (data.length > 0) {
-      console.log(company?.id, "company id");
-      const selectedCompany = data.find(
-        (item) => item.company.id === company?.id,
-      );
-      const tables = selectedCompany ? selectedCompany.per_tables : [];
-      const selectedTable = tables.find(
-        (table) => table.label === selectedTableId,
-      );
+  //         // Verifique se audit_interval existe antes de atualizar o estado
+  //         if (data[0].audit_interval !== undefined) {
+  //           setUpdateInterval(data[0].audit_interval);
+  //         } else {
+  //           console.warn("audit_interval não encontrado, usando valor padrão");
+  //           setUpdateInterval(600); // Valor padrão
+  //         }
+  //       } else {
+  //         console.error("A resposta não é um array:", data);
+  //         setData([data]);
+  //         setDataLastAudit(data.last_audit_date);
+  //         setUpdateInterval(data.audit_interval || 600); // Valor padrão
+  //       }
+  //     } catch (error) {
+  //       console.error("Erro ao verificar lista de usuários", error);
+  //     }
+  //   };
 
-      if (selectedTable) {
-        setUpdateInterval(data[0]?.audit_interval);
-        setChartData({
-          errorsCount: selectedTable.errors_count,
-          fixedErrorsCount: selectedTable.fixed_errors_count,
-        });
-      }
-    }
-  }, [data, company?.id, selectedTableId]);
+  //   getData();
+  // }, []);
 
-  const selectedCompany = data?.find((item) => item.company.id === company?.id);
-  const tables = selectedCompany ? selectedCompany.per_tables : [];
+  // useEffect(() => {
+  //   if (summary.length > 0) {
+  //     console.log(company?.id, "company id");
+  //     const selectedCompany = summary.find(
+  //       (item) => item.company.id === company?.id,
+  //     );
+  //     const tables = selectedCompany ? selectedCompany.per_tables : [];
+  //     const selectedTable = tables.find(
+  //       (table) => table.label === auditModule.name,
+  //     );
 
-  const handleTableChange = (event) => {
-    const tableId = event.target.value;
-    setSelectedTableId(tableId);
-    const selectedTable = tables?.find((table) => table.label === tableId);
-
-    if (selectedTable) {
-      setChartData({
-        errorsCount: selectedTable.errors_count,
-        fixedErrorsCount: selectedTable.fixed_errors_count,
-      });
-    }
-  };
+  //     if (auditModule) {
+  //       setUpdateInterval(summary[0]?.audit_interval);
+  //       setChartData({
+  //         errorsCount: selectedTable.errors_count,
+  //         fixedErrorsCount: selectedTable.fixed_errors_count,
+  //       });
+  //     }
+  //   }
+  // }, [summary, company?.id, auditModule]);
 
   // const handleCompanyChange = (event) => {
   //   const newCompany = availableCompanies.find(
@@ -174,15 +180,15 @@ const AuditSection = () => {
 
   const quickActions = [
     {
-      icon: <Build fontSize="small" />,
+      icon: <AssignmentLate fontSize="small" />,
       fn: () => navigate("/auditorias"),
-      label: "Atividades",
+      label: "Auditoria",
       permissions: auditoriaPermissions,
     },
     {
-      icon: <Work fontSize="small" />,
+      icon: <Assignment fontSize="small" />,
       fn: () => navigate("/clientes"),
-      label: "Clientes",
+      label: "O.S.",
       permissions: clientPermissions,
     },
     {
@@ -253,25 +259,28 @@ const AuditSection = () => {
             variant="outlined"
           >
             <FormControl fullWidth>
-              <InputLabel id="company">Tabela</InputLabel>
+              <InputLabel id="table-select">Módulo</InputLabel>
               <Select
-                value={selectedTableId || ""}
-                onChange={handleTableChange}
-                label="Tabela"
+                fullWidth
+                labelId="table-select"
+                className="capitalize"
+                value={auditModule}
+                label="Módulo"
+                onChange={(e) => setAuditModule(e.target.value)}
               >
-                {tables && tables.length > 0 ? (
-                  tables.map((table) => (
-                    <MenuItem key={table.label} value={table.label}>
-                      {table.label}
-                    </MenuItem>
-                  ))
-                ) : (
-                  <MenuItem disabled>Nenhuma tabela disponível</MenuItem>
-                )}
+                {availableModules.map((module) => (
+                  <MenuItem
+                    key={module.id}
+                    value={module}
+                    className="capitalize"
+                  >
+                    {module.name}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Card>
-          {selectedTableId && (
+          {auditModule && (
             <Card
               className="p-4 flex flex-col gap-2 justify-center"
               variant="outlined"
@@ -296,7 +305,7 @@ const AuditSection = () => {
               </FormControl>
             </Card>
           )}
-          {selectedTableId && (
+          {auditModule && (
             <Dialog
               open={isConfirmModalOpen}
               onClose={() => setIsConfirmModalOpen(false)}
@@ -325,23 +334,28 @@ const AuditSection = () => {
               </DialogActions>
             </Dialog>
           )}
-          {selectedTableId && (
+          {auditModule && (
             <Card
               className="p-4 flex flex-col gap-2 justify-center"
               variant="outlined"
             >
               <p>Última auditoria</p>
               <p className="text-xl font-bold">
-                {dateFormatted(dataLastAudit)}
+                {/* {dateFormatted(dataLastAudit)} */}--
               </p>
             </Card>
           )}
-          {selectedTableId && (
+          {auditModule && (
             <Card
               className="p-4 flex flex-col gap-2 justify-center"
               variant="outlined"
             >
-              <p>Entidades auditadas</p>
+              <p>
+                <span>
+                  <CheckCircleOutline fontSize="small" className="mb-0.5" />
+                </span>{" "}
+                Entidades auditadas
+              </p>
               <p className="text-lg lg:text-2xl font-bold">
                 {stats.audittedEntities}
               </p>
@@ -352,12 +366,16 @@ const AuditSection = () => {
               className="p-4 flex flex-col gap-2 justify-center"
               variant="outlined"
             >
-              <p>Relatório disponível</p>
+              <p>
+                <span>
+                  <DescriptionOutlined fontSize="small" className="mb-1" />
+                </span>{" "}
+                Relatório disponível
+              </p>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={() => setIsOpen(true)}
-                startIcon={<Description />}
               >
                 GERAR RELATÓRIO
               </Button>
@@ -368,12 +386,16 @@ const AuditSection = () => {
               className="p-4 flex flex-col gap-2 justify-center"
               variant="outlined"
             >
-              <p>Regras de auditoria</p>
+              <p>
+                <span>
+                  <WidgetsOutlined fontSize="small" className="mb-1" />
+                </span>{" "}
+                Gerir módulos
+              </p>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={() => navigate("/prioridades")}
-                startIcon={<RuleFolder />}
               >
                 VISUALIZAR
               </Button>
@@ -383,7 +405,12 @@ const AuditSection = () => {
             variant="outlined"
             className="max-md:hidden col-span-2 p-4 flex flex-col gap-2 grow justify-between"
           >
-            <p>Acesso rápido</p>
+            <p className="mb-1">
+              <span>
+                <BoltOutlined fontSize="small" className="mb-1" />
+              </span>{" "}
+              Acesso rápido
+            </p>
             <Box display="flex" gap={4}>
               {quickActions.map((action, index) =>
                 action.permissions ? (
@@ -438,7 +465,7 @@ const AuditSection = () => {
           className="max-md:hidden p-4 flex flex-col gap-2 grow"
         >
           <p>Atividades por status</p>
-          {!selectedTableId ? (
+          {!auditModule ? (
             <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
               <p className="text-gray-500">Não há dados para exibir...</p>
               <p className="text-gray-500">

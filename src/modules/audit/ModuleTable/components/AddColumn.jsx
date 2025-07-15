@@ -104,7 +104,7 @@ export const AddColumn = ({
     if (!validation) return null;
     if (validation.field === "array")
       return (
-        <FormControl>
+        <FormControl fullWidth>
           <FormLabel id="company-label">Valores possíveis</FormLabel>
           <Autocomplete
             multiple
@@ -164,9 +164,14 @@ export const AddColumn = ({
 
   const addRule = () => {
     const { rule } = getValues();
-    
-    if (!rule.name || !rule.message) {
-      toast.error("Preencha todos os campos obrigatórios.");
+
+    if (!rule.name || rule.name.trim() === "") {
+      toast.warn("Selecione ao menos uma condição para a regra.");
+      return;
+    }
+
+    if (!rule.message || rule.message.trim() === "") {
+      toast.warn("O campo de mensagem não pode estar vazio.");
       return;
     }
 
@@ -174,7 +179,7 @@ export const AddColumn = ({
       ruleParams.size === 0 &&
       (selectedValidation === "in" || selectedValidation === "not_in")
     ) {
-      toast.error("Adicione pelo menos um valor para a regra.");
+      toast.warn("Adicione pelo menos um valor para a regra.");
       return;
     }
 
@@ -185,7 +190,7 @@ export const AddColumn = ({
       params: [...ruleParams].join(","),
       priority: rule.priority || 1,
     };
-    
+
     setRules((prev) => [...prev, newRule]);
     resetField("rule.name");
     resetField("rule.message");
@@ -195,14 +200,16 @@ export const AddColumn = ({
   };
 
   const removeRule = (rule) => {
-    setRules((prev) => prev.filter((r) => {
-      // Para regras com ID, comparar por ID
-      if (r.id && rule.id) {
-        return r.id !== rule.id;
-      }
-      // Para regras sem ID, comparar por name e message (identificação única)
-      return !(r.name === rule.name && r.message === rule.message);
-    }));
+    setRules((prev) =>
+      prev.filter((r) => {
+        // Para regras com ID, comparar por ID
+        if (r.id && rule.id) {
+          return r.id !== rule.id;
+        }
+        // Para regras sem ID, comparar por name e message (identificação única)
+        return !(r.name === rule.name && r.message === rule.message);
+      }),
+    );
     setRuleParams((prev) => {
       const newParams = new Set([...prev]);
       if (rule.params) {
@@ -327,96 +334,110 @@ export const AddColumn = ({
             </FormLabel>
             <TextField {...register(`placeholder`)} />
           </FormControl>
-          <Divider className="col-span-6" />
+          <Divider className="col-span-full" />
           <h2 className="font-semibold col-span-6 text-lg mb-2">
             <span>
               <RuleFolderOutlined fontSize="small" className="mb-0.5" />
             </span>{" "}
-            Validações
+            Regras de auditoria
           </h2>
-          <h2 className="col-span-6">Nova regra</h2>
-          <Controller
-            name="rule.name"
-            control={control}
-            render={({ field }) => (
-              <FormControl className="col-span-1 md:col-span-2 lg:col-span-4">
-                <FormLabel>Condição</FormLabel>
-                <Select
-                  fullWidth
-                  key="validation"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
-                >
-                  {validations.map((validation) => (
-                    <MenuItem
-                      key={`${validation.id}/${validation.name}`}
-                      value={`${validation.id}/${validation.name}`}
-                    >
-                      {validation.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>
-                  {field.value &&
-                    validations.find(
-                      (c) => c.name === field.value.split("/")[1],
-                    )?.description}
-                </FormHelperText>
-              </FormControl>
-            )}
-          />
-          <Controller
-            name="rule.priority"
-            control={control}
-            render={({ field }) => (
-              <FormControl className="col-span-1 md:col-span-2 lg:col-span-2">
-                <FormLabel>Prioridade</FormLabel>
-                <Select
-                  fullWidth
-                  key="validation"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
-                >
-                  {priorities.map((priority) => (
-                    <MenuItem
-                      key={`${priority.value}/${priority.label}`}
-                      value={priority.value}
-                    >
-                      {priority.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-          />
-          {renderValidationField()}
-          <FormControl className="col-span-1 md:col-span-2 lg:col-span-6">
-            <FormLabel>Mensagem de erro</FormLabel>
-            <TextField {...register("rule.message")} />
-            <FormHelperText>
-              Mensagem que será exibida quando a regra for violada.
-            </FormHelperText>
-          </FormControl>
-          <Button startIcon={<Add />} onClick={addRule} className="col-span-6">
-            ADICIONAR REGRA
-          </Button>
-          <Divider className="col-span-6" />
-          <h2 className="col-span-6">Regras definidas</h2>
-          <div className="flex flex-row gap-2 items-center col-span-6">
-            {rules.length === 0 ? (
-              <p className="text-sm text-gray-400">
-                Não há regras adicionadas.
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 col-span-full p-4 border border-[--border] rounded-md">
+            <h3 className="col-span-6">Nova regra</h3>
+            <Controller
+              name="rule.name"
+              control={control}
+              render={({ field }) => (
+                <FormControl className="col-span-1 md:col-span-2 lg:col-span-4">
+                  <FormLabel>Condição</FormLabel>
+                  <Select
+                    fullWidth
+                    key="validation"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  >
+                    {validations.map((validation) => (
+                      <MenuItem
+                        key={`${validation.id}/${validation.name}`}
+                        value={`${validation.id}/${validation.name}`}
+                      >
+                        {validation.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>
+                    {field.value &&
+                      validations.find(
+                        (c) => c.name === field.value.split("/")[1],
+                      )?.description}
+                  </FormHelperText>
+                </FormControl>
+              )}
+            />
+            <Controller
+              name="rule.priority"
+              control={control}
+              render={({ field }) => (
+                <FormControl className="col-span-1 md:col-span-2 lg:col-span-2">
+                  <FormLabel>Prioridade</FormLabel>
+                  <Select
+                    fullWidth
+                    key="validation"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  >
+                    {priorities.map((priority) => (
+                      <MenuItem
+                        key={`${priority.value}/${priority.label}`}
+                        value={priority.value}
+                      >
+                        {priority.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
+            <div className="col-span-1 md:col-span-2 lg:col-span-6">
+              {renderValidationField()}
+            </div>
+            <FormControl className="col-span-1 md:col-span-2 lg:col-span-6">
+              <FormLabel>Mensagem de erro</FormLabel>
+              <TextField {...register("rule.message")} />
+              <FormHelperText>
+                Mensagem que será exibida quando a regra for violada.
+              </FormHelperText>
+            </FormControl>
+            <Button
+              startIcon={<Add />}
+              onClick={addRule}
+              className="col-span-6"
+            >
+              ADICIONAR REGRA
+            </Button>
+          </div>
+          <div className="col-span-full p-4 border border-[--border] rounded-md flex flex-col gap-4">
+            <div className="col-span-full">
+              <h2>Regras adicionadas</h2>
+              <p className="text-sm text-gray-500 mb-2">
+                Passe o mouse sobre uma regra para ver mais detalhes.
               </p>
-            ) : (
-              rules.map((rule, index) => (
-                <Validation
-                  key={rule.id ? `rule-${rule.id}` : `${rule.name}-${index}`}
-                  rule={rule}
-                  params={rule.params}
-                  onDelete={() => removeRule(rule)}
-                />
-              ))
-            )}
+            </div>
+            <div className="flex flex-row gap-2 items-center col-span-6">
+              {rules.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  Não há regras adicionadas.
+                </p>
+              ) : (
+                rules.map((rule, index) => (
+                  <Validation
+                    key={rule.id ? `rule-${rule.id}` : `${rule.name}-${index}`}
+                    rule={rule}
+                    params={rule.params}
+                    onDelete={() => removeRule(rule)}
+                  />
+                ))
+              )}
+            </div>
           </div>
         </form>
       </DialogContent>

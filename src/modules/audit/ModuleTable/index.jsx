@@ -7,7 +7,7 @@ import {
   Skeleton,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import TableColumn from "../../../components/AuditComponents/TableColumn";
@@ -64,7 +64,7 @@ const ModuleTableView = () => {
         })),
       };
 
-      const response = await api.post(
+      await api.post(
         `/companies/${company.id}/audit/modules/${id}/tables`,
         formattedData,
       );
@@ -126,23 +126,30 @@ const ModuleTableView = () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
         params: { with_rules: id },
       });
-
+      console.log("Response data:", response.data.data);
       const data = response.data.data.find((t) => t.id === parseInt(table));
-      const selectedColumns = data.columns.filter((c) => c.rules.length > 0);
-      const unselectedColumns = data.columns.filter(
+      return data;
+    },
+    enabled: !!table,
+  });
+
+  useEffect(() => {
+    if (!isLoadingTable) {
+      const selectedColumns = tableData.columns.filter(
+        (c) => c.rules.length > 0,
+      );
+      const unselectedColumns = tableData.columns.filter(
         (c) => c.rules.length === 0,
       );
 
       setUnselectedColumns(unselectedColumns);
       setColumnsData({
-        company_table_id: data.id,
+        company_table_id: tableData.id,
         columns: selectedColumns,
       });
       setHasChanges(false);
-      return data;
-    },
-    enabled: !!table,
-  });
+    }
+  }, [isLoadingTable]);
 
   const handleAddColumn = (column) => {
     setColumnsData((prev) => ({
@@ -230,8 +237,14 @@ const ModuleTableView = () => {
                 <Chip
                   key={column.name}
                   label={`${column.label} (${column.name})`}
-                  onClick={() => openEditColumn(column)}
-                  onDelete={() => handleRemoveColumn(column)}
+                  onClick={
+                    action === "view" ? undefined : () => openEditColumn(column)
+                  }
+                  onDelete={
+                    action === "view"
+                      ? undefined
+                      : () => handleRemoveColumn(column)
+                  }
                   color="primary"
                 />
               ))}
@@ -262,6 +275,7 @@ const ModuleTableView = () => {
         unselectedColumns.map((column) => (
           <TableColumn
             key={column.name}
+            readOnly={action === "view"}
             table={table.table}
             column={column}
             isAdded={columnsData.columns.includes(column)}

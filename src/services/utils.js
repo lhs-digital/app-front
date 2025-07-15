@@ -26,23 +26,27 @@ export const getPriorityColor = (priority, theme) => {
         color: theme === "light" ? colors.grey[700] : colors.grey[200],
         backgroundColor:
           theme === "light" ? colors.grey[200] : colors.grey[700],
+        muiColor: "default",
       };
     case 2:
       return {
         color: theme === "light" ? colors.amber[600] : colors.amber[200],
         backgroundColor:
           theme === "light" ? colors.amber[100] : colors.amber[700],
+        muiColor: "warning",
       };
     case 3:
       return {
         color: theme === "light" ? colors.red[600] : colors.grey[50],
         backgroundColor: theme === "light" ? colors.red[100] : colors.red[800],
+        muiColor: "error",
       };
     default:
       return {
         color: theme === "light" ? colors.grey[700] : colors.grey[200],
         backgroundColor:
           theme === "light" ? colors.grey[200] : colors.grey[700],
+        muiColor: "default",
       };
   }
 };
@@ -257,47 +261,47 @@ export const validations = [
     field: "array",
   },
   {
-            "id": 8,
-            "name": "gt",
-            "label": "Maior que",
-            "has_params": 1,
-            "description": "Verifica se o valor do campo é maior que o valor dado."
-        },
-        {
-            "id": 9,
-            "name": "lt",
-            "label": "Menor que",
-            "has_params": 1,
-            "description": "Verifica se o valor do campo é menor que o valor dado."
-        },
-        {
-            "id": 10,
-            "name": "regex",
-            "label": "Expressão regular",
-            "has_params": 1,
-            "description": "Verifica se o valor do campo está no padrão da expressão."
-        },
-        {
-            "id": 11,
-            "name": "gte",
-            "label": "Maior ou igual",
-            "has_params": 1,
-            "description": "Verifica se o valor do campo é maior ou igual ao valor dado."
-        },
-        {
-            "id": 12,
-            "name": "lte",
-            "label": "Menor ou igual",
-            "has_params": 1,
-            "description": "Verifica se o valor do campo é menor ou igual ao valor dado."
-        },
-        {
-            "id": 13,
-            "name": "same",
-            "label": "Igual a",
-            "has_params": 1,
-            "description": "Verifica se o valor do campo é igual ao valor dado."
-        }
+    id: 8,
+    name: "gt",
+    label: "Maior que",
+    has_params: 1,
+    description: "Verifica se o valor do campo é maior que o valor dado.",
+  },
+  {
+    id: 9,
+    name: "lt",
+    label: "Menor que",
+    has_params: 1,
+    description: "Verifica se o valor do campo é menor que o valor dado.",
+  },
+  {
+    id: 10,
+    name: "regex",
+    label: "Expressão regular",
+    has_params: 1,
+    description: "Verifica se o valor do campo está no padrão da expressão.",
+  },
+  {
+    id: 11,
+    name: "gte",
+    label: "Maior ou igual",
+    has_params: 1,
+    description: "Verifica se o valor do campo é maior ou igual ao valor dado.",
+  },
+  {
+    id: 12,
+    name: "lte",
+    label: "Menor ou igual",
+    has_params: 1,
+    description: "Verifica se o valor do campo é menor ou igual ao valor dado.",
+  },
+  {
+    id: 13,
+    name: "same",
+    label: "Igual a",
+    has_params: 1,
+    description: "Verifica se o valor do campo é igual ao valor dado.",
+  },
 ];
 
 export const validationLabels = {
