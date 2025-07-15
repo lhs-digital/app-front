@@ -3,9 +3,9 @@ import {
   AssignmentLate,
   BoltOutlined,
   Build,
+  BusinessCenter,
   CheckCircleOutline,
   DescriptionOutlined,
-  Person,
   WidgetsOutlined,
 } from "@mui/icons-material";
 import {
@@ -162,21 +162,10 @@ const AuditSection = () => {
     latestAudit: new Date(Date.now()).toLocaleDateString("pt-BR"),
   };
 
-  const usersPermissions = [
-    "view_users",
-    "view_any_users",
-    "update_users",
-    "delete_users",
-  ];
   //eslint-disable-next-line
   const auditoriaPermissions = ["view_any_tasks", "update_tasks"];
-  const clientPermissions = [
-    "view_clients",
-    "view_any_clients",
-    "create_clients",
-    "update_clients",
-    "delete_clients",
-  ];
+  const workOrderPermissions = ["view_any_work_orders", "view_work_orders"];
+  const clientPermissions = ["view_clients", "view_any_clients"];
 
   const quickActions = [
     {
@@ -187,15 +176,15 @@ const AuditSection = () => {
     },
     {
       icon: <Assignment fontSize="small" />,
-      fn: () => navigate("/clientes"),
+      fn: () => navigate("/ordens-de-servico"),
       label: "O.S.",
-      permissions: clientPermissions,
+      permissions: workOrderPermissions,
     },
     {
-      icon: <Person fontSize="small" />,
-      fn: () => navigate("/users"),
-      label: "Usuários",
-      permissions: usersPermissions,
+      icon: <BusinessCenter fontSize="small" />,
+      fn: () => navigate("/empresas"),
+      label: "Empresas",
+      permissions: clientPermissions,
     },
   ];
 

@@ -40,7 +40,7 @@ const permissions = {
     "delete_clients",
   ],
   "/clientes/criar": ["create_clients"],
-  "/atribuicoes": [
+  "/ordens-de-servico": [
     "view_any_work_orders",
     "view_work_orders",
     "update_work_orders",
