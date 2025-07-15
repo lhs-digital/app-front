@@ -171,7 +171,7 @@ const baseModule = {
     },
     {
       label: "Ordens de Serviço",
-      path: "/atribuicoes",
+      path: "/ordens-de-servico",
       element: <WorkOrder />,
       icon: AssignmentOutlined,
       activeIcon: Assignment,
