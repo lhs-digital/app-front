@@ -21,11 +21,12 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  useMediaQuery,
 } from "@mui/material";
-import { grey } from "@mui/material/colors";
+import { amber } from "@mui/material/colors";
 import { PieChart } from "@mui/x-charts";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -39,6 +40,7 @@ import { handleMode } from "../../../../theme";
 
 const AuditSection = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
   const theme = handleMode(useThemeMode().mode);
@@ -52,6 +54,20 @@ const AuditSection = () => {
     fixedErrorsCount: 0,
   });
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  // Remove when API is ready
+  const [mockData, setMockData] = useState({
+    errorsCount: 0,
+    fixedErrorsCount: 0,
+  });
+
+  // Remove when API is ready
+  useEffect(() => {
+    setMockData({
+      errorsCount: Math.floor(Math.random() * 100),
+      fixedErrorsCount: Math.floor(Math.random() * 100),
+    });
+  }, [auditModule]);
 
   const handleIntervalChange = (event) => {
     setUpdateInterval(event.target.value);
@@ -153,8 +169,16 @@ const AuditSection = () => {
   // };
 
   const completionData = [
-    { id: 0, value: chartData?.errorsCount, label: "Pendentes" },
-    { id: 1, value: chartData?.fixedErrorsCount, label: "Corrigidos" },
+    {
+      id: 0,
+      value: chartData?.errorsCount || mockData.errorsCount, // Remove when API is ready
+      label: "Pendentes",
+    },
+    {
+      id: 1,
+      value: chartData?.fixedErrorsCount || mockData.fixedErrorsCount, // Remove when API is ready
+      label: "Corrigidos",
+    },
   ];
 
   const stats = {
@@ -210,7 +234,7 @@ const AuditSection = () => {
         <Box
           display="grid"
           gap={2}
-          gridTemplateColumns={{ xs: "1fr", lg: "1fr 1fr" }}
+          gridTemplateColumns={isMobile ? "1fr" : "1fr 1fr"}
         >
           {/* {user.isLighthouse && (
             <Card
@@ -244,7 +268,7 @@ const AuditSection = () => {
           )} */}
 
           <Card
-            className="p-4 flex flex-col gap-2 justify-center col-span-2"
+            className={`p-4 flex flex-col gap-2 justify-center ${isMobile ? "" : "col-span-2"}`}
             variant="outlined"
           >
             <FormControl fullWidth>
@@ -364,7 +388,9 @@ const AuditSection = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => setIsOpen(true)}
+                onClick={() =>
+                  toast.info("Esta funcionalidade não está disponível.")
+                }
               >
                 GERAR RELATÓRIO
               </Button>
@@ -384,7 +410,7 @@ const AuditSection = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => navigate("/prioridades")}
+                onClick={() => navigate("/modulos")}
               >
                 VISUALIZAR
               </Button>
@@ -449,9 +475,10 @@ const AuditSection = () => {
             </Box>
           </Card>
         </Box>
+        {/* Quick Actions for desktop */}
         <Card
           variant="outlined"
-          className="max-md:hidden p-4 flex flex-col gap-2 grow"
+          className={`p-4 flex flex-col gap-2 grow ${isMobile ? "w-full" : "max-md:hidden"}`}
         >
           <p>Atividades por status</p>
           {!auditModule ? (
@@ -463,51 +490,31 @@ const AuditSection = () => {
             </div>
           ) : (
             <PieChart
-              colors={[grey[900], grey[600]]}
+              colors={
+                theme === "light" ? [amber[600], "#000"] : [amber[400], "#fff"]
+              }
               series={[
                 {
                   data: completionData,
-                  innerRadius: 50,
+                  paddingAngle: 2.5,
+                  innerRadius: isMobile ? 40 : 100,
                 },
               ]}
               slotProps={{
                 legend: {
                   direction: "column",
-                  position: { vertical: "middle", horizontal: "right" },
+                  position: isMobile
+                    ? { vertical: "bottom", horizontal: "middle" }
+                    : { vertical: "middle", horizontal: "right" },
                   padding: 0,
                 },
               }}
-              height={200}
+              width={isMobile ? 300 : undefined}
+              height={isMobile ? 360 : 400}
             />
           )}
         </Card>
-        {/* {
-          !selectedTableId ? (
-            null
-          ) : (
-            <Card
-              variant="outlined"
-              className="max-md:hidden p-4 flex flex-col gap-2 grow"
-            >
-              <p>Atividades por prioridade</p>
-              <PieChart
-                colors={[grey[400], grey[600], grey[900]]}
-                series={[{
-                  data: priorityData,
-                  innerRadius: 50,
-                }]}
-                slotProps={{
-                  legend: {
-                    direction: "column",
-                    position: { vertical: "middle", horizontal: "right" },
-                    padding: 0,
-                  },
-                }}
-                height={200}
-              />
-            </Card>
-          )
-        } */}
+        {/* ... priority PieChart (commented out) ... */}
       </Box>
       <ModalReport isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </Box>
