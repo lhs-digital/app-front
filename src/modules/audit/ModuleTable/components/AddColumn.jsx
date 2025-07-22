@@ -113,12 +113,26 @@ export const AddColumn = ({
               (item) => item !== "",
             )}
             noOptionsText="Digite para adicionar"
+            freeSolo
             onChange={(event, value) => {
               setRuleParams((prev) => new Set([...prev, ...value]));
             }}
             inputValue={inputValue}
-            onInputChange={(event, newInputValue) => {
-              setInputValue(newInputValue);
+            onInputChange={(event, newInputValue, reason) => {
+              if (reason === "input") {
+                setInputValue(newInputValue);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && inputValue && inputValue.trim()) {
+                event.preventDefault();
+                event.stopPropagation();
+                const newParam = inputValue.trim();
+                if (!ruleParams.has(newParam)) {
+                  setRuleParams((prev) => new Set([...prev, newParam]));
+                  setInputValue("");
+                }
+              }
             }}
             getOptionLabel={(option) => option}
             renderInput={(params) => (
@@ -128,6 +142,13 @@ export const AddColumn = ({
               />
             )}
           />
+          <FormHelperText>
+            Pressione{" "}
+            <span className="px-2 bg-neutral-500/30 rounded-sm mx-0.5 border border-[--border]">
+              Enter
+            </span>{" "}
+            para adicionar um novo valor.
+          </FormHelperText>
         </FormControl>
       );
   };

@@ -185,6 +185,52 @@ const baseModule = {
         "be_assigned_work_orders",
       ],
     },
+  ],
+};
+
+const lighthouseModule = {
+  label: "Administração",
+  icon: ShieldOutlined,
+  activeIcon: Shield,
+  children: [
+    {
+      label: "Empresas",
+      path: "/empresas",
+      element: <Companies />,
+      icon: BusinessCenterOutlined,
+      activeIcon: BusinessCenter,
+      permissions: [
+        "view_companies",
+        "view_any_companies",
+        "create_companies",
+        "update_companies",
+        "delete_companies",
+      ],
+    },
+    {
+      label: "Logs",
+      path: "/logs",
+      element: <Logs />,
+      icon: Subject,
+      activeIcon: Subject,
+      permissions: ["view_any_logs"],
+    },
+    {
+      label: "Usuários",
+      path: "/usuarios",
+      element: <Users />,
+      icon: PersonOutline,
+      activeIcon: Person,
+      permissions: [
+        "view_users",
+        "view_any_users",
+        "create_users",
+        "update_users",
+        "delete_users",
+        "assign_responsible_users",
+        "unassign_responsible_users",
+      ],
+    },
     {
       label: "Papéis & Permissões",
       path: "/papeis",
@@ -216,52 +262,6 @@ const baseModule = {
           hidden: true,
         },
       ],
-    },
-    {
-      label: "Usuários",
-      path: "/usuarios",
-      element: <Users />,
-      icon: PersonOutline,
-      activeIcon: Person,
-      permissions: [
-        "view_users",
-        "view_any_users",
-        "create_users",
-        "update_users",
-        "delete_users",
-        "assign_responsible_users",
-        "unassign_responsible_users",
-      ],
-    },
-  ],
-};
-
-const lighthouseModule = {
-  label: "Administração",
-  icon: ShieldOutlined,
-  activeIcon: Shield,
-  children: [
-    {
-      label: "Empresas",
-      path: "/empresas",
-      element: <Companies />,
-      icon: BusinessCenterOutlined,
-      activeIcon: BusinessCenter,
-      permissions: [
-        "view_companies",
-        "view_any_companies",
-        "create_companies",
-        "update_companies",
-        "delete_companies",
-      ],
-    },
-    {
-      label: "Logs",
-      path: "/logs",
-      element: <Logs />,
-      icon: Subject,
-      activeIcon: Subject,
-      permissions: ["view_any_logs"],
     },
   ],
 };
