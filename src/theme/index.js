@@ -16,7 +16,7 @@ const lightPalette = {
   },
   info: {
     main: "#7d7d7d",
-    light: "#a8a8a8", 
+    light: "#a8a8a8",
     dark: "#545454",
     contrastText: "#FFF",
   },
@@ -97,6 +97,14 @@ export const getTheme = (mode) => {
           root: {
             borderRadius: "0.5rem",
             overflow: "clip",
+          },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.8rem",
+            marginTop: "0.3rem",
           },
         },
       },
