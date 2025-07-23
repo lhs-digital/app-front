@@ -44,6 +44,19 @@ jobs:
         run: npm run build
 
       # ----------------------------------------
+      # Create .htaccess file for SPA routing
+      # ----------------------------------------
+      - name: Create .htaccess file
+        run: |
+          cat > dist/.htaccess << 'EOF'
+          RewriteEngine On
+          RewriteBase /
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteRule ^ index.html [QSA,L]
+          EOF
+
+      # ----------------------------------------
       # Upload build as workflow artefact (helpful for debugging)
       # ----------------------------------------
       - name: Upload build artefact
@@ -83,5 +96,5 @@ jobs:
           SSH_PASSWORD: ${{ secrets.STG_SSH_PASSWORD }}
           REMOTE_DIR: ${{ secrets.SSH_REMOTE_DIR || 'public_html' }}
         run: |
-          echo "Deploying dist/ to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
-          sshpass -p "$SSH_PASSWORD" rsync -azv --delete dist "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
+          echo "Deploying dist/ contents to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
+          sshpass -p "$SSH_PASSWORD" rsync -azv --delete dist/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
