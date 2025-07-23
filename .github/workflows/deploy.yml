@@ -44,19 +44,6 @@ jobs:
         run: npm run build
 
       # ----------------------------------------
-      # Create .htaccess file for SPA routing
-      # ----------------------------------------
-      - name: Create .htaccess file
-        run: |
-          cat > dist/.htaccess << 'EOF'
-          RewriteEngine On
-          RewriteBase /
-          RewriteCond %{REQUEST_FILENAME} !-f
-          RewriteCond %{REQUEST_FILENAME} !-d
-          RewriteRule ^ index.html [QSA,L]
-          EOF
-
-      # ----------------------------------------
       # Upload build as workflow artefact (helpful for debugging)
       # ----------------------------------------
       - name: Upload build artefact
