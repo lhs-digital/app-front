@@ -65,6 +65,28 @@ export const AddColumn = ({
     },
   });
 
+  // Limpar tudo quando o diálogo for fechado
+  useEffect(() => {
+    console.log('AddColumn useEffect - open:', open);
+    if (!open) {
+      console.log('Limpando estados do modal');
+      setRules([]);
+      setRuleParams(new Set());
+      setInputValue("");
+      // Reset do formulário também
+      setValue("name", "");
+      setValue("label", "");
+      setValue("priority", "");
+      setValue("size", "");
+      setValue("type", "");
+      setValue("help_text", "");
+      setValue("placeholder", "");
+      setValue("rule.name", "");
+      setValue("rule.message", "");
+      setValue("rule.params", "");
+    }
+  }, [open, setValue]);
+
   useEffect(() => {
     if (column) {
       setValue("name", column.name || "");
@@ -74,6 +96,11 @@ export const AddColumn = ({
       setValue("type", column.type || "");
       setValue("help_text", column.help_text || "");
       setValue("placeholder", column.placeholder || "");
+      
+      // Limpar estados antes de definir novos valores
+      setRules([]);
+      setRuleParams(new Set());
+      
       if (column.rules && Object.keys(column.rules).length > 0) {
         const formattedRules = column.rules.map((validation) => {
           if (validation.params) {
@@ -92,8 +119,19 @@ export const AddColumn = ({
 
         setRules(formattedRules);
       }
+    } else {
+      // Se não há coluna, limpar tudo completamente
+      setRules([]);
+      setRuleParams(new Set());
+      setValue("name", "");
+      setValue("label", "");
+      setValue("priority", "");
+      setValue("size", "");
+      setValue("type", "");
+      setValue("help_text", "");
+      setValue("placeholder", "");
     }
-  }, [column]);
+  }, [column, setValue]);
 
   const selectedValidation = watch("rule.name")?.split("/")[1];
 
@@ -277,7 +315,7 @@ export const AddColumn = ({
               })}
             />
           </FormControl>
-          <Controller
+          {/* <Controller
             name={`size`}
             control={control}
             render={({ field }) => (
@@ -354,13 +392,13 @@ export const AddColumn = ({
               </span>
             </FormLabel>
             <TextField {...register(`placeholder`)} />
-          </FormControl>
+          </FormControl> */}
           <Divider className="col-span-full" />
           <h2 className="font-semibold col-span-6 text-lg mb-2">
             <span>
               <RuleFolderOutlined fontSize="small" className="mb-0.5" />
             </span>{" "}
-            Regras de auditoria
+            Regras de Auditoria da Coluna
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 col-span-full p-4 border border-[--border] rounded-md">
             <h3 className="col-span-6">Nova regra</h3>

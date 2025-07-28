@@ -199,12 +199,15 @@ const ModuleForm = () => {
               {({ zoomIn, zoomOut, centerView }) => (
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-row gap-2 items-center justify-between">
-                    <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
-                      <span className="mb-0.5">
-                        <DataObject fontSize="small" />
-                      </span>{" "}
-                      <span>Esquema</span>
-                    </h2>
+                    <div className="flex flex-col gap-2">
+                      <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
+                        <span className="mb-0.5">
+                          <DataObject fontSize="small" />
+                        </span>{" "}
+                        <span>Esquema</span>
+                      </h2>
+                      <span>Para adicionar uma ou mais colunas a este módulo, <b>clique na tabela</b> que contém as colunas desejadas.</span>
+                    </div>
                     <div className="p-1 flex flex-row justify-between gap-2 border border-[--border] rounded-lg">
                       <div className="flex flex-row gap-4">
                         <Button
