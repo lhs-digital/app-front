@@ -20,13 +20,20 @@ const PageTitle = ({
           <span className="mb-0.5">{icon}</span>
           <p className="text-xl font-bold">{title}</p>
         </div>
-        <div className="text-sm text-neutral-400 flex flex-row gap-2 items-center">
+        <div className="text-md text-neutral-400 flex flex-row gap-2 items-center">
           {subtitle}
           {tag && (
             <Chip
-              label={<p className="text-xs text-neutral-500">{tag}</p>}
+              label={
+                <p className={tag === "Você tem alterações não salvas" ? "text-orange-500" : "text-neutral-500"}>
+                  {tag}
+                </p>
+              }
               size="small"
               variant="outlined"
+              style={{
+                borderColor: tag === "Você tem alterações não salvas" ? "#f97316" : undefined,
+              }}
             />
           )}
         </div>

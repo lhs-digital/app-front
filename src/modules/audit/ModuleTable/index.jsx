@@ -5,8 +5,9 @@ import {
   CircularProgress,
   Divider,
   Skeleton,
+  TextField,
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -23,7 +24,6 @@ const ModuleTableView = () => {
 
   const handleSaveChanges = async () => {
     try {
-      // Validar se temos todos os dados necessários
       if (!company?.id || !id || !columnsData.company_table_id) {
         toast.error("Dados insuficientes para salvar. Recarregue a página.");
         return;
@@ -69,6 +69,20 @@ const ModuleTableView = () => {
         formattedData,
       );
 
+      queryClient.invalidateQueries({
+        queryKey: ["tables", company, table, id],
+      });
+
+      // Invalidar também a query do módulo para atualizar o esquema
+      queryClient.invalidateQueries({
+        queryKey: ["module", id, company],
+      });
+
+      // Invalidar a query da estrutura para atualizar o diagrama ER
+      queryClient.invalidateQueries({
+        queryKey: ["tables", company],
+      });
+
       setHasChanges(false);
       setSearchParams({ action: "view" });
       toast.success("Colunas salvas com sucesso!");
@@ -110,7 +124,9 @@ const ModuleTableView = () => {
   });
   const [unselectedColumns, setUnselectedColumns] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [filterText, setFilterText] = useState("");
   const { company } = useCompany();
+  const queryClient = useQueryClient();
 
   const { data: validationRules = [] } = useQuery({
     queryKey: ["rules"],
@@ -121,7 +137,7 @@ const ModuleTableView = () => {
   });
 
   const { data: tableData = {}, isLoading: isLoadingTable } = useQuery({
-    queryKey: ["tables", company, table],
+    queryKey: ["tables", company, table, id],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
         params: { with_rules: id },
@@ -130,7 +146,9 @@ const ModuleTableView = () => {
       const data = response.data.data.find((t) => t.id === parseInt(table));
       return data;
     },
-    enabled: !!table,
+    enabled: !!table && !!id,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   useEffect(() => {
@@ -158,6 +176,7 @@ const ModuleTableView = () => {
     }));
     setUnselectedColumns(unselectedColumns.filter((c) => c.id !== column.id));
     setOpenDialog(false);
+    setPendingColumn(null); // Limpar o estado após adicionar
     setHasChanges(true);
   };
 
@@ -169,6 +188,7 @@ const ModuleTableView = () => {
     setUnselectedColumns([...unselectedColumns, column]);
     setHasChanges(true);
     setOpenDialog(false);
+    setPendingColumn(null); // Limpar o estado após remover
   };
 
   const openEditColumn = (column) => {
@@ -182,12 +202,13 @@ const ModuleTableView = () => {
       columns: prev.columns.map((c) => (c.id === column.id ? column : c)),
     }));
     setOpenDialog(false);
+    setPendingColumn(null); // Limpar o estado após editar
     setHasChanges(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setPendingColumn(null);
+    setPendingColumn(null); // Limpar completamente o estado
   };
 
   const removeAllColumns = () => {
@@ -222,8 +243,8 @@ const ModuleTableView = () => {
       <div className="flex flex-col gap-4">
         <div>
           <h2 className="font-semibold">Colunas adicionadas</h2>
-          <p className="text-sm text-neutral-500">
-            Clique para editar ou remover uma coluna
+          <p className="text-md text-neutral-500">
+            Selecione uma coluna adicionada no campo  abaixo para editar ou removê-la.
           </p>
         </div>
         <div className="flex flex-col gap-2">
@@ -266,26 +287,51 @@ const ModuleTableView = () => {
         </div>
       </div>
       <Divider />
-      <h2 className="font-semibold">Colunas não adicionadas</h2>
+      <div className="flex flex-col gap-4">
+        <h2 className="font-semibold">Colunas não adicionadas</h2>
+        <p className="text-md text-neutral-500">
+          Adicione uma coluna abaixo para que ela seja exibida no campo acima.
+        </p>
+        <TextField
+          label="Filtrar colunas"
+          placeholder="Digite para filtrar as colunas..."
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+          variant="outlined"
+          size="small"
+          fullWidth
+        />
+      </div>
       {isLoadingTable ? (
         <div className="flex flex-row w-full justify-center py-6">
           <CircularProgress />
         </div>
       ) : unselectedColumns.length > 0 ? (
-        unselectedColumns.map((column) => (
-          <TableColumn
-            key={column.name}
-            readOnly={action === "view"}
-            table={table.table}
-            column={column}
-            isAdded={columnsData.columns.includes(column)}
-            onAddColumn={() => {
-              setPendingColumn(column);
-              setOpenDialog(true);
-            }}
-            onRemoveColumn={() => handleRemoveColumn(column)}
-          />
-        ))
+        unselectedColumns
+          .filter((column) =>
+            filterText === "" ||
+            column.name.toLowerCase().includes(filterText.toLowerCase()) ||
+            column.label?.toLowerCase().includes(filterText.toLowerCase())
+          )
+          .map((column) => (
+            <TableColumn
+              key={column.name}
+              readOnly={action === "view"}
+              table={table.table}
+              column={column}
+              isAdded={columnsData.columns.includes(column)}
+              onAddColumn={() => {
+                // Criar uma cópia limpa da coluna sem regras anteriores
+                const cleanColumn = {
+                  ...column,
+                  rules: [] // Garantir que não há regras de operações anteriores
+                };
+                setPendingColumn(cleanColumn);
+                setOpenDialog(true);
+              }}
+              onRemoveColumn={() => handleRemoveColumn(column)}
+            />
+          ))
       ) : (
         <p className="text-neutral-500">
           Todas as colunas já foram adicionadas

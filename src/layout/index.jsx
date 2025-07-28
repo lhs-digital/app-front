@@ -18,6 +18,7 @@ import {
   Select,
   Tooltip,
 } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
@@ -28,6 +29,7 @@ import ThemeSwitcher from "../components/ThemeSwitcher";
 import { useThemeMode } from "../contexts/themeModeContext";
 import { useCompany } from "../hooks/useCompany";
 import { routes } from "../routes/modules";
+import api from "../services/api";
 import { handleMode } from "../theme";
 import Sidebar from "./components/Sidebar";
 
@@ -42,6 +44,41 @@ const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const user = useAuthUser();
   const navigate = useNavigate();
+
+  // Query para buscar dados do módulo quando necessário
+  const moduleId = pathnames.find((path, index) => 
+    pathnames[index - 1] === "modulos" && path !== "criar"
+  );
+  
+  // Query para buscar dados da tabela quando necessário
+  const tableId = pathnames.find((path, index) => 
+    pathnames[index - 2] === "modulos" && pathnames[index - 1] !== "modulos" && pathnames[index - 1] !== "criar"
+  );
+  
+  const { data: moduleData } = useQuery({
+    queryKey: ["module", moduleId, company],
+    queryFn: async () => {
+      const response = await api.get(
+        `/companies/${company.id}/audit/modules/${moduleId}`,
+      );
+      return response.data.data;
+    },
+    enabled: !!company && !!moduleId && moduleId !== "criar",
+    retry: false,
+  });
+
+  const { data: tableData } = useQuery({
+    queryKey: ["tables", company, tableId, moduleId],
+    queryFn: async () => {
+      const response = await api.get(`/companies/${company.id}/structure`, {
+        params: { with_rules: moduleId },
+      });
+      const data = response.data.data.find((t) => t.id === parseInt(tableId));
+      return data;
+    },
+    enabled: !!company && !!tableId && !!moduleId,
+    retry: false,
+  });
 
   useEffect(() => {
     const sidebarOpen = localStorage.getItem("sidebarOpen");
@@ -164,7 +201,18 @@ const Layout = ({ children }) => {
                 const match = routes.find((r) =>
                   matchPath({ path: r.path, end: true }, to),
                 );
-                const label = match?.label || pathnames[index];
+                let label = match?.label || pathnames[index];
+                
+                // Se o label for "Módulo" e temos dados do módulo, adicionar o nome
+                if (label === "Módulo" && moduleData?.name) {
+                  label = `Módulo ${moduleData.name}`;
+                }
+                
+                // Se o label for "Tabelas" e temos dados da tabela, adicionar o nome
+                if (label === "Tabelas" && tableData?.name) {
+                  label = `Tabela ${tableData.name}`;
+                }
+                
                 return (
                   <Link
                     key={to}
