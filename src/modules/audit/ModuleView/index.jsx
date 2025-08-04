@@ -12,6 +12,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { TransformWrapper } from "react-zoom-pan-pinch";
 import Diagram from "../../../components/ERDiagram/Diagram";
 import { parseStructure } from "../../../components/ERDiagram/erUtility";
@@ -19,7 +20,7 @@ import FormField from "../../../components/FormField";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import { toast } from "react-toastify";
+import { qc } from "../../../services/queryClient";
 
 const ModuleForm = () => {
   const { register, handleSubmit, reset } = useForm();
@@ -92,6 +93,7 @@ const ModuleForm = () => {
       return response.data.data;
     },
     onSuccess: (data) => {
+      qc.invalidateQueries(["module"]);
       navigate(`/modulos/${id}`);
       toast.success(`Módulo "${data.name}" atualizado com sucesso!`);
     },
@@ -206,7 +208,10 @@ const ModuleForm = () => {
                         </span>{" "}
                         <span>Esquema</span>
                       </h2>
-                      <span>Para adicionar uma ou mais colunas a este módulo, <b>clique na tabela</b> que contém as colunas desejadas.</span>
+                      <span>
+                        Para adicionar uma ou mais colunas a este módulo,{" "}
+                        <b>clique na tabela</b> que contém as colunas desejadas.
+                      </span>
                     </div>
                     <div className="p-1 flex flex-row justify-between gap-2 border border-[--border] rounded-lg">
                       <div className="flex flex-row gap-4">

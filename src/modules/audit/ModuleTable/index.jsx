@@ -7,7 +7,7 @@ import {
   Skeleton,
   TextField,
 } from "@mui/material";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -15,6 +15,7 @@ import TableColumn from "../../../components/AuditComponents/TableColumn";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import { qc } from "../../../services/queryClient";
 import AddColumn from "./components/AddColumn";
 
 const ModuleTableView = () => {
@@ -69,17 +70,17 @@ const ModuleTableView = () => {
         formattedData,
       );
 
-      queryClient.invalidateQueries({
+      qc.invalidateQueries({
         queryKey: ["tables", company, table, id],
       });
 
       // Invalidar também a query do módulo para atualizar o esquema
-      queryClient.invalidateQueries({
+      qc.invalidateQueries({
         queryKey: ["module", id, company],
       });
 
       // Invalidar a query da estrutura para atualizar o diagrama ER
-      queryClient.invalidateQueries({
+      qc.invalidateQueries({
         queryKey: ["tables", company],
       });
 
@@ -126,7 +127,6 @@ const ModuleTableView = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [filterText, setFilterText] = useState("");
   const { company } = useCompany();
-  const queryClient = useQueryClient();
 
   const { data: validationRules = [] } = useQuery({
     queryKey: ["rules"],
@@ -147,8 +147,6 @@ const ModuleTableView = () => {
       return data;
     },
     enabled: !!table && !!id,
-    staleTime: 0,
-    cacheTime: 0,
   });
 
   useEffect(() => {
@@ -244,7 +242,8 @@ const ModuleTableView = () => {
         <div>
           <h2 className="font-semibold">Colunas adicionadas</h2>
           <p className="text-md text-neutral-500">
-            Selecione uma coluna adicionada no campo  abaixo para editar ou removê-la.
+            Selecione uma coluna adicionada no campo abaixo para editar ou
+            removê-la.
           </p>
         </div>
         <div className="flex flex-col gap-2">
@@ -308,10 +307,11 @@ const ModuleTableView = () => {
         </div>
       ) : unselectedColumns.length > 0 ? (
         unselectedColumns
-          .filter((column) =>
-            filterText === "" ||
-            column.name.toLowerCase().includes(filterText.toLowerCase()) ||
-            column.label?.toLowerCase().includes(filterText.toLowerCase())
+          .filter(
+            (column) =>
+              filterText === "" ||
+              column.name.toLowerCase().includes(filterText.toLowerCase()) ||
+              column.label?.toLowerCase().includes(filterText.toLowerCase()),
           )
           .map((column) => (
             <TableColumn
@@ -324,7 +324,7 @@ const ModuleTableView = () => {
                 // Criar uma cópia limpa da coluna sem regras anteriores
                 const cleanColumn = {
                   ...column,
-                  rules: [] // Garantir que não há regras de operações anteriores
+                  rules: [], // Garantir que não há regras de operações anteriores
                 };
                 setPendingColumn(cleanColumn);
                 setOpenDialog(true);

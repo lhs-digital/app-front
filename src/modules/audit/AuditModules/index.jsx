@@ -11,7 +11,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,6 +19,7 @@ import ModalDelete from "../../../components/ModalDelete";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import { qc } from "../../../services/queryClient";
 
 const AuditModules = () => {
   const { company } = useCompany();
@@ -30,14 +31,12 @@ const AuditModules = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [moduleToDelete, setModuleToDelete] = useState(null);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
-  // Invalidar query quando o componente for montado (útil quando volta do breadcrumb)
   useEffect(() => {
     if (company) {
-      queryClient.invalidateQueries(["modules"]);
+      qc.invalidateQueries(["modules"]);
     }
-  }, [company, queryClient]);
+  }, [company]);
 
   const { data: modules = [], isLoading: isLoadingModules } = useQuery({
     queryKey: ["modules", company, pagination.current, pagination.perPage],
@@ -59,7 +58,6 @@ const AuditModules = () => {
       return response.data.data;
     },
     enabled: !!company,
-    staleTime: 0, // Reduzir staleTime para garantir que os dados sejam atualizados
   });
 
   const { mutate: deleteModule } = useMutation({
@@ -70,7 +68,7 @@ const AuditModules = () => {
       return response.data.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["modules"]);
+      qc.invalidateQueries(["modules"]);
       toast.success(`Módulo "${moduleToDelete?.name}" excluído com sucesso!`);
       setIsDeleteModalOpen(false);
       setModuleToDelete(null);
