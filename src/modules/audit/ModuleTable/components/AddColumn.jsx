@@ -39,6 +39,7 @@ export const AddColumn = ({
   const [rules, setRules] = useState([]);
   const [ruleParams, setRuleParams] = useState(new Set());
   const [inputValue, setInputValue] = useState();
+  const [availableRules, setAvailableRules] = useState(validations);
   const {
     register,
     getValues,
@@ -67,12 +68,13 @@ export const AddColumn = ({
 
   // Limpar tudo quando o diálogo for fechado
   useEffect(() => {
-    console.log('AddColumn useEffect - open:', open);
+    console.log("AddColumn useEffect - open:", open);
     if (!open) {
-      console.log('Limpando estados do modal');
+      console.log("Limpando estados do modal");
       setRules([]);
       setRuleParams(new Set());
       setInputValue("");
+      setAvailableRules(validations);
       // Reset do formulário também
       setValue("name", "");
       setValue("label", "");
@@ -87,6 +89,15 @@ export const AddColumn = ({
     }
   }, [open, setValue]);
 
+  // Atualizar regras disponíveis quando as regras mudarem
+  useEffect(() => {
+    const usedRuleNames = rules.map((rule) => rule.name);
+    const filtered = validations.filter(
+      (validation) => !usedRuleNames.includes(validation.name),
+    );
+    setAvailableRules(filtered);
+  }, [rules]);
+
   useEffect(() => {
     if (column) {
       setValue("name", column.name || "");
@@ -96,11 +107,12 @@ export const AddColumn = ({
       setValue("type", column.type || "");
       setValue("help_text", column.help_text || "");
       setValue("placeholder", column.placeholder || "");
-      
+
       // Limpar estados antes de definir novos valores
       setRules([]);
       setRuleParams(new Set());
-      
+      setAvailableRules(validations);
+
       if (column.rules && Object.keys(column.rules).length > 0) {
         const formattedRules = column.rules.map((validation) => {
           if (validation.params) {
@@ -123,6 +135,7 @@ export const AddColumn = ({
       // Se não há coluna, limpar tudo completamente
       setRules([]);
       setRuleParams(new Set());
+      setAvailableRules(validations);
       setValue("name", "");
       setValue("label", "");
       setValue("priority", "");
@@ -254,6 +267,7 @@ export const AddColumn = ({
     resetField("rule.name");
     resetField("rule.message");
     resetField("rule.params");
+    setValue("rule.priority", "");
     setRuleParams(new Set());
     setInputValue("");
   };
@@ -414,7 +428,7 @@ export const AddColumn = ({
                     value={field.value}
                     onChange={(e) => field.onChange(e.target.value)}
                   >
-                    {validations.map((validation) => (
+                    {availableRules.map((validation) => (
                       <MenuItem
                         key={`${validation.id}/${validation.name}`}
                         value={`${validation.id}/${validation.name}`}
@@ -425,7 +439,7 @@ export const AddColumn = ({
                   </Select>
                   <FormHelperText>
                     {field.value &&
-                      validations.find(
+                      availableRules.find(
                         (c) => c.name === field.value.split("/")[1],
                       )?.description}
                   </FormHelperText>
@@ -481,7 +495,7 @@ export const AddColumn = ({
                 Passe o mouse sobre uma regra para ver mais detalhes.
               </p>
             </div>
-            <div className="flex flex-row gap-2 items-center col-span-6">
+            <div className="flex flex-row flex-wrap gap-2 items-center col-span-6">
               {rules.length === 0 ? (
                 <p className="text-sm text-gray-400">
                   Não há regras adicionadas.
