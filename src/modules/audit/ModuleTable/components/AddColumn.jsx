@@ -68,9 +68,7 @@ export const AddColumn = ({
 
   // Limpar tudo quando o diálogo for fechado
   useEffect(() => {
-    console.log("AddColumn useEffect - open:", open);
     if (!open) {
-      console.log("Limpando estados do modal");
       setRules([]);
       setRuleParams(new Set());
       setInputValue("");

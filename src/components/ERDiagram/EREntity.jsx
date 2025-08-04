@@ -8,7 +8,6 @@ const EREntity = ({
   onClick = () => {},
   hideIfPresent = false,
 }) => {
-  console.log("EREntity table:", table);
   return (
     <motion.div
       initial={{
