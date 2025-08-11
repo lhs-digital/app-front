@@ -183,7 +183,7 @@ const ModuleForm = () => {
                 <span className="mb-0.5">
                   <DataObject fontSize="small" />
                 </span>{" "}
-                <span>Esquema</span>
+                <span>Tabelas</span>
               </h2>
               <Skeleton
                 variant="rectangular"
