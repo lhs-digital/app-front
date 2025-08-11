@@ -77,9 +77,7 @@ const GenericForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(handleSubmit)} className="w-full">
-        {formSettings.withTabs
-          ? renderTabs()
-          : renderFields(formSettings.fields || [])}
+        {formSettings && renderFields(formSettings.fields || [])}
       </form>
     </FormProvider>
   );

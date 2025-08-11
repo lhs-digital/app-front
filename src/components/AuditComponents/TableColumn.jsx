@@ -11,11 +11,11 @@ const TableColumn = ({
 }) => {
   return (
     <ListItem
-      className="flex flex-row gap-2 items-center justify-between"
+      className="flex flex-row gap-2 items-center justify-between border border-[--border] rounded-md"
       secondaryAction={
         readOnly ? null : (
           <Tooltip
-            title={`${isAdded ? "Remover" : "Adicionar"} "${column.name}" ao módulo`}
+            title={`${isAdded ? "Remover" : "Adicionar"} "${column.name}" ao grupo.`}
             placement="right"
             arrow
           >
@@ -29,7 +29,7 @@ const TableColumn = ({
         )
       }
     >
-      <div className="flex flex-row gap-2 items-center">
+      <div className="flex flex-row gap-2 items-center py-1">
         <p className="font-medium">
           {column.name}
           <span>

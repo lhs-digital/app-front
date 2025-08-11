@@ -94,9 +94,9 @@ const AuditModules = () => {
   return (
     <div className="flex flex-col gap-8 w-full">
       <PageTitle
-        title="Módulos"
+        title="Grupos de regras"
         icon={<Widgets />}
-        subtitle="Gerencie os módulos do sistema da empresa"
+        subtitle="Gerencie os grupos de regras das auditorias das empresa"
         buttons={[
           <Button
             key="create-module"
@@ -107,7 +107,7 @@ const AuditModules = () => {
               navigate("/modulos/criar");
             }}
           >
-            Criar módulo
+            Criar grupo
           </Button>,
         ]}
       />
@@ -115,7 +115,7 @@ const AuditModules = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Módulo</TableCell>
+              <TableCell>Grupo</TableCell>
               <TableCell>Ações</TableCell>
             </TableRow>
           </TableHead>
