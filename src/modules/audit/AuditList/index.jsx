@@ -28,13 +28,12 @@ import { useThemeMode } from "../../../contexts/themeModeContext";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import { moduleRoutes } from "../../../services/moduleRoutes";
 import { qc } from "../../../services/queryClient";
 import { getPriorityColor, priorities } from "../../../services/utils";
 import { handleMode } from "../../../theme";
 import AuditFilters from "./components/AuditFilters";
 import AuditItem from "./components/AuditItem";
-import AuditWorkOrder from "./components/AuditWorkOrder";
+// import AuditWorkOrder from "./components/AuditWorkOrder";
 
 const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
@@ -42,8 +41,8 @@ const AuditList = () => {
   const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company } = useCompany();
   const [auditModule, setAuditModule] = useState("");
-  const [workOrderOpen, setWorkOrderOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  // const [workOrderOpen, setWorkOrderOpen] = useState(false);
+  // const [selectedItem, setSelectedItem] = useState(null);
   const navigate = useNavigate();
   // const { isLighthouse } = useUserState().state;
 
@@ -216,31 +215,29 @@ const AuditList = () => {
     setAnchorEl(null);
   };
 
-  const handleWorkOrder = (auditRecord) => {
-    console.log("auditRecord", auditRecord);
-    if (!auditModule) {
-      toast.error("Selecione um módulo para visualizar os dados.");
-      return;
-    }
+  // const handleWorkOrder = (auditRecord) => {
+  //   console.log("auditRecord", auditRecord);
+  //   if (!auditModule) {
+  //     toast.error("Selecione um módulo para visualizar os dados.");
+  //     return;
+  //   }
 
-    setWorkOrderOpen(true);
-    setSelectedItem(auditRecord);
-  };
+  //   setWorkOrderOpen(true);
+  //   setSelectedItem(auditRecord);
+  // };
 
-  const handleView = (auditRecord) => {
-    console.log("auditRecord", auditRecord);
-    const navigateRoute = [];
+  const handleView = (record) => {
+    const navigateRoute = ["formulario"];
 
-    navigateRoute.push(moduleRoutes[auditModule?.name]);
-    navigateRoute.push(auditRecord?.record_id);
-    console.log("navigateRoute", navigateRoute);
+    navigateRoute.push(record.module.id);
+    navigateRoute.push(record.record_id);
 
     return navigate(`/${navigateRoute.join("/")}`, {
       state: {
         edit: true,
-        columns: auditRecord?.columns,
-        recordId: Number(auditRecord?.id),
-        status: auditRecord?.status,
+        columns: record?.columns,
+        recordId: Number(record?.id),
+        status: record?.status,
         companyId: company?.id,
       },
     });
@@ -362,7 +359,7 @@ const AuditList = () => {
                 auditRecord={item}
                 setRefresh={setRefresh}
                 refresh={refresh}
-                onClick={() => handleWorkOrder(item)}
+                onClick={() => handleView(item)}
               />
             ))}
           </Masonry>
@@ -466,12 +463,12 @@ const AuditList = () => {
         onCleanFilters={handleClean}
       />
       {renderAuditContent()}
-      <AuditWorkOrder
+      {/* <AuditWorkOrder
         open={workOrderOpen}
         onClose={() => setWorkOrderOpen(false)}
         handleView={handleView}
         auditRecord={selectedItem}
-      />
+      /> */}
       <Box display="flex" justifyContent="flex-end" width="100%">
         <TablePagination
           rowsPerPageOptions={[5, 10, 20]}

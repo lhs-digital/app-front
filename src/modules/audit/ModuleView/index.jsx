@@ -12,6 +12,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { TransformWrapper } from "react-zoom-pan-pinch";
 import Diagram from "../../../components/ERDiagram/Diagram";
 import { parseStructure } from "../../../components/ERDiagram/erUtility";
@@ -19,7 +20,7 @@ import FormField from "../../../components/FormField";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import { toast } from "react-toastify";
+import { qc } from "../../../services/queryClient";
 
 const ModuleForm = () => {
   const { register, handleSubmit, reset } = useForm();
@@ -49,7 +50,7 @@ const ModuleForm = () => {
     queryKey: ["tables", company],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
-        params: { with_rules: id },
+        params: { with_module_info: id },
       });
       const existingTables = activeModule.tables.map(
         (table) => table.company_table_id,
@@ -92,6 +93,7 @@ const ModuleForm = () => {
       return response.data.data;
     },
     onSuccess: (data) => {
+      qc.invalidateQueries(["module"]);
       navigate(`/modulos/${id}`);
       toast.success(`Módulo "${data.name}" atualizado com sucesso!`);
     },
@@ -112,19 +114,19 @@ const ModuleForm = () => {
 
   const actions = {
     create: {
-      pageTitle: "Criar módulo",
+      pageTitle: "Criar grupo de regras",
       icon: <Save />,
       buttonLabel: "Salvar",
       onClick: handleSubmit(onSubmit),
     },
     edit: {
-      pageTitle: "Editar módulo",
+      pageTitle: "Editar grupo de regras",
       icon: <Save />,
       buttonLabel: "Salvar",
       onClick: handleSubmit(onSubmit),
     },
     view: {
-      pageTitle: "Visualizar módulo",
+      pageTitle: "Visualizar grupo de regras",
       icon: <Edit />,
       buttonLabel: "Editar",
       onClick: () => navigate(`/modulos/${id}/editar`),
@@ -134,7 +136,10 @@ const ModuleForm = () => {
   return (
     <div className="flex flex-col gap-8 w-full">
       <PageTitle
-        title={actions[currentAction].pageTitle}
+        title={
+          activeModule ? activeModule.name : actions[currentAction].pageTitle
+        }
+        subtitle={activeModule ? activeModule.description : ""}
         icon={<Widgets />}
         buttons={[
           <Button
@@ -149,24 +154,26 @@ const ModuleForm = () => {
           </Button>,
         ]}
       />
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <FormField label="Nome do módulo" loading={isLoadingModule}>
-          <TextField
-            fullWidth
-            {...register("name", { required: true })}
-            disabled={currentAction === "view"}
-          />
-        </FormField>
-        <FormField label="Descrição do módulo" loading={isLoadingModule}>
-          <TextField
-            multiline
-            rows={3}
-            fullWidth
-            {...register("description", { required: true })}
-            disabled={currentAction === "view"}
-          />
-        </FormField>
-      </form>
+      {currentAction !== "view" && (
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <FormField label="Nome do módulo" loading={isLoadingModule}>
+            <TextField
+              fullWidth
+              {...register("name", { required: true })}
+              disabled={currentAction === "view"}
+            />
+          </FormField>
+          <FormField label="Descrição do módulo" loading={isLoadingModule}>
+            <TextField
+              multiline
+              rows={3}
+              fullWidth
+              {...register("description", { required: true })}
+              disabled={currentAction === "view"}
+            />
+          </FormField>
+        </form>
+      )}
       {/* se for criar quero esconder o esquema  */}
       {currentAction === "create" ? null : (
         <div className="flex flex-col gap-4">
@@ -176,7 +183,7 @@ const ModuleForm = () => {
                 <span className="mb-0.5">
                   <DataObject fontSize="small" />
                 </span>{" "}
-                <span>Esquema</span>
+                <span>Tabelas</span>
               </h2>
               <Skeleton
                 variant="rectangular"
@@ -198,15 +205,18 @@ const ModuleForm = () => {
             >
               {({ zoomIn, zoomOut, centerView }) => (
                 <div className="flex flex-col gap-4">
-                  <div className="flex flex-row gap-2 items-center justify-between">
-                    <div className="flex flex-col gap-2">
+                  <div className="flex flex-row gap-2 items-end justify-between">
+                    <div className="flex flex-col gap-1">
                       <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
                         <span className="mb-0.5">
                           <DataObject fontSize="small" />
                         </span>{" "}
-                        <span>Esquema</span>
+                        <span>Tabelas</span>
                       </h2>
-                      <span>Para adicionar uma ou mais colunas a este módulo, <b>clique na tabela</b> que contém as colunas desejadas.</span>
+                      <span>
+                        Para adicionar uma ou mais colunas a este grupo,{" "}
+                        <b>clique na tabela</b> que contém as colunas desejadas.
+                      </span>
                     </div>
                     <div className="p-1 flex flex-row justify-between gap-2 border border-[--border] rounded-lg">
                       <div className="flex flex-row gap-4">

@@ -9,6 +9,8 @@ import {
   BuildOutlined,
   BusinessCenter,
   BusinessCenterOutlined,
+  DynamicForm,
+  DynamicFormOutlined,
   // Computer,
   // ComputerOutlined,
   Home as HomeIcon,
@@ -33,7 +35,7 @@ import AuditList from "../modules/audit/AuditList";
 import AuditModules from "../modules/audit/AuditModules";
 // import AuditRules from "../modules/audit/AuditRules";
 // import AuditTables from "../modules/audit/AuditTables";
-// import EntityForm from "../modules/audit/EntityForm";
+import EntityForm from "../modules/audit/EntityForm";
 import ModuleTables from "../modules/audit/ModuleTable";
 import ModuleForm from "../modules/audit/ModuleView";
 import Home from "../modules/base/Home";
@@ -66,6 +68,7 @@ const auditModule = {
         "define_rules",
       ],
     },
+
     // {
     //   label: "Regras",
     //   path: "/regras",
@@ -107,14 +110,14 @@ const auditModule = {
     //   ],
     // },
     {
-      label: "Módulos",
+      label: "Grupos de regras",
       path: "/modulos",
       element: <AuditModules />,
       icon: WidgetsOutlined,
       activeIcon: Widgets,
       children: [
         {
-          label: "Criar módulo",
+          label: "Criar grupo de regras",
           path: "/modulos/criar",
           element: <ModuleForm />,
           icon: WidgetsOutlined,
@@ -122,7 +125,7 @@ const auditModule = {
           hidden: true,
         },
         {
-          label: "Módulo",
+          label: "Grupo de regras",
           path: "/modulos/:id",
           element: <ModuleForm />,
           icon: TableChartOutlined,
@@ -133,6 +136,14 @@ const auditModule = {
               label: "Tabelas",
               path: "/modulos/:id/:table",
               element: <ModuleTables />,
+            },
+            {
+              label: "Entidade",
+              path: "/formulario/:module/:id",
+              element: <EntityForm />,
+              icon: DynamicFormOutlined,
+              activeIcon: DynamicForm,
+              hidden: true,
             },
           ],
         },

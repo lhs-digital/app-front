@@ -1,32 +1,54 @@
-import { Edit, Remove, Save, TableChart } from "@mui/icons-material";
+import {
+  Add,
+  Edit,
+  Remove,
+  Save,
+  Search,
+  TableChart,
+} from "@mui/icons-material";
 import {
   Button,
-  Chip,
   CircularProgress,
   Divider,
+  InputAdornment,
   Skeleton,
   TextField,
 } from "@mui/material";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import TableColumn from "../../../components/AuditComponents/TableColumn";
+import ConfirmDialog from "../../../components/Miscellaneous/ConfirmationDialog";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import { qc } from "../../../services/queryClient";
 import AddColumn from "./components/AddColumn";
+import RuleChip from "./components/RuleChip";
 
 const ModuleTableView = () => {
   const { id, table } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const action = searchParams.get("action");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [pendingColumn, setPendingColumn] = useState(null);
+  const [columnsData, setColumnsData] = useState({
+    company_table_id: null,
+    columns: [],
+  });
+  const [unselectedColumns, setUnselectedColumns] = useState([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [filterText, setFilterText] = useState("");
+  const { company } = useCompany();
 
-  const handleSaveChanges = async () => {
-    try {
+  const { mutate: saveChanges, isPending } = useMutation({
+    mutationFn: async () => {
       if (!company?.id || !id || !columnsData.company_table_id) {
-        toast.error("Dados insuficientes para salvar. Recarregue a página.");
-        return;
+        throw new Error(
+          "Dados insuficientes para salvar. Recarregue a página.",
+        );
       }
 
       const formattedData = {
@@ -34,12 +56,14 @@ const ModuleTableView = () => {
         columns: columnsData.columns.map((column) => ({
           id: column.id,
           label: column.label,
+          form: column.form || {},
           rules: column.rules.map((rule) => {
             const formattedRule = {
-              name: rule.name,
+              name: rule.name || rule.validation.name,
               message: rule.message,
               params: rule.params || "",
               priority: rule.priority || 1,
+              id: rule.validation?.id || rule.id,
             };
 
             const validationRule = validationRules.find(
@@ -64,69 +88,63 @@ const ModuleTableView = () => {
         })),
       };
 
-      await api.post(
+      console.log("Dados formatados para envio:", formattedData);
+
+      return await api.post(
         `/companies/${company.id}/audit/modules/${id}/tables`,
         formattedData,
       );
-
-      queryClient.invalidateQueries({
-        queryKey: ["tables", company, table, id],
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["tables"],
       });
 
-      // Invalidar também a query do módulo para atualizar o esquema
-      queryClient.invalidateQueries({
-        queryKey: ["module", id, company],
-      });
-
-      // Invalidar a query da estrutura para atualizar o diagrama ER
-      queryClient.invalidateQueries({
-        queryKey: ["tables", company],
+      qc.invalidateQueries({
+        queryKey: ["module"],
       });
 
       setHasChanges(false);
       setSearchParams({ action: "view" });
       toast.success("Colunas salvas com sucesso!");
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Erro ao salvar:", error);
       console.error("Detalhes do erro:", error.response?.data);
-      toast.error("Erro ao salvar colunas. Tente novamente.");
+      toast.error(error.message || "Erro ao salvar colunas. Tente novamente.");
+    },
+  });
+
+  const handleSaveChanges = () => {
+    if (isPending) {
+      return;
     }
+    saveChanges();
   };
 
   const actions = {
     create: {
-      pageTitle: "Adicionar colunas",
+      pageTitle: "Adicionar regras",
       icon: <Save />,
       buttonLabel: "Salvar",
       onClick: handleSaveChanges,
     },
     edit: {
-      pageTitle: "Editar colunas",
+      pageTitle: "Editar regras",
       icon: <Save />,
       buttonLabel: "Salvar",
       onClick: handleSaveChanges,
     },
     view: {
-      pageTitle: "Visualizar colunas",
+      pageTitle: "Visualizar regras",
       icon: <Edit />,
       buttonLabel: "Editar",
       onClick: () => {
         setSearchParams({ action: "edit" });
       },
+      disabled: false,
     },
   };
-
-  const [openDialog, setOpenDialog] = useState(false);
-  const [pendingColumn, setPendingColumn] = useState(null);
-  const [columnsData, setColumnsData] = useState({
-    company_table_id: null,
-    columns: [],
-  });
-  const [unselectedColumns, setUnselectedColumns] = useState([]);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [filterText, setFilterText] = useState("");
-  const { company } = useCompany();
-  const queryClient = useQueryClient();
 
   const { data: validationRules = [] } = useQuery({
     queryKey: ["rules"],
@@ -140,15 +158,13 @@ const ModuleTableView = () => {
     queryKey: ["tables", company, table, id],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
-        params: { with_rules: id },
+        params: { with_module_info: id },
       });
       console.log("Response data:", response.data.data);
       const data = response.data.data.find((t) => t.id === parseInt(table));
       return data;
     },
     enabled: !!table && !!id,
-    staleTime: 0,
-    cacheTime: 0,
   });
 
   useEffect(() => {
@@ -235,6 +251,8 @@ const ModuleTableView = () => {
             color="primary"
             onClick={actions[action].onClick}
             startIcon={actions[action].icon}
+            disabled={actions[action].disabled}
+            loading={isPending}
           >
             {actions[action].buttonLabel}
           </Button>,
@@ -242,10 +260,13 @@ const ModuleTableView = () => {
       />
       <div className="flex flex-col gap-4">
         <div>
-          <h2 className="font-semibold">Colunas adicionadas</h2>
-          <p className="text-md text-neutral-500">
-            Selecione uma coluna adicionada no campo  abaixo para editar ou removê-la.
-          </p>
+          <h2 className="font-semibold">Regras adicionadas</h2>
+          {action !== "view" && (
+            <p className="text-md text-neutral-500">
+              Selecione uma coluna no campo abaixo para editar ou remover suas
+              regras.
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           {isLoadingTable ? (
@@ -253,11 +274,13 @@ const ModuleTableView = () => {
               <Skeleton variant="text" height={"96px"} className="w-full" />
             </div>
           ) : (
-            <div className="flex flex-row gap-2 flex-wrap px-2 py-4 border border-[--border] rounded-md min-h-24">
+            <div
+              className={`flex flex-row ${action === "view" ? "gap-2" : "gap-4"} flex-wrap px-4 py-4 border border-[--border] rounded-md min-h-24`}
+            >
               {columnsData.columns.map((column) => (
-                <Chip
-                  key={column.name}
-                  label={`${column.label} (${column.name})`}
+                <RuleChip
+                  key={column.id}
+                  column={column}
                   onClick={
                     action === "view" ? undefined : () => openEditColumn(column)
                   }
@@ -266,6 +289,7 @@ const ModuleTableView = () => {
                       ? undefined
                       : () => handleRemoveColumn(column)
                   }
+                  readOnly={action === "view"}
                   color="primary"
                 />
               ))}
@@ -288,17 +312,33 @@ const ModuleTableView = () => {
       </div>
       <Divider />
       <div className="flex flex-col gap-4">
-        <h2 className="font-semibold">Colunas não adicionadas</h2>
-        <p className="text-md text-neutral-500">
-          Adicione uma coluna abaixo para que ela seja exibida no campo acima.
-        </p>
+        <div className="flex flex-col gap-1">
+          <h2 className="font-semibold">Colunas sem regras</h2>
+          {action !== "view" && (
+            <p className="text-md text-neutral-500">
+              Clique no{" "}
+              <span className="bg-neutral-500/30 mx-0.5 border border-[--border] rounded-full">
+                <Add fontSize="small" className="mb-0.5" />
+              </span>{" "}
+              ao lado de uma coluna para adicioná-la ao grupo de regras.
+            </p>
+          )}
+        </div>
         <TextField
-          label="Filtrar colunas"
-          placeholder="Digite para filtrar as colunas..."
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            },
+          }}
+          aria-label="Pesquisar colunas"
+          placeholder="Comece a digitar para pesquisar colunas..."
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
           variant="outlined"
-          size="small"
           fullWidth
         />
       </div>
@@ -307,36 +347,49 @@ const ModuleTableView = () => {
           <CircularProgress />
         </div>
       ) : unselectedColumns.length > 0 ? (
-        unselectedColumns
-          .filter((column) =>
-            filterText === "" ||
-            column.name.toLowerCase().includes(filterText.toLowerCase()) ||
-            column.label?.toLowerCase().includes(filterText.toLowerCase())
-          )
-          .map((column) => (
-            <TableColumn
-              key={column.name}
-              readOnly={action === "view"}
-              table={table.table}
-              column={column}
-              isAdded={columnsData.columns.includes(column)}
-              onAddColumn={() => {
-                // Criar uma cópia limpa da coluna sem regras anteriores
-                const cleanColumn = {
-                  ...column,
-                  rules: [] // Garantir que não há regras de operações anteriores
-                };
-                setPendingColumn(cleanColumn);
-                setOpenDialog(true);
-              }}
-              onRemoveColumn={() => handleRemoveColumn(column)}
-            />
-          ))
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {unselectedColumns
+            .filter(
+              (column) =>
+                filterText === "" ||
+                column.name.toLowerCase().includes(filterText.toLowerCase()) ||
+                column.label?.toLowerCase().includes(filterText.toLowerCase()),
+            )
+            .map((column) => (
+              <TableColumn
+                key={column.name}
+                readOnly={action === "view"}
+                table={table.table}
+                column={column}
+                isAdded={columnsData.columns.includes(column)}
+                onAddColumn={() => {
+                  const cleanColumn = {
+                    ...column,
+                    rules: [],
+                  };
+                  setPendingColumn(cleanColumn);
+                  setOpenDialog(true);
+                }}
+                onRemoveColumn={() => handleRemoveColumn(column)}
+              />
+            ))}
+        </div>
       ) : (
         <p className="text-neutral-500">
           Todas as colunas já foram adicionadas
         </p>
       )}
+      <ConfirmDialog
+        isOpen={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+        title="Confirmar remoção"
+        message={`Tem certeza que deseja remover a coluna "${pendingColumn?.name}"?`}
+        onAccept={() => {
+          handleRemoveColumn(pendingColumn);
+          setOpenConfirmDialog(false);
+        }}
+        onReject={() => setOpenConfirmDialog(false)}
+      />
       <AddColumn
         open={openDialog}
         onClose={handleCloseDialog}
@@ -345,7 +398,10 @@ const ModuleTableView = () => {
         moduleId={id}
         onAddColumn={handleAddColumn}
         onEditColumn={handleEditColumn}
-        onRemoveColumn={handleRemoveColumn}
+        onRemoveColumn={() => {
+          setOpenDialog(false);
+          setOpenConfirmDialog(true);
+        }}
       />
     </div>
   );

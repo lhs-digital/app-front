@@ -1,8 +1,6 @@
 import {
-  AssignmentOutlined,
   CheckCircle,
   ContentPaste,
-  Info,
   KeyboardArrowDown,
   OpenInNew,
   WatchLaterOutlined,
@@ -134,7 +132,7 @@ const AuditItem = ({
               }
             />
           </Tooltip>
-          {permissions.some((per) => per.name === "update_tasks") &&
+          {/* {permissions.some((per) => per.name === "update_tasks") &&
             (auditRecord?.status === 0 ? (
               <Tooltip
                 title={auditRecord?.work_order ? "Ver O.S." : "Abrir O.S."}
@@ -167,7 +165,18 @@ const AuditItem = ({
                   <Info fontSize="small" />
                 </button>
               </Tooltip>
-            ))}
+            ))} */}
+          {permissions.some((per) => per.name === "update_tasks") && (
+            <Tooltip title={"Visualizar item"} aria-label="Visualizar item">
+              <button
+                onClick={onClick}
+                className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
+                style={getPriorityColor(auditRecord?.priority, theme)}
+              >
+                <OpenInNew fontSize="small" />
+              </button>
+            </Tooltip>
+          )}
         </Box>
       </Box>
       <Divider
