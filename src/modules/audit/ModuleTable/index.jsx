@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import TableColumn from "../../../components/AuditComponents/TableColumn";
@@ -46,9 +46,7 @@ const ModuleTableView = () => {
   const { mutate: saveChanges, isPending } = useMutation({
     mutationFn: async () => {
       if (!company?.id || !id || !columnsData.company_table_id) {
-        throw new Error(
-          "Dados insuficientes para salvar. Recarregue a página.",
-        );
+        toast.error("Dados insuficientes para salvar. Recarregue a página.");
       }
 
       const formattedData = {
@@ -88,8 +86,6 @@ const ModuleTableView = () => {
         })),
       };
 
-      console.log("Dados formatados para envio:", formattedData);
-
       return await api.post(
         `/companies/${company.id}/audit/modules/${id}/tables`,
         formattedData,
@@ -99,7 +95,6 @@ const ModuleTableView = () => {
       qc.invalidateQueries({
         queryKey: ["tables"],
       });
-
       qc.invalidateQueries({
         queryKey: ["module"],
       });
@@ -146,7 +141,7 @@ const ModuleTableView = () => {
     },
   };
 
-  const { data: validationRules = [] } = useQuery({
+  const { data: validationRules = [], isLoading: isLoadingRules } = useQuery({
     queryKey: ["rules"],
     queryFn: async () => {
       const response = await api.get("/rules");
@@ -160,30 +155,23 @@ const ModuleTableView = () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
         params: { with_module_info: id },
       });
-      console.log("Response data:", response.data.data);
       const data = response.data.data.find((t) => t.id === parseInt(table));
-      return data;
-    },
-    enabled: !!table && !!id,
-  });
-
-  useEffect(() => {
-    if (!isLoadingTable) {
-      const selectedColumns = tableData.columns.filter(
-        (c) => c.rules.length > 0,
-      );
-      const unselectedColumns = tableData.columns.filter(
+      const selectedColumns = data.columns.filter((c) => c.rules.length > 0);
+      const unselectedColumns = data.columns.filter(
         (c) => c.rules.length === 0,
       );
-
       setUnselectedColumns(unselectedColumns);
       setColumnsData({
-        company_table_id: tableData.id,
+        company_table_id: data.id,
         columns: selectedColumns,
       });
       setHasChanges(false);
-    }
-  }, [isLoadingTable]);
+
+      return data;
+    },
+    refetchInterval: action !== "view" ? false : 1500,
+    enabled: !!table && !!id && !isLoadingRules,
+  });
 
   const handleAddColumn = (column) => {
     setColumnsData((prev) => ({
@@ -192,7 +180,7 @@ const ModuleTableView = () => {
     }));
     setUnselectedColumns(unselectedColumns.filter((c) => c.id !== column.id));
     setOpenDialog(false);
-    setPendingColumn(null); // Limpar o estado após adicionar
+    setPendingColumn(null);
     setHasChanges(true);
   };
 
@@ -204,7 +192,7 @@ const ModuleTableView = () => {
     setUnselectedColumns([...unselectedColumns, column]);
     setHasChanges(true);
     setOpenDialog(false);
-    setPendingColumn(null); // Limpar o estado após remover
+    setPendingColumn(null);
   };
 
   const openEditColumn = (column) => {
@@ -218,13 +206,13 @@ const ModuleTableView = () => {
       columns: prev.columns.map((c) => (c.id === column.id ? column : c)),
     }));
     setOpenDialog(false);
-    setPendingColumn(null); // Limpar o estado após editar
+    setPendingColumn(null);
     setHasChanges(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setPendingColumn(null); // Limpar completamente o estado
+    setPendingColumn(null);
   };
 
   const removeAllColumns = () => {
@@ -279,6 +267,7 @@ const ModuleTableView = () => {
             >
               {columnsData.columns.map((column) => (
                 <RuleChip
+                  disabled={isLoadingRules || isLoadingTable || isPending}
                   key={column.id}
                   column={column}
                   onClick={

@@ -82,6 +82,10 @@ const ModuleForm = () => {
       navigate(`/modulos/${data.id}`);
       toast.success(`Módulo "${data.name}" criado com sucesso!`);
     },
+    onError: (error) => {
+      console.error("Erro ao criar módulo:", error);
+      toast.error(error.message || "Erro ao criar módulo. Tente novamente.");
+    },
   });
 
   const { mutate: updateModule } = useMutation({

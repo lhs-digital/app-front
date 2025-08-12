@@ -76,7 +76,6 @@ export const AddColumn = ({
     queryKey: ["validations"],
     queryFn: async () => {
       const response = await api.get("/rules");
-      console.log("Available rules:", response.data.data);
       setAvailableRules(response.data.data);
       return response.data.data;
     },
@@ -106,7 +105,6 @@ export const AddColumn = ({
       setValue("form.help_text", column.form?.help_text || "");
       setValue("form.placeholder", column.form?.placeholder || "");
 
-      // Format backend rules to frontend format
       const formattedRules = formatBackendRulesToFrontend(
         column.rules,
         validations,
@@ -379,7 +377,6 @@ export const AddColumn = ({
                   <Validation
                     key={rule.id ? `rule-${rule.id}` : `${rule.name}-${index}`}
                     rule={rule}
-                    params={rule.params}
                     onDelete={() => removeRule(rule)}
                   />
                 ))

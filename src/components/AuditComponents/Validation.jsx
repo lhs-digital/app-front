@@ -22,6 +22,7 @@ const Validation = ({ rule, onDelete }) => {
   };
 
   const handleLabel = () => {
+    console.log(rule);
     if (!rule) return null;
     let paramsStr = formatParams();
     if (paramsStr) {
