@@ -23,16 +23,16 @@ export const getPriorityColor = (priority, theme) => {
   switch (priority) {
     case 1:
       return {
-        color: theme === "light" ? colors.grey[700] : colors.grey[200],
-        backgroundColor:
+        color: theme === "light" ? colors.grey[800] : colors.grey[200],
+        [theme === "light" ? "backgroundColor" : "borderColor"]:
           theme === "light" ? colors.grey[200] : colors.grey[700],
         muiColor: "default",
       };
     case 2:
       return {
-        color: theme === "light" ? colors.amber[600] : colors.amber[200],
-        backgroundColor:
-          theme === "light" ? colors.amber[100] : colors.amber[700],
+        color: theme === "light" ? colors.amber[900] : colors.amber[700],
+        [theme === "light" ? "backgroundColor" : "borderColor"]:
+          theme === "light" ? colors.amber[100] : colors.amber[200],
         muiColor: "warning",
       };
     case 3:
@@ -44,7 +44,7 @@ export const getPriorityColor = (priority, theme) => {
     default:
       return {
         color: theme === "light" ? colors.grey[700] : colors.grey[200],
-        backgroundColor:
+        [theme === "light" ? "backgroundColor" : "borderColor"]:
           theme === "light" ? colors.grey[200] : colors.grey[700],
         muiColor: "default",
       };

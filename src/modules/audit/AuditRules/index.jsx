@@ -175,22 +175,15 @@ const AuditRules = () => {
   });
 
   const renderPriority = (priority) => {
-    const { backgroundColor, color } = getPriorityColor(priority, theme);
+    const style = getPriorityColor(priority, theme);
     const label = severityLabels[priority];
     return (
       <Chip
         label={label}
-        style={{ backgroundColor, color }}
+        style={style}
         className="text-xs"
         variant="outlined"
         size="small"
-        sx={{
-          backgroundColor: `${backgroundColor} !important`,
-          color: `${color} !important`,
-          "&.MuiChip-outlined": {
-            borderColor: `${backgroundColor} !important`,
-          },
-        }}
       />
     );
   };
