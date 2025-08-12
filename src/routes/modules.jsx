@@ -43,6 +43,7 @@ import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
 // import TestPage from "../modules/base/Test";
+import { Navigate } from "react-router-dom";
 import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
@@ -66,6 +67,24 @@ const auditModule = {
         "view_any_reports",
         "report_generate",
         "define_rules",
+      ],
+      children: [
+        {
+          label: "...",
+          path: "/auditorias/:module",
+          element: <Navigate to="/auditorias" />,
+          icon: DynamicFormOutlined,
+          activeIcon: DynamicForm,
+          hidden: true,
+        },
+        {
+          label: "Item auditado",
+          path: "/auditorias/:module/:id",
+          element: <EntityForm />,
+          icon: DynamicFormOutlined,
+          activeIcon: DynamicForm,
+          hidden: true,
+        },
       ],
     },
 
@@ -136,14 +155,6 @@ const auditModule = {
               label: "Tabelas",
               path: "/modulos/:id/:table",
               element: <ModuleTables />,
-            },
-            {
-              label: "Entidade",
-              path: "/formulario/:module/:id",
-              element: <EntityForm />,
-              icon: DynamicFormOutlined,
-              activeIcon: DynamicForm,
-              hidden: true,
             },
           ],
         },

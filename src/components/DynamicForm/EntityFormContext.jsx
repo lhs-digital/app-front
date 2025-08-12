@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useCompany } from "../../hooks/useCompany";
 import api from "../../services/api";
@@ -11,26 +11,25 @@ export const EntityFormProvider = ({ children }) => {
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const recordId = location.state?.recordId;
-  const errorColumns = location.state?.columns;
+  const columns = location.state?.columns;
   const status = location.state?.status;
   const { company } = useCompany();
   const isCreating = id === "novo";
+  const [auditErrors, setAuditErrors] = useState({});
+  const [auditValues, setAuditValues] = useState({});
 
-  // console.log("EntityFormProvider", module, id, isCreating);
-
-  const [auditErrors, setAuditErrors] = useState(() => {
-    if (status === 1) {
-      return {};
+  useEffect(() => {
+    if (status === 0) {
+      const errors = {};
+      const values = {};
+      for (const column of columns || []) {
+        errors[column.name] = column.message;
+        values[column.name] = column.value;
+      }
+      setAuditErrors(errors);
+      setAuditValues(values);
     }
-    return errorColumns
-      ? errorColumns.reduce((acc, column) => {
-          acc[column.name] = {
-            message: column.message,
-          };
-          return acc;
-        }, {})
-      : {};
-  });
+  }, [columns, status]);
 
   const { data: formSettings } = useQuery({
     queryKey: ["entity", module, id],
@@ -38,7 +37,7 @@ export const EntityFormProvider = ({ children }) => {
       const response = await api.get(
         `/companies/${company.id}/modules/${module}/forms`,
       );
-      return response.data.data;
+      return response.data.data.forms;
     },
   });
 
@@ -66,11 +65,11 @@ export const EntityFormProvider = ({ children }) => {
         isEditing,
         isCreating,
         setIsEditing,
-        auditErrors,
+        values: auditValues,
+        errors: auditErrors,
         resetAuditErrors,
         status,
         recordId,
-        // entity,
         id,
         table: module,
       }}
@@ -85,6 +84,7 @@ export const useEntityForm = () => {
   if (context === undefined) {
     throw new Error("useEntityForm must be used within a EntityFormProvider");
   }
+
   return context;
 };
 

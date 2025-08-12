@@ -100,26 +100,24 @@ const AuditList = () => {
       try {
         const response = await api.get(`/companies/${company.id}/audit`, {
           params: {
-            // search:
-            //   appliedFilters.search === "" ? undefined : appliedFilters.search,
-            // status:
-            //   appliedFilters.status === -1 ? undefined : appliedFilters.status,
-            // priority:
-            //   appliedFilters.priority === -1
-            //     ? undefined
-            //     : appliedFilters.priority,
-            // created_at:
-            //   appliedFilters.createdAt[0] || appliedFilters.createdAt[1]
-            //     ? [appliedFilters.createdAt[0], appliedFilters.createdAt[1]]
-            //     : undefined,
-            // priority_order: appliedFilters.priorityOrder,
-            // page: pagination.currentPage,
-            // per_page: pagination.perPage,
-            // // module: auditModule?.id,
+            search:
+              appliedFilters.search === "" ? undefined : appliedFilters.search,
+            status:
+              appliedFilters.status === -1 ? undefined : appliedFilters.status,
+            priority:
+              appliedFilters.priority === -1
+                ? undefined
+                : appliedFilters.priority,
+            created_at:
+              appliedFilters.createdAt[0] || appliedFilters.createdAt[1]
+                ? [appliedFilters.createdAt[0], appliedFilters.createdAt[1]]
+                : undefined,
+            priority_order: appliedFilters.priorityOrder,
+            page: pagination.currentPage,
+            per_page: pagination.perPage,
+            module: auditModule?.id,
           },
         });
-
-        console.log("response.data.data", response.data.data);
 
         setPagination((prev) => ({
           ...prev,
@@ -227,14 +225,14 @@ const AuditList = () => {
   // };
 
   const handleView = (record) => {
-    const navigateRoute = ["formulario"];
+    const navigateRoute = ["auditorias"];
 
     navigateRoute.push(record.module.id);
     navigateRoute.push(record.record_id);
 
     return navigate(`/${navigateRoute.join("/")}`, {
       state: {
-        edit: true,
+        edit: record.status === 1,
         columns: record?.columns,
         recordId: Number(record?.id),
         status: record?.status,

@@ -76,8 +76,11 @@ const GenericForm = () => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(handleSubmit)} className="w-full">
-        {formSettings && renderFields(formSettings.fields || [])}
+      <form
+        onSubmit={methods.handleSubmit(handleSubmit)}
+        className="w-full grid grid-cols-12 gap-4"
+      >
+        {formSettings && renderFields(formSettings || [])}
       </form>
     </FormProvider>
   );

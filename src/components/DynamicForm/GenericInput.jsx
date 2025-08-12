@@ -14,6 +14,7 @@ import jsonLogic from "json-logic-js";
 import PropTypes from "prop-types";
 import { Controller, useFormContext } from "react-hook-form";
 import FormField from "../FormField";
+import NumberInput from "./NumberInput";
 
 const sizes = {
   small: "col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-2",
@@ -248,6 +249,29 @@ const GenericInput = ({
           })}
           fullWidth
           type="text"
+        />
+      </FormField>
+    );
+  }
+
+  if (type === "number") {
+    return (
+      <FormField
+        label={dynamicLabel}
+        htmlFor={name}
+        error={error}
+        helperText={helperText}
+        containerClass={sizes[size] || sizes.medium}
+      >
+        <Controller
+          name={name}
+          control={control}
+          rules={{
+            required: required ? `${label} é obrigatório` : false,
+          }}
+          render={({ field }) => (
+            <NumberInput {...inputProps} {...field} fullWidth min={0} />
+          )}
         />
       </FormField>
     );
