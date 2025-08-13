@@ -28,6 +28,8 @@ import Info from "../../../../components/Miscellaneous/Info";
 import api from "../../../../services/api";
 import { formatBackendRulesToFrontend } from "../../../../services/formatters";
 import AddColumnRule from "./AddColumnRule";
+import AddSelectOptions from "./AddSelectOptions";
+import OptionChip from "./OptionChip";
 
 export const AddColumn = ({
   open,
@@ -37,6 +39,8 @@ export const AddColumn = ({
   onEditColumn,
   onRemoveColumn,
 }) => {
+  const [options, setOptions] = useState([]);
+  const [openAddOption, setOpenAddOption] = useState(false);
   const [rules, setRules] = useState([]);
   const [availableRules, setAvailableRules] = useState([]);
   const [openAddRule, setOpenAddRule] = useState(false);
@@ -46,6 +50,7 @@ export const AddColumn = ({
     control,
     setValue,
     reset,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -57,6 +62,7 @@ export const AddColumn = ({
         help_text: "",
         size: "",
         type: "",
+        options: [],
       },
       rule: {
         name: "",
@@ -70,7 +76,6 @@ export const AddColumn = ({
     queryKey: ["validations"],
     queryFn: async () => {
       const response = await api.get("/rules");
-      console.log("Available rules:", response.data.data);
       setAvailableRules(response.data.data);
       return response.data.data;
     },
@@ -96,10 +101,10 @@ export const AddColumn = ({
       setValue("priority", column.priority || "");
       setValue("form.size", column.form?.size || "");
       setValue("form.type", column.form?.type || "");
+      setOptions(column.form?.options || []);
       setValue("form.help_text", column.form?.help_text || "");
       setValue("form.placeholder", column.form?.placeholder || "");
 
-      // Format backend rules to frontend format
       const formattedRules = formatBackendRulesToFrontend(
         column.rules,
         validations,
@@ -128,6 +133,11 @@ export const AddColumn = ({
       return toast.error("Preencha todos os campos corretamente");
     }
 
+    console.log("options of select", options);
+    if (watch("form.type") === "select" && options.length === 0) {
+      return toast.error("Adicione pelo menos uma opção para o campo select.");
+    }
+
     const formattedData = {
       ...column,
       name: formData.name,
@@ -135,6 +145,7 @@ export const AddColumn = ({
       form: {
         size: formData.form.size,
         type: formData.form.type,
+        options: options,
         help_text: formData.form.help_text,
         placeholder: formData.form.placeholder,
       },
@@ -153,6 +164,14 @@ export const AddColumn = ({
     setAvailableRules((prev) =>
       prev.filter((validation) => validation.name !== rule.validation.name),
     );
+  };
+
+  const handleAddOption = (newOption) => {
+    setOptions((prev) => [...prev, newOption]);
+  };
+
+  const handleDeleteOption = (index) => {
+    setOptions((prevOptions) => prevOptions.filter((_, i) => i !== index));
   };
 
   const removeRule = (rule) => {
@@ -268,6 +287,58 @@ export const AddColumn = ({
                 </FormControl>
               )}
             />
+            {watch("form.type") === "select" && (
+              <>
+                <div className="col-span-full flex flex-row justify-between">
+                  <div>
+                    <h2 className="font-semibold col-span-full text-lg mb-2">
+                      <span>
+                        <RuleFolderOutlined fontSize="small" className="mb-0.5" />
+                      </span>{" "}
+                      Opções
+                    </h2>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Lista de opções disponíveis para este campo select.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-row flex-wrap gap-2 items-center col-span-6">
+                  {options.length === 0 ? (
+                    <p className="text-sm text-gray-400">Não há opções adicionadas.</p>
+                  ) : (
+                    options.map((opt, idx) => (
+                      <OptionChip
+                        key={opt.value}
+                        option={opt}
+                        onDelete={() => handleDeleteOption(idx)}
+                        clickable
+                      />
+                    ))
+                  )}
+
+                  <Tooltip
+                    title={<p className="text-sm">Adicionar opção</p>}
+                    placement="auto-end"
+                    arrow
+                  >
+                    <Button
+                      onClick={() => setOpenAddOption(true)}
+                      variant="contained"
+                      sx={{
+                        aspectRatio: "1 / 1",
+                        padding: "0px",
+                        minHeight: "32px",
+                        minWidth: "32px",
+                        borderRadius: "100%",
+                      }}
+                    >
+                      <Add fontSize="small" />
+                    </Button>
+                  </Tooltip>
+                </div>
+              </>
+            )}
             <FormControl className="lg:col-span-6">
               <FormLabel className="flex flex-row items-center">
                 Texto de ajuda
@@ -306,7 +377,6 @@ export const AddColumn = ({
                   <Validation
                     key={rule.id ? `rule-${rule.id}` : `${rule.name}-${index}`}
                     rule={rule}
-                    params={rule.params}
                     onDelete={() => removeRule(rule)}
                   />
                 ))
@@ -355,12 +425,21 @@ export const AddColumn = ({
             {column?.edit ? "Atualizar coluna" : "Adicionar coluna"}
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog >
       <AddColumnRule
         open={openAddRule}
         validations={availableRules}
         onClose={() => setOpenAddRule(false)}
         submit={addRule}
+      />
+      <AddSelectOptions
+        open={openAddOption}
+        options={options}
+        setOptions={setOptions}
+        onClose={() => {
+          setOpenAddOption(false);
+        }}
+        submit={handleAddOption}
       />
     </>
   );

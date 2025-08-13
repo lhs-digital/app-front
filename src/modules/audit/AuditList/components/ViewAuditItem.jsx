@@ -11,10 +11,17 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "react-toastify";
+import { useThemeMode } from "../../../../contexts/themeModeContext";
 import api from "../../../../services/api";
-import { formattedPriority, getPriorityColor } from "../../../../services/utils";
+import {
+  formattedPriority,
+  getPriorityColor,
+} from "../../../../services/utils";
+import { handleMode } from "../../../../theme";
 
 const ViewAuditItem = ({ id, selectedActivitie, setRefresh, refresh }) => {
+  const { mode: themeMode } = useThemeMode();
+  const theme = handleMode(themeMode);
   //eslint-disable-next-line
   const formattedDate = (date) => new Date(date).toLocaleDateString("pt-BR");
 
@@ -54,8 +61,10 @@ const ViewAuditItem = ({ id, selectedActivitie, setRefresh, refresh }) => {
                     aria-label="Prioridade"
                   >
                     <Chip
+                      variant={theme === "dark" ? "outlined" : "filled"}
                       label={formattedPriority(+col?.priority)}
-                      sx={getPriorityColor(col?.priority)}
+                      sx={getPriorityColor(col?.priority, theme)}
+                      style={{}}
                     />
                   </Tooltip>
                 </TableCell>

@@ -16,27 +16,28 @@ export const formatBackendRulesToFrontend = (
     return [];
   }
 
-  return backendRules.map((backendRule) => {
+  return backendRules.map((rule) => {
+    console.log(rule);
     // Find the validation object from available validations by matching the rule name
     const validationObject = availableValidations.find(
-      (validation) => validation.name === backendRule.name,
+      (validation) => validation.name === rule.name,
     );
 
     return {
-      id: backendRule.id,
-      name: backendRule.name,
-      message: backendRule.message,
+      id: rule.id,
+      name: rule.name,
+      message: rule.message,
       validation: validationObject || {
         id: null,
-        name: backendRule.name,
-        label: backendRule.label || backendRule.name,
+        name: rule.name,
+        label: rule.label || rule.name,
         has_params: false,
         multiple: false,
         separator: null,
         description: "",
       },
-      params: backendRule.params || "",
-      priority: backendRule.priority || 1,
+      params: rule.params || "",
+      priority: rule.priority || 1,
     };
   });
 };

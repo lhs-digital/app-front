@@ -109,7 +109,7 @@ const AuditItem = ({
           </Tooltip>
           <div>
             <p className="text-lg">
-              AUD{auditRecord?.record_id.toString().padStart(5, "0")}
+              AUD{auditRecord?.id.toString().padStart(4, "0")}
             </p>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 -mt-1">
               Entidade: #{auditRecord?.record_id}
@@ -124,9 +124,10 @@ const AuditItem = ({
           >
             <Chip
               sx={getPriorityColor(auditRecord?.priority, theme)}
+              variant={theme === "dark" ? "outlined" : "filled"}
               label={
                 <div>
-                  {isMobile ? "" : "Prioridade Geral:"}{" "}
+                  {isMobile ? "" : "Prioridade:"}{" "}
                   <b>{formattedPriority(auditRecord?.priority, theme)}</b>
                 </div>
               }
@@ -170,8 +171,7 @@ const AuditItem = ({
             <Tooltip title={"Visualizar item"} aria-label="Visualizar item">
               <button
                 onClick={onClick}
-                className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
-                style={getPriorityColor(auditRecord?.priority, theme)}
+                className="p-2 aspect-square rounded-full flex flex-col items-center justify-center border hover:bg-gray-500/35 transition-colors duration-200"
               >
                 <OpenInNew fontSize="small" />
               </button>

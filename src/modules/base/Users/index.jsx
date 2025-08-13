@@ -56,6 +56,7 @@ const Users = () => {
   const [isHierarchyOpen, setIsHierarchyOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [responsible, setResponsible] = useState();
 
   const onOpenCreate = () => setIsCreateOpen(true);
   const onCloseCreate = () => setIsCreateOpen(false);
@@ -165,9 +166,9 @@ const Users = () => {
     onOpenHierarchy();
   };
 
-  const handleViewHierarchy = (user) => {
+  const handleViewHierarchy = (responsible) => {
     setViewHierarchy(true);
-    setSelectedUser(user);
+    setResponsible(responsible);
     onOpenHierarchy();
   };
 
@@ -322,6 +323,7 @@ const Users = () => {
         setDesHierarchy={setDesHierarchy}
         viewHierarchy={viewHierarchy}
         setViewHierarchy={setViewHierarchy}
+        responsibleHierarchy={responsible}
         refresh={refresh}
       />
       <ModalDelete
@@ -515,6 +517,18 @@ const Users = () => {
                   {responsible ? responsible.name : <span>N/A</span>}
                 </TableCell>
                 <TableCell sx={{ padding: 0 }}>
+                  {
+                    responsible && (
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewHierarchy(responsible);
+                        }}
+                      >
+                        <Groups fontSize="small" />
+                      </IconButton>
+                    )
+                  }
                   {permissions.some(
                     (permissions) => permissions.name === "update_users",
                   ) && (
@@ -539,18 +553,6 @@ const Users = () => {
                         <Delete fontSize="small" />
                       </IconButton>
                     )}
-                  {/* {permissions.some(
-                    (permissions) => permissions.name === "delete_users",
-                  ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleHierarchy({ name, email, role, company, id });
-                        }}
-                      >
-                        <GroupAddIcon fontSize="small" />
-                      </IconButton>
-                    )} */}
                 </TableCell>
               </TableRow>
             ))}

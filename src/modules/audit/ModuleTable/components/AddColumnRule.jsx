@@ -45,6 +45,11 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
   //   }
   // }, [data, reset]);
 
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
   const onSubmit = (rule) => {
     if (!rule.validation) {
       toast.warn("Selecione ao menos uma condição para a regra.");
@@ -138,7 +143,7 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>
         <span className="font-semibold text-lg flex items-center gap-2">
           Adicionar regra

@@ -86,29 +86,29 @@ const AuditFilters = ({
         <div>
           <InputLabel>Status</InputLabel>
           <Select
-            value={filters.status}
+            value={String(filters.status)}
             onChange={(e) => onFilterChange("status", e.target.value)}
             fullWidth
             size="small"
           >
-            <MenuItem value={-1}>Todos</MenuItem>
-            <MenuItem value={0}>Pendentes</MenuItem>
-            <MenuItem value={1}>Concluídas</MenuItem>
+            <MenuItem value={"-1"}>Todos</MenuItem>
+            <MenuItem value={"0"}>Pendentes</MenuItem>
+            <MenuItem value={"1"}>Concluídas</MenuItem>
           </Select>
         </div>
 
         <div>
           <InputLabel>Prioridade</InputLabel>
           <Select
-            value={filters.priority}
+            value={String(filters.priority)}
             onChange={(e) => onFilterChange("priority", e.target.value)}
             fullWidth
             size="small"
           >
-            <MenuItem value={-1}>Todas</MenuItem>
-            <MenuItem value={3}>Urgente</MenuItem>
-            <MenuItem value={2}>Moderada</MenuItem>
-            <MenuItem value={1}>Baixa</MenuItem>
+            <MenuItem value={"-1"}>Todas</MenuItem>
+            <MenuItem value={"3"}>Urgente</MenuItem>
+            <MenuItem value={"2"}>Moderada</MenuItem>
+            <MenuItem value={"1"}>Baixa</MenuItem>
           </Select>
         </div>
 

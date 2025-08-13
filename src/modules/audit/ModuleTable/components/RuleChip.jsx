@@ -1,13 +1,13 @@
 import { Remove } from "@mui/icons-material";
 import { Card, CardContent, Chip } from "@mui/material";
 
-const RuleChip = ({ column, onClick, onDelete, readOnly }) => {
+const RuleChip = ({ column, onClick, onDelete, readOnly, disabled }) => {
   const len = column.rules.length;
   return (
     <div className="relative">
       <Card
         onClick={onClick}
-        className={`${readOnly ? "cursor-default" : "cursor-pointer border hover:border-[--foreground-color]"}`}
+        className={`${readOnly ? "cursor-default" : "cursor-pointer border hover:border-[--foreground-color]"} ${disabled ? "opacity-50 pointer-events-none" : ""}`}
       >
         <CardContent className="flex flex-col gap-4 min-w-56">
           <div className="flex flex-col gap-1">

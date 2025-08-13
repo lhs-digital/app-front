@@ -10,6 +10,7 @@ import {
   DialogTitle,
   InputLabel,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
@@ -25,13 +26,14 @@ const ModalHierarchy = ({
   viewHierarchy,
   setViewHierarchy,
   setRefresh,
+  responsibleHierarchy
 }) => {
   const [responsibleUser, setResponsibleUser] = useState(null);
   const [eligibleResponsibleUsers, setEligibleResponsibleUsers] = useState([]);
   const [associatedUsers, setAssociatedUsers] = useState([]);
   const [eligibleSubordinates, setEligibleSubordinates] = useState([]);
   const user = useAuthUser();
-  const {company} = useCompany();
+  const { company } = useCompany();
 
   // fetchelegibleResposibleUsers
   const fetchEligibleResponsibleUsers = async () => {
@@ -61,7 +63,6 @@ const ModalHierarchy = ({
 
       const response = await api.get(endpoint);
 
-      console.log("responseaaa:", response)
 
       const formattedSubordinates = response.data?.flatMap((role) =>
         role.users.map((user) => ({
@@ -78,7 +79,7 @@ const ModalHierarchy = ({
 
   const fetchMySubordinates = async () => {
     try {
-      const response = await api.get(`/users/my-subordinates`);
+      const response = await api.get(`/users/my-subordinates?userId=${responsibleHierarchy?.id}`);
       const formattedSubordinates = response.data?.flatMap((role) =>
         role.users.map((user) => ({
           id: user.id,
@@ -194,20 +195,47 @@ const ModalHierarchy = ({
     <Dialog open={isOpen} onClose={handleClose}>
       <DialogTitle>
         {viewHierarchy
-          ? "Membros da sua equipe"
+          ? "Membros da equipe"
           : desHierarchy
             ? "Remover membros de uma equipe"
             : "Vincular membros em uma equipe"}
       </DialogTitle>
+      {console.log(responsibleHierarchy?.id)}
       <DialogContent className="w-[480px] flex flex-col gap-4">
         {viewHierarchy ? (
           <Box>
             {associatedUsers.length === 0 ? (
               <span>Não há usuários na sua equipe.</span>
             ) : (
-              associatedUsers.map((user) => (
-                <Chip key={user.id} label={user.name} style={{ margin: "4px" }} />
-              ))
+              <>
+                <Typography variant="subtitle2" gutterBottom>
+                  Responsável pela Equipe
+                </Typography>
+                    <Chip
+                      key={responsibleHierarchy?.id}
+                      label={responsibleHierarchy?.name}
+                      color="primary"
+                      style={{ margin: '4px' }}
+                    />
+              </>
+            )}
+
+            {/* Se houver membros */}
+            {associatedUsers.some((user) => user.role !== 'leader') && (
+              <>
+                <Typography variant="subtitle2" gutterBottom sx={{ marginTop: 2 }}>
+                  Membros da Equipe
+                </Typography>
+                {associatedUsers
+                  .filter((user) => user.role !== 'leader')
+                  .map((user) => (
+                    <Chip
+                      key={user.id}
+                      label={user.name}
+                      style={{ margin: '4px' }}
+                    />
+                  ))}
+              </>
             )}
           </Box>
         ) : (
