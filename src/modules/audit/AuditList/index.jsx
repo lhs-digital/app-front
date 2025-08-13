@@ -21,14 +21,18 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { toast } from "react-toastify";
 import { useThemeMode } from "../../../contexts/themeModeContext";
+import {
+  filterDefaults,
+  useAuditFilters,
+} from "../../../hooks/useAuditFilters";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import { qc } from "../../../services/queryClient";
 import { getPriorityColor, priorities } from "../../../services/utils";
 import { handleMode } from "../../../theme";
 import AuditFilters from "./components/AuditFilters";
@@ -40,33 +44,27 @@ const AuditList = () => {
   const theme = handleMode(useThemeMode().mode);
   const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company } = useCompany();
-  const [auditModule, setAuditModule] = useState("");
   // const [workOrderOpen, setWorkOrderOpen] = useState(false);
   // const [selectedItem, setSelectedItem] = useState(null);
   const navigate = useNavigate();
   // const { isLighthouse } = useUserState().state;
 
-  const filterDefaults = {
-    search: "",
-    priorityOrder: "desc",
-    createdAt: [null, null],
-    status: 0,
-    priority: -1,
-  };
+  const { filters, updateFilters, resetFilters, searchParams } =
+    useAuditFilters();
 
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    perPage: 20,
-    totalCount: 0,
-  });
-
-  const [filters, setFilters] = useState({
-    ...filterDefaults,
-  });
-
-  const [appliedFilters, setAppliedFilters] = useState({
-    ...filterDefaults,
-  });
+  useEffect(() => {
+    // Update URL when filters change
+    const params = new URLSearchParams(searchParams);
+    let count = -1;
+    for (const key of params.keys()) {
+      if (Object.prototype.hasOwnProperty.call(filterDefaults, key)) {
+        if (params.get(key) !== filterDefaults[key]) {
+          count++;
+        }
+      }
+    }
+    setCurrentFilterCount(count);
+  }, [searchParams]);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const openFilters = Boolean(anchorEl);
@@ -78,9 +76,11 @@ const AuditList = () => {
         const response = await api.get(
           `/companies/${company.id}/audit/modules`,
         );
-        console.log("response.data.data", response.data.data);
-        setAuditModule(response.data.data[0]);
-        return response.data.data;
+        const modules = response.data.data;
+        if (modules.length > 0 && !filters.moduleId) {
+          updateFilters({ moduleId: modules[0].id });
+        }
+        return modules;
       },
       enabled: !!company,
     },
@@ -89,40 +89,29 @@ const AuditList = () => {
   const { data = [], isLoading } = useQuery({
     queryKey: [
       "audits",
-      pagination.currentPage,
-      pagination.perPage,
-      appliedFilters,
+      filters.page,
+      filters.perPage,
+      JSON.stringify(filters),
       company?.id,
-      auditModule,
     ],
-
     queryFn: async () => {
       try {
         const response = await api.get(`/companies/${company.id}/audit`, {
           params: {
-            search:
-              appliedFilters.search === "" ? undefined : appliedFilters.search,
-            status:
-              appliedFilters.status === -1 ? undefined : appliedFilters.status,
-            priority:
-              appliedFilters.priority === -1
-                ? undefined
-                : appliedFilters.priority,
+            search: filters.search === "" ? undefined : filters.search,
+            status: filters.status === -1 ? undefined : filters.status,
+            priority: filters.priority === -1 ? undefined : filters.priority,
             created_at:
-              appliedFilters.createdAt[0] || appliedFilters.createdAt[1]
-                ? [appliedFilters.createdAt[0], appliedFilters.createdAt[1]]
+              filters.createdAt[0] || filters.createdAt[1]
+                ? [filters.createdAt[0], filters.createdAt[1]]
                 : undefined,
-            priority_order: appliedFilters.priorityOrder,
-            page: pagination.currentPage,
-            per_page: pagination.perPage,
-            module: auditModule?.id,
+            priority_order: filters.priorityOrder,
+            page: filters.page,
+            per_page: filters.perPage,
+            module: filters.moduleId,
           },
         });
 
-        setPagination((prev) => ({
-          ...prev,
-          totalCount: response.data.meta.total,
-        }));
         return response.data.data;
       } catch (error) {
         toast.error("Erro ao carregar os dados.");
@@ -131,78 +120,24 @@ const AuditList = () => {
     onError: () => {
       toast.error("Erro ao carregar os dados.");
     },
-    enabled: !!company && !!auditModule,
+    enabled: !!company && !!filters.moduleId,
   });
-
-  const handleClean = () => {
-    setFilters(filterDefaults);
-    setAppliedFilters(filterDefaults);
-    setCurrentFilterCount(0);
-    qc.invalidateQueries([
-      "audits",
-      pagination.currentPage,
-      pagination.perPage,
-      appliedFilters,
-      company?.id,
-      auditModule,
-    ]);
-  };
 
   const handleSearch = (event) => {
     const value = event.target.value;
 
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      search: value || "",
-    }));
-
     if (value.length > 3 || value.length === 0) {
-      handleFilter();
+      updateFilters({ search: value });
     }
   };
 
-  const countActiveFilters = () => {
-    let count = 0;
-    Object.keys(filters).forEach((key) => {
-      if (appliedFilters[key] !== filterDefaults[key]) {
-        console.log(appliedFilters[key], filterDefaults[key]);
-        count += 1;
-      }
-    });
-    setCurrentFilterCount(count);
-  };
-
-  const handleFilter = () => {
-    setAppliedFilters({
-      search: filters.search,
-      priorityOrder: filters.priorityOrder,
-      priority: filters.priority,
-      status: filters.status,
-      createdAt: filters.createdAt,
-    });
-
-    countActiveFilters();
-
-    setPagination((prev) => ({
-      ...prev,
-      currentPage: 1,
-    }));
-  };
-
   const handleChangePage = (event, newPage) => {
-    setPagination((prev) => ({
-      ...prev,
-      currentPage: newPage + 1,
-    }));
+    updateFilters({ page: newPage + 1 });
   };
 
   const handleChangeRowsPerPage = (event) => {
     const newRowsPerPage = parseInt(event.target.value, 10);
-    setPagination((prev) => ({
-      ...prev,
-      perPage: newRowsPerPage,
-      currentPage: 1,
-    }));
+    updateFilters({ perPage: newRowsPerPage, page: 1 });
   };
 
   const handleOpenFilterMenu = (event) => {
@@ -215,7 +150,7 @@ const AuditList = () => {
 
   // const handleWorkOrder = (auditRecord) => {
   //   console.log("auditRecord", auditRecord);
-  //   if (!auditModule) {
+  //   if (!filters.module) {
   //     toast.error("Selecione um módulo para visualizar os dados.");
   //     return;
   //   }
@@ -252,7 +187,7 @@ const AuditList = () => {
       );
     }
 
-    if (!auditModule) {
+    if (!filters.moduleId) {
       return (
         <div className="p-8 lg:py-12">
           <p className="text-lg text-center text-gray-500">
@@ -387,7 +322,7 @@ const AuditList = () => {
             },
           }}
           placeholder="Pesquise por ID do cliente, campo, valor ou mensagem."
-          value={filters.search}
+          defaultValue={filters.search}
           onChange={handleSearch}
         />
         <div className="w-full lg:w-1/3">
@@ -397,12 +332,16 @@ const AuditList = () => {
               fullWidth
               labelId="table-select"
               className="capitalize"
-              value={auditModule}
+              value={filters.moduleId || ""}
               label="Módulo"
-              onChange={(e) => setAuditModule(e.target.value)}
+              onChange={(e) => updateFilters({ moduleId: e.target.value })}
             >
               {availableModules.map((module) => (
-                <MenuItem key={module.id} value={module} className="capitalize">
+                <MenuItem
+                  key={module.id}
+                  value={module.id}
+                  className="capitalize"
+                >
                   {module.name}
                 </MenuItem>
               ))}
@@ -439,7 +378,7 @@ const AuditList = () => {
         <Tooltip title="Limpar filtros" aria-label="Limpar filtros">
           <IconButton
             className="aspect-square"
-            onClick={handleClean}
+            onClick={resetFilters}
             size="small"
           >
             <FilterListOff fontSize="small" />
@@ -451,14 +390,9 @@ const AuditList = () => {
         anchorEl={anchorEl}
         filters={filters}
         onClose={handleCloseFilterMenu}
-        onFilterChange={(field, value) =>
-          setFilters((prevFilters) => ({
-            ...prevFilters,
-            [field]: value,
-          }))
-        }
-        onApplyFilters={handleFilter}
-        onCleanFilters={handleClean}
+        onFilterChange={(field, value) => updateFilters({ [field]: value })}
+        onApplyFilters={handleCloseFilterMenu}
+        onCleanFilters={resetFilters}
       />
       {renderAuditContent()}
       {/* <AuditWorkOrder
@@ -471,10 +405,10 @@ const AuditList = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 20]}
           component="div"
-          count={pagination.totalCount}
+          count={data?.length > 0 ? -1 : 0}
           labelRowsPerPage="Linhas por página"
-          rowsPerPage={pagination.perPage}
-          page={pagination.currentPage - 1}
+          rowsPerPage={filters.perPage}
+          page={filters.page - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelDisplayedRows={({ from, to, count }) =>
