@@ -20,7 +20,7 @@ const GenericForm = () => {
     resetAuditErrors,
     recordId,
     status,
-    table,
+    module,
   } = useEntityForm();
 
   const methods = useForm();
@@ -30,8 +30,8 @@ const GenericForm = () => {
       console.log("Form submitted:", data);
       toast.success("Dados salvos com sucesso!");
 
-      if (table) {
-        navigate(`/tabelas/${table}`);
+      if (module) {
+        navigate(`/tabelas/${module}`);
       }
     } catch (error) {
       console.error("Error submitting form:", error);

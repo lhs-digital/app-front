@@ -71,7 +71,7 @@ export const EntityFormProvider = ({ children }) => {
         status,
         recordId,
         id,
-        table: module,
+        module,
       }}
     >
       {children}
