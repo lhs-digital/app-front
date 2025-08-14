@@ -388,6 +388,7 @@ const ModuleTableView = () => {
         onAddColumn={handleAddColumn}
         onEditColumn={handleEditColumn}
         onRemoveColumn={() => {
+          handleRemoveColumn(pendingColumn);
           setOpenDialog(false);
           setOpenConfirmDialog(true);
         }}

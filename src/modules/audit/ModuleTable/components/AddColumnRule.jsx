@@ -51,18 +51,18 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
   };
 
   const onSubmit = (rule) => {
-    if (!rule.validation) {
+    if (!rule?.validation) {
       toast.warn("Selecione ao menos uma condição para a regra.");
       return;
     }
 
-    if (!rule.message || rule.message.trim() === "") {
+    if (!rule?.message || rule?.message.trim() === "") {
       toast.warn("O campo de mensagem não pode estar vazio.");
       return;
     }
 
     if (
-      ruleParams.size === 0 &&
+      ruleParams?.size === 0 &&
       (selectedValidation === "in" || selectedValidation === "not_in")
     ) {
       toast.warn("Adicione pelo menos um valor para a regra.");
@@ -73,6 +73,7 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
     setRuleParams(new Set());
     setInputValue("");
     submit({
+      name: rule.validation.name,
       validation: rule.validation,
       message: rule.message,
       params: selectedValidation?.multiple
