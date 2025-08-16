@@ -35,9 +35,9 @@ export const EntityFormProvider = ({ children }) => {
     queryKey: ["entity", module, id],
     queryFn: async () => {
       const response = await api.get(
-        `/companies/${company.id}/modules/${module}/forms`,
+        `/companies/${company.id}/audit/modules/${module}/forms`,
       );
-      return response.data.data.forms;
+      return response.data.data;
     },
   });
 
