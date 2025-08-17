@@ -129,7 +129,7 @@ const auditModule = {
     //   ],
     // },
     {
-      label: "Grupos de regras",
+      label: "Regras de Auditoria",
       path: "/modulos",
       element: <AuditModules />,
       icon: WidgetsOutlined,

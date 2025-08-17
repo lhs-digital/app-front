@@ -15,7 +15,8 @@ import {
   TextField,
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useBlocker } from "react-router-dom";
+import { useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import TableColumn from "../../../components/AuditComponents/TableColumn";
@@ -26,12 +27,16 @@ import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
 import AddColumn from "./components/AddColumn";
 import RuleChip from "./components/RuleChip";
+import ModalDelete from "../../../components/ModalDelete";
 
 const ModuleTableView = () => {
   const { id, table } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const action = searchParams.get("action");
+  const [isDeleteRuleOpen, setIsDeleteRuleOpen] = useState(false);
+  const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
+  const [ruleToDelete, setRuleToDelete] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [pendingColumn, setPendingColumn] = useState(null);
   const [columnsData, setColumnsData] = useState({
@@ -42,6 +47,16 @@ const ModuleTableView = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [filterText, setFilterText] = useState("");
   const { company } = useCompany();
+  const allowNavigationRef = useRef(false);
+
+  useBlocker((tx) => {
+    if (hasChanges && !allowNavigationRef.current) {
+      toast.warning("Você tem alterações não salvas!");
+      return true; // bloqueia navegação
+    }
+    allowNavigationRef.current = false; // reseta após navegação
+    return false; // permite navegação
+  });
 
   const { mutate: saveChanges, isPending } = useMutation({
     mutationFn: async () => {
@@ -114,6 +129,7 @@ const ModuleTableView = () => {
     if (isPending) {
       return;
     }
+    allowNavigationRef.current = true;
     saveChanges();
   };
 
@@ -276,7 +292,10 @@ const ModuleTableView = () => {
                   onDelete={
                     action === "view"
                       ? undefined
-                      : () => handleRemoveColumn(column)
+                      : () => {
+                        setRuleToDelete(column);
+                        setIsDeleteRuleOpen(true);
+                      }
                   }
                   readOnly={action === "view"}
                   color="primary"
@@ -291,7 +310,7 @@ const ModuleTableView = () => {
                 className="w-fit"
                 startIcon={<Remove />}
                 disabled={columnsData.columns.length === 0}
-                onClick={removeAllColumns}
+                onClick={() => setIsDeleteAllOpen(true)}
               >
                 Remover todas
               </Button>
@@ -378,6 +397,25 @@ const ModuleTableView = () => {
           setOpenConfirmDialog(false);
         }}
         onReject={() => setOpenConfirmDialog(false)}
+      />
+      <ModalDelete
+        isOpen={isDeleteRuleOpen}
+        isRuleUnic={true}
+        onClose={() => setIsDeleteRuleOpen(false)}
+        onConfirm={() => {
+          handleRemoveColumn(ruleToDelete);
+          setIsDeleteRuleOpen(false);
+        }}
+      />
+      <ModalDelete
+        isOpen={isDeleteAllOpen}
+        isRuleAll={true}
+        onClose={() => setIsDeleteAllOpen(false)}
+        onConfirm={() => {
+          removeAllColumns();
+          setIsDeleteAllOpen(false);
+        }}
+        message="Tem certeza que deseja remover todas as colunas?"
       />
       <AddColumn
         open={openDialog}

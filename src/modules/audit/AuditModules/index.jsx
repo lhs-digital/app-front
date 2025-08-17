@@ -94,9 +94,9 @@ const AuditModules = () => {
   return (
     <div className="flex flex-col gap-8 w-full">
       <PageTitle
-        title="Grupos de regras"
+        title="Regras de Auditoria"
         icon={<Widgets />}
-        subtitle="Gerencie os grupos de regras das auditorias das empresa"
+        subtitle="Gerencie as regras de auditoria das empresas"
         buttons={[
           <Button
             key="create-module"

@@ -233,7 +233,10 @@ export const AddColumn = ({
               Informações gerais
             </h2>
             <FormControl className="lg:col-span-2">
-              <FormLabel>Nome da coluna</FormLabel>
+              <FormLabel>
+                Nome da coluna
+                <Info description="Nome da coluna no banco de dados." />
+              </FormLabel>
               <TextField value={column?.name} disabled {...register("name", { required: "Nome da coluna é obrigatório" })} />
             </FormControl>
             <FormControl className="lg:col-span-4">
@@ -275,7 +278,9 @@ export const AddColumn = ({
               rules={{ required: "Tipo de campo é obrigatório" }}
               render={({ field }) => (
                 <FormControl className="lg:col-span-3">
-                  <FormLabel>Tipo de campo</FormLabel>
+                  <FormLabel>Tipo de campo
+                    <Info description="Tipo de campo a ser exibido no formulário." />
+                  </FormLabel>
                   <Select
                     value={field.value}
                     onChange={(e) => field.onChange(e.target.value)}
