@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { toast } from "react-toastify";
+import ReportViewer from "../../../components/ReportViewer.jsx";
 import { useThemeMode } from "../../../contexts/themeModeContext";
 import {
   filterDefaults,
@@ -41,6 +42,7 @@ import AuditItem from "./components/AuditItem";
 
 const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
+  const [openReport, setOpenReport] = useState(false);
   const theme = handleMode(useThemeMode().mode);
   const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company } = useCompany();
@@ -416,6 +418,7 @@ const AuditList = () => {
           }
         />
       </Box>
+      <ReportViewer open={openReport} onClose={() => setOpenReport(false)} />
     </div>
   );
 };
