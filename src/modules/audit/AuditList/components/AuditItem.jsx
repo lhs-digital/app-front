@@ -29,12 +29,7 @@ import {
 import { handleMode } from "../../../../theme";
 import ViewAuditItem from "./ViewAuditItem";
 
-const AuditItem = ({
-  auditRecord,
-  setRefresh,
-  refresh,
-  onClick = () => {},
-}) => {
+const AuditItem = ({ auditRecord, onClick = () => {} }) => {
   const [dataView, setDataView] = useState(auditRecord);
   const { mode: themeMode } = useThemeMode();
   const theme = handleMode(themeMode);
@@ -242,8 +237,6 @@ const AuditItem = ({
             setDataView={setDataView}
             id={auditRecord?.id}
             status={auditRecord?.status}
-            setRefresh={setRefresh}
-            refresh={refresh}
           />
         </AccordionDetails>
       </Accordion>

@@ -1,15 +1,14 @@
 import {
   AssignmentLate,
+  FileOpenOutlined,
   FilterList,
-  FilterListOff,
   Search,
 } from "@mui/icons-material";
-import Masonry from "@mui/lab/Masonry";
 import {
   Badge,
   Box,
+  Button,
   CircularProgress,
-  colors,
   FormControl,
   IconButton,
   InputAdornment,
@@ -20,12 +19,10 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { toast } from "react-toastify";
-import { useThemeMode } from "../../../contexts/themeModeContext";
 import {
   filterDefaults,
   useAuditFilters,
@@ -33,20 +30,17 @@ import {
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import { getPriorityColor, priorities } from "../../../services/utils";
-import { handleMode } from "../../../theme";
+
+import AuditContent from "./components/AuditContent";
 import AuditFilters from "./components/AuditFilters";
-import AuditItem from "./components/AuditItem";
-// import AuditWorkOrder from "./components/AuditWorkOrder";
+import AuditItemModal from "./components/AuditItemModal";
 
 const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
-  const theme = handleMode(useThemeMode().mode);
   const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company } = useCompany();
   // const [workOrderOpen, setWorkOrderOpen] = useState(false);
-  // const [selectedItem, setSelectedItem] = useState(null);
-  const navigate = useNavigate();
+  const [selectedItem, setSelectedItem] = useState(null);
   // const { isLighthouse } = useUserState().state;
 
   const { filters, updateFilters, resetFilters, searchParams } =
@@ -160,155 +154,70 @@ const AuditList = () => {
   // };
 
   const handleView = (record) => {
-    const navigateRoute = ["auditorias"];
-
-    navigateRoute.push(record.module.id);
-    navigateRoute.push(record.record_id);
-
-    return navigate(`/${navigateRoute.join("/")}`, {
-      state: {
-        edit: record.status === 1,
-        columns: record?.columns,
-        recordId: Number(record?.id),
-        status: record?.status,
-        companyId: company?.id,
-      },
-    });
+    setSelectedItem(record);
   };
 
-  const renderAuditContent = () => {
-    if (!company) {
-      return (
-        <div className="p-8 lg:py-12">
-          <p className="text-lg text-center text-gray-500">
-            Selecione uma empresa para visualizar as atividades.
-          </p>
-        </div>
+  const { mutate: downloadReport, isPending: isDownloading } = useMutation({
+    mutationFn: async () => {
+      const response = await api.get(
+        `/companies/${company.id}/audit/download_report`,
+        {
+          params: {
+            search: filters.search === "" ? undefined : filters.search,
+            status: filters.status === -1 ? undefined : filters.status,
+            priority: filters.priority === -1 ? undefined : filters.priority,
+            created_at:
+              filters.createdAt[0] || filters.createdAt[1]
+                ? [filters.createdAt[0], filters.createdAt[1]]
+                : undefined,
+            priority_order: filters.priorityOrder,
+            page: filters.page,
+            per_page: filters.perPage,
+            module: filters.moduleId,
+          },
+          responseType: "arraybuffer",
+          headers: {
+            Accept: "application/pdf",
+          },
+        },
       );
-    }
 
-    if (!filters.moduleId) {
-      return (
-        <div className="p-8 lg:py-12">
-          <p className="text-lg text-center text-gray-500">
-            Selecione uma tabela para visualizar as atividades.
-          </p>
-        </div>
-      );
-    }
-
-    if (isLoading || isModulesLoading) {
-      return (
-        <div className="w-full min-h-80 flex items-center justify-center">
-          <CircularProgress />
-        </div>
-      );
-    }
-
-    if (data?.length === 0) {
-      return (
-        <div className="p-8 lg:py-12">
-          <p className="text-lg text-center text-gray-500">
-            Não há atividades pendentes ou concluídas.
-          </p>
-        </div>
-      );
-    }
-
-    return (
-      <Box width="100%">
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          width={"100%"}
-          gap={2}
-          border="1px solid"
-          borderBottom="none"
-          borderColor="divider"
-          borderRadius="8px 8px 0 0"
-          p={2}
-        >
-          <Box display="flex" alignItems="center" alignSelf="end" gap={2}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Box
-                width="12px"
-                height="12px"
-                borderRadius="30%"
-                bgcolor={colors.orange[theme === "light" ? 100 : 500]}
-              />
-              <p className="text-sm">Atividade Pendente</p>
-            </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Box
-                width="12px"
-                height="12px"
-                borderRadius="30%"
-                bgcolor={colors.green[theme === "light" ? 100 : 500]}
-              />
-              <p className="text-sm">Atividade Concluída</p>
-            </Box>
-          </Box>
-          <Box display="flex" alignItems="center" alignSelf="end" gap={2}>
-            {priorities.map((item) => (
-              <Box key={item.label} display="flex" alignItems="center" gap={1}>
-                <Box
-                  width="12px"
-                  height="12px"
-                  borderRadius="30%"
-                  sx={{
-                    backgroundColor: getPriorityColor(item.value, theme)[
-                      theme === "light" ? "color" : "backgroundColor"
-                    ],
-                  }}
-                />
-                <p className="text-sm">Prioridade {item.label}</p>
-              </Box>
-            ))}
-          </Box>
-        </Box>
-        <Box
-          className="w-full flex flex-col items-center lg:min-h-80"
-          border="1px solid"
-          borderColor="divider"
-          borderRadius="0 0 8px 8px"
-          p={2}
-          py={3}
-          backgroundColor={theme === "light" ? colors.grey[50] : "#0f0f0f"}
-        >
-          <Masonry
-            columns={{
-              xs: 1,
-              lg: 2,
-              xl: 3,
-            }}
-            spacing={2}
-            className="m-0"
-            width="100%"
-          >
-            {data.map((item) => (
-              <AuditItem
-                key={item.id}
-                auditRecord={item}
-                setRefresh={setRefresh}
-                refresh={refresh}
-                onClick={() => handleView(item)}
-              />
-            ))}
-          </Masonry>
-        </Box>
-      </Box>
-    );
-  };
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const newWindow = window.open(url, "_blank");
+      if (newWindow) {
+        newWindow.onload = () => {
+          URL.revokeObjectURL(url);
+        };
+      }
+    },
+  });
 
   return (
     <div className="flex flex-col w-full gap-6 items-center">
       <PageTitle
         icon={<AssignmentLate fontSize="small" />}
+        buttons={[
+          <Tooltip
+            title="Baixar relatório com a seleção e filtros atuais"
+            key="download-report"
+            arrow
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<FileOpenOutlined />}
+              onClick={downloadReport}
+              loading={isDownloading}
+            >
+              Exportar relatório
+            </Button>
+          </Tooltip>,
+        ]}
         title="Itens auditados"
         subtitle="Gerencie todas as suas atividades pendentes e concluídas."
       />
-      <div className="flex flex-col lg:flex-row w-full gap-4">
+      <div className="flex flex-col lg:flex-row w-full gap-4 items-center">
         <TextField
           fullWidth
           className="grow"
@@ -365,24 +274,21 @@ const AuditList = () => {
           </div>
         )} */}
         <Tooltip title="Filtrar" aria-label="Filtrar">
-          <Badge badgeContent={currentFilterCount} color="primary">
+          <Badge
+            badgeContent={!isModulesLoading && currentFilterCount}
+            color="primary"
+          >
             <IconButton
-              className="aspect-square"
               onClick={handleOpenFilterMenu}
-              size="small"
+              className="h-[52px] w-[52px]"
             >
-              <FilterList fontSize="small" />
+              {isModulesLoading ? (
+                <CircularProgress size={16} />
+              ) : (
+                <FilterList fontSize="small" />
+              )}
             </IconButton>
           </Badge>
-        </Tooltip>
-        <Tooltip title="Limpar filtros" aria-label="Limpar filtros">
-          <IconButton
-            className="aspect-square"
-            onClick={resetFilters}
-            size="small"
-          >
-            <FilterListOff fontSize="small" />
-          </IconButton>
         </Tooltip>
       </div>
       <AuditFilters
@@ -394,7 +300,13 @@ const AuditList = () => {
         onApplyFilters={handleCloseFilterMenu}
         onCleanFilters={resetFilters}
       />
-      {renderAuditContent()}
+      <AuditContent
+        isLoading={isLoading || isModulesLoading}
+        data={data}
+        setRefresh={setRefresh}
+        refresh={refresh}
+        handleView={handleView}
+      />
       {/* <AuditWorkOrder
         open={workOrderOpen}
         onClose={() => setWorkOrderOpen(false)}
@@ -416,6 +328,13 @@ const AuditList = () => {
           }
         />
       </Box>
+      {selectedItem && (
+        <AuditItemModal
+          item={selectedItem}
+          isOpen={!!selectedItem}
+          onClose={() => setSelectedItem(null)}
+        />
+      )}
     </div>
   );
 };

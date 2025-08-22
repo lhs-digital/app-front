@@ -133,9 +133,12 @@ export const AddColumn = ({
       return toast.error("Preencha todos os campos corretamente");
     }
 
-    console.log("options of select", options);
     if (watch("form.type") === "select" && options.length === 0) {
       return toast.error("Adicione pelo menos uma opção para o campo select.");
+    }
+
+    if (rules.length === 0) {
+      return toast.error("Adicione pelo menos uma regra para a coluna.");
     }
 
     const formattedData = {
@@ -230,8 +233,11 @@ export const AddColumn = ({
               Informações gerais
             </h2>
             <FormControl className="lg:col-span-2">
-              <FormLabel>Nome da coluna</FormLabel>
-              <TextField value={column?.name} disabled {...register(`name`)} />
+              <FormLabel>
+                Nome da coluna
+                <Info description="Nome da coluna no banco de dados." />
+              </FormLabel>
+              <TextField value={column?.name} disabled {...register("name", { required: "Nome da coluna é obrigatório" })} />
             </FormControl>
             <FormControl className="lg:col-span-4">
               <FormLabel className="flex flex-row items-center">
@@ -247,6 +253,7 @@ export const AddColumn = ({
             <Controller
               name={`form.size`}
               control={control}
+              rules={{ required: "Tamanho é obrigatório" }}
               render={({ field }) => (
                 <FormControl className="lg:col-span-3">
                   <FormLabel className="flex flex-row items-center">
@@ -268,9 +275,12 @@ export const AddColumn = ({
             <Controller
               name={`form.type`}
               control={control}
+              rules={{ required: "Tipo de campo é obrigatório" }}
               render={({ field }) => (
                 <FormControl className="lg:col-span-3">
-                  <FormLabel>Tipo de campo</FormLabel>
+                  <FormLabel>Tipo de campo
+                    <Info description="Tipo de campo a ser exibido no formulário." />
+                  </FormLabel>
                   <Select
                     value={field.value}
                     onChange={(e) => field.onChange(e.target.value)}
@@ -344,14 +354,14 @@ export const AddColumn = ({
                 Texto de ajuda
                 <Info description="Texto que será exibido como ajuda para o usuário." />
               </FormLabel>
-              <TextField {...register(`form.help_text`)} />
+              <TextField {...register("form.help_text", { required: "Texto de ajuda é obrigatório" })} />
             </FormControl>
             <FormControl className="lg:col-span-6">
               <FormLabel className="flex flex-row items-center">
                 Texto placeholder
                 <Info description="Opcional. Texto para indicar ao usuário o que deve ser digitado no campo." />
               </FormLabel>
-              <TextField {...register(`form.placeholder`)} />
+              <TextField {...register("form.placeholder", { required: "Placeholder é obrigatório" })} />
             </FormControl>
             <Divider className="col-span-full" />
             <div className="col-span-full flex flex-row justify-between">
@@ -420,7 +430,10 @@ export const AddColumn = ({
             variant="contained"
             color="primary"
             startIcon={column?.edit ? <Check /> : <Add />}
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(
+              onSubmit,
+              () => toast.error("Preencha todos os campos corretamente")
+            )}
           >
             {column?.edit ? "Atualizar coluna" : "Adicionar coluna"}
           </Button>
