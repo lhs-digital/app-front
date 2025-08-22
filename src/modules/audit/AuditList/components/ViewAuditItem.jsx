@@ -19,7 +19,7 @@ import {
 } from "../../../../services/utils";
 import { handleMode } from "../../../../theme";
 
-const ViewAuditItem = ({ id, selectedActivitie, setRefresh, refresh }) => {
+const ViewAuditItem = ({ id, selectedActivitie }) => {
   const { mode: themeMode } = useThemeMode();
   const theme = handleMode(themeMode);
   //eslint-disable-next-line
@@ -32,8 +32,6 @@ const ViewAuditItem = ({ id, selectedActivitie, setRefresh, refresh }) => {
       toast.success("Status da atividade alterado com sucesso!");
     } catch (error) {
       console.error("Erro ao alterar o status da atividade", error);
-    } finally {
-      setRefresh(!refresh);
     }
   };
 
@@ -44,7 +42,7 @@ const ViewAuditItem = ({ id, selectedActivitie, setRefresh, refresh }) => {
           <TableHead>
             <TableRow>
               <TableCell>Campo</TableCell>
-              <TableCell>Sugestão</TableCell>
+              <TableCell>Valor observado</TableCell>
               <TableCell>Prioridade</TableCell>
             </TableRow>
           </TableHead>
@@ -54,7 +52,7 @@ const ViewAuditItem = ({ id, selectedActivitie, setRefresh, refresh }) => {
                 <TableCell>
                   <Typography fontWeight="bold">{col?.label}</Typography>
                 </TableCell>
-                <TableCell>{col?.message || "N/A"}</TableCell>
+                <TableCell>{col?.value || "N/A"}</TableCell>
                 <TableCell>
                   <Tooltip
                     title={`Prioridade: ${formattedPriority(+col?.priority)}`}
