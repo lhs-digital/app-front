@@ -1,13 +1,14 @@
 import {
   AssignmentLate,
+  FileOpenOutlined,
   FilterList,
-  FilterListOff,
   Search,
 } from "@mui/icons-material";
 import Masonry from "@mui/lab/Masonry";
 import {
   Badge,
   Box,
+  Button,
   CircularProgress,
   colors,
   FormControl,
@@ -20,7 +21,7 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -176,6 +177,42 @@ const AuditList = () => {
     });
   };
 
+  const { mutate: downloadReport, isPending: isDownloading } = useMutation({
+    mutationFn: async () => {
+      const response = await api.get(
+        `/companies/${company.id}/audit/download_report`,
+        {
+          params: {
+            search: filters.search === "" ? undefined : filters.search,
+            status: filters.status === -1 ? undefined : filters.status,
+            priority: filters.priority === -1 ? undefined : filters.priority,
+            created_at:
+              filters.createdAt[0] || filters.createdAt[1]
+                ? [filters.createdAt[0], filters.createdAt[1]]
+                : undefined,
+            priority_order: filters.priorityOrder,
+            page: filters.page,
+            per_page: filters.perPage,
+            module: filters.moduleId,
+          },
+          responseType: "arraybuffer",
+          headers: {
+            Accept: "application/pdf",
+          },
+        },
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const newWindow = window.open(url, "_blank");
+      if (newWindow) {
+        newWindow.onload = () => {
+          URL.revokeObjectURL(url);
+        };
+      }
+    },
+  });
+
   const renderAuditContent = () => {
     if (!company) {
       return (
@@ -305,10 +342,27 @@ const AuditList = () => {
     <div className="flex flex-col w-full gap-6 items-center">
       <PageTitle
         icon={<AssignmentLate fontSize="small" />}
+        buttons={[
+          <Tooltip
+            title="Baixar relatório com a seleção e filtros atuais"
+            key="download-report"
+            arrow
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<FileOpenOutlined />}
+              onClick={downloadReport}
+              loading={isDownloading}
+            >
+              Exportar relatório
+            </Button>
+          </Tooltip>,
+        ]}
         title="Itens auditados"
         subtitle="Gerencie todas as suas atividades pendentes e concluídas."
       />
-      <div className="flex flex-col lg:flex-row w-full gap-4">
+      <div className="flex flex-col lg:flex-row w-full gap-4 items-center">
         <TextField
           fullWidth
           className="grow"
@@ -365,24 +419,21 @@ const AuditList = () => {
           </div>
         )} */}
         <Tooltip title="Filtrar" aria-label="Filtrar">
-          <Badge badgeContent={currentFilterCount} color="primary">
+          <Badge
+            badgeContent={!isModulesLoading && currentFilterCount}
+            color="primary"
+          >
             <IconButton
-              className="aspect-square"
               onClick={handleOpenFilterMenu}
-              size="small"
+              className="h-[52px] w-[52px]"
             >
-              <FilterList fontSize="small" />
+              {isModulesLoading ? (
+                <CircularProgress size={16} />
+              ) : (
+                <FilterList fontSize="small" />
+              )}
             </IconButton>
           </Badge>
-        </Tooltip>
-        <Tooltip title="Limpar filtros" aria-label="Limpar filtros">
-          <IconButton
-            className="aspect-square"
-            onClick={resetFilters}
-            size="small"
-          >
-            <FilterListOff fontSize="small" />
-          </IconButton>
         </Tooltip>
       </div>
       <AuditFilters
