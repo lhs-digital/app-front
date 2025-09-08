@@ -2,12 +2,13 @@ import { createBrowserRouter } from "react-router-dom";
 import FirstAccess from "../modules/base/FirstAccess";
 import Logout from "../modules/public/Logout";
 import PasswordUpdate from "../modules/public/PasswordUpdate";
+import PickCompany from "../modules/public/PickCompany";
 import RecoverPassword from "../modules/public/RecoverPassword";
 import SignIn from "../modules/public/SignIn";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
 import { routes } from "./modules";
-import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const publicRoutes = [
   {
@@ -19,6 +20,11 @@ const publicRoutes = [
     label: "Recuperar Senha",
     path: "/recover-password",
     element: <RecoverPassword />,
+  },
+  {
+    label: "Selecionar Empresa",
+    path: "/selecionar-empresa",
+    element: <PickCompany />,
   },
   {
     label: "Atualizar Senha",
