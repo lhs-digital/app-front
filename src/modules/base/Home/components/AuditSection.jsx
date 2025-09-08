@@ -46,7 +46,7 @@ const AuditSection = () => {
   const theme = handleMode(useThemeMode().mode);
   const [dataLastAudit, setDataLastAudit] = useState([]);
   const { company } = useCompany();
-  const [updateInterval, setUpdateInterval] = useState(600);
+  const [updateInterval, setUpdateInterval] = useState("");
   const [auditModule, setAuditModule] = useState(null);
   const [chartData, setChartData] = useState({
     errorsCount: 0,
@@ -58,12 +58,10 @@ const AuditSection = () => {
     if (!auditModule) return;
     const fetchData = async () => {
       const response = await api.get(`/companies/${company?.id}/audit/summary`);
-      console.log(response.data);
-      console.log("Modulo: ", auditModule.name);
 
       if (response.data.per_module && auditModule) {
         const foundModule = response.data.per_module.find(
-          (mod) => mod.label === auditModule.name
+          (mod) => mod.label === auditModule.name,
         );
         if (foundModule) {
           setChartData({
@@ -73,9 +71,8 @@ const AuditSection = () => {
         }
       }
 
-      setUpdateInterval(response.data.audit_interval)
-      setDataLastAudit(response.data.last_audit_date)
-
+      setUpdateInterval(response.data.audit_interval);
+      setDataLastAudit(response.data.last_audit_date);
     };
     fetchData();
   }, [auditModule]);
@@ -83,6 +80,11 @@ const AuditSection = () => {
   const handleIntervalChange = (event) => {
     setUpdateInterval(event.target.value);
     setIsConfirmModalOpen(true);
+  };
+
+  const handleClearIntervalChange = () => {
+    setUpdateInterval("");
+    setIsConfirmModalOpen(false);
   };
 
   const confirmIntervalChange = async () => {
@@ -245,10 +247,7 @@ const AuditSection = () => {
                 </p>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={() => setIsConfirmModalOpen(false)}
-                  color="error"
-                >
+                <Button onClick={handleClearIntervalChange} color="error">
                   Cancelar
                 </Button>
                 <Button onClick={confirmIntervalChange} color="primary">

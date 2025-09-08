@@ -6,9 +6,6 @@ const PublicRoute = () => {
   const isAuthenticated = useIsAuthenticated();
   const { company } = useCompany();
 
-  console.log("PublicRoute isAuthenticated:", isAuthenticated);
-  console.log("PublicRoute company:", company);
-
   if (isAuthenticated && company) {
     return <Navigate to="/painel" />;
   }
