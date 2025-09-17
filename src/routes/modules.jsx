@@ -26,6 +26,8 @@ import {
   Subject,
   TableChart,
   TableChartOutlined,
+  VpnLock,
+  VpnLockOutlined,
   // Web,
   // WebOutlined,
   Widgets,
@@ -48,6 +50,7 @@ import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
 import Logs from "../modules/lighthouse/Logs";
+import Vpns from "../modules/lighthouse/Vpns";
 
 const auditModule = {
   label: "Auditoria",
@@ -87,47 +90,6 @@ const auditModule = {
         },
       ],
     },
-
-    // {
-    //   label: "Regras",
-    //   path: "/regras",
-    //   element: <AuditRules />,
-    //   icon: RuleFolderOutlined,
-    //   activeIcon: RuleFolder,
-    //   permissions: ["define_rules"],
-    // },
-    // {
-    //   label: "Tabelas",
-    //   path: "/tabelas",
-    //   element: <AuditTables />,
-    //   icon: TableChartOutlined,
-    //   activeIcon: TableChart,
-    //   children: [
-    //     {
-    //       label: "Tabela",
-    //       path: "/tabelas/:table",
-    //       element: <AuditTables />,
-    //       icon: TableChartOutlined,
-    //       activeIcon: TableChart,
-    //       hidden: true,
-    //     },
-    //     {
-    //       label: "Entidade",
-    //       path: "/tabelas/:table/:id",
-    //       element: <EntityForm />,
-    //       icon: TableChartOutlined,
-    //       activeIcon: TableChart,
-    //       hidden: true,
-    //     },
-    //   ],
-    //   permissions: [
-    //     "view_clients",
-    //     "view_any_clients",
-    //     "create_clients",
-    //     "update_clients",
-    //     "delete_clients",
-    //   ],
-    // },
     {
       label: "Regras de Auditoria",
       path: "/modulos",
@@ -175,7 +137,7 @@ const auditModule = {
           hidden: true,
         },
       ],
-    },
+    }
   ],
 };
 
@@ -285,23 +247,17 @@ const lighthouseModule = {
         },
       ],
     },
+    {
+      label: "VPNs",
+      path: "/vpns",
+      element: <Vpns />,
+      icon: VpnLockOutlined,
+      activeIcon: VpnLock,
+      children: [
+      ],
+    },
   ],
 };
-
-// const devModule = {
-//   label: "Desenvolvimento",
-//   icon: ComputerOutlined,
-//   activeIcon: Computer,
-//   children: [
-//     {
-//       label: "Página genérica",
-//       path: "/dev",
-//       element: <TestPage />,
-//       icon: Web,
-//       activeIcon: WebOutlined,
-//     },
-//   ],
-// };
 
 export const unrenderedRoutes = [
   {

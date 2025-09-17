@@ -497,7 +497,7 @@ const Users = () => {
                 </TableCell>
                 <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}>
                   {" "}
-                  {role.name}{" "}
+                  {role?.name}{" "}
                 </TableCell>
                 <TableCell
                   sx={{
@@ -506,7 +506,7 @@ const Users = () => {
                   }}
                 >
                   {" "}
-                  {company.name}{" "}
+                  {company?.name}{" "}
                 </TableCell>
                 <TableCell
                   sx={{
@@ -554,6 +554,7 @@ const Users = () => {
                       </IconButton>
                     )}
                 </TableCell>
+                {console.log("data", data)}
               </TableRow>
             ))}
           </TableBody>
