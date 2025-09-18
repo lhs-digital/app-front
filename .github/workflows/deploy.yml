@@ -23,10 +23,10 @@ jobs:
       # ----------------------------------------
       # Set up Node.js with dependency caching
       # ----------------------------------------
-      - name: Use Node.js 18.x
+      - name: Use Node.js 20.9.0
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20.9.0
           cache: "npm"
 
       # ----------------------------------------
