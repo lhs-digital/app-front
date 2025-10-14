@@ -298,7 +298,7 @@ const AuditSection = () => {
                 variant="contained"
                 color="primary"
                 onClick={() =>
-                  toast.info("Esta funcionalidade não está disponível.")
+                  setIsOpen(true)
                 }
               >
                 GERAR RELATÓRIO

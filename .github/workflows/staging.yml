@@ -3,79 +3,51 @@ name: Deploy to staging environment
 on:
   push:
     branches:
-      - staging # Trigger only on pushes to the staging branch
+      - staging
   workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    # Prevent more than one deployment to the same environment at a time
     concurrency: deploy-staging
 
     runs-on: ubuntu-latest
 
     steps:
-      # ----------------------------------------
-      # Checkout repository
-      # ----------------------------------------
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # ----------------------------------------
-      # Set up Node.js with dependency caching
-      # ----------------------------------------
       - name: Use Node.js 20.9.0
         uses: actions/setup-node@v4
         with:
           node-version: 20.9.0
           cache: "npm"
 
-      # ----------------------------------------
-      # Install dependencies (clean install)
-      # ----------------------------------------
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      # ----------------------------------------
-      # Build project – outputs to ./dist by default (Vite)
-      # ----------------------------------------
       - name: Build
         env:
           VITE_API_URL: ${{ secrets.STG_API_URL }}
         run: npm run build
 
-      # ----------------------------------------
-      # Upload build as workflow artefact (helpful for debugging)
-      # ----------------------------------------
       - name: Upload build artefact
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
 
-      # ----------------------------------------
-      # Install sshpass for password-based SSH
-      # ----------------------------------------
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      # ----------------------------------------
-      # Add remote host to known_hosts to avoid prompt
-      # ----------------------------------------
       - name: Add host to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      # ----------------------------------------
-      # Create deploy log file
-      # ----------------------------------------
       - name: Create deploy log file
         run: |
           echo "Deployed at $(date)" > dist/deploy-log.txt
 
-      # ----------------------------------------
-      # Deploy build directory to remote server using rsync over SSH with password
-      # ----------------------------------------
       - name: Deploy to VM
         env:
           SSH_USER: ${{ secrets.STG_SSH_USER }}

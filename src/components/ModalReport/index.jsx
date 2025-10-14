@@ -14,12 +14,12 @@ import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
 import api from "../../services/api";
+import { useCompany } from "../../hooks/useCompany";
 
 const ModalReport = ({ isOpen, onClose }) => {
   const [createdAt, setCreatedAt] = useState([]);
   const user = useAuthUser();
-  const [company, setCompany] = useState("");
-  const [companyId, setCompanyId] = useState(user?.company?.id);
+  const { company } = useCompany();
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
@@ -34,16 +34,11 @@ const ModalReport = ({ isOpen, onClose }) => {
     getData();
   }, []);
 
-  const handleCompanyChange = (event) => {
-    setCompany(event.target.value);
-    setCompanyId(event.target.value);
-  };
-
   const generateReport = async () => {
     try {
       const response = await api.get(`/report_generate`, {
         params: {
-          company_id: companyId,
+          company_id: company?.id,
           start_date: createdAt[0],
           end_date: createdAt[1],
         },
@@ -80,8 +75,8 @@ const ModalReport = ({ isOpen, onClose }) => {
               <Select
                 id="company"
                 placeholder="Selecione uma opção"
-                value={company}
-                onChange={handleCompanyChange}
+                value={company?.id}
+                disabled
                 fullWidth
               >
                 {companies.map((companyItem) => (
