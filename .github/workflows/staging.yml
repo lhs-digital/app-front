@@ -28,6 +28,7 @@ jobs:
       - name: Build
         env:
           VITE_API_URL: ${{ secrets.STG_API_URL }}
+          VITE_ENVIRONMENT: STAGING
         run: npm run build
 
       - name: Upload build artefact
