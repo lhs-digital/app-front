@@ -1,6 +1,7 @@
 import { TableChartOutlined } from "@mui/icons-material";
 import { Chip } from "@mui/material";
 import { useEffect } from "react";
+import { envMap } from "../../services/utils";
 
 const PageTitle = ({
   title,
@@ -10,7 +11,8 @@ const PageTitle = ({
   icon = <TableChartOutlined fontSize="small" />,
 }) => {
   useEffect(() => {
-    document.title = `LHS - ${title}`;
+    const environment = import.meta.env.VITE_ENVIRONMENT;
+    document.title = `${environment ? `[${envMap[environment]?.alias}] ` : ""}LHS - ${title || "Página"}`;
   }, [title]);
 
   return (
@@ -25,14 +27,23 @@ const PageTitle = ({
           {tag && (
             <Chip
               label={
-                <p className={tag === "Você tem alterações não salvas" ? "text-orange-500" : "text-neutral-500"}>
+                <p
+                  className={
+                    tag === "Você tem alterações não salvas"
+                      ? "text-orange-500"
+                      : "text-neutral-500"
+                  }
+                >
                   {tag}
                 </p>
               }
               size="small"
               variant="outlined"
               style={{
-                borderColor: tag === "Você tem alterações não salvas" ? "#f97316" : undefined,
+                borderColor:
+                  tag === "Você tem alterações não salvas"
+                    ? "#f97316"
+                    : undefined,
               }}
             />
           )}
