@@ -31,6 +31,7 @@ import { useCompany } from "../hooks/useCompany";
 import { routes } from "../routes/modules";
 import api from "../services/api";
 import { handleMode } from "../theme";
+import EnvironmentIndicator from "./components/EnvironmentIndicator";
 import Sidebar from "./components/Sidebar";
 
 const Layout = ({ children }) => {
@@ -46,15 +47,18 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
 
   // Query para buscar dados do módulo quando necessário
-  const moduleId = pathnames.find((path, index) => 
-    pathnames[index - 1] === "modulos" && path !== "criar"
+  const moduleId = pathnames.find(
+    (path, index) => pathnames[index - 1] === "modulos" && path !== "criar",
   );
-  
+
   // Query para buscar dados da tabela quando necessário
-  const tableId = pathnames.find((path, index) => 
-    pathnames[index - 2] === "modulos" && pathnames[index - 1] !== "modulos" && pathnames[index - 1] !== "criar"
+  const tableId = pathnames.find(
+    (path, index) =>
+      pathnames[index - 2] === "modulos" &&
+      pathnames[index - 1] !== "modulos" &&
+      pathnames[index - 1] !== "criar",
   );
-  
+
   const { data: moduleData } = useQuery({
     queryKey: ["module", moduleId, company],
     queryFn: async () => {
@@ -126,7 +130,7 @@ const Layout = ({ children }) => {
             <img
               src={theme === "dark" ? whiteLogo : blackLogo}
               alt="Lighthouse"
-              className="h-10 mb-1"
+              className="h-8 mb-2"
             />
             {editingCompany ? (
               <div className="min-w-[200px]">
@@ -145,7 +149,7 @@ const Layout = ({ children }) => {
                 </Select>
               </div>
             ) : (
-              <p className="text-2xl font-bold">{company?.name}</p>
+              <p className="text-xl font-bold">{company?.name}</p>
             )}
             {user && user?.isLighthouse && (
               <Tooltip
@@ -167,7 +171,8 @@ const Layout = ({ children }) => {
               </Tooltip>
             )}
           </Box>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-4 items-center">
+            <EnvironmentIndicator />
             <ThemeSwitcher />
           </div>
         </div>
@@ -202,17 +207,17 @@ const Layout = ({ children }) => {
                   matchPath({ path: r.path, end: true }, to),
                 );
                 let label = match?.label || pathnames[index];
-                
+
                 // Se o label for "Módulo" e temos dados do módulo, adicionar o nome
                 if (label === "Módulo" && moduleData?.name) {
                   label = `Módulo ${moduleData.name}`;
                 }
-                
+
                 // Se o label for "Tabelas" e temos dados da tabela, adicionar o nome
                 if (label === "Tabelas" && tableData?.name) {
                   label = `Tabela ${tableData.name}`;
                 }
-                
+
                 return (
                   <Link
                     key={to}

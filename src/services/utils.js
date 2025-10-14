@@ -346,3 +346,14 @@ export const formatInterval = (interval) => {
 
   return intervals[interval];
 };
+
+export const envMap = {
+  STAGING: {
+    label: "Ambiente de homologação",
+    alias: "HML",
+  },
+  DEVELOPMENT: {
+    label: "Ambiente de desenvolvimento",
+    alias: "DEV",
+  },
+};
