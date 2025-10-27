@@ -46,7 +46,6 @@ const AuditSection = () => {
   const theme = handleMode(useThemeMode().mode);
   const [dataLastAudit, setDataLastAudit] = useState([]);
   const { company } = useCompany();
-  const [updateInterval, setUpdateInterval] = useState("");
   const [auditModule, setAuditModule] = useState(null);
   const [chartData, setChartData] = useState({
     errorsCount: 0,
@@ -71,36 +70,10 @@ const AuditSection = () => {
         }
       }
 
-      setUpdateInterval(response.data.audit_interval);
       setDataLastAudit(response.data.last_audit_date);
     };
     fetchData();
   }, [auditModule]);
-
-  const handleIntervalChange = (event) => {
-    setUpdateInterval(event.target.value);
-    setIsConfirmModalOpen(true);
-  };
-
-  const handleClearIntervalChange = () => {
-    setUpdateInterval("");
-    setIsConfirmModalOpen(false);
-  };
-
-  const confirmIntervalChange = async () => {
-    try {
-      await api.put(`/companies/${company?.id}/update_interval`, {
-        audit_interval: updateInterval,
-      });
-      setIsConfirmModalOpen(false);
-      toast.success(
-        `Intervalo de auditoria atualizado para ${formatInterval(updateInterval)} com sucesso!`,
-      );
-    } catch (error) {
-      console.error("Erro ao atualizar o intervalo de auditoria", error);
-      toast.error("Erro ao atualizar o intervalo de auditoria");
-    }
-  };
 
   const { data: availableModules = [] } = useQuery({
     queryKey: ["company_tables", company],
@@ -205,57 +178,6 @@ const AuditSection = () => {
               </Select>
             </FormControl>
           </Card>
-          {auditModule && (
-            <Card
-              className="p-4 flex flex-col gap-2 justify-center"
-              variant="outlined"
-            >
-              <FormControl fullWidth>
-                <InputLabel id="interval">Intervalo de auditoria</InputLabel>
-                <Select
-                  value={updateInterval || ""}
-                  onChange={handleIntervalChange}
-                  label="Intervalo de auditoria"
-                >
-                  <MenuItem value={600}>10 minutos</MenuItem>
-                  <MenuItem value={1800}>30 minutos</MenuItem>
-                  <MenuItem value={3600}>1 hora</MenuItem>
-                  <MenuItem value={21600}>6 horas</MenuItem>
-                  <MenuItem value={43200}>12 horas</MenuItem>
-                  <MenuItem value={86400}>1 dia</MenuItem>
-                  <MenuItem value={604800}>1 semana</MenuItem>
-                  <MenuItem value={2592000}>1 mês</MenuItem>
-                  <MenuItem value={31536000}>1 ano</MenuItem>
-                </Select>
-              </FormControl>
-            </Card>
-          )}
-          {auditModule && (
-            <Dialog
-              open={isConfirmModalOpen}
-              onClose={() => setIsConfirmModalOpen(false)}
-              aria-labelledby="confirm-dialog-title"
-              aria-describedby="confirm-dialog-description"
-            >
-              <DialogTitle id="confirm-dialog-title">
-                Confirmar Alteração
-              </DialogTitle>
-              <DialogContent>
-                <p>
-                  Deseja confirmar a alteração do intervalo de auditoria para
-                  <strong> {formatInterval(updateInterval)}?</strong>
-                </p>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleClearIntervalChange} color="error">
-                  Cancelar
-                </Button>
-                <Button onClick={confirmIntervalChange} color="primary">
-                  Confirmar
-                </Button>
-              </DialogActions>
-            </Dialog>
-          )}
           {auditModule && (
             <Card
               className="p-4 flex flex-col gap-2 justify-center"
