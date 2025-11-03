@@ -19,6 +19,9 @@ import {
   LockOutlined,
   Person,
   PersonOutline,
+  Settings,
+  SettingsAccessibilityOutlined,
+  SettingsApplications,
   // RuleFolder,
   // RuleFolderOutlined,
   Shield,
@@ -51,6 +54,7 @@ import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
 import Logs from "../modules/lighthouse/Logs";
 import Vpns from "../modules/lighthouse/Vpns";
+import AuditConfig from "../modules/audit/AuditConfig";
 
 const auditModule = {
   label: "Auditoria",
@@ -137,7 +141,15 @@ const auditModule = {
           hidden: true,
         },
       ],
-    }
+    },
+    {
+      label: "Configurações e Logs",
+      path: "/auditorias/configuracao",
+      element: <AuditConfig />,
+      icon: Settings,
+      activeIcon: DynamicForm,
+      hidden: true,
+    },
   ],
 };
 

@@ -193,11 +193,38 @@ const AuditList = () => {
     },
   });
 
+  const { mutate: startingAudit, isPending: isStarting } = useMutation({
+    mutationFn: async () => {
+      const response = await api.post(`/companies/${company.id}/audit`);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Auditoria iniciada com sucesso.");
+      setRefresh((prev) => !prev);
+    },
+    onError: () => {
+      toast.error("Erro ao iniciar a auditoria.");
+    },
+  });
+
   return (
     <div className="flex flex-col w-full gap-6 items-center">
       <PageTitle
         icon={<AssignmentLate fontSize="small" />}
         buttons={[
+          <Tooltip
+            title={`Iniciar auditoria manualmente da empresa atual: ${company?.name}`}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={startingAudit}
+              loading={isStarting}
+              startIcon={<FileOpenOutlined />}
+            >
+              Iniciar Auditoria
+            </Button>
+          </Tooltip>,
           <Tooltip
             title="Baixar relatório com a seleção e filtros atuais"
             key="download-report"
