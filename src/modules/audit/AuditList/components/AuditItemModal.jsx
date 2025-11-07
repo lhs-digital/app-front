@@ -20,6 +20,7 @@ import {
   dateFormatted,
   formattedPriority,
   getPriorityColor,
+  formatParams,
 } from "../../../../services/utils";
 import { handleMode } from "../../../../theme";
 
@@ -60,7 +61,7 @@ const AuditItemModal = ({ item, isOpen, onClose }) => {
                     <Typography fontWeight="bold">{col?.label}</Typography>
                   </TableCell>
                   <TableCell>{col?.value || "N/A"}</TableCell>
-                  <TableCell>{col?.rule.label}</TableCell>
+                  <TableCell>{`${col?.rule.label} ${formatParams(col?.rule)}`}</TableCell>
                   <TableCell>
                     <Tooltip
                       title={`Prioridade: ${formattedPriority(+col?.priority)}`}

@@ -2,6 +2,7 @@ import {
   AssignmentLate,
   FileOpenOutlined,
   FilterList,
+  PlayCircleOutline,
   Search,
 } from "@mui/icons-material";
 import {
@@ -71,6 +72,8 @@ const AuditList = () => {
           `/companies/${company.id}/audit/modules`,
         );
         const modules = response.data.data;
+        console.log("modules", modules);
+        console.log("filters.moduleId", filters.moduleId);
         if (modules.length > 0 && !filters.moduleId) {
           updateFilters({ moduleId: modules[0].id });
         }
@@ -213,6 +216,7 @@ const AuditList = () => {
         icon={<AssignmentLate fontSize="small" />}
         buttons={[
           <Tooltip
+            key="start-audit"
             title={`Iniciar auditoria manualmente da empresa atual: ${company?.name}`}
           >
             <Button
@@ -220,7 +224,7 @@ const AuditList = () => {
               color="primary"
               onClick={startingAudit}
               loading={isStarting}
-              startIcon={<FileOpenOutlined />}
+              startIcon={<PlayCircleOutline />}
             >
               Iniciar Auditoria
             </Button>

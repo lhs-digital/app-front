@@ -40,6 +40,16 @@ const AuditItem = ({ auditRecord, onClick = () => {} }) => {
     setIsAccordionOpen((prevState) => !prevState);
   };
 
+  const getEntityIds = (data) => {
+    if (typeof data === "object" && data !== null) {
+      const keys = Object.keys(data);
+      if (keys.length === 0) {
+        return "N/A";
+      }
+      return keys.map((key) => `${key}: ${data[key]}`).join(", ");
+    }
+  };
+
   return (
     <Box
       display="flex"
@@ -104,10 +114,10 @@ const AuditItem = ({ auditRecord, onClick = () => {} }) => {
           </Tooltip>
           <div>
             <p className="text-lg">
-              AUD{auditRecord?.id.toString().padStart(4, "0")}
+              AUD{auditRecord?.id.toString().padStart(3, "0")}
             </p>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 -mt-1">
-              Entidade: #{auditRecord?.record_id}
+              {getEntityIds(auditRecord?.record_id)}
             </p>
           </div>
         </div>

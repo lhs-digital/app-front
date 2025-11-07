@@ -2,9 +2,9 @@ import {
   Add,
   Delete,
   Edit,
-  Lock,
   RemoveRedEye,
   Search,
+  Sell,
 } from "@mui/icons-material";
 import {
   Button,
@@ -137,7 +137,7 @@ const Roles = () => {
         onConfirm={handleRemove}
       />
       <PageTitle
-        icon={<Lock />}
+        icon={<Sell />}
         title="Papéis e permissões"
         subtitle="Administração e atribuição de permissões e funções de usuários"
         buttons={

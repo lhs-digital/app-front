@@ -1,35 +1,16 @@
 import { Chip, Tooltip } from "@mui/material";
 import { useThemeMode } from "../../contexts/themeModeContext";
-import { formattedPriority, getPriorityColor } from "../../services/utils";
+import {
+  formatRuleLabel,
+  formattedPriority,
+  getPriorityColor,
+} from "../../services/utils";
 import { handleMode } from "../../theme";
 
 const Validation = ({ rule, onDelete }) => {
   const { mode: themeMode } = useThemeMode();
   const theme = handleMode(themeMode);
   const colors = getPriorityColor(rule.priority, theme);
-  const formatParams = () => {
-    if (!rule.params) return null;
-    if (Array.isArray(rule.params)) {
-      return rule.params.map((param) => param.trim()).join(", ");
-    }
-    if (typeof rule.params === "string") {
-      return rule.params
-        .split(rule.validation.separator || ",")
-        .map((param) => param.trim())
-        .join(", ");
-    }
-    return rule.params;
-  };
-
-  const handleLabel = () => {
-    console.log(rule);
-    if (!rule) return null;
-    let paramsStr = formatParams();
-    if (paramsStr) {
-      return `${rule.validation.label} ${rule.validation.multiple ? `[${paramsStr}]` : `${paramsStr}`}`;
-    }
-    return rule.validation.label;
-  };
 
   return (
     <Tooltip
@@ -53,7 +34,7 @@ const Validation = ({ rule, onDelete }) => {
       }
     >
       <Chip
-        label={handleLabel()}
+        label={formatRuleLabel(rule)}
         onDelete={onDelete}
         clickable
         variant={theme === "dark" ? "outlined" : "filled"}
