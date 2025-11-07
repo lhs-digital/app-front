@@ -13,10 +13,6 @@ import {
   Button,
   Card,
   colors,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   FormControl,
   InputLabel,
   MenuItem,
@@ -28,14 +24,13 @@ import { PieChart } from "@mui/x-charts";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ModalReport from "../../../../components/ModalReport";
 import { useThemeMode } from "../../../../contexts/themeModeContext";
 import { useCompany } from "../../../../hooks/useCompany";
 import { useUserState } from "../../../../hooks/useUserState";
 import api from "../../../../services/api";
-import { dateFormatted, formatInterval } from "../../../../services/utils";
+import { dateFormatted } from "../../../../services/utils";
 import { handleMode } from "../../../../theme";
 
 const AuditSection = () => {
@@ -51,7 +46,6 @@ const AuditSection = () => {
     errorsCount: 0,
     fixedErrorsCount: 0,
   });
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     if (!auditModule) return;
@@ -219,9 +213,7 @@ const AuditSection = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() =>
-                  setIsOpen(true)
-                }
+                onClick={() => setIsOpen(true)}
               >
                 GERAR RELATÓRIO
               </Button>

@@ -1,11 +1,11 @@
 import {
   Add,
-  BusinessCenterOutlined,
   Circle,
   Delete,
   Edit,
   KeyboardArrowDown,
   KeyboardArrowUp,
+  Lock,
   Search,
   ToggleOffOutlined,
   ToggleOn,
@@ -153,7 +153,6 @@ const Vpns = () => {
       } catch (error) {
         console.error("Erro ao desativada a VPN", error);
       }
-
     } else {
       try {
         await api.post(`/vpns/${id}/run`);
@@ -163,7 +162,7 @@ const Vpns = () => {
         console.error("Erro ao ativar a VPN", error);
       }
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -189,7 +188,7 @@ const Vpns = () => {
       />
       <PageTitle
         title="VPNs"
-        icon={<BusinessCenterOutlined />}
+        icon={<Lock />}
         subtitle="Administração e controle das conexões VPN da empresa"
         buttons={
           permissions.some((per) => per.name === "create_companies") && (
@@ -256,80 +255,71 @@ const Vpns = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              data.map(
-                (
-                  {
-                    name,
-                    status,
-                    company,
-                    id
-                  },
-                  index,
-                ) => (
-                  <TableRow
-                    key={index}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleView(index)}
-                  >
-                    <TableCell> {name} </TableCell>
-                    <TableCell> {company?.name} </TableCell>
-                    <TableCell>
+              data.map(({ name, status, company, id }, index) => (
+                <TableRow
+                  key={index}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleView(index)}
+                >
+                  <TableCell> {name} </TableCell>
+                  <TableCell> {company?.name} </TableCell>
+                  <TableCell>
+                    {status === "active" ? (
+                      <Circle sx={{ color: "green", fontSize: 18 }} />
+                    ) : (
+                      <Circle sx={{ color: "red", fontSize: 18 }} />
+                    )}
+                    {status === "active" ? "Ativo" : "Inativo"}
+                  </TableCell>
+                  <TableCell className="space-x-1">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatus(id, status);
+                      }}
+                    >
                       {status === "active" ? (
-                        <Circle sx={{ color: "green", fontSize: 18 }} />
+                        <ToggleOn color="primary" />
                       ) : (
-                        <Circle sx={{ color: "red", fontSize: 18 }} />
+                        <ToggleOffOutlined color="disabled" />
                       )}
-                      {status === "active" ? "Ativo" : "Inativo"}
-                    </TableCell>
-                    <TableCell className="space-x-1">
+                    </IconButton>
+
+                    {permissions.some(
+                      (permissions) => permissions.name === "update_companies",
+                    ) ? (
                       <IconButton
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleStatus(id, status);
+                          handleEdit({
+                            name,
+                            status,
+                            company,
+                            id,
+                          });
                         }}
                       >
-                        {status === "active" ? <ToggleOn color="primary" /> : <ToggleOffOutlined color="disabled" />}
+                        <Edit />
                       </IconButton>
-
-                      {permissions.some(
-                        (permissions) =>
-                          permissions.name === "update_companies",
-                      ) ? (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit({
-                              name,
-                              status,
-                              company,
-                              id,
-                            });
-                          }}
-                        >
-                          <Edit />
-                        </IconButton>
-                      ) : null}
-                      {permissions.some(
-                        (permissions) =>
-                          permissions.name === "delete_companies",
-                      ) ? (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(id);
-                          }}
-                        >
-                          <Delete />
-                        </IconButton>
-                      ) : null}
-
-                    </TableCell>
-                  </TableRow>
-                ),
-              )
+                    ) : null}
+                    {permissions.some(
+                      (permissions) => permissions.name === "delete_companies",
+                    ) ? (
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    ) : null}
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>

@@ -19,9 +19,10 @@ import {
   LockOutlined,
   Person,
   PersonOutline,
+  Sell,
+  SellOutlined,
   Settings,
-  SettingsAccessibilityOutlined,
-  SettingsApplications,
+  SettingsOutlined,
   // RuleFolder,
   // RuleFolderOutlined,
   Shield,
@@ -29,8 +30,6 @@ import {
   Subject,
   TableChart,
   TableChartOutlined,
-  VpnLock,
-  VpnLockOutlined,
   // Web,
   // WebOutlined,
   Widgets,
@@ -49,12 +48,12 @@ import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
 // import TestPage from "../modules/base/Test";
 import { Navigate } from "react-router-dom";
+import AuditConfig from "../modules/audit/AuditConfig";
 import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
 import Logs from "../modules/lighthouse/Logs";
 import Vpns from "../modules/lighthouse/Vpns";
-import AuditConfig from "../modules/audit/AuditConfig";
 
 const auditModule = {
   label: "Auditoria",
@@ -146,8 +145,8 @@ const auditModule = {
       label: "Configurações e Logs",
       path: "/auditorias/configuracao",
       element: <AuditConfig />,
-      icon: Settings,
-      activeIcon: DynamicForm,
+      icon: SettingsOutlined,
+      activeIcon: Settings,
       hidden: true,
     },
   ],
@@ -231,8 +230,8 @@ const lighthouseModule = {
       label: "Papéis & Permissões",
       path: "/papeis",
       element: <Roles />,
-      icon: LockOutlined,
-      activeIcon: Lock,
+      icon: SellOutlined,
+      activeIcon: Sell,
       permissions: [
         "view_roles",
         "view_any_roles",
@@ -246,8 +245,8 @@ const lighthouseModule = {
           label: "Papel",
           path: "/papeis/:id",
           element: <RoleView />,
-          icon: LockOutlined,
-          activeIcon: Lock,
+          icon: SellOutlined,
+          activeIcon: Sell,
           permissions: [
             "view_roles",
             "create_roles",
@@ -263,10 +262,9 @@ const lighthouseModule = {
       label: "VPNs",
       path: "/vpns",
       element: <Vpns />,
-      icon: VpnLockOutlined,
-      activeIcon: VpnLock,
-      children: [
-      ],
+      icon: LockOutlined,
+      activeIcon: Lock,
+      children: [],
     },
   ],
 };
