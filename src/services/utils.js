@@ -357,3 +357,26 @@ export const envMap = {
     alias: "DEV",
   },
 };
+
+export const formatParams = (rule) => {
+  if (!rule.params) return null;
+  if (Array.isArray(rule.params)) {
+    return rule.params.map((param) => param.trim()).join(", ");
+  }
+  if (typeof rule.params === "string") {
+    return rule.params
+      .split(rule.validation?.separator || ",")
+      .map((param) => param.trim())
+      .join(", ");
+  }
+  return rule.params;
+};
+
+export const formatRuleLabel = (rule) => {
+  if (!rule) return null;
+  let paramsStr = formatParams(rule);
+  if (paramsStr) {
+    return `${rule.validation.label} ${rule.validation.multiple ? `[${paramsStr}]` : `${paramsStr}`}`;
+  }
+  return rule.validation.label;
+};
