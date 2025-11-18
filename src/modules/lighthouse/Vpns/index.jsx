@@ -76,11 +76,11 @@ const Vpns = () => {
   const handleRemove = async () => {
     try {
       await api.delete(`/vpns/${deleteId}`);
-      setRefresh(!refresh);
       toast.success("VPN removida com sucesso!");
       setDeleteOpen(false);
+      refetch();
     } catch (error) {
-      console.error("Erro ao remover a VPN", error);
+      toast.error("Erro ao remover a VPN", error);
     }
   };
 
