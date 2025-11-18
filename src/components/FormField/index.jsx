@@ -1,9 +1,18 @@
 import { Box, InputLabel, Skeleton } from "@mui/material";
 
-const FormField = ({ children, label, containerClass, loading, ...props }) => {
+const FormField = ({
+  children,
+  label,
+  containerClass,
+  loading,
+  required,
+  ...props
+}) => {
   return (
     <Box className={containerClass}>
-      <InputLabel {...props}>{label}</InputLabel>
+      <InputLabel {...props} className="mb-1" required={required}>
+        {label}
+      </InputLabel>
       {loading ? (
         <Skeleton
           variant="rectangular"

@@ -24,60 +24,54 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import ModalViewVPN from "./components/ModalViewVPN";
-import ModalVpn from "./components/ModalVpn";
 
 const Vpns = () => {
-  const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [viewOpen, setViewOpen] = useState(false);
   const [data, setData] = useState([]);
-  const [dataEdit, setDataEdit] = useState({});
-  const [dataView, setDataView] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
-  //eslint-disable-next-line
-  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",
   });
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
-
+  const navigate = useNavigate();
   const { permissions } = useUserState().state;
 
-  useEffect(() => {
-    const getData = async () => {
-      setLoading(true);
-      try {
-        const response = await api.get(
-          `/vpns?page=${currentPage}&per_page=${rowsPerPage}`,
-          {
-            params: {
-              search: search,
-            },
+  const {
+    data: fetchedData,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["vpns", currentPage, rowsPerPage, search, refresh],
+    queryFn: async () => {
+      return await api.get(
+        `/vpns?page=${currentPage}&per_page=${rowsPerPage}`,
+        {
+          params: {
+            search: search,
           },
-        );
-        setCurrentPage(response.data.meta.current_page);
-        setData(response.data.data);
-        setTotalCount(response.data.meta.total);
-      } catch (error) {
-        console.error("Erro ao verificar lista de empresas", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getData();
-  }, [setData, currentPage, search, refresh]);
+        },
+      );
+    },
+    keepPreviousData: true,
+    onSuccess: (response) => {
+      setCurrentPage(response.data.meta.current_page);
+      setData(response.data.data);
+      setTotalCount(response.data.meta.total);
+    },
+  });
 
   const handleRemove = async () => {
     try {
@@ -90,17 +84,6 @@ const Vpns = () => {
     }
   };
 
-  const handleEdit = (vpn) => {
-    setDataEdit(vpn);
-    setModalOpen(true);
-  };
-
-  const handleView = (index) => {
-    const selectedVPN = data;
-    setDataView(selectedVPN[index]);
-    setViewOpen(true);
-  };
-
   const handleDelete = (id) => {
     setDeleteId(id);
     setDeleteOpen(true);
@@ -110,7 +93,7 @@ const Vpns = () => {
     const direction =
       sortConfig.direction === "asc" && sortConfig.key === key ? "desc" : "asc";
 
-    const sortedData = [...data].sort((a, b) => {
+    const sortedData = fetchedData.sort((a, b) => {
       const aKey = key.split(".").reduce((acc, part) => acc && acc[part], a);
       const bKey = key.split(".").reduce((acc, part) => acc && acc[part], b);
 
@@ -166,25 +149,10 @@ const Vpns = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      <ModalVpn
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        data={data}
-        setData={setData}
-        dataEdit={dataEdit}
-        setDataEdit={setDataEdit}
-        setRefresh={setRefresh}
-        refresh={refresh}
-      />
       <ModalDelete
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleRemove}
-      />
-      <ModalViewVPN
-        selectedVpn={dataView}
-        isOpen={viewOpen}
-        onClose={() => setViewOpen(false)}
       />
       <PageTitle
         title="VPNs"
@@ -196,7 +164,7 @@ const Vpns = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => [setDataEdit({}), setModalOpen(true)]}
+                onClick={() => navigate("/vpns/nova")}
                 startIcon={<Add />}
               >
                 NOVA VPN
@@ -208,12 +176,14 @@ const Vpns = () => {
       <TextField
         fullWidth
         placeholder="Buscar VPN"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          },
         }}
         size="lg"
         value={search}
@@ -248,10 +218,16 @@ const Vpns = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.length === 0 ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={4} style={{ textAlign: "center" }}>
-                  Não existem empresas cadastradas
+                  Carregando...
+                </TableCell>
+              </TableRow>
+            ) : data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} style={{ textAlign: "center" }}>
+                  Não há VPNs cadastradas
                 </TableCell>
               </TableRow>
             ) : (
@@ -259,7 +235,7 @@ const Vpns = () => {
                 <TableRow
                   key={index}
                   style={{ cursor: "pointer" }}
-                  onClick={() => handleView(index)}
+                  onClick={() => navigate(`/vpns/${id}`)}
                 >
                   <TableCell> {name} </TableCell>
                   <TableCell> {company?.name} </TableCell>
@@ -293,12 +269,7 @@ const Vpns = () => {
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleEdit({
-                            name,
-                            status,
-                            company,
-                            id,
-                          });
+                          navigate(`/vpns/${id}/editar`);
                         }}
                       >
                         <Edit />
