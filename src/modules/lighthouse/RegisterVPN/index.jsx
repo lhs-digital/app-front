@@ -15,18 +15,23 @@ import FormField from "../../../components/FormField/index";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import { parseOVPN } from "../../../services/ovpn";
+import { createOVPNFile, parseOVPN } from "../../../services/ovpn";
 
 const RegisterVpn = () => {
   const { company } = useCompany();
   const { id } = useParams();
   const qc = useQueryClient();
-  const [fileVpn, setFileVpn] = useState(null);
   const uploadInput = useRef(null);
   const [isParsing, setIsParsing] = useState(false);
   const navigate = useNavigate();
 
-  const { register, setValue, control } = useForm({
+  const {
+    register,
+    setValue,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       name: "",
       ca_crt: "",
@@ -40,7 +45,7 @@ const RegisterVpn = () => {
     },
   });
 
-  const { data } = useQuery({
+  useQuery({
     queryKey: ["vpn", id],
     queryFn: async () => {
       const response = await api.get(`/vpns/${id}`);
@@ -51,59 +56,6 @@ const RegisterVpn = () => {
     },
     enabled: !!id,
   });
-
-  const saveData = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("company_id", company?.id);
-      formData.append("name", name);
-      formData.append("ovpn_file", fileVpn);
-
-      await api.post("/vpns", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      toast.success("VPN cadastrada com sucesso!");
-    } catch (error) {
-      console.error("Erro ao cadastrar VPN", error);
-    }
-  };
-
-  const updateUser = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("ovpn_file", fileVpn);
-      formData.append("_method", "PUT");
-
-      await api.post(`/vpns/${id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      qc.invalidateQueries(["vpn", id]);
-      toast.success("VPN alterada com sucesso!");
-    } catch (error) {
-      console.error("Erro ao alterar VPN", error);
-    }
-  };
-
-  const handleSave = () => {
-    if (!fileVpn) {
-      toast.error("Por favor, preencha todos os campos obrigatórios.");
-      return;
-    }
-
-    if (data?.id) {
-      updateUser();
-    } else {
-      saveData();
-    }
-
-    navigate(`/vpns`);
-  };
 
   const populateFormFields = (parsed) => {
     setValue("ca_crt", parsed.ca_crt);
@@ -130,7 +82,6 @@ const RegisterVpn = () => {
     try {
       reader.onload = (event) => {
         const parsed = parseOVPN(event.target.result);
-        setFileVpn(file);
         populateFormFields(parsed);
       };
       reader.readAsText(file);
@@ -139,6 +90,35 @@ const RegisterVpn = () => {
     } finally {
       setIsParsing(false);
     }
+  };
+
+  const onSubmit = async (data) => {
+    if (Object.keys(errors).length > 0) {
+      toast.error("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+    try {
+      const formData = new FormData();
+      const file = createOVPNFile(data);
+      formData.append("ovpn_file", file);
+      formData.append("company_id", company?.id);
+      formData.append("name", data.name);
+
+      const fn = id ? api.post : api.put;
+
+      await fn(`/vpns/${id || ""}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success(`VPN ${id ? "alterada" : "cadastrada"} com sucesso!`);
+    } catch (error) {
+      console.error(`Erro ao ${id ? "alterar" : "cadastrar"} VPN`, error);
+    } finally {
+      qc.invalidateQueries(["vpns"]);
+    }
+
+    navigate(id ? `/vpns/${id}` : "/vpns");
   };
 
   return (
@@ -167,7 +147,7 @@ const RegisterVpn = () => {
           </Button>,
           <Button
             key="save-button"
-            onClick={handleSave}
+            onClick={handleSubmit(onSubmit)}
             color="primary"
             variant="contained"
             startIcon={<VpnKey />}
@@ -176,7 +156,10 @@ const RegisterVpn = () => {
           </Button>,
         ]}
       />
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-1 md:grid-cols-5 gap-8"
+      >
         <FormField
           label="Nome da VPN"
           containerClass="col-span-full md:col-span-3"
@@ -285,7 +268,7 @@ const RegisterVpn = () => {
             {...register("ta_key", { required: true })}
           />
         </FormField>
-      </div>
+      </form>
     </div>
   );
 };
