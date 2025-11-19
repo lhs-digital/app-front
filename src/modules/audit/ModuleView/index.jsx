@@ -3,13 +3,14 @@ import {
   DataObject,
   Edit,
   Save,
+  Search,
   Widgets,
   ZoomIn,
   ZoomOut,
 } from "@mui/icons-material";
 import { Button, Skeleton, TextField } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -18,6 +19,7 @@ import Diagram from "../../../components/ERDiagram/Diagram";
 import { parseStructure } from "../../../components/ERDiagram/erUtility";
 import FormField from "../../../components/FormField";
 import { useCompany } from "../../../hooks/useCompany";
+import useDebounce from "../../../hooks/useDebounce";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
@@ -28,6 +30,8 @@ const ModuleForm = () => {
   const { id } = useParams();
   const { company } = useCompany();
   const location = useLocation();
+  const [search, setSearch] = useState();
+  const [filteredTables, setFilteredTables] = useState([]);
   const currentAction = location.pathname.includes("criar")
     ? "create"
     : location.pathname.includes("editar")
@@ -46,7 +50,11 @@ const ModuleForm = () => {
     retry: false,
   });
 
-  const { data: structure = [], isLoading: isLoadingStructure } = useQuery({
+  const {
+    data: structure = [],
+    isLoading: isLoadingStructure,
+    isSuccess,
+  } = useQuery({
     queryKey: ["tables", company],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
@@ -59,6 +67,20 @@ const ModuleForm = () => {
     },
     enabled: !!activeModule,
   });
+
+  const filterTables = (searchTerm) => {
+    if (!searchTerm) {
+      setFilteredTables(structure);
+      return;
+    }
+    const lowercasedTerm = searchTerm.toLowerCase();
+    const filtered = structure.filter((table) =>
+      table.name.toLowerCase().includes(lowercasedTerm),
+    );
+    setFilteredTables(filtered);
+  };
+
+  useDebounce(search, 300, filterTables);
 
   useEffect(() => {
     if (activeModule) {
@@ -143,7 +165,7 @@ const ModuleForm = () => {
         title={
           activeModule ? activeModule.name : actions[currentAction].pageTitle
         }
-        subtitle={activeModule ? activeModule.description : ""}
+        subtitle={activeModule ? activeModule.description : "Grupo de regras"}
         icon={<Widgets />}
         buttons={[
           <Button
@@ -178,7 +200,6 @@ const ModuleForm = () => {
           </FormField>
         </form>
       )}
-      {/* se for criar quero esconder o esquema  */}
       {currentAction === "create" ? null : (
         <div className="flex flex-col gap-4">
           {isLoadingStructure || isLoadingModule ? (
@@ -191,7 +212,12 @@ const ModuleForm = () => {
               </h2>
               <Skeleton
                 variant="rectangular"
-                height={360}
+                height={52}
+                className="rounded-lg"
+              />
+              <Skeleton
+                variant="rectangular"
+                height={480}
                 className="rounded-lg"
               />
             </div>
@@ -257,9 +283,22 @@ const ModuleForm = () => {
                       </div>
                     </div>
                   </div>
+                  <TextField
+                    placeholder="Pesquisar tabelas..."
+                    fullWidth
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <Search className="text-neutral-500 mr-2" />
+                        ),
+                      },
+                    }}
+                  />
                   <div className="w-full h-[62.5vh] overflow-y-hidden border border-[--border] rounded-lg grid-bg relative">
                     <Diagram
-                      data={structure}
+                      data={filteredTables}
                       isLoading={isLoadingStructure}
                       allowHover={true}
                       onSelectTable={(table) => {
