@@ -50,11 +50,7 @@ const ModuleForm = () => {
     retry: false,
   });
 
-  const {
-    data: structure = [],
-    isLoading: isLoadingStructure,
-    isSuccess,
-  } = useQuery({
+  const { data: structure = [], isLoading: isLoadingStructure } = useQuery({
     queryKey: ["tables", company],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
