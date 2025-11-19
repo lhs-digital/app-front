@@ -77,7 +77,7 @@ export const getTheme = (mode) => {
       MuiInput: {
         styleOverrides: {
           root: {
-            borderRadius: "1rem",
+            borderRadius: "0.5rem",
           },
         },
       },
@@ -93,6 +93,14 @@ export const getTheme = (mode) => {
         },
       },
       MuiInputBase: {
+        styleOverrides: {
+          root: {
+            borderRadius: "0.5rem",
+            overflow: "clip",
+          },
+        },
+      },
+      MuiOutlinedInput: {
         styleOverrides: {
           root: {
             borderRadius: "0.5rem",
