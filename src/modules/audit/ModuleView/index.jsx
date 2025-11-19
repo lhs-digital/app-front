@@ -50,7 +50,11 @@ const ModuleForm = () => {
     retry: false,
   });
 
-  const { data: structure = [], isLoading: isLoadingStructure } = useQuery({
+  const {
+    data: structure = [],
+    isLoading: isLoadingStructure,
+    isSuccess,
+  } = useQuery({
     queryKey: ["tables", company],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
@@ -77,6 +81,10 @@ const ModuleForm = () => {
   };
 
   useDebounce(search, 300, filterTables);
+
+  if (isSuccess && filteredTables.length === 0 && !search) {
+    setFilteredTables(structure);
+  }
 
   useEffect(() => {
     if (activeModule) {
