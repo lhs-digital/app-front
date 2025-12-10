@@ -25,7 +25,7 @@ const ModalReport = ({ isOpen, onClose }) => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const responseCompany = await api.get(`/companies/get_companies`);
+        const responseCompany = await api.get(`/companies/select`);
         setCompanies(responseCompany.data.data);
       } catch (error) {
         console.error("Erro ao consumir as empresas do sistema", error);

@@ -1,70 +1,178 @@
-# Getting Started with Create React App
+# App Provedores Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 
-## Available Scripts
+A modern frontend application built with React and Vite, developed by **Lighthouse Software Systems**.
+
+## 🚀 Tech Stack
+
+This project is built with the following technologies:
+
+- **[React](https://react.dev/)** - A JavaScript library for building user interfaces
+- **[Vite](https://vitejs.dev/)** - Next generation frontend tooling
+- **[Tailwind CSS](https://tailwindcss.com/)** - A utility-first CSS framework
+- **[React Hook Form](https://react-hook-form.com/)** - Performant, flexible and extensible forms with easy-to-use validation
+- **[TanStack Query](https://tanstack.com/query/latest)** - Powerful data synchronization for React
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- **Node.js** (version 18.x or higher)
+- **npm** (version 9.x or higher) or your preferred package manager
+
+You can verify your installations by running:
+
+```bash
+node --version
+npm --version
+```
+
+## 🔧 Installation
+
+Follow these steps to set up the project locally:
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd app_provedores_front
+```
+
+### 2. Install Dependencies
+
+Using npm:
+
+```bash
+npm install
+```
+
+Or using yarn:
+
+```bash
+yarn install
+```
+
+Or using pnpm:
+
+```bash
+pnpm install
+```
+
+### 3. Environment Configuration
+
+Create a `.env` file in the root directory (if needed) and configure your environment variables:
+
+```bash
+# Example .env file
+VITE_API_URL=your_api_url_here
+```
+
+### 4. Start the Development Server
+
+```bash
+npm run dev
+```
+
+Or using your preferred package manager:
+
+```bash
+your-package-manager run dev
+```
+
+The application will be available at `http://localhost:5173` (or the port specified by Vite).
+
+## 📜 Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+### `npm run dev`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Runs the app in development mode. The page will reload when you make changes.
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the app for production. The build artifacts will be stored in the `dist` folder. This command also runs TypeScript type checking.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### `npm run preview`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Preview the production build locally. This command serves the built application from the `dist` folder.
 
-### `npm run eject`
+### `npm run format`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Format code using Prettier. This will format all JavaScript, JSX, TypeScript, and TSX files in the `src` directory.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### `npm run lint`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Run ESLint to check for code quality issues and potential bugs in the codebase.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🏗️ Project Structure
 
-## Learn More
+```
+app_provedores_front/
+├── public/          # Static assets
+├── src/             # Source code
+│   ├── assets/      # Assets
+│   ├── components/  # Reusable components
+│   ├── contexts/    # Custom contexts
+│   ├── hooks/       # Custom hooks
+│   ├── layout/      # Layout components
+│   ├── modules/     # Feature modules
+│   ├── routes/      # Routes
+│   ├── services/    # API services and utilities
+│   └── theme/       # MUI theme
+├── .env             # Environment variables
+├── vite.config.js   # Vite configuration
+├── tailwind.config.js # Tailwind CSS configuration
+└── package.json     # Project dependencies
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🛠️ Development
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Code Formatting
 
-### Code Splitting
+This project uses Prettier for code formatting. Run the formatter before committing:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+npm run format
+```
 
-### Analyzing the Bundle Size
+### Linting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+ESLint is configured to maintain code quality. Check for linting errors:
 
-### Making a Progressive Web App
+```bash
+npm run lint
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📦 Build for Production
 
-### Advanced Configuration
+To create a production build:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+npm run build
+```
 
-### Deployment
+The optimized production build will be in the `dist` directory, ready to be deployed.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 📄 License
 
-### `npm run build` fails to minify
+This project is private and proprietary to Lighthouse Software Systems.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 👥 Developed By
+
+**Lighthouse Software Systems**
+
+---
+
+For more information about the technologies used in this project:
+
+- [React Documentation](https://react.dev/)
+- [Vite Documentation](https://vitejs.dev/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [React Hook Form Documentation](https://react-hook-form.com/)
+- [TanStack Query Documentation](https://tanstack.com/query/latest)

@@ -15,7 +15,7 @@ const ContextSelect = ({ company, table, setTable }) => {
   // const { data: companies } = useQuery({
   //   queryKey: ["companies"],
   //   queryFn: async () => {
-  //     const response = await api.get("/companies/get_companies");
+  //     const response = await api.get("/companies/select");
   //     return response.data.data;
   //   },
   //   enabled: isLighthouse,

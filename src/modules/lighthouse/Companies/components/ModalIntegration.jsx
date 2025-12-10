@@ -32,7 +32,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
   useEffect(() => {
     const getCompanies = async () => {
       try {
-        const responseCompany = await api.get(`/companies/get_companies`);
+        const responseCompany = await api.get(`/companies/select`);
         setCompanies(responseCompany?.data?.data);
         console.log("Empresas:", responseCompany?.data?.data);
       } catch (error) {
@@ -83,7 +83,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
 
   const saveData = async (integrationData) => {
     try {
-      await api.put(`/companies/${company}/update_connection`, integrationData);
+      await api.put(`/companies/{company}/connection`, integrationData);
 
       setRefresh((prev) => !prev);
       toast.success("Integração configurada com sucesso!");

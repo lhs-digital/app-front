@@ -10,10 +10,14 @@ const PageTitle = ({
   buttons = <></>,
   icon = <TableChartOutlined fontSize="small" />,
 }) => {
+
   useEffect(() => {
     const environment = import.meta.env.VITE_ENVIRONMENT;
-    document.title = `${environment ? `[${envMap[environment]?.alias}] ` : ""}LHS - ${title || "Página"}`;
+    const alias = environment && envMap[environment] ? envMap[environment].alias : null;
+
+    document.title = `${alias ? `[${alias}] ` : ""}LHS - ${title || "Página"}`;
   }, [title]);
+
 
   return (
     <div className="flex flex-row items-center justify-between w-full">
