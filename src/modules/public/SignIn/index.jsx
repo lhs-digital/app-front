@@ -65,6 +65,7 @@ const SignIn = () => {
 
     if (!email || !password) {
       toast.warning("Preencha o email e a senha para acessar o sistema!");
+      setLoading(false);
       return;
     }
 
