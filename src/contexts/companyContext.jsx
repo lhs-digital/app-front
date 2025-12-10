@@ -39,8 +39,13 @@ export const CompanyContextProvider = ({ children }) => {
         if (!user?.isLighthouse) {
           return user?.company ? [user.company] : [];
         }
-        
+
         const response = await api.get("/companies");
+
+        if (user?.isLighthouse) {
+          return response.data.data;
+        }
+
         return response.data.data.filter((company) => company.id !== 1);
       },
       enabled: !!user,
