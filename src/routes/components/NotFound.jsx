@@ -42,28 +42,10 @@ export function NotFound() {
             startIcon={<Home />}
             onClick={() => navigate("/")}
             fullWidth
-            sx={{
-              borderRadius: "12px",
-              padding: "12px",
-              fontSize: "16px",
-              fontWeight: 600,
-              textTransform: "none",
-            }}
           >
             Voltar para o início
           </Button>
-          <Button
-            variant="outlined"
-            onClick={() => navigate(-1)}
-            fullWidth
-            sx={{
-              borderRadius: "12px",
-              padding: "12px",
-              fontSize: "16px",
-              fontWeight: 600,
-              textTransform: "none",
-            }}
-          >
+          <Button variant="outlined" onClick={() => navigate(-1)} fullWidth>
             Voltar
           </Button>
         </div>
