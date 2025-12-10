@@ -44,13 +44,14 @@ import ModalUser from "./components/ModalUser";
 
 const Users = () => {
   const [modalState, setModalState] = useState({
-    type: null, // 'user' | 'hierarchy' | 'delete'
+    type: null,
+    mode: "create",
     isOpen: false,
   });
 
   const [userModal, setUserModal] = useState({
     user: null,
-    viewOnly: false,
+    mode: "create",
   });
 
   const [hierarchyState, setHierarchyState] = useState({
@@ -107,7 +108,6 @@ const Users = () => {
     },
   });
 
-  // Derive sorted data from query data and sort config
   const sortedData = useMemo(() => {
     const users = data?.data || [];
     return [...users].sort((a, b) => {
@@ -148,12 +148,12 @@ const Users = () => {
   });
 
   const handleEdit = (index) => {
-    setUserModal({ user: sortedData[index], viewOnly: false });
+    setUserModal({ user: sortedData[index], mode: "edit" });
     setModalState({ type: "user", isOpen: true });
   };
 
   const handleView = (index) => {
-    setUserModal({ user: sortedData[index], viewOnly: true });
+    setUserModal({ user: sortedData[index], mode: "view" });
     setModalState({ type: "user", isOpen: true });
   };
 
@@ -271,6 +271,7 @@ const Users = () => {
       />
       <ModalDelete
         isOpen={modalState.type === "delete" && modalState.isOpen}
+        message="Você tem certeza que deseja excluir este usuário?"
         onClose={() => {
           setModalState({ type: null, isOpen: false });
           setDeleteId(null);
@@ -281,9 +282,8 @@ const Users = () => {
         selectedUser={userModal.user}
         isOpen={modalState.type === "user" && modalState.isOpen}
         onClose={() => setModalState({ type: null, isOpen: false })}
-        viewOnly={userModal.viewOnly}
+        mode={userModal.mode}
         data={sortedData}
-        setRefresh={() => queryClient.invalidateQueries(["users"])}
       />
       <PageTitle
         title="Usuários"
@@ -311,7 +311,7 @@ const Users = () => {
             ) && (
               <Button
                 onClick={() => {
-                  setUserModal({ user: {}, viewOnly: false });
+                  setUserModal({ user: {}, mode: "create" });
                   setModalState({ type: "user", isOpen: true });
                 }}
                 variant="contained"

@@ -1,3 +1,4 @@
+import { Save } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -19,21 +20,11 @@ import { useCompany } from "../../../../hooks/useCompany";
 import { useUserState } from "../../../../hooks/useUserState";
 import api from "../../../../services/api";
 
-const ModalUser = ({
-  selectedUser,
-  isOpen,
-  onClose,
-  viewOnly = false,
-  setRefresh,
-  data = [],
-}) => {
+const ModalUser = ({ selectedUser, mode, isOpen, onClose, data = [] }) => {
   const user = useAuthUser();
   const { state: userState } = useUserState();
   const { company, availableCompanies } = useCompany();
   const qc = useQueryClient();
-
-  // Determine mode: create, edit, or view
-  const mode = selectedUser ? (viewOnly ? "view" : "edit") : "create";
 
   const {
     control,
@@ -53,7 +44,6 @@ const ModalUser = ({
 
   const watchedCompany = watch("company");
 
-  // Determine which company ID to use for roles
   const companyIdForRoles =
     mode === "create"
       ? watchedCompany || company?.id
@@ -61,7 +51,6 @@ const ModalUser = ({
         ? watchedCompany || selectedUser?.company?.id
         : user.company?.id || selectedUser?.company?.id;
 
-  // Fetch roles based on company
   const { data: roles = [], isLoading } = useQuery({
     queryKey: ["roles", companyIdForRoles],
     queryFn: async () => {
@@ -73,7 +62,6 @@ const ModalUser = ({
     enabled: !!companyIdForRoles && isOpen,
   });
 
-  // Reset form when modal opens or selectedUser changes
   useEffect(() => {
     if (isOpen) {
       if (mode === "create") {
@@ -94,15 +82,13 @@ const ModalUser = ({
     }
   }, [isOpen, selectedUser, mode, company, reset]);
 
-  // Set company when it's available and user is not lighthouse (create mode)
   useEffect(() => {
     if (mode === "create" && company?.id && !userState?.isLighthouse) {
       setValue("company", company.id);
     }
   }, [mode, company, userState?.isLighthouse, setValue]);
 
-  // Mutation for creating user
-  const createUserMutation = useMutation({
+  const { mutate: createUser, isPending: createUserPending } = useMutation({
     mutationFn: async (formData) => {
       return api.post("/users", {
         name: formData.name,
@@ -127,8 +113,7 @@ const ModalUser = ({
     },
   });
 
-  // Mutation for updating user
-  const updateUserMutation = useMutation({
+  const { mutate: updateUser, isPending: updateUserPending } = useMutation({
     mutationFn: async (formData) => {
       const payload = {
         name: formData.name,
@@ -144,7 +129,6 @@ const ModalUser = ({
     },
     onSuccess: () => {
       qc.invalidateQueries(["users"]);
-      setRefresh((prev) => !prev);
       toast.success("Usuário editado com sucesso!");
       onClose();
     },
@@ -159,9 +143,9 @@ const ModalUser = ({
 
   const onSubmit = (formData) => {
     if (mode === "create") {
-      createUserMutation.mutate(formData);
+      createUser(formData);
     } else {
-      updateUserMutation.mutate(formData);
+      updateUser(formData);
     }
   };
 
@@ -171,9 +155,6 @@ const ModalUser = ({
     }
     return false;
   };
-
-  const isPending =
-    createUserMutation.isPending || updateUserMutation.isPending;
 
   const getTitle = () => {
     switch (mode) {
@@ -325,16 +306,23 @@ const ModalUser = ({
         </form>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={isPending}>
+        <Button
+          onClick={onClose}
+          color={mode === "create" ? "error" : "default"}
+          disabled={createUserPending || updateUserPending}
+        >
           {mode === "view" ? "Fechar" : "Cancelar"}
         </Button>
         {mode !== "view" && (
           <Button
             color="primary"
+            variant="contained"
             onClick={handleSubmit(onSubmit)}
-            disabled={isPending}
+            disabled={createUserPending || updateUserPending}
+            loading={createUserPending || updateUserPending}
+            startIcon={<Save fontSize="small" />}
           >
-            {isPending ? "Salvando..." : "Salvar"}
+            {mode === "create" ? "Cadastrar" : "Salvar"}
           </Button>
         )}
       </DialogActions>
