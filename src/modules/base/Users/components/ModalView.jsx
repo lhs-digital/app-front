@@ -28,7 +28,7 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
     const getData = async () => {
       try {
         if (user.isLighthouse) {
-          const responseCompany = await api.get(`/companies/get_companies`);
+          const responseCompany = await api.get(`/companies/select`);
           setCompanies(responseCompany?.data?.data);
 
           const responseRole = await api.get(`/roles/roles_from_company`, {
@@ -36,7 +36,7 @@ const ModalView = ({ selectedUser, isOpen, onClose, viewOnly, setRefresh }) => {
           });
           setRoles(responseRole?.data?.data);
         } else {
-          const responseCompany = await api.get(`/companies/get_companies`);
+          const responseCompany = await api.get(`/companies/select`);
           setCompanies(responseCompany?.data?.data);
 
           const responseRole = await api.get(`/roles/roles_from_company`, {

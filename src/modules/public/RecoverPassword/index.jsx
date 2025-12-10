@@ -55,7 +55,7 @@ const RecoverPassword = () => {
         <Button variant="contained" fullWidth type="submit">
           Enviar Código
         </Button>
-        <Link to="/public" className="mt-4 text-center">
+        <Link to="/" className="mt-4 text-center">
           Já possui uma conta? Acessar
         </Link>
       </form>
