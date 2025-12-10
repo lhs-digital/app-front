@@ -17,8 +17,8 @@ import {
   HomeOutlined,
   Lock,
   LockOutlined,
-  Person,
-  PersonOutline,
+  People,
+  PeopleOutlined,
   Sell,
   SellOutlined,
   Settings,
@@ -53,6 +53,7 @@ import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
 import Logs from "../modules/lighthouse/Logs";
+import RegisterVpn from "../modules/lighthouse/RegisterVPN";
 import Vpns from "../modules/lighthouse/Vpns";
 
 const auditModule = {
@@ -203,19 +204,11 @@ const lighthouseModule = {
       ],
     },
     {
-      label: "Logs",
-      path: "/logs",
-      element: <Logs />,
-      icon: Subject,
-      activeIcon: Subject,
-      permissions: ["view_any_logs"],
-    },
-    {
       label: "Usuários",
       path: "/usuarios",
       element: <Users />,
-      icon: PersonOutline,
-      activeIcon: Person,
+      icon: PeopleOutlined,
+      activeIcon: People,
       permissions: [
         "view_users",
         "view_any_users",
@@ -264,7 +257,40 @@ const lighthouseModule = {
       element: <Vpns />,
       icon: LockOutlined,
       activeIcon: Lock,
-      children: [],
+      children: [
+        {
+          label: "Registrar VPN",
+          path: "/vpns/nova",
+          element: <RegisterVpn />,
+          icon: LockOutlined,
+          activeIcon: Lock,
+          hidden: true,
+        },
+        {
+          label: "Ver VPN",
+          path: "/vpns/:id",
+          element: <RegisterVpn />,
+          icon: LockOutlined,
+          activeIcon: Lock,
+          hidden: true,
+        },
+        {
+          label: "Editar VPN",
+          path: "/vpns/:id/editar",
+          element: <RegisterVpn />,
+          icon: LockOutlined,
+          activeIcon: Lock,
+          hidden: true,
+        },
+      ],
+    },
+    {
+      label: "Logs",
+      path: "/logs",
+      element: <Logs />,
+      icon: Subject,
+      activeIcon: Subject,
+      permissions: ["view_any_logs"],
     },
   ],
 };

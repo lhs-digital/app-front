@@ -1,5 +1,13 @@
-import { Button, Checkbox, TextField, Tooltip } from "@mui/material";
+import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
+import {
+  Button,
+  Checkbox,
+  IconButton,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
 import { useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,6 +22,7 @@ const SignIn = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const isAuthenticated = useIsAuthenticated();
   const [rememberMe, setRememberMe] = useState(false);
   const [companyPickerOpen, setCompanyPickerOpen] = useState(
@@ -22,9 +31,14 @@ const SignIn = () => {
   const signIn = useSignIn();
   const navigate = useNavigate();
   const { setUserState } = useUserState();
+  const authUser = useAuthUser();
 
   const handleRememberMeChange = () => {
     setRememberMe(!rememberMe);
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   const onCompanyPickerClose = (success = false) => {
@@ -33,10 +47,15 @@ const SignIn = () => {
       navigate("/painel");
       setCompanyPickerOpen(false);
     } else {
-      toast.error("Selecione uma empresa para continuar.");
-      setTimeout(() => {
-        setCompanyPickerOpen(true);
-      }, 1000);
+      if (authUser?.isLighthouse) {
+        navigate("/painel");
+        setCompanyPickerOpen(false);
+      } else {
+        toast.error("Selecione uma empresa para continuar.");
+        setTimeout(() => {
+          setCompanyPickerOpen(true);
+        }, 1000);
+      }
     }
   };
 
@@ -46,6 +65,7 @@ const SignIn = () => {
 
     if (!email || !password) {
       toast.warning("Preencha o email e a senha para acessar o sistema!");
+      setLoading(false);
       return;
     }
 
@@ -62,7 +82,12 @@ const SignIn = () => {
         })
       ) {
         setUserState(formattedUser);
-        setCompanyPickerOpen(true);
+
+        if (formattedUser.isLighthouse) {
+          navigate("/painel");
+        } else {
+          setCompanyPickerOpen(true);
+        }
       } else {
         toast.error("Ocorreu um erro ao realizar login.");
       }
@@ -79,7 +104,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="relative bg-black flex flex-col items-center justify-center h-screen gap-8">
+    <div className="relative bg-black flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
       {companyPickerOpen && (
         <CompanyPicker
           open={companyPickerOpen}
@@ -89,57 +114,108 @@ const SignIn = () => {
       <div className="absolute login-bg top-0 left-0 w-screen h-screen opacity-40 grayscale" />
       <form
         onSubmit={login}
-        className={`z-20 ${companyPickerOpen && "hidden"} bg-[--background-color] shadow-lg shadow-white/50 flex flex-col gap-4 w-[95vw] sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 border p-8 rounded-lg`}
+        className={`z-20 ${companyPickerOpen && "hidden"} dark:bg-black/75 bg-white/75 backdrop-blur-sm shadow-2xl shadow-black/50 flex flex-col gap-6 w-[95vw] sm:w-[450px] border border-black/10 dark:border-white/10 p-10 rounded-2xl`}
       >
-        <h1 className="text-2xl">Entrar</h1>
-        <TextField
-          disabled={loading}
-          fullWidth
-          type="email"
-          placeholder="Digite o seu email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-        />
-        <TextField
-          disabled={loading}
-          fullWidth
-          type="password"
-          placeholder="********"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-        />
-        <div className="flex flex-row items-center">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center gap-4 mb-2">
+          <div className="flex items-center justify-center w-16 h-16 bg-white rounded-full p-3 shadow-lg">
+            <img
+              src={Lighthouse}
+              alt="Lighthouse"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-1">Bem-vindo ao Lighthouse</h1>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              Entre com suas credenciais para acessar a plataforma.
+            </p>
+          </div>
+        </div>
+
+        {/* Form Fields */}
+        <div className="flex flex-col gap-5">
+          <TextField
+            disabled={loading}
+            fullWidth
+            type="email"
+            label="Email"
+            placeholder="email@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            variant="outlined"
+          />
+          <TextField
+            disabled={loading}
+            fullWidth
+            type={showPassword ? "text" : "password"}
+            label="Senha"
+            placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="password"
+            variant="outlined"
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                      size="small"
+                      disabled={loading}
+                    >
+                      {showPassword ? (
+                        <VisibilityOffOutlined fontSize="small" />
+                      ) : (
+                        <VisibilityOutlined fontSize="small" />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        </div>
+
+        {/* Remember Me */}
+        <div className="flex flex-row items-center -mt-2">
           <Checkbox
             disabled={loading}
             id="rememberMe"
             checked={rememberMe}
             onChange={handleRememberMeChange}
+            size="small"
           />
-          <label className="mt-0.5" htmlFor="rememberMe">
+          <label
+            className="text-sm cursor-pointer select-none"
+            htmlFor="rememberMe"
+          >
             Mantenha-me conectado por 7 dias
           </label>
         </div>
+
+        {/* Submit Button */}
         <Button variant="contained" fullWidth type="submit" loading={loading}>
-          ENTRAR
+          Entrar
         </Button>
-        <Link to="/recover-password" className="mt-4 text-center">
-          Esqueceu sua senha? <span className="underline">Recuperar senha</span>
+
+        {/* Forgot Password Link */}
+        <Link
+          to="/recover-password"
+          className="text-center text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary dark:hover:text-primary-light transition-colors"
+        >
+          Esqueceu sua senha?{" "}
+          <span className="underline font-medium">Recuperar senha</span>
         </Link>
       </form>
-      <div className="absolute bottom-2 text-xs text-white">
-        &copy; {new Date().getFullYear()} Lighthouse
+
+      {/* Footer */}
+      <div className="absolute bottom-4 text-xs text-white/80 z-10">
+        &copy; {new Date().getFullYear()} Lighthouse Software Systems
       </div>
-      <Tooltip
-        title="Powered by Lighthouse Software Systems"
-        arrow
-        placement="left"
-      >
-        <div className="absolute shadow-md shadow-white/50 flex flex-col items-center justify-center bottom-10 right-10 text-white bg-white aspect-square px-3 rounded-full">
-          <img src={Lighthouse} alt="Lighthouse" className="w-8 h-8 mb-1" />
-        </div>
-      </Tooltip>
     </div>
   );
 };

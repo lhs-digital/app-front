@@ -6,6 +6,7 @@ import PickCompany from "../modules/public/PickCompany";
 import RecoverPassword from "../modules/public/RecoverPassword";
 import SignIn from "../modules/public/SignIn";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { NotFound } from "./components/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
 import { routes } from "./modules";
@@ -54,5 +55,9 @@ export const AppRoutes = createBrowserRouter([
     path: "/logout",
     element: <Logout />,
     errorElement: <ErrorBoundary />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);

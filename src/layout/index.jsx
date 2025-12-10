@@ -46,12 +46,10 @@ const Layout = ({ children }) => {
   const user = useAuthUser();
   const navigate = useNavigate();
 
-  // Query para buscar dados do módulo quando necessário
   const moduleId = pathnames.find(
     (path, index) => pathnames[index - 1] === "modulos" && path !== "criar",
   );
 
-  // Query para buscar dados da tabela quando necessário
   const tableId = pathnames.find(
     (path, index) =>
       pathnames[index - 2] === "modulos" &&
@@ -90,11 +88,11 @@ const Layout = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (!company) {
+    if (!company && !user?.isLighthouse) {
       navigate("/painel");
       setEditingCompany(false);
     }
-  }, [company]);
+  }, [company, user]);
 
   const onCompanyChangeClick = () => {
     if (!editingCompany) {
@@ -149,7 +147,9 @@ const Layout = ({ children }) => {
                 </Select>
               </div>
             ) : (
-              <p className="text-xl font-bold">{company?.name}</p>
+              <p className="text-xl font-bold">
+                {company?.name || (user?.isLighthouse ? "Lighthouse" : "")}
+              </p>
             )}
             {user && user?.isLighthouse && (
               <Tooltip
@@ -208,12 +208,10 @@ const Layout = ({ children }) => {
                 );
                 let label = match?.label || pathnames[index];
 
-                // Se o label for "Módulo" e temos dados do módulo, adicionar o nome
                 if (label === "Módulo" && moduleData?.name) {
                   label = `Módulo ${moduleData.name}`;
                 }
 
-                // Se o label for "Tabelas" e temos dados da tabela, adicionar o nome
                 if (label === "Tabelas" && tableData?.name) {
                   label = `Tabela ${tableData.name}`;
                 }
@@ -230,7 +228,7 @@ const Layout = ({ children }) => {
               })}
             </Breadcrumbs>
           )}
-          {editingCompany ? (
+          {editingCompany && !user?.isLighthouse ? (
             <div className="flex flex-col gap-4 items-center justify-center h-[calc(100vh-4rem)]">
               <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 Selecione uma empresa para continuar

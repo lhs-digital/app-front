@@ -1,4 +1,10 @@
-import { Close } from "@mui/icons-material";
+import {
+  Close,
+  GroupAdd,
+  GroupRemove,
+  Groups,
+  PersonOffOutlined,
+} from "@mui/icons-material";
 import {
   Autocomplete,
   Box,
@@ -15,8 +21,8 @@ import {
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
-import api from "../../../../services/api";
 import { useCompany } from "../../../../hooks/useCompany";
+import api from "../../../../services/api";
 
 const ModalHierarchy = ({
   isOpen,
@@ -26,7 +32,7 @@ const ModalHierarchy = ({
   viewHierarchy,
   setViewHierarchy,
   setRefresh,
-  responsibleHierarchy
+  responsibleHierarchy,
 }) => {
   const [responsibleUser, setResponsibleUser] = useState(null);
   const [eligibleResponsibleUsers, setEligibleResponsibleUsers] = useState([]);
@@ -35,10 +41,32 @@ const ModalHierarchy = ({
   const user = useAuthUser();
   const { company } = useCompany();
 
+  const operationStyle = {
+    view: {
+      icon: <Groups />,
+      title: "Visualizar equipe",
+      description: "Visualize os membros da equipe e seus responsáveis.",
+    },
+    remove: {
+      icon: <GroupRemove />,
+      title: "Remover membro",
+      description: "Remova um membro da equipe.",
+    },
+    add: {
+      icon: <GroupAdd />,
+      title: "Adicionar membro",
+      description: "Vincule um membro à equipe.",
+    },
+  };
+
+  const operation = viewHierarchy ? "view" : desHierarchy ? "remove" : "add";
+
   // fetchelegibleResposibleUsers
   const fetchEligibleResponsibleUsers = async () => {
     try {
-      const response = await api.get(`/users/potential-responsibles?companyId=${company?.id}`);
+      const response = await api.get(
+        `/users/potential-responsibles?companyId=${company?.id}`,
+      );
       const formattedUsers = response.data?.flatMap((responsible) =>
         responsible.users.map((user) => ({
           id: user.id,
@@ -63,7 +91,6 @@ const ModalHierarchy = ({
 
       const response = await api.get(endpoint);
 
-
       const formattedSubordinates = response.data?.flatMap((role) =>
         role.users.map((user) => ({
           id: user.id,
@@ -79,7 +106,9 @@ const ModalHierarchy = ({
 
   const fetchMySubordinates = async () => {
     try {
-      const response = await api.get(`/users/my-subordinates?userId=${responsibleHierarchy?.id}`);
+      const response = await api.get(
+        `/users/my-subordinates?userId=${responsibleHierarchy?.id}`,
+      );
       const formattedSubordinates = response.data?.flatMap((role) =>
         role.users.map((user) => ({
           id: user.id,
@@ -116,19 +145,23 @@ const ModalHierarchy = ({
 
       const payload = desHierarchy
         ? {
-          responsible_user_id: user.isLighthouse ? responsibleUser?.id : user?.id,
-          target_user_ids: targetUserIds
-        }
+            responsible_user_id: user.isLighthouse
+              ? responsibleUser?.id
+              : user?.id,
+            target_user_ids: targetUserIds,
+          }
         : {
-          responsible_user_id: user.isLighthouse ? responsibleUser?.id : user?.id,
-          target_user_ids: targetUserIds,
-        };
+            responsible_user_id: user.isLighthouse
+              ? responsibleUser?.id
+              : user?.id,
+            target_user_ids: targetUserIds,
+          };
 
       const endpoint = desHierarchy
         ? "/users/unassign-responsible"
         : "/users/assign-responsible";
 
-      const response = await api.post(endpoint, payload);
+      await api.post(endpoint, payload);
 
       const successMessage = desHierarchy
         ? `Usuários desvinculados com sucesso: ${targetUserNames}`
@@ -145,28 +178,22 @@ const ModalHierarchy = ({
 
         if (apiErrors) {
           Object.values(apiErrors).forEach((err) => {
-            console.log("Toast erro (apiErrors):", err);
             toast.error(err);
           });
 
-          toast.error(apiErrors)
+          toast.error(apiErrors);
         } else if (apiMessage) {
-          console.log("Toast erro (apiMessage):", apiMessage);
           toast.error(apiMessage);
         } else {
-          console.log("Toast erro (default)");
           toast.error("Erro ao processar a solicitação. Tente novamente.");
         }
 
         if (error?.message) {
-          console.log("Toast erro (message):", error.message);
           toast.error(apiMessage);
         }
       } else {
         toast.error("Erro ao conectar ao servidor. Tente novamente.");
       }
-
-      // console.error("Errdo:", error);
     }
   };
 
@@ -181,58 +208,68 @@ const ModalHierarchy = ({
   };
 
   const handleClose = () => {
-    setResponsibleUser(null);
-    setDesHierarchy(false);
-    setViewHierarchy(false);
-    setAssociatedUsers([]);
-    setDesHierarchy(false);
-    setViewHierarchy(false);
-    setEligibleSubordinates([]);
     onClose();
+    setTimeout(() => {
+      setEligibleSubordinates([]);
+      setResponsibleUser(null);
+      setAssociatedUsers([]);
+      setDesHierarchy(false);
+      setViewHierarchy(false);
+    }, 100);
   };
 
   return (
     <Dialog open={isOpen} onClose={handleClose}>
       <DialogTitle>
-        {viewHierarchy
-          ? "Membros da equipe"
-          : desHierarchy
-            ? "Remover membros de uma equipe"
-            : "Vincular membros em uma equipe"}
+        <div className="flex flex-row gap-2">
+          {operationStyle[operation].icon}
+          <h2>{operationStyle[operation].title}</h2>
+        </div>
+        <p className="text-sm text-neutral-500">
+          {operationStyle[operation].description}
+        </p>
       </DialogTitle>
-      {console.log(responsibleHierarchy?.id)}
       <DialogContent className="w-[480px] flex flex-col gap-4">
         {viewHierarchy ? (
           <Box>
             {associatedUsers.length === 0 ? (
-              <span>Não há usuários na sua equipe.</span>
+              <div className="flex flex-col gap-2 py-4 items-center justify-center border-2 border-neutral-700 rounded-md border-dashed">
+                <PersonOffOutlined fontSize="large" color="disabled" />
+                <p className="text-sm text-neutral-400">
+                  Não há usuários na sua equipe.
+                </p>
+              </div>
             ) : (
               <>
                 <Typography variant="subtitle2" gutterBottom>
                   Responsável pela Equipe
                 </Typography>
-                    <Chip
-                      key={responsibleHierarchy?.id}
-                      label={responsibleHierarchy?.name}
-                      color="primary"
-                      style={{ margin: '4px' }}
-                    />
+                <Chip
+                  key={responsibleHierarchy?.id}
+                  label={responsibleHierarchy?.name}
+                  color="primary"
+                  style={{ margin: "4px" }}
+                />
               </>
             )}
 
             {/* Se houver membros */}
-            {associatedUsers.some((user) => user.role !== 'leader') && (
+            {associatedUsers.some((user) => user.role !== "leader") && (
               <>
-                <Typography variant="subtitle2" gutterBottom sx={{ marginTop: 2 }}>
+                <Typography
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{ marginTop: 2 }}
+                >
                   Membros da Equipe
                 </Typography>
                 {associatedUsers
-                  .filter((user) => user.role !== 'leader')
+                  .filter((user) => user.role !== "leader")
                   .map((user) => (
                     <Chip
                       key={user.id}
                       label={user.name}
-                      style={{ margin: '4px' }}
+                      style={{ margin: "4px" }}
                     />
                   ))}
               </>
@@ -241,11 +278,8 @@ const ModalHierarchy = ({
         ) : (
           <>
             {
-
               <Box>
-                <InputLabel>
-                  Selecione o usuário responsável
-                </InputLabel>
+                <InputLabel>Selecione o usuário responsável</InputLabel>
                 <Autocomplete
                   options={eligibleResponsibleUsers}
                   value={responsibleUser}
@@ -263,15 +297,12 @@ const ModalHierarchy = ({
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      placeholder={
-                        "Selecione um usuário responsável da equipe"
-                      }
+                      placeholder={"Selecione um usuário responsável da equipe"}
                       fullWidth
                     />
                   )}
                 />
               </Box>
-
             }
             <Box>
               <InputLabel>

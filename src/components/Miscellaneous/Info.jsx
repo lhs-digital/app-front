@@ -10,12 +10,12 @@ const Info = ({ description }) => {
     >
       <button
         type="button"
-        className="aspect-square rounded-full hover:bg-[--border] mx-1 p-1 transition-all ease-in-out duration-200"
+        className="aspect-square rounded-full hover:bg-[--border] p-1 flex items-center justify-center transition-all ease-in-out duration-200"
         onClick={() => {}}
       >
         <InfoOutlined
           fontSize="16px"
-          className="mx-auto mb-2 text-[--foreground-color]"
+          className="mx-auto text-[--foreground-color]"
         />
       </button>
     </Tooltip>

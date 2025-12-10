@@ -81,7 +81,7 @@ const Sidebar = ({ open, setOpen }) => {
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
   const isActive = (url) => window.location.pathname === url;
-  const { setCompany } = useCompany();
+  const { setCompany, company } = useCompany();
 
   const handleLogout = async () => {
     signOut();
@@ -179,6 +179,10 @@ const Sidebar = ({ open, setOpen }) => {
         item?.permissions.length > 0 &&
         !hasPermission(item?.permissions)
       ) {
+        return null;
+      }
+
+      if (item.label === "Auditoria" && !company) {
         return null;
       }
 

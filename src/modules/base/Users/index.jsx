@@ -5,13 +5,15 @@ import {
   ExpandLess,
   ExpandMore,
   Groups,
-  Person,
+  People,
+  PeopleAltOutlined,
   Search,
 } from "@mui/icons-material";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import GroupRemoveIcon from "@mui/icons-material/GroupRemove";
 import {
   Button,
+  CircularProgress,
   IconButton,
   InputAdornment,
   ListItemIcon,
@@ -29,198 +31,185 @@ import {
   TextField,
   useMediaQuery,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
+import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import ModalComp from "./components/ModalComp";
 import ModalHierarchy from "./components/ModalHierarchy";
-import ModalView from "./components/ModalView";
+import ModalUser from "./components/ModalUser";
 
 const Users = () => {
-  const [viewOnly, setViewOnly] = useState(false);
-  const [data, setData] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [dataEdit, setDataEdit] = useState({});
-  const [dataView, setDataView] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [refresh, setRefresh] = useState(false);
-  const [search, setSearch] = useState("");
-  const [deleteId, setDeleteId] = useState(null);
-  const [desHierarchy, setDesHierarchy] = useState(false);
-  const [viewHierarchy, setViewHierarchy] = useState(false);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isHierarchyOpen, setIsHierarchyOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [responsible, setResponsible] = useState();
+  const [modalState, setModalState] = useState({
+    type: null,
+    mode: "create",
+    isOpen: false,
+  });
 
-  const onOpenCreate = () => setIsCreateOpen(true);
-  const onCloseCreate = () => setIsCreateOpen(false);
+  const [userModal, setUserModal] = useState({
+    user: null,
+    mode: "create",
+  });
 
-  const onOpenHierarchy = () => setIsHierarchyOpen(true);
-  const onHierarchyClose = () => setIsHierarchyOpen(false);
+  const [hierarchyState, setHierarchyState] = useState({
+    selectedUser: null,
+    responsible: null,
+    desHierarchy: false,
+    viewHierarchy: false,
+  });
 
-  const onOpenDelete = () => setIsDeleteOpen(true);
-  const onCloseDelete = () => setIsDeleteOpen(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    rowsPerPage: 5,
+  });
 
-  const onOpenView = () => setIsViewOpen(true);
-  const onCloseView = () => setIsViewOpen(false);
-
-  //eslint-disable-next-line
-  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",
   });
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [totalCount, setTotalCount] = useState(0);
-  const user = useAuthUser();
+
+  const [search, setSearch] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const hierarchyOpen = Boolean(anchorEl);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
+  const queryClient = useQueryClient();
   const { permissions } = useUserState().state;
-
+  const { company } = useCompany();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  useEffect(() => {
-    const getData = async () => {
-      setLoading(true);
-      try {
-        const response = await api.get(
-          `/users?page=${currentPage}&per_page=${rowsPerPage}`,
-          {
-            params: {
-              search: search,
-            },
-          },
-        );
-        console.log(response.data);
-        setCurrentPage(response.data.meta.current_page);
-        setData(response.data.data);
-        setTotalCount(response.data.meta.total);
-      } catch (error) {
-        console.error("Erro ao verificar lista de usuários", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getData();
-  }, [setData, currentPage, search, refresh]);
+  const { data, isFetching } = useQuery({
+    queryKey: [
+      "users",
+      pagination.currentPage,
+      pagination.rowsPerPage,
+      search,
+      company?.id,
+    ],
+    queryFn: async () => {
+      const params = {
+        page: pagination.currentPage,
+        per_page: pagination.rowsPerPage,
+        search: search || undefined,
+        company_id: company?.id || undefined,
+      };
 
-  const handleSort = (key) => {
-    const direction =
-      sortConfig.direction === "asc" && sortConfig.key === key ? "desc" : "asc";
+      const response = await api.get("/users", { params });
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: response.data.meta.current_page,
+      }));
+      return {
+        data: response.data.data,
+        total: response.data.meta.total,
+      };
+    },
+  });
 
-    const sortedData = [...data].sort((a, b) => {
-      const aKey = key.split(".").reduce((acc, part) => acc && acc[part], a);
-      const bKey = key.split(".").reduce((acc, part) => acc && acc[part], b);
+  const sortedData = useMemo(() => {
+    const users = data?.data || [];
+    return [...users].sort((a, b) => {
+      const aKey = sortConfig.key
+        .split(".")
+        .reduce((acc, part) => acc && acc[part], a);
+      const bKey = sortConfig.key
+        .split(".")
+        .reduce((acc, part) => acc && acc[part], b);
 
-      if (aKey < bKey) return direction === "asc" ? -1 : 1;
-      if (aKey > bKey) return direction === "asc" ? 1 : -1;
+      if (aKey < bKey) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aKey > bKey) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
+  }, [data?.data, sortConfig]);
 
-    setSortConfig({ key, direction });
-    setData(sortedData);
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.direction === "asc" && prev.key === key ? "desc" : "asc",
+    }));
   };
 
-  const createSortHandler = (key) => () => {
-    handleSort(key);
-  };
-
-  const handleRemove = async () => {
-    try {
-      await api.delete(`/users/${deleteId}`);
-      setRefresh(!refresh);
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id) => {
+      return api.delete(`/users/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["users"]);
       toast.success("Usuário removido com sucesso!");
-      onCloseDelete();
-    } catch (error) {
+      setModalState({ type: null, isOpen: false });
+      setDeleteId(null);
+    },
+    onError: (error) => {
       console.error("Erro ao verificar lista de usuários", error);
-    }
-  };
+      toast.error("Erro ao remover usuário");
+    },
+  });
 
   const handleEdit = (index) => {
-    const selectedUser = data;
-    setDataView(selectedUser[index]);
-    setViewOnly(false);
-    onOpenView();
+    setUserModal({ user: sortedData[index], mode: "edit" });
+    setModalState({ type: "user", isOpen: true });
   };
 
   const handleView = (index) => {
-    const selectedUser = data;
-    setDataView(selectedUser[index]);
-    setViewOnly(true);
-    onOpenView();
-  };
-
-  const handleHierarchy = (user) => {
-    setSelectedUser(user);
-    onOpenHierarchy();
+    setUserModal({ user: sortedData[index], mode: "view" });
+    setModalState({ type: "user", isOpen: true });
   };
 
   const handleViewHierarchy = (responsible) => {
-    setViewHierarchy(true);
-    setResponsible(responsible);
-    onOpenHierarchy();
-  };
-
-  const handleDesHierarchy = (user) => {
-    setDesHierarchy(true);
-    setSelectedUser(user);
-    onOpenHierarchy();
+    setHierarchyState((prev) => ({
+      ...prev,
+      responsible,
+      viewHierarchy: true,
+    }));
+    setModalState({ type: "hierarchy", isOpen: true });
   };
 
   const handleDelete = (id) => {
     setDeleteId(id);
-    onOpenDelete();
+    setModalState({ type: "delete", isOpen: true });
   };
 
   const handleChangePage = (event, newPage) => {
-    setCurrentPage(newPage + 1);
+    setPagination((prev) => ({ ...prev, currentPage: newPage + 1 }));
   };
 
   const handleChangeRowsPerPage = (event) => {
-    const newRowsPerPage = parseInt(event.target.value, 10);
-    setRowsPerPage(newRowsPerPage);
-    setCurrentPage(1);
-    setRefresh((prev) => !prev);
+    setPagination({
+      currentPage: 1,
+      rowsPerPage: parseInt(event.target.value, 10),
+    });
   };
 
-  const hierarchyMenu = () => (
-    <Menu
-      className="mt-2"
-      id="hierarchy-menu"
-      aria-labelledby="hierarchy-menu"
-      anchorEl={anchorEl}
-      open={hierarchyOpen}
-      onClose={handleClose}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "right",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-    >
-      {/* Visualizar equipe: Qualquer uma das permissões */}
-      {permissions.some(
-        (permission) =>
-          permission.name === "assign_responsible_users" ||
-          permission.name === "unassign_responsible_users",
-      ) && (
+  return (
+    <div className="flex flex-col gap-6 w-full">
+      <Menu
+        className="mt-2"
+        id="hierarchy-menu"
+        aria-labelledby="hierarchy-menu"
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        {permissions.some(
+          (permission) =>
+            permission.name === "assign_responsible_users" ||
+            permission.name === "unassign_responsible_users",
+        ) && (
           <MenuItem
             onClick={(e) => {
               e.stopPropagation();
-              handleViewHierarchy();
+              setHierarchyState((prev) => ({ ...prev, viewHierarchy: true }));
+              setModalState({ type: "hierarchy", isOpen: true });
             }}
           >
             <ListItemIcon>
@@ -229,15 +218,14 @@ const Users = () => {
             <ListItemText>Visualizar equipe</ListItemText>
           </MenuItem>
         )}
-
-      {/* Adicionar membro: Permissão específica */}
-      {permissions.some(
-        (permission) => permission.name === "assign_responsible_users",
-      ) && (
+        {permissions.some(
+          (permission) => permission.name === "assign_responsible_users",
+        ) && (
           <MenuItem
             onClick={(e) => {
               e.stopPropagation();
-              handleHierarchy();
+              setHierarchyState((prev) => ({ ...prev, selectedUser: null }));
+              setModalState({ type: "hierarchy", isOpen: true });
             }}
           >
             <ListItemIcon>
@@ -246,15 +234,18 @@ const Users = () => {
             <ListItemText>Adicionar membro</ListItemText>
           </MenuItem>
         )}
-
-      {/* Remover membro: Permissão específica */}
-      {permissions.some(
-        (permission) => permission.name === "unassign_responsible_users",
-      ) && (
+        {permissions.some(
+          (permission) => permission.name === "unassign_responsible_users",
+        ) && (
           <MenuItem
             onClick={(e) => {
               e.stopPropagation();
-              handleDesHierarchy();
+              setHierarchyState((prev) => ({
+                ...prev,
+                desHierarchy: true,
+                selectedUser: null,
+              }));
+              setModalState({ type: "hierarchy", isOpen: true });
             }}
           >
             <ListItemIcon>
@@ -263,89 +254,75 @@ const Users = () => {
             <ListItemText>Remover membro</ListItemText>
           </MenuItem>
         )}
-    </Menu>
-  );
-
-  const renderButtons = () => {
-    const canCreateUsers = permissions.some(
-      (permission) => permission.name === "create_users",
-    );
-
-    const canManageTeam = permissions.some(
-      (permission) =>
-        permission.name === "assign_responsible_users" ||
-        permission.name === "unassign_responsible_users",
-    );
-
-    return (
-      <>
-        {canManageTeam && (
-          <Button
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            variant="contained"
-            color="primary"
-            endIcon={hierarchyOpen ? <ExpandLess /> : <ExpandMore />}
-          >
-            EQUIPES
-          </Button>
-        )}
-        {canCreateUsers && (
-          <Button
-            onClick={() => [setDataEdit({}), onOpenCreate()]}
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-          >
-            NOVO USUÁRIO
-          </Button>
-        )}
-      </>
-    );
-  };
-
-  return (
-    <div className="flex flex-col gap-6 w-full">
-      {hierarchyMenu()}
-      <ModalComp
-        isOpen={isCreateOpen}
-        onClose={onCloseCreate}
-        data={data}
-        setRefresh={setRefresh}
-        refresh={refresh}
-        setData={setData}
-      />
+      </Menu>
       <ModalHierarchy
-        isOpen={isHierarchyOpen}
-        selectedUser={selectedUser}
-        onClose={onHierarchyClose}
-        setRefresh={setRefresh}
-        desHierarchy={desHierarchy}
-        setDesHierarchy={setDesHierarchy}
-        viewHierarchy={viewHierarchy}
-        setViewHierarchy={setViewHierarchy}
-        responsibleHierarchy={responsible}
-        refresh={refresh}
+        isOpen={modalState.type === "hierarchy" && modalState.isOpen}
+        selectedUser={hierarchyState.selectedUser}
+        onClose={() => setModalState({ type: null, isOpen: false })}
+        desHierarchy={hierarchyState.desHierarchy}
+        setDesHierarchy={(value) =>
+          setHierarchyState((prev) => ({ ...prev, desHierarchy: value }))
+        }
+        viewHierarchy={hierarchyState.viewHierarchy}
+        setViewHierarchy={(value) =>
+          setHierarchyState((prev) => ({ ...prev, viewHierarchy: value }))
+        }
+        responsibleHierarchy={hierarchyState.responsible}
       />
       <ModalDelete
-        isOpen={isDeleteOpen}
-        onClose={onCloseDelete}
-        onConfirm={handleRemove}
+        isOpen={modalState.type === "delete" && modalState.isOpen}
+        message="Você tem certeza que deseja excluir este usuário?"
+        onClose={() => {
+          setModalState({ type: null, isOpen: false });
+          setDeleteId(null);
+        }}
+        onConfirm={() => deleteUserMutation.mutate(deleteId)}
       />
-      <ModalView
-        dataEdit={dataEdit}
-        viewOnly={viewOnly}
-        setDataEdit={setDataEdit}
-        selectedUser={dataView}
-        isOpen={isViewOpen}
-        setRefresh={setRefresh}
-        refresh={refresh}
-        onClose={onCloseView}
+      <ModalUser
+        selectedUser={userModal.user}
+        isOpen={modalState.type === "user" && modalState.isOpen}
+        onClose={() => setModalState({ type: null, isOpen: false })}
+        mode={userModal.mode}
+        data={sortedData}
       />
       <PageTitle
         title="Usuários"
-        icon={<Person />}
+        icon={<People />}
         subtitle="Administre, edite e remova usuários conforme necessário."
-        buttons={renderButtons()}
+        buttons={
+          <>
+            {permissions.some(
+              (permission) =>
+                permission.name === "assign_responsible_users" ||
+                permission.name === "unassign_responsible_users",
+            ) && (
+              <Button
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+                variant="contained"
+                color="primary"
+                startIcon={<PeopleAltOutlined />}
+                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+              >
+                EQUIPES
+              </Button>
+            )}
+            {permissions.some(
+              (permission) => permission.name === "create_users",
+            ) && (
+              <Button
+                onClick={() => {
+                  setUserModal({ user: {}, mode: "create" });
+                  setModalState({ type: "user", isOpen: true });
+                }}
+                variant="contained"
+                color="primary"
+                startIcon={<Add />}
+              >
+                NOVO USUÁRIO
+              </Button>
+            )}
+          </>
+        }
       />
       <TextField
         fullWidth
@@ -363,7 +340,7 @@ const Users = () => {
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
-          setCurrentPage(1);
+          setPagination((prev) => ({ ...prev, currentPage: 1 }));
         }}
       />
       <TableContainer>
@@ -380,7 +357,7 @@ const Users = () => {
                   direction={
                     sortConfig.key === "name" ? sortConfig.direction : "asc"
                   }
-                  onClick={createSortHandler("name")}
+                  onClick={() => handleSort("name")}
                 >
                   Nome
                 </TableSortLabel>
@@ -395,7 +372,7 @@ const Users = () => {
                   direction={
                     sortConfig.key === "email" ? sortConfig.direction : "asc"
                   }
-                  onClick={createSortHandler("email")}
+                  onClick={() => handleSort("email")}
                 >
                   E-mail
                 </TableSortLabel>
@@ -412,7 +389,7 @@ const Users = () => {
                       ? sortConfig.direction
                       : "asc"
                   }
-                  onClick={createSortHandler("role.name")}
+                  onClick={() => handleSort("role.name")}
                 >
                   Cargo
                 </TableSortLabel>
@@ -424,7 +401,7 @@ const Users = () => {
                     : false
                 }
                 sx={{
-                  display: isMobile ? "none" : undefined,
+                  display: !company || !isMobile ? undefined : "none",
                 }}
               >
                 <TableSortLabel
@@ -434,7 +411,7 @@ const Users = () => {
                       ? sortConfig.direction
                       : "asc"
                   }
-                  onClick={createSortHandler("company.name")}
+                  onClick={() => handleSort("company.name")}
                 >
                   Empresa
                 </TableSortLabel>
@@ -456,116 +433,137 @@ const Users = () => {
                       ? sortConfig.direction
                       : "asc"
                   }
-                  onClick={createSortHandler("responsible")}
+                  onClick={() => handleSort("responsible")}
                 >
                   Usuário Responsável
                 </TableSortLabel>
-                {console.log("user", user)}
               </TableCell>
               <TableCell sx={{ padding: 0 }}>Ações</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {(!search
-              ? data
-              : data.filter(
-                (user) =>
-                  user.name.toLowerCase().includes(search.toLowerCase()) ||
-                  user.email.toLowerCase().includes(search.toLowerCase()) ||
-                  user.role.name.toLowerCase().includes(search.toLowerCase()),
-              )
-            ).map(({ name, email, role, company, id, responsible }, index) => (
-              <TableRow
-                key={index}
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => handleView(index)}
-              >
-                <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}>
-                  {" "}
-                  {name}{" "}
+            {isFetching && (
+              <TableRow>
+                <TableCell colSpan={6} rowSpan={2} align="center">
+                  <CircularProgress size={24} />
                 </TableCell>
-                <TableCell sx={{
-                  maxWidth: isMobile ? 100 : 200,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap"
-                }} a>
-                  {" "}
-                  {email}{" "}
-                </TableCell>
-                <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}>
-                  {" "}
-                  {role?.name}{" "}
-                </TableCell>
-                <TableCell
-                  sx={{
-                    maxWidth: isMobile ? 5 : 100,
-                    display: isMobile ? "none" : undefined,
-                  }}
-                >
-                  {" "}
-                  {company?.name}{" "}
-                </TableCell>
-                <TableCell
-                  sx={{
-                    maxWidth: isMobile ? 5 : 100,
-                    display: isMobile ? "none" : undefined,
-                  }}
-                >
-                  {responsible ? responsible.name : <span>N/A</span>}
-                </TableCell>
-                <TableCell sx={{ padding: 0 }}>
-                  {
-                    responsible && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewHierarchy(responsible);
-                        }}
-                      >
-                        <Groups fontSize="small" />
-                      </IconButton>
-                    )
-                  }
-                  {permissions.some(
-                    (permissions) => permissions.name === "update_users",
-                  ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(index);
-                        }}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    )}
-                  {permissions.some(
-                    (permissions) => permissions.name === "delete_users",
-                  ) && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(id);
-                        }}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    )}
-                </TableCell>
-                {console.log("data", data)}
               </TableRow>
-            ))}
+            )}
+            {!isFetching && sortedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6}>Nenhum usuário encontrado</TableCell>
+              </TableRow>
+            ) : (
+              (!search
+                ? sortedData
+                : sortedData.filter(
+                    (user) =>
+                      user.name.toLowerCase().includes(search.toLowerCase()) ||
+                      user.email.toLowerCase().includes(search.toLowerCase()) ||
+                      user.role?.name
+                        ?.toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                      user.company?.name
+                        ?.toLowerCase()
+                        .includes(search.toLowerCase()),
+                  )
+              ).map(
+                (
+                  { name, email, role, company: userCompany, id, responsible },
+                  index,
+                ) => (
+                  <TableRow
+                    key={index}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleView(index)}
+                  >
+                    <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}>
+                      {" "}
+                      {name}{" "}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        maxWidth: isMobile ? 100 : 200,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {" "}
+                      {email}{" "}
+                    </TableCell>
+                    <TableCell sx={{ maxWidth: isMobile ? 5 : 100 }}>
+                      {" "}
+                      {role?.name}{" "}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        maxWidth: isMobile ? 5 : 100,
+                        display: !company || !isMobile ? undefined : "none",
+                      }}
+                    >
+                      {" "}
+                      {userCompany?.name || "N/A"}{" "}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        maxWidth: isMobile ? 5 : 100,
+                        display: isMobile ? "none" : undefined,
+                      }}
+                    >
+                      {responsible ? responsible.name : <span>N/A</span>}
+                    </TableCell>
+                    <TableCell sx={{ padding: 0 }}>
+                      {responsible && (
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewHierarchy(responsible);
+                          }}
+                        >
+                          <Groups fontSize="small" />
+                        </IconButton>
+                      )}
+                      {permissions.some(
+                        (permissions) => permissions.name === "update_users",
+                      ) && (
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(index);
+                          }}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      )}
+                      {permissions.some(
+                        (permissions) => permissions.name === "delete_users",
+                      ) && (
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(id);
+                          }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ),
+              )
+            )}
           </TableBody>
         </Table>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={totalCount}
+          count={data?.total || 0}
           labelRowsPerPage="Linhas por página"
-          rowsPerPage={rowsPerPage}
-          page={currentPage - 1}
+          rowsPerPage={pagination.rowsPerPage}
+          page={pagination.currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelDisplayedRows={({ from, to, count }) =>

@@ -61,3 +61,10 @@ export const formatFrontendRulesToBackend = (frontendRules) => {
     priority: frontendRule.priority || 1,
   }));
 };
+
+
+export const trimText = (text, maxLength) => {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + "...";
+};
