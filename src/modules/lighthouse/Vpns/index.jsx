@@ -1,14 +1,12 @@
 import {
   Add,
-  Circle,
   Delete,
-  Edit,
   KeyboardArrowDown,
   KeyboardArrowUp,
   Lock,
+  PowerSettingsNew,
   Search,
-  ToggleOffOutlined,
-  ToggleOn,
+  WifiTetheringOff,
 } from "@mui/icons-material";
 import {
   Box,
@@ -23,15 +21,17 @@ import {
   TablePagination,
   TableRow,
   TextField,
+  Tooltip,
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import VpnStatus from "./components/VpnStatus";
 
 const Vpns = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -52,6 +52,7 @@ const Vpns = () => {
   const {
     data: fetchedData,
     isLoading,
+    status,
     refetch,
   } = useQuery({
     queryKey: ["vpns", currentPage, rowsPerPage, search, refresh],
@@ -66,12 +67,40 @@ const Vpns = () => {
       );
     },
     keepPreviousData: true,
-    onSuccess: (response) => {
-      setCurrentPage(response.data.meta.current_page);
-      setData(response.data.data);
-      setTotalCount(response.data.meta.total);
+  });
+
+  const { mutate: switchStatus, isPending: isSwitchingStatus } = useMutation({
+    mutationFn: async ({ id, status }) => {
+      const endpoint =
+        status === "active" ? `/vpns/${id}/kill` : `/vpns/${id}/run`;
+      return await api.post(endpoint);
+    },
+    onSuccess: (_, variables) => {
+      setRefresh(!refresh);
+      const message =
+        variables.status === "active"
+          ? "VPN desativada com sucesso!"
+          : "VPN ativada com sucesso!";
+      toast.success(message);
+      setDeleteOpen(false);
+    },
+    onError: (error, variables) => {
+      const message =
+        variables.status === "active"
+          ? "Erro ao desativada a VPN"
+          : "Erro ao ativar a VPN";
+      console.error(message, error);
+      toast.error(message);
     },
   });
+
+  useEffect(() => {
+    if (status === "success") {
+      setCurrentPage(fetchedData.data.meta.current_page);
+      setData(fetchedData.data.data);
+      setTotalCount(fetchedData.data.meta.total);
+    }
+  }, [status, fetchedData]);
 
   const handleRemove = async () => {
     try {
@@ -124,27 +153,6 @@ const Vpns = () => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
     setRefresh((prev) => !prev);
-  };
-
-  const handleStatus = async (id, status) => {
-    if (status === "active") {
-      try {
-        await api.post(`/vpns/${id}/kill`);
-        setRefresh(!refresh);
-        toast.success("VPN desativada com sucesso!");
-        setDeleteOpen(false);
-      } catch (error) {
-        console.error("Erro ao desativada a VPN", error);
-      }
-    } else {
-      try {
-        await api.post(`/vpns/${id}/run`);
-        setRefresh(!refresh);
-        toast.success("VPN ativada com sucesso!");
-      } catch (error) {
-        console.error("Erro ao ativar a VPN", error);
-      }
-    }
   };
 
   return (
@@ -231,50 +239,34 @@ const Vpns = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              data.map(({ name, status, company, id }, index) => (
-                <TableRow
-                  key={index}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => navigate(`/vpns/${id}`)}
-                >
-                  <TableCell> {name} </TableCell>
-                  <TableCell> {company?.name} </TableCell>
+              data.map((vpn, index) => (
+                <TableRow key={index} style={{ cursor: "pointer" }}>
+                  <TableCell> {vpn.name} </TableCell>
+                  <TableCell> {vpn.company?.name} </TableCell>
                   <TableCell>
-                    {status === "active" ? (
-                      <Circle sx={{ color: "green", fontSize: 18 }} />
-                    ) : (
-                      <Circle sx={{ color: "red", fontSize: 18 }} />
-                    )}
-                    {status === "active" ? "Ativo" : "Inativo"}
+                    <VpnStatus status={vpn.status} />
                   </TableCell>
                   <TableCell className="space-x-1">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatus(id, status);
-                      }}
+                    <Tooltip
+                      title={
+                        vpn.status === "active" ? "Desativar VPN" : "Ativar VPN"
+                      }
                     >
-                      {status === "active" ? (
-                        <ToggleOn color="primary" />
-                      ) : (
-                        <ToggleOffOutlined color="disabled" />
-                      )}
-                    </IconButton>
-
-                    {permissions.some(
-                      (permissions) => permissions.name === "update_companies",
-                    ) ? (
                       <IconButton
                         size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/vpns/${id}/editar`);
-                        }}
+                        onClick={() =>
+                          switchStatus({ id: vpn.id, status: vpn.status })
+                        }
+                        disabled={isSwitchingStatus}
+                        loading={isSwitchingStatus}
                       >
-                        <Edit />
+                        {status === "active" ? (
+                          <WifiTetheringOff />
+                        ) : (
+                          <PowerSettingsNew />
+                        )}
                       </IconButton>
-                    ) : null}
+                    </Tooltip>
                     {permissions.some(
                       (permissions) => permissions.name === "delete_companies",
                     ) ? (
@@ -282,7 +274,7 @@ const Vpns = () => {
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDelete(id);
+                          handleDelete(vpn.id);
                         }}
                       >
                         <Delete />
