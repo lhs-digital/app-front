@@ -1,353 +1,507 @@
+import { IntegrationInstructions, Save } from "@mui/icons-material";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  InputLabel,
   MenuItem,
   Select,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import FormField from "../../../../components/FormField/index";
+import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
 
 const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
-  const [type, setType] = useState("db");
-  const [baseUrl, setBaseUrl] = useState("");
-  const [apiToken, setApiToken] = useState("");
-  const [apiAuthType, setApiAuthType] = useState("bearer");
-  const [dbDriver, setDbDriver] = useState("mysql");
-  const [dbHost, setDbHost] = useState("");
-  const [dbPort, setDbPort] = useState("");
-  const [dbName, setDbName] = useState("");
-  const [dbUsername, setDbUsername] = useState("");
-  const [dbPassword, setDbPassword] = useState("");
-  const [company, setCompany] = useState("");
-  const [companies, setCompanies] = useState([]);
-  const [buttonSave, setButtonSave] = useState(true);
+  const { availableCompanies, company } = useCompany();
+  const qc = useQueryClient();
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      company: "",
+      type: "db",
+      baseUrl: "",
+      apiToken: "",
+      apiAuthType: "bearer",
+      dbDriver: "mysql",
+      dbHost: "",
+      dbPort: "",
+      dbName: "",
+      dbUsername: "",
+      dbPassword: "",
+    },
+  });
+
+  const watchedCompany = watch("company");
+  const watchedType = watch("type");
+
+  const { data: integrationData } = useQuery({
+    queryKey: ["integration", watchedCompany],
+    queryFn: async () => {
+      const response = await api.get(`/companies/${watchedCompany}/connection`);
+      return response.data.data;
+    },
+    enabled: !!watchedCompany && isOpen,
+  });
 
   useEffect(() => {
-    const getCompanies = async () => {
-      try {
-        const responseCompany = await api.get(`/companies/select`);
-        setCompanies(responseCompany?.data?.data);
-        console.log("Empresas:", responseCompany?.data?.data);
-      } catch (error) {
-        console.error("Erro ao acessar a lista de empresas.", error);
-      }
-    };
-
-    getCompanies();
-  }, []);
+    if (isOpen) {
+      reset({
+        company: company?.id || "",
+        type: "db",
+        baseUrl: "",
+        apiToken: "",
+        apiAuthType: "bearer",
+        dbDriver: "mysql",
+        dbHost: "",
+        dbPort: "",
+        dbName: "",
+        dbUsername: "",
+        dbPassword: "",
+      });
+    }
+  }, [isOpen, reset]);
 
   useEffect(() => {
-    const getIntegration = async () => {
-      if (!company) return;
-      
-      try {
-        const responseIntegration = await api.get(`/companies/${company}/connection`);
-
-        console.log("Integração:", responseIntegration);
-
-        if (responseIntegration.data.data) {
-          if (responseIntegration.data.data.type === "api") {
-            setType("api");
-            setBaseUrl(responseIntegration.data.data.connection.api_base_url);
-            setApiToken(responseIntegration.data.data.connection.api_token);
-            setApiAuthType(responseIntegration.data.data.connection.api_auth_type);
-          } else {
-            setType("db");
-            setDbDriver(responseIntegration.data.data.connection.db_driver);
-            setDbHost(responseIntegration.data.data.connection.db_host);
-            setDbPort(responseIntegration.data.data.connection.db_port);
-            setDbName(responseIntegration.data.data.connection.db_name);
-            setDbUsername(responseIntegration.data.data.connection.db_username);
-            setDbPassword(responseIntegration.data.data.connection.db_password);
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao acessar dados de integração.", error);
-      }
-    };
-
-    getIntegration();
-  }, [company]);
-
-  const handleCompanyChange = (event) => {
-    setCompany(event.target.value);
-  };
-
-
-  const saveData = async (integrationData) => {
-    try {
-      await api.put(`/companies/{company}/connection`, integrationData);
-
-      setRefresh((prev) => !prev);
-      toast.success("Integração configurada com sucesso!");
-    } catch (error) {
-      toast.error("Erro ao configurar a integração." + error.response?.data?.message);
-      console.error("Erro ao configurar a integração.", error);
-    }
-  }
-
-  const handleTestConnection = async () => {
-    if (!dbDriver || !dbHost || !dbPort || !dbName || !dbUsername || !dbPassword) {
-      toast.error("Por favor, preencha todos os campos obrigatórios para o teste de conexão de Banco de Dados.");
-      return;
-    }
-
-    const integrationData = {
-      driver: dbDriver,
-      host: dbHost,
-      port: dbPort,
-      database: dbName,
-      username: dbUsername,
-      password: dbPassword,
-    };
-
-    try {
-      const response = await api.post("/database/test-connection", integrationData);
-      if (response.data.success) {
-        toast.success("Teste de Conexão bem-sucedida!");
-        setButtonSave(false);
+    if (integrationData?.connection) {
+      if (integrationData.type === "api") {
+        setValue("type", "api");
+        setValue("baseUrl", integrationData.connection.api_base_url || "");
+        setValue("apiToken", integrationData.connection.api_token || "");
+        setValue(
+          "apiAuthType",
+          integrationData.connection.api_auth_type || "bearer",
+        );
       } else {
-        toast.error(response.data.message || "Falha ao testar conexão.");
-        setButtonSave(true);
+        setValue("type", "db");
+        setValue("dbDriver", integrationData.connection.db_driver || "mysql");
+        setValue("dbHost", integrationData.connection.db_host || "");
+        setValue("dbPort", integrationData.connection.db_port || "");
+        setValue("dbName", integrationData.connection.db_name || "");
+        setValue("dbUsername", integrationData.connection.db_username || "");
+        setValue("dbPassword", integrationData.connection.db_password || "");
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Erro ao testar conexão.");
-      setButtonSave(true);
     }
-  };
+  }, [integrationData, setValue]);
 
-  const handleSave = () => {
-    if (!company) {
+  const { mutate: testConnection, isPending: testConnectionPending } =
+    useMutation({
+      mutationFn: async (formData) => {
+        const integrationData = {
+          driver: formData.dbDriver,
+          host: formData.dbHost,
+          port: formData.dbPort,
+          database: formData.dbName,
+          username: formData.dbUsername,
+          password: formData.dbPassword,
+        };
+        return api.post("/database/test-connection", integrationData);
+      },
+      onSuccess: (response) => {
+        if (response.data.success) {
+          toast.success("Teste de Conexão bem-sucedida!");
+        } else {
+          toast.error(response.data.message || "Falha ao testar conexão.");
+        }
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || "Erro ao testar conexão.");
+      },
+    });
+
+  const { mutate: saveIntegration, isPending: saveIntegrationPending } =
+    useMutation({
+      mutationFn: async (formData) => {
+        const integrationData =
+          formData.type === "api"
+            ? {
+                type: "api",
+                connection: {
+                  api_base_url: formData.baseUrl,
+                  api_token: formData.apiToken,
+                  api_auth_type: formData.apiAuthType,
+                },
+              }
+            : {
+                type: "db",
+                connection: {
+                  db_driver: formData.dbDriver,
+                  db_host: formData.dbHost,
+                  db_port: formData.dbPort,
+                  db_name: formData.dbName,
+                  db_username: formData.dbUsername,
+                  db_password: formData.dbPassword,
+                },
+              };
+
+        return api.put(
+          `/companies/${formData.company}/connection`,
+          integrationData,
+        );
+      },
+      onSuccess: () => {
+        qc.invalidateQueries(["integration"]);
+        setRefresh((prev) => !prev);
+        toast.success("Integração configurada com sucesso!");
+        reset();
+        onClose();
+      },
+      onError: (error) => {
+        toast.error(
+          "Erro ao configurar a integração: " +
+            (error.response?.data?.message || "Erro desconhecido"),
+        );
+        console.error("Erro ao configurar a integração.", error);
+      },
+    });
+
+  const onSubmit = (formData) => {
+    if (!formData.company) {
       toast.error("Por favor, selecione uma empresa.");
       return;
     }
 
-    if (type === "api") {
-      if (!baseUrl || !apiToken) {
-        toast.error("Por favor, preencha todos os campos obrigatórios para a API.");
+    if (formData.type === "api") {
+      if (!formData.baseUrl || !formData.apiToken) {
+        toast.error(
+          "Por favor, preencha todos os campos obrigatórios para a API.",
+        );
         return;
       }
-
-      const integrationData = {
-        type: "api",
-        connection: {
-          api_base_url: baseUrl,
-          api_token: apiToken,
-          api_auth_type: apiAuthType,
-        }
-      };
-
-      saveData(integrationData)
-
     } else {
-      if (!dbDriver || !dbHost || !dbPort || !dbName || !dbUsername || !dbPassword) {
-        toast.error("Por favor, preencha todos os campos obrigatórios para o Banco de Dados.");
+      if (
+        !formData.dbDriver ||
+        !formData.dbHost ||
+        !formData.dbPort ||
+        !formData.dbName ||
+        !formData.dbUsername ||
+        !formData.dbPassword
+      ) {
+        toast.error(
+          "Por favor, preencha todos os campos obrigatórios para o Banco de Dados.",
+        );
         return;
       }
-      const integrationData = {
-        type: "db",
-        connection: {
-          db_driver: dbDriver,
-          db_host: dbHost,
-          db_port: dbPort,
-          db_name: dbName,
-          db_username: dbUsername,
-          db_password: dbPassword,
-        }
-      };
-
-      saveData(integrationData)
-
     }
 
-    cleanFields();
-
-    setRefresh((prev) => !prev);
-    onClose();
+    saveIntegration(formData);
   };
 
-  const cleanFields = () => {
-    setCompany("");
-    setType("db");
-    setBaseUrl("");
-    setApiToken("");
-    setApiAuthType("bearer");
-    setDbDriver("mysql");
-    setDbHost("");
-    setDbPort("");
-    setDbName("");
-    setDbUsername("");
-    setDbPassword("");
-    setButtonSave(true);
-  }
+  const handleTestConnection = () => {
+    const formData = getValues();
+    const dbData = {
+      dbDriver: formData.dbDriver,
+      dbHost: formData.dbHost,
+      dbPort: formData.dbPort,
+      dbName: formData.dbName,
+      dbUsername: formData.dbUsername,
+      dbPassword: formData.dbPassword,
+    };
+
+    if (
+      !dbData.dbDriver ||
+      !dbData.dbHost ||
+      !dbData.dbPort ||
+      !dbData.dbName ||
+      !dbData.dbUsername ||
+      !dbData.dbPassword
+    ) {
+      toast.error(
+        "Por favor, preencha todos os campos obrigatórios para o teste de conexão de Banco de Dados.",
+      );
+      return;
+    }
+
+    testConnection(dbData);
+  };
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle>{"Configurar Integração"}</DialogTitle>
-      <DialogContent className="w-[480px] flex flex-col gap-4">
-        <Box className="flex gap-2">
-          <Box className="flex-1">
-            <InputLabel>Empresa *</InputLabel>
-            <Select
-              placeholder="Selecione uma opção"
-              value={company}
-              onChange={handleCompanyChange}
-              fullWidth
-            >
-              {console.log("Empresas:", companies)}
-              {companies.map((companyItem) => (
-                <MenuItem key={companyItem.id} value={companyItem.id}>
-                  {companyItem.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
-
-          <Box>
-            <InputLabel>Tipo de Integração *</InputLabel>
-            <Select value={type} fullWidth onChange={(e) => setType(e.target.value)}>
-              <MenuItem value={"api"}>API</MenuItem>
-              <MenuItem value={"db"}>Banco de Dados</MenuItem>
-            </Select>
-          </Box>
-
-        </Box>
-
-
-        {
-          type === "api" ? (
-            <>
-              <Box>
-                <InputLabel>Base URL *</InputLabel>
-                <TextField
-                  fullWidth
-                  placeholder="https://api.exemplo.com"
-                  variant="outlined"
-                  value={baseUrl}
-                  onChange={(e) => setBaseUrl(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <InputLabel>Token de Acesso *</InputLabel>
-                <TextField
-                  fullWidth
-                  placeholder="Seu token de acesso"
-                  variant="outlined"
-                  value={apiToken}
-                  onChange={(e) => setApiToken(e.target.value)}
-                />
-              </Box>
-              <Box>
-                <InputLabel>Tipo de Autenticação</InputLabel>
+    <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>Configurar Integração</DialogTitle>
+      <DialogContent>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid grid-cols-1 md:grid-cols-5 gap-4"
+        >
+          <Controller
+            name="company"
+            control={control}
+            rules={{ required: "Empresa é obrigatória" }}
+            render={({ field }) => (
+              <FormField
+                label="Empresa"
+                error={!!errors.company}
+                containerClass="col-span-full md:col-span-3"
+                required
+              >
                 <Select
+                  {...field}
+                  placeholder="Selecione uma opção"
                   fullWidth
-                  value={apiAuthType}
-                  onChange={(e) => setApiAuthType(e.target.value)}
+                  error={!!errors.company}
                 >
-                  <MenuItem value={"bearer"}>Bearer</MenuItem>
-                  <MenuItem value={"basic"}>Basic</MenuItem>
+                  {availableCompanies.map((companyItem) => (
+                    <MenuItem key={companyItem.id} value={companyItem.id}>
+                      {companyItem.name}
+                    </MenuItem>
+                  ))}
                 </Select>
-              </Box>
+              </FormField>
+            )}
+          />
+
+          <Controller
+            name="type"
+            control={control}
+            rules={{ required: "Tipo de integração é obrigatório" }}
+            render={({ field }) => (
+              <FormField
+                label="Tipo de Integração"
+                error={!!errors.type}
+                containerClass="col-span-full md:col-span-2"
+                required
+              >
+                <Select {...field} fullWidth error={!!errors.type}>
+                  <MenuItem value="api">API</MenuItem>
+                  <MenuItem value="db">Banco de Dados</MenuItem>
+                </Select>
+              </FormField>
+            )}
+          />
+          {watchedType === "api" ? (
+            <>
+              <Controller
+                name="baseUrl"
+                control={control}
+                rules={{ required: "URL da API é obrigatória" }}
+                render={({ field }) => (
+                  <FormField
+                    label="URL da API"
+                    error={!!errors.baseUrl}
+                    containerClass="col-span-full"
+                    required
+                  >
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="https://api.exemplo.com"
+                      error={!!errors.baseUrl}
+                      helperText={errors.baseUrl?.message}
+                    />
+                  </FormField>
+                )}
+              />
+              <Controller
+                name="apiToken"
+                control={control}
+                rules={{ required: "Token de acesso é obrigatório" }}
+                render={({ field }) => (
+                  <FormField
+                    label="Chave de Acesso"
+                    error={!!errors.apiToken}
+                    containerClass="col-span-full md:col-span-3"
+                    required
+                  >
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Seu token de acesso"
+                      error={!!errors.apiToken}
+                      helperText={errors.apiToken?.message}
+                    />
+                  </FormField>
+                )}
+              />
+              <Controller
+                name="apiAuthType"
+                control={control}
+                render={({ field }) => (
+                  <FormField
+                    label="Tipo de Autenticação"
+                    containerClass="col-span-full md:col-span-2"
+                  >
+                    <Select {...field} fullWidth>
+                      <MenuItem value="bearer">Bearer</MenuItem>
+                      <MenuItem value="basic">Basic</MenuItem>
+                    </Select>
+                  </FormField>
+                )}
+              />
             </>
           ) : (
             <>
-              <Box>
-                <InputLabel>Driver *</InputLabel>
-                <Select
-                  fullWidth
-                  value={dbDriver}
-                  onChange={(e) => setDbDriver(e.target.value)}
-                >
-                  <MenuItem value={"mysql"}>MySQL</MenuItem>
-                  <MenuItem value={"postgres"}>PostgreSQL</MenuItem>
-                  <MenuItem value={"sqlite"}>SQLite</MenuItem>
-                </Select>
-              </Box>
-              <Box className="flex gap-2">
-                <Box>
-                  <InputLabel>Host *</InputLabel>
-                  <TextField
-                    fullWidth
-                    placeholder="localhost"
-                    variant="outlined"
-                    value={dbHost}
-                    onChange={(e) => setDbHost(e.target.value)}
-                  />
-                </Box>
-                <Box>
-                  <InputLabel>Porta *</InputLabel>
-                  <TextField
-                    fullWidth
-                    placeholder="3306"
-                    variant="outlined"
-                    value={dbPort}
-                    onChange={(e) => setDbPort(e.target.value)}
-                  />
-                </Box>
-              </Box>
-              <Box>
-                <InputLabel>Nome do Banco de Dados *</InputLabel>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  value={dbName}
-                  onChange={(e) => setDbName(e.target.value)}
-                />
-              </Box>
-              <Box className="flex gap-2">
-                <Box>
-
-                  <InputLabel>Usuário *</InputLabel>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    value={dbUsername}
-                    onChange={(e) => setDbUsername(e.target.value)}
-                  />
-                </Box>
-                <Box>
-                  <InputLabel>Senha *</InputLabel>
-                  <TextField
-                    fullWidth
-                    type="password"
-                    variant="outlined"
-                    value={dbPassword}
-                    onChange={(e) => setDbPassword(e.target.value)}
-                  />
-                </Box>
-              </Box>
+              <Controller
+                name="dbDriver"
+                control={control}
+                rules={{ required: "Driver é obrigatório" }}
+                render={({ field }) => (
+                  <FormField
+                    label="Driver"
+                    error={!!errors.dbDriver}
+                    containerClass="col-span-full md:col-span-2"
+                    required
+                  >
+                    <Select {...field} fullWidth error={!!errors.dbDriver}>
+                      <MenuItem value="mysql">MySQL</MenuItem>
+                      <MenuItem value="postgres">PostgreSQL</MenuItem>
+                      <MenuItem value="sqlite">SQLite</MenuItem>
+                    </Select>
+                  </FormField>
+                )}
+              />
+              <Controller
+                name="dbHost"
+                control={control}
+                rules={{ required: "Host é obrigatório" }}
+                render={({ field }) => (
+                  <FormField
+                    label="Host"
+                    error={!!errors.dbHost}
+                    containerClass="col-span-full md:col-span-2"
+                    required
+                  >
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="localhost"
+                      error={!!errors.dbHost}
+                      helperText={errors.dbHost?.message}
+                    />
+                  </FormField>
+                )}
+              />
+              <Controller
+                name="dbPort"
+                control={control}
+                rules={{ required: "Porta é obrigatória" }}
+                render={({ field }) => (
+                  <FormField
+                    label="Porta"
+                    error={!!errors.dbPort}
+                    containerClass="col-span-full md:col-span-1"
+                    required
+                  >
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="3306"
+                      error={!!errors.dbPort}
+                      helperText={errors.dbPort?.message}
+                    />
+                  </FormField>
+                )}
+              />
+              <Controller
+                name="dbName"
+                control={control}
+                rules={{ required: "Nome do banco de dados é obrigatório" }}
+                render={({ field }) => (
+                  <FormField
+                    label="Nome do Banco de Dados"
+                    error={!!errors.dbName}
+                    containerClass="col-span-full"
+                    required
+                  >
+                    <TextField
+                      {...field}
+                      fullWidth
+                      error={!!errors.dbName}
+                      helperText={errors.dbName?.message}
+                    />
+                  </FormField>
+                )}
+              />
+              <Controller
+                name="dbUsername"
+                control={control}
+                rules={{ required: "Usuário é obrigatório" }}
+                render={({ field }) => (
+                  <FormField
+                    label="Usuário"
+                    error={!!errors.dbUsername}
+                    containerClass="col-span-full md:col-span-3"
+                    required
+                  >
+                    <TextField
+                      {...field}
+                      fullWidth
+                      error={!!errors.dbUsername}
+                      helperText={errors.dbUsername?.message}
+                    />
+                  </FormField>
+                )}
+              />
+              <Controller
+                name="dbPassword"
+                control={control}
+                rules={{ required: "Senha é obrigatória" }}
+                render={({ field }) => (
+                  <FormField
+                    label="Senha"
+                    error={!!errors.dbPassword}
+                    containerClass="col-span-full md:col-span-2"
+                    required
+                  >
+                    <TextField
+                      {...field}
+                      fullWidth
+                      type="password"
+                      error={!!errors.dbPassword}
+                      helperText={errors.dbPassword?.message}
+                    />
+                  </FormField>
+                )}
+              />
             </>
-          )
-        }
-
+          )}
+        </form>
       </DialogContent>
       <DialogActions>
         <Button
-          color="info"
-          mr={3}
           onClick={() => {
-            onClose(), cleanFields();
+            reset();
+            onClose();
           }}
+          color="error"
+          disabled={saveIntegrationPending || testConnectionPending}
         >
-          CANCELAR
+          Cancelar
         </Button>
-        {type === "db" && (
-          <Button color="primary" onClick={handleTestConnection}>
-            TESTAR CONEXÃO
+        {watchedType === "db" && (
+          <Button
+            color="primary"
+            onClick={handleTestConnection}
+            disabled={testConnectionPending || saveIntegrationPending}
+            startIcon={<IntegrationInstructions />}
+          >
+            Testar Conexão
           </Button>
         )}
-        <Button color="primary" onClick={handleSave} disabled={buttonSave && type === "db"}>
-          SALVAR
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={handleSubmit(onSubmit)}
+          disabled={saveIntegrationPending || testConnectionPending}
+          loading={saveIntegrationPending}
+          startIcon={<Save fontSize="small" />}
+        >
+          Salvar
         </Button>
       </DialogActions>
-    </Dialog >
+    </Dialog>
   );
 };
 
