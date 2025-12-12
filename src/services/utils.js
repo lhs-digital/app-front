@@ -350,7 +350,7 @@ export const formatInterval = (interval) => {
 export const envMap = {
   STAGING: {
     label: "Ambiente de homologação",
-    alias: "HML",
+    alias: "STG",
   },
   DEVELOPMENT: {
     label: "Ambiente de desenvolvimento",
