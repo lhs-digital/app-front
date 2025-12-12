@@ -17,7 +17,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import NumberInput from "../../../components/DynamicForm/NumberInput";
 import FormField from "../../../components/FormField/index";
@@ -26,11 +26,9 @@ import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { trimText } from "../../../services/formatters";
 import { parseOVPN } from "../../../services/ovpn";
-import Validator from "../../../services/validator";
 
 const RegisterVpn = () => {
   const { company, availableCompanies } = useCompany();
-  const { id } = useParams();
   const qc = useQueryClient();
   const uploadInput = useRef(null);
   const [isParsing, setIsParsing] = useState(false);
@@ -59,7 +57,7 @@ const RegisterVpn = () => {
       username: "",
       password: "",
       company_id: "",
-      protocol: "",
+      protocol: "udp",
       remote_address: "",
       remote_port: "",
       route_ip: "",
@@ -107,43 +105,22 @@ const RegisterVpn = () => {
       return;
     }
     try {
-      if (!Validator.isCleanString(data.name)) {
-        toast.error(
-          "O nome da VPN não deve conter espaços ou caracteres especiais.",
-        );
-        return;
-      }
-
       setIsPending(true);
 
+      console.log(data);
+
       const formData = new FormData();
-      formData.append("p12_file", fileP12);
-      formData.append("company_id", data.company_id);
-      formData.append("name", data.name);
-      formData.append("protocol", data.protocol);
-      formData.append("remote_address", data.remote_address);
-      formData.append("remote_port", data.remote_port);
-      formData.append("route_ip", data.route_ip);
-      formData.append("ta_key", data.ta_key);
-      formData.append("tls_type", data.tls_type);
-      formData.append("username", data.username);
-      formData.append("password", data.password);
-
-      const fn = id ? api.post : api.put;
-
-      await fn(`/vpns/${id || ""}`, formData, {
-        headers: {
-          "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-        },
-        withCredentials: true,
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
       });
-      toast.success(`VPN ${id ? "alterada" : "cadastrada"} com sucesso!`);
-      navigate(id ? `/vpns/${id}` : "/vpns");
+      formData.append("p12_file", fileP12);
+
+      await api.post("/vpns", formData);
+      toast.success("VPN cadastrada com sucesso!");
+      navigate("/vpns");
     } catch (error) {
-      console.error(`Erro ao ${id ? "alterar" : "cadastrar"} VPN`, error);
-      toast.error(
-        `Erro ao ${id ? "alterar" : "cadastrar"} VPN: ${error.message}`,
-      );
+      console.error("Erro ao cadastrar VPN", error);
+      toast.error(`Erro ao cadastrar VPN: ${error.message}`);
     } finally {
       setIsPending(false);
       qc.invalidateQueries(["vpns"]);
@@ -232,12 +209,20 @@ const RegisterVpn = () => {
         <h2 className="col-span-full font-medium">
           <SettingsOutlined className="mb-0.5" /> Configurações
         </h2>
-        <FormField required label="Protocolo" error={!!errors.protocol}>
-          <Select defaultValue="udp" {...register("protocol")} fullWidth>
-            <MenuItem value="tcp">TCP</MenuItem>
-            <MenuItem value="udp">UDP</MenuItem>
-          </Select>
-        </FormField>
+        <Controller
+          name="protocol"
+          control={control}
+          error={!!errors.protocol}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <FormField required label="Protocolo" error={!!errors.protocol}>
+              <Select {...field} fullWidth>
+                <MenuItem value="tcp">TCP</MenuItem>
+                <MenuItem value="udp">UDP</MenuItem>
+              </Select>
+            </FormField>
+          )}
+        />
         <FormField
           required
           label="Endereço de Roteamento"
@@ -246,7 +231,7 @@ const RegisterVpn = () => {
         >
           <TextField
             placeholder="255.255.255.255"
-            {...register("remote_address", { required: true })}
+            {...register("route_ip", { required: true })}
             fullWidth
           />
         </FormField>
