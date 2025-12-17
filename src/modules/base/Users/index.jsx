@@ -1,5 +1,6 @@
 import {
   Add,
+  BusinessCenter,
   Delete,
   Edit,
   ExpandLess,
@@ -16,10 +17,12 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  InputLabel,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -76,9 +79,19 @@ const Users = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const queryClient = useQueryClient();
-  const { permissions } = useUserState().state;
-  const { company } = useCompany();
+  const { state: userState } = useUserState();
+  const { permissions } = userState;
+  const { company, availableCompanies } = useCompany();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+
+  const companyIdForFilter = userState?.isLighthouse
+    ? selectedCompanyId === null || selectedCompanyId === undefined
+      ? company?.id
+      : selectedCompanyId === ""
+        ? undefined
+        : selectedCompanyId
+    : company?.id;
 
   const { data, isFetching } = useQuery({
     queryKey: [
@@ -86,14 +99,14 @@ const Users = () => {
       pagination.currentPage,
       pagination.rowsPerPage,
       search,
-      company?.id,
+      companyIdForFilter,
     ],
     queryFn: async () => {
       const params = {
         page: pagination.currentPage,
         per_page: pagination.rowsPerPage,
         search: search || undefined,
-        company_id: company?.id || undefined,
+        company_id: companyIdForFilter || undefined,
       };
 
       const response = await api.get("/users", { params });
@@ -131,10 +144,8 @@ const Users = () => {
     }));
   };
 
-  const deleteUserMutation = useMutation({
-    mutationFn: async (id) => {
-      return api.delete(`/users/${id}`);
-    },
+  const { mutate: deleteUser } = useMutation({
+    mutationFn: async (id) => await api.delete(`/users/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries(["users"]);
       toast.success("Usuário removido com sucesso!");
@@ -276,7 +287,7 @@ const Users = () => {
           setModalState({ type: null, isOpen: false });
           setDeleteId(null);
         }}
-        onConfirm={() => deleteUserMutation.mutate(deleteId)}
+        onConfirm={() => deleteUser(deleteId)}
       />
       <ModalUser
         selectedUser={userModal.user}
@@ -324,25 +335,81 @@ const Users = () => {
           </>
         }
       />
-      <TextField
-        fullWidth
-        placeholder="Buscar usuário"
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          },
-        }}
-        size="lg"
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPagination((prev) => ({ ...prev, currentPage: 1 }));
-        }}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+        <TextField
+          fullWidth
+          placeholder="Buscar usuário"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            },
+          }}
+          size="lg"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPagination((prev) => ({ ...prev, currentPage: 1 }));
+          }}
+          className="col-span-1 lg:col-span-4"
+        />
+        {userState?.isLighthouse ? (
+          <div className="col-span-1 lg:col-span-2">
+            <Select
+              fullWidth
+              value={
+                selectedCompanyId !== null && selectedCompanyId !== undefined
+                  ? selectedCompanyId
+                  : company?.id || ""
+              }
+              displayEmpty
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <BusinessCenter fontSize="small" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSelectedCompanyId(value === "" ? "" : value || null);
+                setPagination((prev) => ({ ...prev, currentPage: 1 }));
+              }}
+              size="lg"
+              renderValue={(selected) => {
+                if (selected === "" || !selected) {
+                  return "Todas as empresas";
+                }
+                const selectedCompany = availableCompanies?.find(
+                  (c) => c.id === selected,
+                );
+                return selectedCompany?.name || company?.name || "";
+              }}
+            >
+              <MenuItem value="">Todas as empresas</MenuItem>
+              {availableCompanies?.map((companyItem) => (
+                <MenuItem key={companyItem.id} value={companyItem.id}>
+                  {companyItem.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </div>
+        ) : (
+          <div className="col-span-1 lg:col-span-2">
+            <InputLabel>Empresa</InputLabel>
+            <Select fullWidth disabled value={company?.id || ""} size="lg">
+              {company && (
+                <MenuItem value={company.id}>{company.name}</MenuItem>
+              )}
+            </Select>
+          </div>
+        )}
+      </div>
       <TableContainer>
         <Table>
           <TableHead>
