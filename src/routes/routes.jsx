@@ -4,19 +4,14 @@ import Logout from "../modules/public/Logout";
 import PasswordUpdate from "../modules/public/PasswordUpdate";
 import PickCompany from "../modules/public/PickCompany";
 import RecoverPassword from "../modules/public/RecoverPassword";
-import SignIn from "../modules/public/SignIn";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import HomeRoute from "./components/HomeRoute";
 import { NotFound } from "./components/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
 import { routes } from "./modules";
 
 const publicRoutes = [
-  {
-    label: "Login",
-    path: "/",
-    element: <SignIn />,
-  },
   {
     label: "Recuperar Senha",
     path: "/recover-password",
@@ -41,6 +36,11 @@ const publicRoutes = [
 ];
 
 export const AppRoutes = createBrowserRouter([
+  {
+    path: "/",
+    element: <HomeRoute />,
+    errorElement: <ErrorBoundary />,
+  },
   {
     element: <PublicRoute />,
     children: publicRoutes,

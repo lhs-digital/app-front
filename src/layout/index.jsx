@@ -89,7 +89,7 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     if (!company && !user?.isLighthouse) {
-      navigate("/painel");
+      navigate("/");
       setEditingCompany(false);
     }
   }, [company, user]);
@@ -102,7 +102,7 @@ const Layout = ({ children }) => {
 
     setCompany(selectedCompany);
     setEditingCompany(false);
-    navigate("/painel");
+    navigate("/");
   };
 
   const onConfirmChange = () => {
@@ -183,7 +183,7 @@ const Layout = ({ children }) => {
             transition: "all 0.3s ease-in-out",
           }}
         >
-          {pathnames.length > 0 && pathnames[0] !== "painel" && (
+          {pathnames.length > 0 && pathnames[0] !== "" && (
             <Breadcrumbs
               aria-label="breadcrumb"
               className="items-center"

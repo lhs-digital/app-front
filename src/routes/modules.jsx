@@ -3,8 +3,6 @@ import {
   AssignmentLate,
   AssignmentLateOutlined,
   AssignmentOutlined,
-  AutoAwesomeMosaic,
-  AutoAwesomeMosaicOutlined,
   Build,
   BuildOutlined,
   BusinessCenter,
@@ -35,6 +33,7 @@ import {
   Widgets,
   WidgetsOutlined,
 } from "@mui/icons-material";
+import AuditDashboard from "../modules/audit/AuditDashboard";
 import AuditList from "../modules/audit/AuditList";
 import AuditModules from "../modules/audit/AuditModules";
 // import AuditRules from "../modules/audit/AuditRules";
@@ -42,7 +41,6 @@ import AuditModules from "../modules/audit/AuditModules";
 import EntityForm from "../modules/audit/EntityForm";
 import ModuleTables from "../modules/audit/ModuleTable";
 import ModuleForm from "../modules/audit/ModuleView";
-import Home from "../modules/base/Home";
 import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
@@ -62,6 +60,13 @@ const auditModule = {
   icon: BuildOutlined,
   activeIcon: Build,
   children: [
+    {
+      label: "Painel",
+      path: "/painel",
+      element: <AuditDashboard />,
+      icon: HomeIcon,
+      activeIcon: HomeOutlined,
+    },
     {
       label: "Itens auditados",
       path: "/auditorias",
@@ -160,11 +165,12 @@ const baseModule = {
   activeIcon: HomeIcon,
   children: [
     {
-      label: "Painel",
-      path: "/painel",
-      element: <Home />,
-      icon: AutoAwesomeMosaicOutlined,
-      activeIcon: AutoAwesomeMosaic,
+      label: "Início",
+      path: "/",
+      element: <Navigate to="/" />,
+      icon: HomeOutlined,
+      activeIcon: HomeIcon,
+      hidden: true,
     },
     {
       label: "Ordens de Serviço",
