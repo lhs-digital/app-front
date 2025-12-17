@@ -2,7 +2,7 @@ import { Build } from "@mui/icons-material";
 import { useEffect } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import PageTitle from "../../../layout/components/PageTitle";
-import AuditSection from "../../base/Home/components/AuditSection";
+import AuditSection from "./components/AuditSection";
 
 const AuditDashboard = () => {
   const user = useAuthUser();
