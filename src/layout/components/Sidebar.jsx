@@ -1,8 +1,13 @@
-import { ExpandLess, ExpandMore, Logout, Menu } from "@mui/icons-material";
+import {
+  ExpandLess,
+  ExpandMore,
+  Logout,
+  Menu as MenuIcon,
+} from "@mui/icons-material";
 import {
   Avatar,
+  Box,
   Collapse,
-  colors,
   Divider,
   IconButton,
   List,
@@ -10,77 +15,276 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  styled,
+  Menu,
+  MenuItem,
+  Stack,
   Tooltip,
+  Typography,
+  useTheme,
 } from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
 import { useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
-import { useNavigate } from "react-router-dom";
-import { useThemeMode } from "../../contexts/themeModeContext";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useCompany } from "../../hooks/useCompany";
 import { useUserState } from "../../hooks/useUserState";
 import { modules } from "../../routes/modules";
-import { handleMode } from "../../theme";
 import { routeIcon } from "./RouteIcon";
 
 const drawerWidth = 320;
+const drawerWidthClosed = 64;
 
-const openedMixin = (theme) => ({
-  width: drawerWidth,
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: "hidden",
-});
+const Drawer = MuiDrawer;
 
-const closedMixin = (theme) => ({
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: "hidden",
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up("sm")]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
-  },
-});
+/**
+ * Recursive component for rendering menu items
+ */
+const SidebarMenuItem = ({
+  item,
+  open,
+  collapsedChildren,
+  onToggleCollapse,
+  onNavigate,
+  hasPermission,
+  isActive,
+  depth = 0,
+}) => {
+  const theme = useTheme();
+  const [menuAnchor, setMenuAnchor] = useState(null);
 
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-  boxSizing: "border-box",
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        ...openedMixin(theme),
-        "& .MuiDrawer-paper": openedMixin(theme),
-      },
-    },
-    {
-      props: ({ open }) => !open,
-      style: {
-        ...closedMixin(theme),
-        "& .MuiDrawer-paper": closedMixin(theme),
-      },
-    },
-  ],
-}));
+  // Check permissions
+  if (item?.permissions && item?.permissions.length > 0) {
+    if (!hasPermission(item.permissions)) {
+      return null;
+    }
+  }
+
+  // Filter out hidden children for display
+  const visibleChildren = item.children?.filter((child) => !child.hidden) || [];
+  const hasVisibleChildren = visibleChildren.length > 0;
+  const isItemOpen = collapsedChildren[item.label] || false;
+  const isPathActive = item.path && isActive(item.path);
+  const menuOpen = Boolean(menuAnchor);
+
+  const handleClick = (event) => {
+    if (!open && hasVisibleChildren) {
+      // When collapsed, show menu for items with children
+      setMenuAnchor(event.currentTarget);
+    } else if (open && hasVisibleChildren) {
+      // When open, toggle collapse
+      onToggleCollapse(item.label);
+    } else if (item.path) {
+      // Navigate to path
+      onNavigate(item.path);
+      setMenuAnchor(null);
+    }
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
+
+  const handleMenuItemClick = (childPath) => {
+    onNavigate(childPath);
+    handleMenuClose();
+  };
+
+  return (
+    <>
+      <ListItem disablePadding>
+        <Tooltip title={!open ? item.label : ""} placement="right" arrow>
+          <ListItemButton
+            onClick={handleClick}
+            selected={isPathActive}
+            sx={{
+              minHeight: 48,
+              px: open ? 3 : 2,
+              pl: open ? 3 + depth * 2 : 2,
+              justifyContent: open ? "flex-start" : "center",
+              "&.Mui-selected": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.08)"
+                    : "rgba(0, 0, 0, 0.08)",
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.12)"
+                      : "rgba(0, 0, 0, 0.12)",
+                },
+                "& .MuiListItemIcon-root": {
+                  color: theme.palette.primary.main,
+                },
+                "& .MuiListItemText-primary": {
+                  fontWeight: 600,
+                },
+              },
+              "&:hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.05)",
+              },
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                justifyContent: "center",
+                mr: open ? 2 : 0,
+                color: isPathActive
+                  ? theme.palette.primary.main
+                  : theme.palette.text.secondary,
+                opacity: isItemOpen && hasVisibleChildren && open ? 0.6 : 1,
+              }}
+            >
+              {routeIcon(item, isPathActive)}
+            </ListItemIcon>
+            {open && (
+              <>
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{
+                    fontSize: "0.875rem",
+                    fontWeight: isPathActive ? 600 : 400,
+                  }}
+                />
+                {hasVisibleChildren && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: theme.palette.text.secondary,
+                    }}
+                  >
+                    {isItemOpen ? <ExpandLess /> : <ExpandMore />}
+                  </Box>
+                )}
+              </>
+            )}
+          </ListItemButton>
+        </Tooltip>
+      </ListItem>
+
+      {/* Collapsed state menu */}
+      {!open && hasVisibleChildren && (
+        <Menu
+          anchorEl={menuAnchor}
+          open={menuOpen}
+          onClose={handleMenuClose}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left",
+          }}
+          slotProps={{
+            paper: {
+              sx: {
+                mt: 0.5,
+                minWidth: 200,
+                maxHeight: 400,
+                overflow: "auto",
+                borderRadius: 0,
+              },
+            },
+          }}
+        >
+          {visibleChildren.map((child) => {
+            // Check child permissions
+            if (
+              child?.permissions &&
+              child.permissions.length > 0 &&
+              !hasPermission(child.permissions)
+            ) {
+              return null;
+            }
+
+            const isChildActive = child.path && isActive(child.path);
+            const hasGrandchildren =
+              child.children?.filter((gc) => !gc.hidden).length > 0;
+
+            return (
+              <MenuItem
+                key={child.path || child.label}
+                onClick={() => handleMenuItemClick(child.path)}
+                selected={isChildActive}
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.08)"
+                        : "rgba(0, 0, 0, 0.08)",
+                    "&:hover": {
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.12)"
+                          : "rgba(0, 0, 0, 0.12)",
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  {routeIcon(child, isChildActive)}
+                </ListItemIcon>
+                <ListItemText
+                  primary={child.label}
+                  primaryTypographyProps={{
+                    fontSize: "0.875rem",
+                    fontWeight: isChildActive ? 600 : 400,
+                  }}
+                />
+                {hasGrandchildren && (
+                  <Box
+                    sx={{
+                      ml: 1,
+                      color: theme.palette.text.secondary,
+                    }}
+                  >
+                    <ExpandMore fontSize="small" />
+                  </Box>
+                )}
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      )}
+
+      {/* Expanded state collapse */}
+      {open && hasVisibleChildren && (
+        <Collapse in={isItemOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {visibleChildren.map((child) => (
+              <SidebarMenuItem
+                key={child.path || child.label}
+                item={child}
+                open={open}
+                collapsedChildren={collapsedChildren}
+                onToggleCollapse={onToggleCollapse}
+                onNavigate={onNavigate}
+                hasPermission={hasPermission}
+                isActive={isActive}
+                depth={depth + 1}
+              />
+            ))}
+          </List>
+        </Collapse>
+      )}
+    </>
+  );
+};
 
 const Sidebar = ({ open, setOpen }) => {
   const user = useAuthUser();
   const signOut = useSignOut();
-  const theme = handleMode(useThemeMode().mode);
+  const theme = useTheme();
   const [collapsedChildren, setCollapsedChildren] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
   const { permissions } = useUserState().state;
-  const isActive = (url) => window.location.pathname === url;
   const { setCompany, company } = useCompany();
 
   const handleLogout = async () => {
@@ -100,170 +304,262 @@ const Sidebar = ({ open, setOpen }) => {
     );
   };
 
-  const openChildren = (key) => {
-    const isOpen = collapsedChildren[key] || false;
-    setCollapsedChildren({
-      [key]: !isOpen,
-    });
+  const isActive = (path) => {
+    if (!path) return false;
+    const currentPath = location.pathname;
+
+    // Exact match
+    if (currentPath === path) return true;
+
+    // Check if current path starts with this path (for nested routes)
+    // But avoid matching "/" with everything
+    if (path !== "/" && currentPath.startsWith(path + "/")) return true;
+
+    return false;
   };
 
-  const renderRouteItem = (item) => {
-    if (item?.permissions && item?.permissions.length > 0) {
-      if (!hasPermission(item?.permissions)) {
-        return null;
-      }
-    }
-
-    const hasChildren =
-      item.children &&
-      item.children.filter((child) => !child.hidden).length > 0;
-    const isItemOpen = collapsedChildren[item.label] || false;
-    const isPathActive = item.path && isActive(item.path);
-
-    return (
-      <ListItem
-        disablePadding
-        key={item.path || item.label}
-        sx={{
-          ...(hasChildren &&
-            isItemOpen && {
-              borderTop: "1px solid",
-              borderColor: "primary.light",
-            }),
-        }}
-      >
-        <ListItemButton
-          color="primary"
-          disableGutters
-          onClick={
-            hasChildren
-              ? () => openChildren(item.label)
-              : () => item.path && navigate(item.path)
-          }
-          selected={isPathActive}
-          sx={[
-            { minHeight: 48, px: 3 },
-            open ? { justifyContent: "initial" } : { justifyContent: "center" },
-          ]}
-        >
-          <ListItemIcon
-            color="primary"
-            sx={[
-              { minWidth: 0, justifyContent: "center" },
-              open ? { mr: 2 } : { mr: 0 },
-              isItemOpen ? { opacity: 0.5 } : { opacity: 1 },
-              isPathActive && {
-                color: colors.grey[theme === "light" ? 900 : 200],
-              },
-            ]}
-          >
-            {routeIcon(item, isPathActive)}
-          </ListItemIcon>
-          {open && (
-            <>
-              <ListItemText primary={item.label} />
-              {hasChildren && (isItemOpen ? <ExpandLess /> : <ExpandMore />)}
-            </>
-          )}
-        </ListItemButton>
-      </ListItem>
-    );
+  const handleToggleCollapse = (label) => {
+    setCollapsedChildren((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
   };
 
-  const renderModule = (items = []) => {
-    if (!items || items.length === 0) return null;
+  const handleNavigate = (path) => {
+    if (path) navigate(path);
+  };
 
-    return items.map((item) => {
-      if (
-        item?.permissions &&
-        item?.permissions.length > 0 &&
-        !hasPermission(item?.permissions)
-      ) {
-        return null;
+  const filterVisibleModules = (items) => {
+    return items.filter((item) => {
+      // Check permissions
+      if (item?.permissions && item?.permissions.length > 0) {
+        if (!hasPermission(item.permissions)) {
+          return false;
+        }
       }
 
+      // Special case: hide Auditoria module if no company
       if (item.label === "Auditoria" && !company) {
-        return null;
+        return false;
       }
 
-      const isItemOpen = collapsedChildren[item.label] || false;
-      const hasChildren = item.children && item.children.length > 0;
-
-      return (
-        <div key={item.path || item.label}>
-          <Tooltip title={!open ? item.label : ""} placement="right" arrow>
-            {renderRouteItem(item)}
-          </Tooltip>
-          {hasChildren && (
-            <Collapse
-              in={collapsedChildren[item.label] || false}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List component="div" disablePadding>
-                {renderModule(item.children)}
-              </List>
-            </Collapse>
-          )}
-          {isItemOpen && <Divider />}
-        </div>
-      );
+      return true;
     });
   };
 
   return (
     <Drawer
       variant="permanent"
-      anchor="left"
       open={open}
-      onClose={() => setOpen(false)}
-      slotProps={{
-        paper: { style: { borderRadius: 0, borderTop: 0, borderBottom: 0 } },
+      sx={{
+        width: open ? drawerWidth : drawerWidthClosed,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+          width: open ? drawerWidth : drawerWidthClosed,
+          boxSizing: "border-box",
+          border: "none",
+          borderRight: `1px solid ${theme.palette.divider}`,
+          borderRadius: 0,
+          transition: theme.transitions.create("width", {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+          overflowX: "hidden",
+        },
       }}
     >
-      <div className="h-16 p-4 w-full flex flex-row items-center border-b border-b-black/10 dark:border-b-white/15 justify-end">
-        <IconButton size="small" onClick={() => setOpen(!open)}>
-          <Menu />
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="flex-end"
+        sx={{
+          height: 64,
+          px: 2,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <IconButton
+          size="small"
+          onClick={() => setOpen(!open)}
+          sx={{
+            color: theme.palette.text.secondary,
+            "&:hover": {
+              backgroundColor: theme.palette.action.hover,
+            },
+          }}
+        >
+          <MenuIcon />
         </IconButton>
-      </div>
-      <div className="grow overflow-y-scroll">{renderModule(modules)}</div>
+      </Stack>
+
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.2)"
+                : "rgba(0, 0, 0, 0.2)",
+            borderRadius: "0px",
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.3)"
+                  : "rgba(0, 0, 0, 0.3)",
+            },
+          },
+        }}
+      >
+        <List disablePadding>
+          {filterVisibleModules(modules).map((module) => (
+            <SidebarMenuItem
+              key={module.path || module.label}
+              item={module}
+              open={open}
+              collapsedChildren={collapsedChildren}
+              onToggleCollapse={handleToggleCollapse}
+              onNavigate={handleNavigate}
+              hasPermission={hasPermission}
+              isActive={isActive}
+            />
+          ))}
+        </List>
+      </Box>
+
       <Divider />
+
       {open ? (
-        <div className="p-2 w-full flex flex-row items-center justify-between gap-2">
-          <button
-            aria-label="Perfil"
+        <Box
+          sx={{
+            p: 2,
+            borderTop: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            component="button"
             onClick={() => navigate("/permissoes")}
-            className="flex flex-row gap-4 text-left hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg p-2 pr-3"
+            sx={{
+              width: "100%",
+              p: 1.5,
+              borderRadius: 0,
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              textAlign: "left",
+              "&:hover": {
+                backgroundColor: theme.palette.action.hover,
+              },
+            }}
           >
             <Avatar
               src={user?.avatar}
-              alt="Avatar"
-              sx={{ width: 48, height: 48 }}
+              alt={user?.name || "User"}
+              sx={{
+                width: 40,
+                height: 40,
+              }}
             />
-            <div className="flex flex-col">
-              <p className="font-medium">{user?.name}</p>
-              <p className="text-sm">{user?.company?.name}</p>
-            </div>
-          </button>
-          <IconButton color="info" onClick={handleLogout}>
-            <Logout fontSize="small" />
-          </IconButton>
-        </div>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {user?.name}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: theme.palette.text.secondary,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  display: "block",
+                }}
+              >
+                {user?.company?.name}
+              </Typography>
+            </Box>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLogout();
+              }}
+              sx={{
+                color: theme.palette.text.secondary,
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                  color: theme.palette.error.main,
+                },
+              }}
+            >
+              <Logout fontSize="small" />
+            </IconButton>
+          </Stack>
+        </Box>
       ) : (
-        <div className="p-2 py-4 mx-auto flex flex-col gap-4">
-          <Tooltip title={user?.name} placement="right" arrow>
-            <Avatar
-              src={user?.user?.avatar}
-              alt="Avatar"
-              sx={{ width: 32, height: 32 }}
-            />
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            borderTop: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Tooltip title={user?.name || "User"} placement="right" arrow>
+            <IconButton
+              onClick={() => navigate("/permissoes")}
+              sx={{
+                p: 0,
+                "&:hover": {
+                  opacity: 0.8,
+                },
+              }}
+            >
+              <Avatar
+                src={user?.avatar}
+                alt={user?.name || "User"}
+                sx={{
+                  width: 32,
+                  height: 32,
+                }}
+              />
+            </IconButton>
           </Tooltip>
           <Tooltip title="Sair" placement="right" arrow>
-            <IconButton color="info" onClick={handleLogout}>
+            <IconButton
+              size="small"
+              onClick={handleLogout}
+              sx={{
+                color: theme.palette.text.secondary,
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                  color: theme.palette.error.main,
+                },
+              }}
+            >
               <Logout fontSize="small" />
             </IconButton>
           </Tooltip>
-        </div>
+        </Box>
       )}
     </Drawer>
   );
