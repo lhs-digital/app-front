@@ -52,6 +52,7 @@ import AuditConfig from "../modules/audit/AuditConfig";
 import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
+import CompanyView from "../modules/lighthouse/Companies/CompanyView";
 import Logs from "../modules/lighthouse/Logs";
 import RegisterVpn from "../modules/lighthouse/RegisterVPN";
 import Vpns from "../modules/lighthouse/Vpns";
@@ -201,6 +202,16 @@ const lighthouseModule = {
         "create_companies",
         "update_companies",
         "delete_companies",
+      ],
+      children: [
+        {
+          label: "Ver Empresa",
+          path: "/empresas/:id",
+          element: <CompanyView />,
+          icon: BusinessCenterOutlined,
+          activeIcon: BusinessCenter,
+          hidden: true,
+        },
       ],
     },
     {

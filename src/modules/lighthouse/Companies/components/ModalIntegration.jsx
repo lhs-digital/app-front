@@ -17,8 +17,8 @@ import FormField from "../../../../components/FormField/index";
 import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
 
-const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
-  const { availableCompanies, company } = useCompany();
+const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
+  const { availableCompanies } = useCompany();
   const qc = useQueryClient();
 
   const {
@@ -31,7 +31,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      company: "",
+      company: companyId || "",
       type: "db",
       baseUrl: "",
       apiToken: "",
@@ -45,7 +45,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
     },
   });
 
-  const watchedCompany = watch("company");
+  const watchedCompany = companyId ? companyId : watch("company");
   const watchedType = watch("type");
 
   const { data: integrationData } = useQuery({
@@ -60,7 +60,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
   useEffect(() => {
     if (isOpen) {
       reset({
-        company: company?.id || "",
+        company: companyId || "",
         type: "db",
         baseUrl: "",
         apiToken: "",
@@ -73,10 +73,13 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
         dbPassword: "",
       });
     }
-  }, [isOpen, reset]);
+  }, [isOpen, reset, companyId]);
 
   useEffect(() => {
     if (integrationData?.connection) {
+      if (companyId) {
+        setValue("company", companyId);
+      }
       if (integrationData.type === "api") {
         setValue("type", "api");
         setValue("baseUrl", integrationData.connection.api_base_url || "");
@@ -125,6 +128,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
   const { mutate: saveIntegration, isPending: saveIntegrationPending } =
     useMutation({
       mutationFn: async (formData) => {
+        const finalCompanyId = companyId || formData.company;
         const integrationData =
           formData.type === "api"
             ? {
@@ -148,7 +152,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
               };
 
         return api.put(
-          `/companies/${formData.company}/connection`,
+          `/companies/${finalCompanyId}/connection`,
           integrationData,
         );
       },
@@ -169,7 +173,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
     });
 
   const onSubmit = (formData) => {
-    if (!formData.company) {
+    if (!companyId && !formData.company) {
       toast.error("Por favor, selecione uma empresa.");
       return;
     }
@@ -252,6 +256,8 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh }) => {
                   placeholder="Selecione uma opção"
                   fullWidth
                   error={!!errors.company}
+                  disabled={!!companyId}
+                  value={companyId || field.value || ""}
                 >
                   {availableCompanies.map((companyItem) => (
                     <MenuItem key={companyItem.id} value={companyItem.id}>
