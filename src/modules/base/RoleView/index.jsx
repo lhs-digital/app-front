@@ -6,10 +6,11 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../../components/FormField";
+import { useCompany } from "../../../hooks/useCompany";
+import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import PermissionCategory from "./components/PermissionCategory";
-import { useCompany } from "../../../hooks/useCompany";
 
 const RoleView = () => {
   const { id } = useParams();
@@ -19,8 +20,8 @@ const RoleView = () => {
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  // const { isLighthouse } = useUserState().state;
-  const { company } = useCompany();
+  const { state: userState } = useUserState();
+  const { company, availableCompanies } = useCompany();
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   // const { data: companies, isFetched: isCompanyFetched } = useQuery({
@@ -44,10 +45,16 @@ const RoleView = () => {
     if (!role) return;
     methods.setValue("name", role.name);
     methods.setValue("nivel", parseInt(role.nivel));
-    methods.setValue("company", role.company);
-    methods.setValue("company.name", role.company.name);
+    methods.setValue("company", role.company?.id || "");
+    methods.setValue("company.name", role.company?.name || "");
     setSelectedPermissions(role.permissions);
-  }, [role]);
+  }, [role, methods]);
+
+  useEffect(() => {
+    if (isCreating && company?.id) {
+      methods.setValue("company", company.id);
+    }
+  }, [isCreating, company, methods]);
 
   const { data: permissions } = useQuery({
     queryKey: ["permissions"],
@@ -118,9 +125,12 @@ const RoleView = () => {
 
     const payload = {
       ...data,
-      company_id: company?.id,
+      company_id: data.company || company?.id,
       permissions: selectedPermissions.map((permission) => permission.id),
     };
+
+    // Remove company from payload if it's not needed in the API
+    delete payload.company;
 
     console.log("payload", payload);
 
@@ -130,6 +140,10 @@ const RoleView = () => {
 
     return updateRole(payload);
   };
+
+  const canEditCompany =
+    (isCreating && userState?.isLighthouse) ||
+    (isEditing && userState?.isLighthouse);
 
   return (
     <FormProvider {...methods}>
@@ -210,61 +224,62 @@ const RoleView = () => {
               )}
             />
           </FormField>
-          {/* {isLighthouse ? (
-            isCreating || isEditing ? (
-              <FormField
-                label="Empresa"
-                containerClass="col-span-2"
-                required={isCreating}
-              >
-                <Controller
-                  control={methods.control}
-                  name="company"
-                  render={({ field }) => (
-                    <Autocomplete
-                      {...field}
-                      className="col-span-8"
-                      noOptionsText="Nenhuma empresa encontrada."
-                      options={companies || []}
-                      getOptionLabel={(option) => option.name || ""}
-                      isOptionEqualToValue={(option, value) =>
-                        option.id === value.id
-                      } // Garante que a opção selecionada seja comparada corretamente
-                      value={field.value || null} // Define o valor selecionado
-                      onChange={(e, newValue) => field.onChange(newValue)} // Atualiza o valor no estado do formulário
-                      readOnly={!isEditing && !isCreating}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder="Selecione uma empresa"
-                        />
-                      )}
-                    />
-                  )}
-                />
-              </FormField>
-            ) : (
-              <FormField
-                label="Empresa"
-                containerClass="col-span-2"
-                required={isCreating}
-              >
-                <TextField
-                  fullWidth
-                  name="company.name"
-                  type="text"
-                  {...methods.register("company.name", {
-                    required: "Campo obrigatório",
-                  })}
-                  slotProps={{
-                    input: {
-                      readOnly: !isEditing && !isCreating,
-                    },
-                  }}
-                />
-              </FormField>
-            )
-          ) : null} */}
+          {canEditCompany ? (
+            <FormField
+              label="Empresa"
+              containerClass="col-span-2"
+              required={isCreating}
+            >
+              <Controller
+                control={methods.control}
+                name="company"
+                rules={isCreating ? { required: "Campo obrigatório" } : {}}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    fullWidth
+                    value={field.value || ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    disabled={!isEditing && !isCreating}
+                  >
+                    {availableCompanies?.map((companyItem) => (
+                      <MenuItem key={companyItem.id} value={companyItem.id}>
+                        {companyItem.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+            </FormField>
+          ) : (
+            <FormField
+              label="Empresa"
+              containerClass="col-span-2"
+              required={isCreating}
+            >
+              <Controller
+                control={methods.control}
+                name="company"
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    disabled
+                    fullWidth
+                    value={field.value || ""}
+                  >
+                    {company && (
+                      <MenuItem value={company.id}>{company.name}</MenuItem>
+                    )}
+                    {role?.company && !company && (
+                      <MenuItem value={role.company.id}>
+                        {role.company.name}
+                      </MenuItem>
+                    )}
+                  </Select>
+                )}
+              />
+            </FormField>
+          )}
           <div className="col-span-full flex flex-col">
             <h2 className="text-lg font-semibold mb-4">Permissões</h2>
             {permissions &&

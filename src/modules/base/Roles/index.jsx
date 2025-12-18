@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
 import { useUserState } from "../../../hooks/useUserState";
@@ -39,6 +39,8 @@ const Roles = () => {
   const [deleteId, setDeleteId] = useState(null);
   const { permissions } = useUserState().state;
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const companyId = searchParams.get("company_id");
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",
@@ -48,15 +50,22 @@ const Roles = () => {
   const [sortedData, setSortedData] = useState([]);
 
   const { data, isFetched, isSuccess } = useQuery({
-    queryKey: ["roles", currentPage, rowsPerPage, search],
+    queryKey: ["roles", currentPage, rowsPerPage, search, companyId],
     queryFn: async () => {
+      const params = {
+        page: currentPage,
+        per_page: rowsPerPage,
+        search: search,
+      };
+      if (companyId) {
+        params.company_id = companyId;
+      }
       const response = await api.get(
         `/roles?page=${currentPage}&per_page=${rowsPerPage}`,
         {
-          params: { search: search },
+          params: params,
         },
       );
-      console.log(response);
       setTotalCount(response.data.meta.total);
       return response.data.data;
     },

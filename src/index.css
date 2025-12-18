@@ -82,7 +82,10 @@ button {
 }
 
 .login-bg {
-  background-image: url("https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=900");
+  background-image: url("assets/login-bg.jpeg");
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
 }
 
 .MuiAccordion-region {

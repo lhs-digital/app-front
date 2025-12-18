@@ -22,13 +22,13 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import blackLogo from "../assets/lh_black.svg";
 import whiteLogo from "../assets/lh_white.svg";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { useThemeMode } from "../contexts/themeModeContext";
 import { useCompany } from "../hooks/useCompany";
-import { routes } from "../routes/modules";
+import { getBreadcrumbTrail } from "../routes/modules";
 import api from "../services/api";
 import { handleMode } from "../theme";
 import EnvironmentIndicator from "./components/EnvironmentIndicator";
@@ -89,7 +89,7 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     if (!company && !user?.isLighthouse) {
-      navigate("/painel");
+      navigate("/");
       setEditingCompany(false);
     }
   }, [company, user]);
@@ -102,7 +102,7 @@ const Layout = ({ children }) => {
 
     setCompany(selectedCompany);
     setEditingCompany(false);
-    navigate("/painel");
+    navigate("/");
   };
 
   const onConfirmChange = () => {
@@ -183,7 +183,7 @@ const Layout = ({ children }) => {
             transition: "all 0.3s ease-in-out",
           }}
         >
-          {pathnames.length > 0 && pathnames[0] !== "painel" && (
+          {pathnames.length > 0 && pathnames[0] !== "" && (
             <Breadcrumbs
               aria-label="breadcrumb"
               className="items-center"
@@ -201,13 +201,10 @@ const Layout = ({ children }) => {
               >
                 <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
               </Link>
-              {pathnames.map((_, index) => {
-                const to = `/${pathnames.slice(0, index + 1).join("/")}`;
-                const match = routes.find((r) =>
-                  matchPath({ path: r.path, end: true }, to),
-                );
-                let label = match?.label || pathnames[index];
+              {getBreadcrumbTrail(location.pathname).map((breadcrumb) => {
+                let label = breadcrumb.label;
 
+                // Handle dynamic labels for modules and tables
                 if (label === "Módulo" && moduleData?.name) {
                   label = `Módulo ${moduleData.name}`;
                 }
@@ -218,8 +215,8 @@ const Layout = ({ children }) => {
 
                 return (
                   <Link
-                    key={to}
-                    to={to}
+                    key={breadcrumb.path}
+                    to={breadcrumb.path}
                     className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-[--foreground-color] hover:underline"
                   >
                     {label}

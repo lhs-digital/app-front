@@ -1,4 +1,5 @@
 const permissions = {
+  "/": [],
   "/painel": [],
   "/auditorias": [
     "view_any_tasks",

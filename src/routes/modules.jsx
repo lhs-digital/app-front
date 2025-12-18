@@ -3,12 +3,12 @@ import {
   AssignmentLate,
   AssignmentLateOutlined,
   AssignmentOutlined,
-  AutoAwesomeMosaic,
-  AutoAwesomeMosaicOutlined,
   Build,
   BuildOutlined,
   BusinessCenter,
   BusinessCenterOutlined,
+  Code,
+  CodeOutlined,
   DynamicForm,
   DynamicFormOutlined,
   // Computer,
@@ -30,28 +30,30 @@ import {
   Subject,
   TableChart,
   TableChartOutlined,
+  Troubleshoot,
   // Web,
   // WebOutlined,
   Widgets,
   WidgetsOutlined,
 } from "@mui/icons-material";
+import AuditDashboard from "../modules/audit/AuditDashboard";
 import AuditList from "../modules/audit/AuditList";
 import AuditModules from "../modules/audit/AuditModules";
 // import AuditRules from "../modules/audit/AuditRules";
 // import AuditTables from "../modules/audit/AuditTables";
+import { Navigate } from "react-router-dom";
+import AuditConfig from "../modules/audit/AuditConfig";
 import EntityForm from "../modules/audit/EntityForm";
 import ModuleTables from "../modules/audit/ModuleTable";
 import ModuleForm from "../modules/audit/ModuleView";
-import Home from "../modules/base/Home";
 import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
-// import TestPage from "../modules/base/Test";
-import { Navigate } from "react-router-dom";
-import AuditConfig from "../modules/audit/AuditConfig";
+import TestPage from "../modules/base/Test";
 import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
 import Companies from "../modules/lighthouse/Companies";
+import CompanyView from "../modules/lighthouse/Companies/CompanyView";
 import Logs from "../modules/lighthouse/Logs";
 import RegisterVpn from "../modules/lighthouse/RegisterVPN";
 import Vpns from "../modules/lighthouse/Vpns";
@@ -61,6 +63,13 @@ const auditModule = {
   icon: BuildOutlined,
   activeIcon: Build,
   children: [
+    {
+      label: "Painel",
+      path: "/painel",
+      element: <AuditDashboard />,
+      icon: HomeIcon,
+      activeIcon: HomeOutlined,
+    },
     {
       label: "Itens auditados",
       path: "/auditorias",
@@ -159,11 +168,11 @@ const baseModule = {
   activeIcon: HomeIcon,
   children: [
     {
-      label: "Painel",
-      path: "/painel",
-      element: <Home />,
-      icon: AutoAwesomeMosaicOutlined,
-      activeIcon: AutoAwesomeMosaic,
+      label: "Início",
+      path: "/",
+      element: <Navigate to="/" />,
+      icon: HomeOutlined,
+      activeIcon: HomeIcon,
     },
     {
       label: "Ordens de Serviço",
@@ -201,6 +210,16 @@ const lighthouseModule = {
         "create_companies",
         "update_companies",
         "delete_companies",
+      ],
+      children: [
+        {
+          label: "Ver Empresa",
+          path: "/empresas/:id",
+          element: <CompanyView />,
+          icon: BusinessCenterOutlined,
+          activeIcon: BusinessCenter,
+          hidden: true,
+        },
       ],
     },
     {
@@ -303,34 +322,53 @@ export const unrenderedRoutes = [
   },
 ];
 
+const devModule = {
+  label: "Desenvolvimento",
+  icon: CodeOutlined,
+  activeIcon: Code,
+  children: [
+    {
+      label: "Teste",
+      path: "/teste",
+      element: <TestPage />,
+      icon: Troubleshoot,
+      activeIcon: Troubleshoot,
+    },
+  ],
+};
+
 export const modules = [
   baseModule,
   auditModule,
   lighthouseModule,
-  // ...(import.meta.env.MODE !== "production" ? [devModule] : []),
+  ...(import.meta.env.MODE !== "production" ? [devModule] : []),
 ];
 
-const getRoutes = (acc, items) => {
+/**
+ * Builds a flat array of routes from nested module structure
+ */
+const getRoutes = (acc, items, parent = null) => {
   let accRoutes = acc;
 
   items.forEach((item) => {
     if (item.children && item.children.length > 0) {
-      accRoutes = getRoutes(accRoutes, item.children);
+      accRoutes = getRoutes(accRoutes, item.children, item);
     }
 
     if (item.path) {
       const Icon = item.icon;
       const ActiveIcon = item.activeIcon;
-      accRoutes = [
-        ...accRoutes,
-        {
-          path: item.path,
-          element: item.element,
-          label: item.label,
-          ...(Icon && { icon: <Icon /> }),
-          ...(ActiveIcon && { activeIcon: <ActiveIcon /> }),
-        },
-      ];
+      const route = {
+        path: item.path,
+        element: item.element,
+        label: item.label,
+        permissions: item.permissions,
+        hidden: item.hidden,
+        parent: parent ? { path: parent.path, label: parent.label } : null,
+        ...(Icon && { icon: <Icon /> }),
+        ...(ActiveIcon && { activeIcon: <ActiveIcon /> }),
+      };
+      accRoutes = [...accRoutes, route];
     }
   });
 
@@ -339,14 +377,71 @@ const getRoutes = (acc, items) => {
 
 export const routes = getRoutes([], [...modules, ...unrenderedRoutes]);
 
+/**
+ * Finds a route that matches the given pathname
+ * Handles both exact matches and parameterized routes
+ */
+export const findRouteByPath = (pathname) => {
+  // Try exact match first
+  let route = routes.find((r) => r.path === pathname);
+  if (route) return route;
+
+  // Try parameterized route matching
+  const pathSegments = pathname.split("/").filter(Boolean);
+
+  for (const route of routes) {
+    const routeSegments = route.path.split("/").filter(Boolean);
+
+    if (routeSegments.length !== pathSegments.length) continue;
+
+    const matches = routeSegments.every((segment, index) => {
+      return segment === pathSegments[index] || segment.startsWith(":");
+    });
+
+    if (matches) return route;
+  }
+
+  return null;
+};
+
+/**
+ * Builds breadcrumb trail from pathname
+ * Constructs trail by matching each path segment to a route
+ * Note: Home icon is handled separately in Layout component
+ */
+export const getBreadcrumbTrail = (pathname) => {
+  const trail = [];
+  const pathSegments = pathname.split("/").filter(Boolean);
+
+  // Build trail from path segments
+  for (let i = 0; i < pathSegments.length; i++) {
+    const path = `/${pathSegments.slice(0, i + 1).join("/")}`;
+    const route = findRouteByPath(path);
+
+    if (route && !route.hidden) {
+      trail.push({
+        path,
+        label: route.label,
+      });
+    } else if (i === pathSegments.length - 1) {
+      // For the last segment, if no route found, use the segment as label
+      // This handles dynamic routes that might not be in the route list
+      trail.push({
+        path,
+        label: pathSegments[i],
+      });
+    }
+  }
+
+  return trail;
+};
+
 export const routePermissions = (pathname) => {
-  const path = pathname.split("/")[1];
-  const route = routes.find((route) => route.path === path);
+  const route = findRouteByPath(pathname);
   return route?.permissions || [];
 };
 
 export const getIconByPath = (pathname) => {
-  const path = pathname.split("/")[1];
-  const route = routes.find((route) => route.path === `/${path}`);
+  const route = findRouteByPath(pathname);
   return route?.icon || null;
 };

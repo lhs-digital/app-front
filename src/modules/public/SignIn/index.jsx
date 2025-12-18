@@ -44,11 +44,11 @@ const SignIn = () => {
   const onCompanyPickerClose = (success = false) => {
     console.log("onCompanyPickerClose", success);
     if (success) {
-      navigate("/painel");
+      navigate("/");
       setCompanyPickerOpen(false);
     } else {
       if (authUser?.isLighthouse) {
-        navigate("/painel");
+        navigate("/");
         setCompanyPickerOpen(false);
       } else {
         toast.error("Selecione uma empresa para continuar.");
@@ -84,7 +84,7 @@ const SignIn = () => {
         setUserState(formattedUser);
 
         if (formattedUser.isLighthouse) {
-          navigate("/painel");
+          navigate("/");
         } else {
           setCompanyPickerOpen(true);
         }
