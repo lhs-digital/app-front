@@ -75,7 +75,7 @@ export const AddColumn = ({
   const { data: validations = [], isLoading: loadingValidations } = useQuery({
     queryKey: ["validations"],
     queryFn: async () => {
-      const response = await api.get("/rules");
+      const response = await api.get("/audit/rules");
       setAvailableRules(response.data.data);
       return response.data.data;
     },
