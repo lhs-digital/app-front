@@ -82,9 +82,11 @@ const ModuleForm = () => {
 
   useDebounce(search, 300, filterTables);
 
-  if (isSuccess && filteredTables.length === 0 && !search) {
-    setFilteredTables(structure);
-  }
+  useEffect(() => {
+    if (isSuccess && !search) {
+      setFilteredTables(structure);
+    }
+  }, [isSuccess, search, structure]);
 
   useEffect(() => {
     if (activeModule) {
