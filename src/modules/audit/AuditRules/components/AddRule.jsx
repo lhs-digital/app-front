@@ -382,7 +382,7 @@ const AddRule = ({
           <h2 className="font-semibold">Regras</h2>
           <div className="flex flex-row gap-2 items-center">
             {rules.length === 0 ? (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-neutral-400">
                 Não há regras adicionadas.
               </p>
             ) : (

@@ -101,7 +101,7 @@ const MiscSection = () => {
                   >
                     <Box>
                       <p className="text-sm font-medium">Auditoria executada</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
                         {dateFormatted(log.created_at)}
                       </p>
                     </Box>
@@ -177,7 +177,7 @@ const MiscSection = () => {
                 <Box display="flex" flexDirection="column" gap={2}>
                   {company && (
                     <Box>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
                         Empresa Atual
                       </p>
                       <p className="font-medium">{company.name}</p>
@@ -189,7 +189,7 @@ const MiscSection = () => {
             <Card className="flex-1">
               <CardContent>
                 <Box>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
                     Usuário Logado
                   </p>
                   <p className="font-medium">{userState?.name || "N/A"}</p>
