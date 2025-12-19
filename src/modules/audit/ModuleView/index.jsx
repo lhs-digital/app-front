@@ -166,8 +166,8 @@ const ModuleForm = () => {
   return (
     <div className="flex flex-col gap-8 w-full">
       <PageTitle
-        title={activeModule.name || actions[currentAction].pageTitle}
-        subtitle={activeModule.description || "Grupo de regras"}
+        title={activeModule?.name || actions[currentAction].pageTitle}
+        subtitle={activeModule?.description || "Grupo de regras"}
         icon={<Widgets />}
         buttons={[
           <Button
