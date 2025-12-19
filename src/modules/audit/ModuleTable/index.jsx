@@ -160,7 +160,7 @@ const ModuleTableView = () => {
   const { data: validationRules = [], isLoading: isLoadingRules } = useQuery({
     queryKey: ["rules"],
     queryFn: async () => {
-      const response = await api.get("/rules");
+      const response = await api.get("/audit/rules");
       return response.data.data;
     },
   });
