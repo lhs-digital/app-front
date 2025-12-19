@@ -61,32 +61,33 @@ const MiscSection = () => {
   ];
 
   return (
-    <Box display="flex" gap={3} flexDirection={{ xs: "column", lg: "row" }}>
+    <Box display="flex" flexDirection="column" gap={4}>
       {/* Recent Audit Activity */}
-      {auditLogs.length > 0 && (
-        <Box flex={{ xs: 1, lg: 0.5 }}>
-          <div className="flex flex-row justify-between">
-            <div className="flex flex-row gap-2 items-center mb-4">
-              <NotificationsActive fontSize="small" />
-              <h2 className="font-medium">Atividade de Auditoria</h2>
-            </div>
-            <Tooltip title="Ver todas as auditorias">
-              <IconButton
-                color="primary"
-                size="small"
-                className="w-8 h-8"
-                onClick={() => navigate("/auditorias")}
-              >
-                <span className="!aspect-square mb-0.5">
-                  <OpenInNew fontSize="14px" />
-                </span>
-              </IconButton>
-            </Tooltip>
+
+      <Box flex={1}>
+        <div className="flex flex-row justify-between">
+          <div className="flex flex-row gap-2 items-center mb-4">
+            <NotificationsActive fontSize="small" />
+            <h2 className="font-medium">Atividade de Auditoria</h2>
           </div>
-          <Card>
-            <CardContent>
-              <Box display="flex" flexDirection="column" gap={2}>
-                {auditLogs.map((log, index) => (
+          <Tooltip title="Ver todas as auditorias">
+            <IconButton
+              color="primary"
+              size="small"
+              className="w-8 h-8"
+              onClick={() => navigate("/auditorias")}
+            >
+              <span className="!aspect-square mb-0.5">
+                <OpenInNew fontSize="14px" />
+              </span>
+            </IconButton>
+          </Tooltip>
+        </div>
+        <Card>
+          <CardContent>
+            <Box display="flex" flexDirection="column" gap={2}>
+              {auditLogs.length > 0 ? (
+                auditLogs.map((log, index) => (
                   <Box
                     key={index}
                     display="flex"
@@ -106,21 +107,22 @@ const MiscSection = () => {
                     </Box>
                     <AuditStatus status={log.status} size="small" />
                   </Box>
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-      )}
+                ))
+              ) : (
+                <Box>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    Nenhuma auditoria encontrada
+                  </p>
+                </Box>
+              )}
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
 
-      <Box
-        display="flex"
-        flexDirection="column"
-        gap={4}
-        flex={{ xs: 1, lg: 0.5 }}
-      >
+      <Box display="flex" flexDirection={{ xs: "column", lg: "row" }} gap={3}>
         {/* Quick Links */}
-        <Box>
+        <Box flex={1}>
           <div className="flex flex-row gap-2 items-center mb-4">
             <ControlPoint fontSize="small" />
             <h2 className="font-medium">Links Rápidos</h2>
