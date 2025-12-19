@@ -193,6 +193,10 @@ const Users = () => {
     });
   };
 
+  const handleHierarchyUpdated = () => {
+    queryClient.invalidateQueries({ queryKey: ["users"] });
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <Menu
@@ -216,55 +220,55 @@ const Users = () => {
             permission.name === "assign_responsible_users" ||
             permission.name === "unassign_responsible_users",
         ) && (
-          <MenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              setHierarchyState((prev) => ({ ...prev, viewHierarchy: true }));
-              setModalState({ type: "hierarchy", isOpen: true });
-            }}
-          >
-            <ListItemIcon>
-              <Groups fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Visualizar equipe</ListItemText>
-          </MenuItem>
-        )}
+            <MenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                setHierarchyState((prev) => ({ ...prev, viewHierarchy: true }));
+                setModalState({ type: "hierarchy", isOpen: true });
+              }}
+            >
+              <ListItemIcon>
+                <Groups fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Visualizar equipe</ListItemText>
+            </MenuItem>
+          )}
         {permissions.some(
           (permission) => permission.name === "assign_responsible_users",
         ) && (
-          <MenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              setHierarchyState((prev) => ({ ...prev, selectedUser: null }));
-              setModalState({ type: "hierarchy", isOpen: true });
-            }}
-          >
-            <ListItemIcon>
-              <GroupAddIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Adicionar membro</ListItemText>
-          </MenuItem>
-        )}
+            <MenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                setHierarchyState((prev) => ({ ...prev, selectedUser: null }));
+                setModalState({ type: "hierarchy", isOpen: true });
+              }}
+            >
+              <ListItemIcon>
+                <GroupAddIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Adicionar membro</ListItemText>
+            </MenuItem>
+          )}
         {permissions.some(
           (permission) => permission.name === "unassign_responsible_users",
         ) && (
-          <MenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              setHierarchyState((prev) => ({
-                ...prev,
-                desHierarchy: true,
-                selectedUser: null,
-              }));
-              setModalState({ type: "hierarchy", isOpen: true });
-            }}
-          >
-            <ListItemIcon>
-              <GroupRemoveIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Remover membro</ListItemText>
-          </MenuItem>
-        )}
+            <MenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                setHierarchyState((prev) => ({
+                  ...prev,
+                  desHierarchy: true,
+                  selectedUser: null,
+                }));
+                setModalState({ type: "hierarchy", isOpen: true });
+              }}
+            >
+              <ListItemIcon>
+                <GroupRemoveIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Remover membro</ListItemText>
+            </MenuItem>
+          )}
       </Menu>
       <ModalHierarchy
         isOpen={modalState.type === "hierarchy" && modalState.isOpen}
@@ -279,6 +283,7 @@ const Users = () => {
           setHierarchyState((prev) => ({ ...prev, viewHierarchy: value }))
         }
         responsibleHierarchy={hierarchyState.responsible}
+        onHierarchyUpdated={handleHierarchyUpdated}
       />
       <ModalDelete
         isOpen={modalState.type === "delete" && modalState.isOpen}
@@ -307,31 +312,31 @@ const Users = () => {
                 permission.name === "assign_responsible_users" ||
                 permission.name === "unassign_responsible_users",
             ) && (
-              <Button
-                onClick={(e) => setAnchorEl(e.currentTarget)}
-                variant="contained"
-                color="primary"
-                startIcon={<PeopleAltOutlined />}
-                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
-              >
-                EQUIPES
-              </Button>
-            )}
+                <Button
+                  onClick={(e) => setAnchorEl(e.currentTarget)}
+                  variant="contained"
+                  color="primary"
+                  startIcon={<PeopleAltOutlined />}
+                  endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+                >
+                  EQUIPES
+                </Button>
+              )}
             {permissions.some(
               (permission) => permission.name === "create_users",
             ) && (
-              <Button
-                onClick={() => {
-                  setUserModal({ user: {}, mode: "create" });
-                  setModalState({ type: "user", isOpen: true });
-                }}
-                variant="contained"
-                color="primary"
-                startIcon={<Add />}
-              >
-                NOVO USUÁRIO
-              </Button>
-            )}
+                <Button
+                  onClick={() => {
+                    setUserModal({ user: {}, mode: "create" });
+                    setModalState({ type: "user", isOpen: true });
+                  }}
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Add />}
+                >
+                  NOVO USUÁRIO
+                </Button>
+              )}
           </>
         }
       />
@@ -524,16 +529,16 @@ const Users = () => {
               (!search
                 ? sortedData
                 : sortedData.filter(
-                    (user) =>
-                      user.name.toLowerCase().includes(search.toLowerCase()) ||
-                      user.email.toLowerCase().includes(search.toLowerCase()) ||
-                      user.role?.name
-                        ?.toLowerCase()
-                        .includes(search.toLowerCase()) ||
-                      user.company?.name
-                        ?.toLowerCase()
-                        .includes(search.toLowerCase()),
-                  )
+                  (user) =>
+                    user.name.toLowerCase().includes(search.toLowerCase()) ||
+                    user.email.toLowerCase().includes(search.toLowerCase()) ||
+                    user.role?.name
+                      ?.toLowerCase()
+                      .includes(search.toLowerCase()) ||
+                    user.company?.name
+                      ?.toLowerCase()
+                      .includes(search.toLowerCase()),
+                )
               ).map(
                 (
                   { name, email, role, company: userCompany, id, responsible },
@@ -596,27 +601,27 @@ const Users = () => {
                       {permissions.some(
                         (permissions) => permissions.name === "update_users",
                       ) && (
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(index);
-                          }}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
-                      )}
+                          <IconButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(index);
+                            }}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        )}
                       {permissions.some(
                         (permissions) => permissions.name === "delete_users",
                       ) && (
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(id);
-                          }}
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      )}
+                          <IconButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(id);
+                            }}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        )}
                     </TableCell>
                   </TableRow>
                 ),

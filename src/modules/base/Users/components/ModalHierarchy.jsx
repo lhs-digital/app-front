@@ -31,8 +31,8 @@ const ModalHierarchy = ({
   setDesHierarchy,
   viewHierarchy,
   setViewHierarchy,
-  setRefresh,
   responsibleHierarchy,
+  onHierarchyUpdated,
 }) => {
   const [responsibleUser, setResponsibleUser] = useState(null);
   const [eligibleResponsibleUsers, setEligibleResponsibleUsers] = useState([]);
@@ -145,17 +145,17 @@ const ModalHierarchy = ({
 
       const payload = desHierarchy
         ? {
-            responsible_user_id: user.isLighthouse
-              ? responsibleUser?.id
-              : user?.id,
-            target_user_ids: targetUserIds,
-          }
+          responsible_user_id: user.isLighthouse
+            ? responsibleUser?.id
+            : user?.id,
+          target_user_ids: targetUserIds,
+        }
         : {
-            responsible_user_id: user.isLighthouse
-              ? responsibleUser?.id
-              : user?.id,
-            target_user_ids: targetUserIds,
-          };
+          responsible_user_id: user.isLighthouse
+            ? responsibleUser?.id
+            : user?.id,
+          target_user_ids: targetUserIds,
+        };
 
       const endpoint = desHierarchy
         ? "/users/unassign-responsible"
@@ -168,32 +168,17 @@ const ModalHierarchy = ({
         : `Responsável atribuído com sucesso para: ${targetUserNames}`;
       toast.success(successMessage);
 
-      setRefresh((prev) => !prev);
+      onHierarchyUpdated();
 
       handleClose();
     } catch (error) {
-      if (error?.response) {
-        const apiErrors = error.response.data.errors;
-        const apiMessage = error.response.data.message;
+      console.error("ERRO:", {
+        url: error?.config?.url,
+        response: error?.response?.data,
+        message: error?.message,
+      });
 
-        if (apiErrors) {
-          Object.values(apiErrors).forEach((err) => {
-            toast.error(err);
-          });
-
-          toast.error(apiErrors);
-        } else if (apiMessage) {
-          toast.error(apiMessage);
-        } else {
-          toast.error("Erro ao processar a solicitação. Tente novamente.");
-        }
-
-        if (error?.message) {
-          toast.error(apiMessage);
-        }
-      } else {
-        toast.error("Erro ao conectar ao servidor. Tente novamente.");
-      }
+      toast.error("ERRO DETECTADO — veja o console");
     }
   };
 
