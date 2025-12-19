@@ -99,7 +99,7 @@ const Home = () => {
       />
 
       {/* Recent Items & Activity */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {hasPermission(permissions, "view_users") ||
         hasPermission(permissions, "view_any_users") ? (
           <RecentItemsCard

@@ -1,4 +1,6 @@
 import {
+  Assessment,
+  AssessmentOutlined,
   Assignment,
   AssignmentLate,
   AssignmentLateOutlined,
@@ -67,8 +69,8 @@ const auditModule = {
       label: "Painel",
       path: "/painel",
       element: <AuditDashboard />,
-      icon: HomeIcon,
-      activeIcon: HomeOutlined,
+      icon: AssessmentOutlined,
+      activeIcon: Assessment,
     },
     {
       label: "Itens auditados",

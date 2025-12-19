@@ -1,23 +1,23 @@
-import { Circle } from "@mui/icons-material";
+import { CheckCircle, Error, Pending } from "@mui/icons-material";
 import { Chip } from "@mui/material";
 
 const AuditStatus = ({ status, size = "small" }) => {
   const colors = {
-    running: "success",
-    completed: "info",
+    success: "success",
+    pending: "info",
     failed: "error",
   };
 
   const label = {
-    running: "Em andamento",
-    completed: "Concluído",
+    success: "Concluído",
+    pending: "Pendente",
     failed: "Falhou",
   };
 
   const icon = {
-    active: <Circle color="success" />,
-    inactive: <Circle color="info" />,
-    error: <Circle color="error" />,
+    success: <CheckCircle color="success" fontSize="small" />,
+    pending: <Pending color="info" fontSize="small" />,
+    failed: <Error color="error" fontSize="small" />,
   };
   return (
     <Chip

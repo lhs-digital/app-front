@@ -15,7 +15,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
   if (!company) {
     return (
       <div className="p-8 lg:py-12">
-        <p className="text-lg text-center text-gray-500">
+        <p className="text-lg text-center text-neutral-500">
           Selecione uma empresa para visualizar as atividades.
         </p>
       </div>
@@ -25,7 +25,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
   if (!filters.moduleId) {
     return (
       <div className="p-8 lg:py-12">
-        <p className="text-lg text-center text-gray-500">
+        <p className="text-lg text-center text-neutral-500">
           Selecione uma tabela para visualizar as atividades.
         </p>
       </div>
@@ -43,7 +43,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
   if (data?.length === 0) {
     return (
       <div className="p-8 lg:py-12">
-        <p className="text-lg text-center text-gray-500">
+        <p className="text-lg text-center text-neutral-500">
           Não há atividades pendentes ou concluídas.
         </p>
       </div>

@@ -268,7 +268,7 @@ const AuditSection = () => {
                       >
                         {action.icon}
                       </button>
-                      <label className="text-xs text-gray-500 dark:text-[--foreground-color]">
+                      <label className="text-xs text-neutral-500 dark:text-[--foreground-color]">
                         {action.label}
                       </label>
                     </div>
@@ -289,7 +289,7 @@ const AuditSection = () => {
                     >
                       {action.icon}
                     </button>
-                    <label className="text-xs text-gray-500 dark:text-[--foreground-color]">
+                    <label className="text-xs text-neutral-500 dark:text-[--foreground-color]">
                       {action.label}
                     </label>
                   </div>
@@ -306,8 +306,8 @@ const AuditSection = () => {
           <p>Atividades por status</p>
           {!auditModule ? (
             <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
-              <p className="text-gray-500">Não há dados para exibir...</p>
-              <p className="text-gray-500">
+              <p className="text-neutral-500">Não há dados para exibir...</p>
+              <p className="text-neutral-500">
                 Selecione uma empresa e uma tabela
               </p>
             </div>

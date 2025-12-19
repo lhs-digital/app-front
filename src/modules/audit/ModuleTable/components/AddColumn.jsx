@@ -237,7 +237,13 @@ export const AddColumn = ({
                 Nome da coluna
                 <Info description="Nome da coluna no banco de dados." />
               </FormLabel>
-              <TextField value={column?.name} disabled {...register("name", { required: "Nome da coluna é obrigatório" })} />
+              <TextField
+                value={column?.name}
+                disabled
+                {...register("name", {
+                  required: "Nome da coluna é obrigatório",
+                })}
+              />
             </FormControl>
             <FormControl className="lg:col-span-4">
               <FormLabel className="flex flex-row items-center">
@@ -278,7 +284,8 @@ export const AddColumn = ({
               rules={{ required: "Tipo de campo é obrigatório" }}
               render={({ field }) => (
                 <FormControl className="lg:col-span-3">
-                  <FormLabel>Tipo de campo
+                  <FormLabel>
+                    Tipo de campo
                     <Info description="Tipo de campo a ser exibido no formulário." />
                   </FormLabel>
                   <Select
@@ -303,11 +310,14 @@ export const AddColumn = ({
                   <div>
                     <h2 className="font-semibold col-span-full text-lg mb-2">
                       <span>
-                        <RuleFolderOutlined fontSize="small" className="mb-0.5" />
+                        <RuleFolderOutlined
+                          fontSize="small"
+                          className="mb-0.5"
+                        />
                       </span>{" "}
                       Opções
                     </h2>
-                    <p className="text-sm text-gray-500 mb-2">
+                    <p className="text-sm text-neutral-500 mb-2">
                       Lista de opções disponíveis para este campo select.
                     </p>
                   </div>
@@ -315,7 +325,9 @@ export const AddColumn = ({
 
                 <div className="flex flex-row flex-wrap gap-2 items-center col-span-6">
                   {options.length === 0 ? (
-                    <p className="text-sm text-gray-400">Não há opções adicionadas.</p>
+                    <p className="text-sm text-neutral-400">
+                      Não há opções adicionadas.
+                    </p>
                   ) : (
                     options.map((opt, idx) => (
                       <OptionChip
@@ -354,14 +366,22 @@ export const AddColumn = ({
                 Texto de ajuda
                 <Info description="Texto que será exibido como ajuda para o usuário." />
               </FormLabel>
-              <TextField {...register("form.help_text", { required: "Texto de ajuda é obrigatório" })} />
+              <TextField
+                {...register("form.help_text", {
+                  required: "Texto de ajuda é obrigatório",
+                })}
+              />
             </FormControl>
             <FormControl className="lg:col-span-6">
               <FormLabel className="flex flex-row items-center">
                 Texto placeholder
                 <Info description="Opcional. Texto para indicar ao usuário o que deve ser digitado no campo." />
               </FormLabel>
-              <TextField {...register("form.placeholder", { required: "Placeholder é obrigatório" })} />
+              <TextField
+                {...register("form.placeholder", {
+                  required: "Placeholder é obrigatório",
+                })}
+              />
             </FormControl>
             <Divider className="col-span-full" />
             <div className="col-span-full flex flex-row justify-between">
@@ -372,14 +392,14 @@ export const AddColumn = ({
                   </span>{" "}
                   Regras
                 </h2>
-                <p className="text-sm text-gray-500 mb-2">
+                <p className="text-sm text-neutral-500 mb-2">
                   Passe o mouse sobre uma regra para ver mais detalhes.
                 </p>
               </div>
             </div>
             <div className="flex flex-row flex-wrap gap-2 items-center col-span-6">
               {rules.length === 0 ? (
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-neutral-400">
                   Não há regras adicionadas.
                 </p>
               ) : (
@@ -430,15 +450,14 @@ export const AddColumn = ({
             variant="contained"
             color="primary"
             startIcon={column?.edit ? <Check /> : <Add />}
-            onClick={handleSubmit(
-              onSubmit,
-              () => toast.error("Preencha todos os campos corretamente")
+            onClick={handleSubmit(onSubmit, () =>
+              toast.error("Preencha todos os campos corretamente"),
             )}
           >
             {column?.edit ? "Atualizar coluna" : "Adicionar coluna"}
           </Button>
         </DialogActions>
-      </Dialog >
+      </Dialog>
       <AddColumnRule
         open={openAddRule}
         validations={availableRules}

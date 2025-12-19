@@ -1,10 +1,12 @@
 import { IntegrationInstructions, Save } from "@mui/icons-material";
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   MenuItem,
   Select,
   TextField,
@@ -17,7 +19,7 @@ import FormField from "../../../../components/FormField/index";
 import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
 
-const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
+const ModalIntegration = ({ isOpen, onClose, companyId }) => {
   const { availableCompanies } = useCompany();
   const qc = useQueryClient();
 
@@ -26,7 +28,6 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
     handleSubmit,
     reset,
     watch,
-    setValue,
     getValues,
     formState: { errors },
   } = useForm({
@@ -42,6 +43,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
       dbName: "",
       dbUsername: "",
       dbPassword: "",
+      sync: true,
     },
   });
 
@@ -58,7 +60,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
   });
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) {
       reset({
         company: companyId || "",
         type: "db",
@@ -71,34 +73,47 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
         dbName: "",
         dbUsername: "",
         dbPassword: "",
+        sync: true,
       });
     }
   }, [isOpen, reset, companyId]);
 
   useEffect(() => {
-    if (integrationData?.connection) {
-      if (companyId) {
-        setValue("company", companyId);
-      }
+    if (isOpen && integrationData?.connection) {
+      const formValues = {
+        company: companyId || integrationData.company_id || "",
+        type: integrationData.type || "db",
+        baseUrl: "",
+        apiToken: "",
+        apiAuthType: "bearer",
+        dbDriver: "mysql",
+        dbHost: "",
+        dbPort: "",
+        dbName: "",
+        dbUsername: "",
+        dbPassword: "",
+        sync: integrationData.connection?.sync ? true : false,
+      };
+
       if (integrationData.type === "api") {
-        setValue("type", "api");
-        setValue("baseUrl", integrationData.connection.api_base_url || "");
-        setValue("apiToken", integrationData.connection.api_token || "");
-        setValue(
-          "apiAuthType",
-          integrationData.connection.api_auth_type || "bearer",
-        );
+        formValues.type = "api";
+        formValues.baseUrl = integrationData.connection.api_base_url || "";
+        formValues.apiToken = integrationData.connection.api_token || "";
+        formValues.apiAuthType =
+          integrationData.connection.api_auth_type || "bearer";
       } else {
-        setValue("type", "db");
-        setValue("dbDriver", integrationData.connection.db_driver || "mysql");
-        setValue("dbHost", integrationData.connection.db_host || "");
-        setValue("dbPort", integrationData.connection.db_port || "");
-        setValue("dbName", integrationData.connection.db_name || "");
-        setValue("dbUsername", integrationData.connection.db_username || "");
-        setValue("dbPassword", integrationData.connection.db_password || "");
+        formValues.type = "db";
+        formValues.dbDriver = integrationData.connection.db_driver || "mysql";
+        formValues.dbHost = integrationData.connection.db_host || "";
+        formValues.dbPort = integrationData.connection.db_port || "";
+        formValues.dbName = integrationData.connection.db_name || "";
+        formValues.dbUsername = integrationData.connection.db_username || "";
+        formValues.dbPassword = integrationData.connection.db_password || "";
       }
+
+      reset(formValues);
     }
-  }, [integrationData, setValue]);
+  }, [isOpen, integrationData, reset, companyId]);
 
   const { mutate: testConnection, isPending: testConnectionPending } =
     useMutation({
@@ -149,6 +164,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
                   db_username: formData.dbUsername,
                   db_password: formData.dbPassword,
                 },
+                sync: formData.sync ? 1 : 0,
               };
 
         return api.put(
@@ -158,7 +174,6 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
       },
       onSuccess: () => {
         qc.invalidateQueries(["integration"]);
-        setRefresh((prev) => !prev);
         toast.success("Integração configurada com sucesso!");
         reset();
         onClose();
@@ -206,22 +221,14 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
 
   const handleTestConnection = () => {
     const formData = getValues();
-    const dbData = {
-      dbDriver: formData.dbDriver,
-      dbHost: formData.dbHost,
-      dbPort: formData.dbPort,
-      dbName: formData.dbName,
-      dbUsername: formData.dbUsername,
-      dbPassword: formData.dbPassword,
-    };
 
     if (
-      !dbData.dbDriver ||
-      !dbData.dbHost ||
-      !dbData.dbPort ||
-      !dbData.dbName ||
-      !dbData.dbUsername ||
-      !dbData.dbPassword
+      !formData.dbDriver ||
+      !formData.dbHost ||
+      !formData.dbPort ||
+      !formData.dbName ||
+      !formData.dbUsername ||
+      !formData.dbPassword
     ) {
       toast.error(
         "Por favor, preencha todos os campos obrigatórios para o teste de conexão de Banco de Dados.",
@@ -229,7 +236,7 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
       return;
     }
 
-    testConnection(dbData);
+    testConnection(formData);
   };
 
   return (
@@ -472,6 +479,19 @@ const ModalIntegration = ({ isOpen, onClose, setRefresh, companyId }) => {
                 )}
               />
             </>
+          )}
+          {integrationData && (
+            <Controller
+              name="sync"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  className="col-span-full"
+                  control={<Checkbox {...field} />}
+                  label="Atualizar dados ao salvar"
+                />
+              )}
+            />
           )}
         </form>
       </DialogContent>

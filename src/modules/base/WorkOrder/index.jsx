@@ -50,7 +50,7 @@ const WorkOrder = () => {
           <CircularProgress size="1.5rem" />
         </div>
       ) : assignments.length === 0 ? (
-        <div className="col-span-full flex justify-center items-center h-32 text-gray-500">
+        <div className="col-span-full flex justify-center items-center h-32 text-neutral-500">
           {showContent
             ? "Nenhuma ordem de serviço encontrada"
             : "Selecione uma empresa para visualizar as ordens de serviço"}

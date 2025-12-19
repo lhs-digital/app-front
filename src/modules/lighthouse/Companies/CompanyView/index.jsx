@@ -10,6 +10,7 @@ import {
   Save,
   SellOutlined,
   SettingsOutlined,
+  Sync,
 } from "@mui/icons-material";
 import {
   Button,
@@ -17,6 +18,7 @@ import {
   CircularProgress,
   Divider,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -211,6 +213,20 @@ const CompanyView = () => {
 
     return true;
   };
+
+  const { mutate: syncData, isPending: syncDataPending } = useMutation({
+    mutationFn: async () => {
+      return api.post(`/companies/${id}/database/sync`);
+    },
+    onSuccess: () => {
+      toast.success("Dados sincronizados com sucesso!");
+      invalidateQueries();
+    },
+    onError: (error) => {
+      console.error("Erro ao sincronizar dados", error);
+      toast.error(error.response?.data?.message || "Erro ao sincronizar dados");
+    },
+  });
 
   const { mutate: updateCompany, isPending } = useMutation({
     mutationFn: async (data) => {
@@ -645,15 +661,31 @@ const CompanyView = () => {
           <h2 className="font-medium flex items-center gap-2">
             <Autorenew className="mb-0.5" /> Informações de Conexão
           </h2>
-          <Button
-            variant="outlined"
-            size="small"
-            color="primary"
-            onClick={() => setModalIntegrationOpen(true)}
-            startIcon={<SettingsOutlined />}
-          >
-            Configurar Integração
-          </Button>
+          <div className="flex gap-2">
+            <Tooltip title={!connection ? "Nenhuma conexão configurada" : ""}>
+              <Button
+                variant="outlined"
+                size="small"
+                color="primary"
+                onClick={() => syncData()}
+                startIcon={<Sync />}
+                loading={syncDataPending}
+                disabled={syncDataPending || !connection || isEditing}
+              >
+                Sincronizar dados
+              </Button>
+            </Tooltip>
+            <Button
+              variant="outlined"
+              size="small"
+              color="primary"
+              onClick={() => setModalIntegrationOpen(true)}
+              startIcon={<SettingsOutlined />}
+              disabled={isEditing}
+            >
+              Configurar Integração
+            </Button>
+          </div>
         </div>
 
         {!connection ? (
