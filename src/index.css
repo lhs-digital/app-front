@@ -82,7 +82,7 @@ button {
 }
 
 .login-bg {
-  background-image: url("/login-bg.jpeg");
+  background-image: url("/assets/login-bg.jpeg");
   background-size: cover;
   background-position: top;
   background-repeat: no-repeat;
