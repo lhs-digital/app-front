@@ -13,8 +13,8 @@ import {
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { toast } from "react-toastify";
-import api from "../../services/api";
 import { useCompany } from "../../hooks/useCompany";
+import api from "../../services/api";
 
 const ModalReport = ({ isOpen, onClose }) => {
   const [createdAt, setCreatedAt] = useState([]);
@@ -36,14 +36,16 @@ const ModalReport = ({ isOpen, onClose }) => {
 
   const generateReport = async () => {
     try {
-      const response = await api.get(`/report_generate`, {
-        params: {
-          company_id: company?.id,
-          start_date: createdAt[0],
-          end_date: createdAt[1],
+      const response = await api.get(
+        `/companies/${company?.id}/audit/download_summary_report`,
+        {
+          params: {
+            start_date: createdAt[0],
+            end_date: createdAt[1] || new Date().toISOString().split("T")[0],
+          },
+          responseType: "blob",
         },
-        responseType: "blob",
-      });
+      );
 
       const fileBlob = new Blob([response.data], { type: response.data.type });
 
