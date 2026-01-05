@@ -380,3 +380,10 @@ export const formatRuleLabel = (rule) => {
   }
   return rule.validation.label;
 };
+
+export const roleLevelMap = {
+  0: "Administrativo",
+  1: "Estratégico",
+  2: "Tático",
+  3: "Operacional",
+};
