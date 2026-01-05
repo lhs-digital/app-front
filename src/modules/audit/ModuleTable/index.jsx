@@ -179,7 +179,6 @@ const ModuleTableView = () => {
     enabled: !!table && !!id && !!company?.id && !isLoadingRules,
   });
 
-  // Sync state with tableData when data loads and there are no local changes
   useEffect(() => {
     if (tableData?.columns && !hasChanges) {
       const selectedColumns = tableData.columns.filter(
@@ -196,19 +195,15 @@ const ModuleTableView = () => {
     }
   }, [tableData, hasChanges]);
 
-  // Unified loading state - wait for both queries to complete
   const isLoading =
     isLoadingRules || isLoadingTable || !company?.id || !tableData?.columns;
 
-  // Compute selectedColumns synchronously from source of truth
-  // Use tableData when available (no changes), state when user has made changes
   const selectedColumns = hasChanges
     ? columnsData.columns
     : tableData?.columns
       ? tableData.columns.filter((c) => (c.rules || []).length > 0)
       : columnsData.columns;
 
-  // Compute unselectedColumns synchronously from source of truth
   const effectiveUnselectedColumns = hasChanges
     ? unselectedColumns
     : tableData?.columns
