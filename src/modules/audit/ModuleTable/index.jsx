@@ -8,26 +8,25 @@ import {
 } from "@mui/icons-material";
 import {
   Button,
-  CircularProgress,
   Divider,
   InputAdornment,
   Skeleton,
   TextField,
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useBlocker } from "react-router-dom";
-import { useRef, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useBlocker, useParams, useSearchParams } from "react-router-dom";
+
 import { toast } from "react-toastify";
 import TableColumn from "../../../components/AuditComponents/TableColumn";
 import ConfirmDialog from "../../../components/Miscellaneous/ConfirmationDialog";
+import ModalDelete from "../../../components/ModalDelete";
 import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
 import AddColumn from "./components/AddColumn";
 import RuleChip from "./components/RuleChip";
-import ModalDelete from "../../../components/ModalDelete";
 
 const ModuleTableView = () => {
   const { id, table } = useParams();
@@ -49,24 +48,26 @@ const ModuleTableView = () => {
   const { company } = useCompany();
   const allowNavigationRef = useRef(false);
 
-  useBlocker((tx) => {
+  useBlocker(() => {
     if (hasChanges && !allowNavigationRef.current) {
       toast.warning("Você tem alterações não salvas!");
-      return true; // bloqueia navegação
+      return true;
     }
-    allowNavigationRef.current = false; // reseta após navegação
-    return false; // permite navegação
+    allowNavigationRef.current = false;
+    return false;
   });
 
   const { mutate: saveChanges, isPending } = useMutation({
     mutationFn: async () => {
-      if (!company?.id || !id || !columnsData.company_table_id) {
+      const companyTableId = columnsData.company_table_id || tableData?.id;
+      if (!company?.id || !id || !companyTableId) {
         toast.error("Dados insuficientes para salvar. Recarregue a página.");
+        return;
       }
 
       const formattedData = {
-        company_table_id: columnsData.company_table_id,
-        columns: columnsData.columns.map((column) => ({
+        company_table_id: companyTableId,
+        columns: selectedColumns.map((column) => ({
           id: column.id,
           label: column.label,
           form: column.form || {},
@@ -172,22 +173,42 @@ const ModuleTableView = () => {
         params: { with_module_info: id },
       });
       const data = response.data.data.find((t) => t.id === parseInt(table));
-      const selectedColumns = data.columns.filter((c) => c.rules.length > 0);
-      const unselectedColumns = data.columns.filter(
-        (c) => c.rules.length === 0,
-      );
-      setUnselectedColumns(unselectedColumns);
-      setColumnsData({
-        company_table_id: data.id,
-        columns: selectedColumns,
-      });
-      setHasChanges(false);
-
       return data;
     },
     refetchInterval: action !== "view" ? false : 1500,
-    enabled: !!table && !!id && !isLoadingRules,
+    enabled: !!table && !!id && !!company?.id && !isLoadingRules,
   });
+
+  useEffect(() => {
+    if (tableData?.columns && !hasChanges) {
+      const selectedColumns = tableData.columns.filter(
+        (c) => (c.rules || []).length > 0,
+      );
+      const unselectedColumns = tableData.columns.filter(
+        (c) => (c.rules || []).length === 0,
+      );
+      setUnselectedColumns(unselectedColumns);
+      setColumnsData({
+        company_table_id: tableData.id,
+        columns: selectedColumns,
+      });
+    }
+  }, [tableData, hasChanges]);
+
+  const isLoading =
+    isLoadingRules || isLoadingTable || !company?.id || !tableData?.columns;
+
+  const selectedColumns = hasChanges
+    ? columnsData.columns
+    : tableData?.columns
+      ? tableData.columns.filter((c) => (c.rules || []).length > 0)
+      : columnsData.columns;
+
+  const effectiveUnselectedColumns = hasChanges
+    ? unselectedColumns
+    : tableData?.columns
+      ? tableData.columns.filter((c) => (c.rules || []).length === 0)
+      : unselectedColumns;
 
   const handleAddColumn = (column) => {
     setColumnsData((prev) => ({
@@ -232,11 +253,12 @@ const ModuleTableView = () => {
   };
 
   const removeAllColumns = () => {
+    const allColumns = tableData?.columns || [];
     setColumnsData((prev) => ({
       ...prev,
       columns: [],
     }));
-    setUnselectedColumns(tableData.columns);
+    setUnselectedColumns(allColumns);
     setHasChanges(true);
   };
 
@@ -246,7 +268,13 @@ const ModuleTableView = () => {
         title={actions[action].pageTitle || "Tabela"}
         tag={hasChanges && "Você tem alterações não salvas"}
         icon={<TableChart />}
-        subtitle={`Tabela "${tableData.name || "..."}"`}
+        subtitle={
+          isLoading ? (
+            <Skeleton variant="text" width={180} height={36} />
+          ) : (
+            `Tabela "${tableData.name || "..."}"`
+          )
+        }
         buttons={[
           <Button
             key="table-action"
@@ -255,7 +283,7 @@ const ModuleTableView = () => {
             color="primary"
             onClick={actions[action].onClick}
             startIcon={actions[action].icon}
-            disabled={actions[action].disabled}
+            disabled={actions[action].disabled || isLoading}
             loading={isPending}
           >
             {actions[action].buttonLabel}
@@ -273,17 +301,27 @@ const ModuleTableView = () => {
           )}
         </div>
         <div className="flex flex-col gap-2">
-          {isLoadingTable ? (
-            <div className="flex flex-row w-full justify-end">
-              <Skeleton variant="text" height={"96px"} className="w-full" />
+          {isLoading ? (
+            <div
+              className={`flex flex-row ${action === "view" ? "gap-2" : "gap-4"} flex-wrap px-4 py-4 border border-[--border] rounded-md min-h-24`}
+            >
+              {[1, 2, 3].map((i) => (
+                <Skeleton
+                  key={i}
+                  variant="rectangular"
+                  width={224}
+                  height={128}
+                  className="rounded-xl"
+                />
+              ))}
             </div>
           ) : (
             <div
               className={`flex flex-row ${action === "view" ? "gap-2" : "gap-4"} flex-wrap px-4 py-4 border border-[--border] rounded-md min-h-24`}
             >
-              {columnsData.columns.map((column) => (
+              {selectedColumns.map((column) => (
                 <RuleChip
-                  disabled={isLoadingRules || isLoadingTable || isPending}
+                  disabled={isPending}
                   key={column.id}
                   column={column}
                   onClick={
@@ -293,9 +331,9 @@ const ModuleTableView = () => {
                     action === "view"
                       ? undefined
                       : () => {
-                        setRuleToDelete(column);
-                        setIsDeleteRuleOpen(true);
-                      }
+                          setRuleToDelete(column);
+                          setIsDeleteRuleOpen(true);
+                        }
                   }
                   readOnly={action === "view"}
                   color="primary"
@@ -309,7 +347,7 @@ const ModuleTableView = () => {
                 color="primary"
                 className="w-fit"
                 startIcon={<Remove />}
-                disabled={columnsData.columns.length === 0}
+                disabled={selectedColumns.length === 0}
                 onClick={() => setIsDeleteAllOpen(true)}
               >
                 Remover todas
@@ -348,15 +386,23 @@ const ModuleTableView = () => {
           onChange={(e) => setFilterText(e.target.value)}
           variant="outlined"
           fullWidth
+          disabled={isLoading}
         />
       </div>
-      {isLoadingTable ? (
-        <div className="flex flex-row w-full justify-center py-6">
-          <CircularProgress />
-        </div>
-      ) : unselectedColumns.length > 0 ? (
+      {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {unselectedColumns
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={50}
+              className="rounded-lg"
+            />
+          ))}
+        </div>
+      ) : effectiveUnselectedColumns.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {effectiveUnselectedColumns
             .filter(
               (column) =>
                 filterText === "" ||
@@ -369,7 +415,7 @@ const ModuleTableView = () => {
                 readOnly={action === "view"}
                 table={table.table}
                 column={column}
-                isAdded={columnsData.columns.includes(column)}
+                isAdded={selectedColumns.some((c) => c.id === column.id)}
                 onAddColumn={() => {
                   const cleanColumn = {
                     ...column,

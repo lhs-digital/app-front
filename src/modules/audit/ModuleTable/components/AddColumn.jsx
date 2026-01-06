@@ -233,7 +233,7 @@ export const AddColumn = ({
               Informações gerais
             </h2>
             <FormControl className="lg:col-span-2">
-              <FormLabel>
+              <FormLabel className="flex flex-row items-center">
                 Nome da coluna
                 <Info description="Nome da coluna no banco de dados." />
               </FormLabel>
@@ -284,7 +284,7 @@ export const AddColumn = ({
               rules={{ required: "Tipo de campo é obrigatório" }}
               render={({ field }) => (
                 <FormControl className="lg:col-span-3">
-                  <FormLabel>
+                  <FormLabel className="flex flex-row items-center">
                     Tipo de campo
                     <Info description="Tipo de campo a ser exibido no formulário." />
                   </FormLabel>

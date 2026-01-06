@@ -8,6 +8,7 @@ import {
 } from "@mui/icons-material";
 import {
   Button,
+  Chip,
   CircularProgress,
   IconButton,
   InputAdornment,
@@ -30,7 +31,7 @@ import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
-import { hasPermission } from "../../../services/utils";
+import { hasPermission, roleLevelMap } from "../../../services/utils";
 
 const Roles = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -200,6 +201,21 @@ const Roles = () => {
               </TableCell>
               <TableCell
                 sortDirection={
+                  sortConfig.key === "nivel" ? sortConfig.direction : false
+                }
+              >
+                <TableSortLabel
+                  active={sortConfig.key === "nivel"}
+                  direction={
+                    sortConfig.key === "nivel" ? sortConfig.direction : "asc"
+                  }
+                  onClick={createSortHandler("nivel")}
+                >
+                  Nível
+                </TableSortLabel>
+              </TableCell>
+              <TableCell
+                sortDirection={
                   sortConfig.key === "company.name"
                     ? sortConfig.direction
                     : false
@@ -247,42 +263,49 @@ const Roles = () => {
                 </TableCell>
               </TableRow>
             )}
-            {sortedData.map(({ name, company, permissions_count, id }) => (
-              <TableRow
-                key={id}
-                className="cursor-pointer hover:bg-gray-600/20 transition-all"
-              >
-                <TableCell>{name}</TableCell>
-                <TableCell>{company?.name}</TableCell>
-                <TableCell>{permissions_count}</TableCell>
-                <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
-                  {hasPermission(permissions, "view_clients") && (
-                    <IconButton onClick={() => navigate(`/papeis/${id}`)}>
-                      <RemoveRedEye fontSize="small" />
-                    </IconButton>
-                  )}
-                  {hasPermission(permissions, "update_roles") && (
-                    <IconButton
-                      onClick={() =>
-                        navigate(`/papeis/${id}`, { state: { edit: true } })
-                      }
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  )}
-                  {hasPermission(permissions, "delete_roles") && (
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(id);
-                      }}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+            {sortedData.map(
+              ({ name, company, permissions_count, id, nivel }) => (
+                <TableRow
+                  key={id}
+                  className="cursor-pointer hover:bg-gray-600/20 transition-all"
+                >
+                  <TableCell>{name}</TableCell>
+                  <TableCell>
+                    <Chip label={roleLevelMap[nivel]} size="small" />
+                  </TableCell>
+                  <TableCell>{company?.name}</TableCell>
+                  <TableCell>
+                    <Chip label={permissions_count} size="small" />
+                  </TableCell>
+                  <TableCell sx={{ padding: 0, paddingLeft: 1 }}>
+                    {hasPermission(permissions, "view_clients") && (
+                      <IconButton onClick={() => navigate(`/papeis/${id}`)}>
+                        <RemoveRedEye fontSize="small" />
+                      </IconButton>
+                    )}
+                    {hasPermission(permissions, "update_roles") && (
+                      <IconButton
+                        onClick={() =>
+                          navigate(`/papeis/${id}`, { state: { edit: true } })
+                        }
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    )}
+                    {hasPermission(permissions, "delete_roles") && (
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(id);
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ),
+            )}
           </TableBody>
         </Table>
         <TablePagination

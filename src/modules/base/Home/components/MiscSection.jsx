@@ -26,7 +26,7 @@ const MiscSection = () => {
   const navigate = useNavigate();
   const { company } = useCompany();
   const { state: userState } = useUserState();
-  const { permissions } = userState;
+  const { permissions, isLighthouse } = userState;
 
   const { data: auditLogs = [] } = useQuery({
     queryKey: ["dashboard_audit_logs", company?.id],
@@ -175,13 +175,24 @@ const MiscSection = () => {
             <Card className="flex-1">
               <CardContent>
                 <Box display="flex" flexDirection="column" gap={2}>
-                  {company && (
+                  {isLighthouse ? (
                     <Box>
                       <p className="text-sm text-neutral-500 dark:text-neutral-400">
                         Empresa Atual
                       </p>
-                      <p className="font-medium">{company.name}</p>
+                      <p className="font-medium text-sm">
+                        Nenhuma empresa selecionada
+                      </p>
                     </Box>
+                  ) : (
+                    company && (
+                      <Box>
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                          Empresa Atual
+                        </p>
+                        <p className="font-medium">{company.name}</p>
+                      </Box>
+                    )
                   )}
                 </Box>
               </CardContent>

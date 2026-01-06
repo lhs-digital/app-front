@@ -57,7 +57,7 @@ const Companies = () => {
 
   const { permissions } = useUserState().state;
 
-  const { data, isFetching } = useQuery({
+  const { data, isPending, isFetching } = useQuery({
     queryKey: [
       "companies",
       pagination.currentPage,
@@ -259,7 +259,7 @@ const Companies = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {isFetching && (
+            {isPending && (
               <TableRow>
                 <TableCell colSpan={5} rowSpan={2} align="center">
                   <CircularProgress size={24} />
@@ -283,6 +283,7 @@ const Companies = () => {
                     roles_count,
                     address,
                     id,
+                    is_super_admin,
                   },
                   index,
                 ) => (
@@ -337,6 +338,7 @@ const Companies = () => {
                           permissions.name === "delete_companies",
                       ) ? (
                         <IconButton
+                          disabled={is_super_admin}
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
