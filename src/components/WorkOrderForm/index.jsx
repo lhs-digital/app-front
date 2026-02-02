@@ -1,37 +1,93 @@
 import {
+  BusinessCenterOutlined,
   CalendarTodayOutlined,
+  CheckCircleOutline,
+  BuildOutlined,
+  HowToRegOutlined,
   LabelOutlined,
   PersonOutline,
+  HourglassEmptyOutlined,
 } from "@mui/icons-material";
-import { Chip, Divider } from "@mui/material";
+import { Chip, Divider, Tooltip, Typography } from "@mui/material";
 import { statusInfo } from "../../modules/base/WorkOrder/utils";
 
 const WorkOrderForm = ({ assignment, compact = false }) => {
+
+  const isCompleted = assignment?.is_completed === true;
+  const isCorrected = Boolean(assignment?.corrected_at);
+
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleDateString("pt-BR") : "--";
+
   return (
     <div className={`flex flex-col ${compact ? "gap-2.5" : "gap-4"}`}>
-      {!compact && (
-        <>
-          <p className="text-lg font-medium">{assignment?.description}</p>
-          <Divider />
-        </>
-      )}
-      <div className="flex items-center gap-4">
-        <PersonOutline fontSize="small" />
-        <p>{assignment?.assigned_to?.name}</p>
+      <strong>OS{String(assignment?.id).padStart(4, '0')}</strong>
+      <Divider />
+
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <Tooltip title="Atribuido para" arrow>
+
+            <PersonOutline fontSize="small" />
+          </Tooltip>
+          <p>{assignment?.assigned_to?.name}</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Tooltip title="Quantidade de vezes que foi reaberta" arrow>
+            <Chip
+              label={assignment?.reopen_count}
+              color={assignment?.is_persistent_error ? "error" : "default"}
+              size="small"
+            />
+          </Tooltip>
+        </div>
       </div>
+
       <div className="flex items-center gap-4">
-        <CalendarTodayOutlined fontSize="small" />
-        <p>{new Date(assignment.deadline).toLocaleDateString("pt-Br")}</p>
+        <Tooltip title="Empresa" arrow>
+          <BusinessCenterOutlined fontSize="small" />
+        </Tooltip>
+        <p>{assignment?.company?.name}</p>
       </div>
+
+
       <div className="flex items-center gap-4">
-        <LabelOutlined fontSize="small" />
+        <Tooltip title="Status" arrow>
+          <LabelOutlined fontSize="small" />
+        </Tooltip>
         <Chip
           label={statusInfo[assignment?.status]?.label}
           color={statusInfo[assignment?.status]?.severity}
           size="small"
         />
       </div>
-    </div>
+
+      <div className="flex items-center gap-4">
+        <Tooltip title="Prazo da Ordem de Serviço" arrow>
+          <CalendarTodayOutlined fontSize="small" color="warning" />
+        </Tooltip>
+        <p>{formatDate(assignment?.deadline)}</p>
+
+        {isCompleted && !isCorrected && (
+          <>
+            <Tooltip title="Concluída" arrow>
+              <HourglassEmptyOutlined fontSize="small" color="info" />
+            </Tooltip>
+            <p>{formatDate(assignment?.completed_at)}</p>
+          </>
+        )}
+
+        {isCorrected && (
+          <>
+            <Tooltip title="Ordem de Serviço Corrigida em" arrow>
+              <CheckCircleOutline fontSize="small" color="success" />
+            </Tooltip>
+            <p>{formatDate(assignment?.corrected_at)}</p>
+          </>
+        )}
+      </div>
+
+    </div >
   );
 };
 

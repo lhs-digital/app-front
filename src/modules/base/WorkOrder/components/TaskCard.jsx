@@ -1,13 +1,8 @@
 import { Card, CardContent } from "@mui/material";
 import WorkOrderForm from "../../../../components/WorkOrderForm";
-// import { useUserState } from "../../hooks/useUserState";
+import { useNavigate } from "react-router-dom";
 
-const TaskCard = ({ assignment, setSelectedAssignment }) => {
-  // const { isLighthouse } = useUserState().state;
-
-  const handleCardClick = () => {
-    setSelectedAssignment(assignment);
-  };
+const TaskCard = ({ assignment, onClick }) => {
 
   return (
     <Card
@@ -22,7 +17,7 @@ const TaskCard = ({ assignment, setSelectedAssignment }) => {
         position: "relative",
         mb: 2,
       }}
-      onClick={handleCardClick}
+      onClick={onClick}
     >
       <CardContent className="flex flex-col gap-4">
         <WorkOrderForm assignment={assignment} />

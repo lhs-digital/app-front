@@ -59,6 +59,7 @@ import CompanyView from "../modules/lighthouse/Companies/CompanyView";
 import Logs from "../modules/lighthouse/Logs";
 import RegisterVpn from "../modules/lighthouse/RegisterVPN";
 import Vpns from "../modules/lighthouse/Vpns";
+import WorkOrderView from "../modules/base/WorkOrder/WorkOrderView";
 
 const auditModule = {
   label: "Auditoria",
@@ -190,6 +191,16 @@ const baseModule = {
         "delete_work_orders",
         "assign_work_orders",
         "be_assigned_work_orders",
+      ],
+      children: [
+        {
+          label: "Ver Ordem de Serviço",
+          path: "/ordens-de-servico/:id",
+          element: <WorkOrderView />,
+          icon: AssignmentOutlined,
+          activeIcon: Assignment,
+          hidden: true,
+        },
       ],
     },
   ],

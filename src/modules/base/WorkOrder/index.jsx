@@ -10,15 +10,18 @@ import CreateTask from "./components/CreateTask";
 import TaskCard from "./components/TaskCard";
 import TaskFilter from "./components/TaskFilter";
 import ViewTask from "./components/ViewTask";
+import { assignmentsMock } from "./assignment_mock";
+import { useNavigate } from "react-router-dom";
 
 const WorkOrder = () => {
   const user = useUserState().state;
   const { company } = useCompany();
   const showContent = user.isLighthouse ? !!company : true;
-  const [assignments, setAssignments] = useState([]);
-  const [isFetching, setIsFetching] = useState(true);
+  const [assignments, setAssignments] = useState(assignmentsMock);
+  const [isFetching, setIsFetching] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [selectedAssignment, setSelectedAssignment] = useState(null);
+
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col gap-8">
@@ -70,17 +73,14 @@ const WorkOrder = () => {
             <TaskCard
               key={assignment.id}
               assignment={assignment}
-              setSelectedAssignment={setSelectedAssignment}
+              onClick={() =>
+                navigate(`/ordens-de-servico/${assignment?.id}`)
+              }
             />
           ))}
         </Masonry>
       )}
       <CreateTask open={createOpen} onClose={() => setCreateOpen(false)} />
-      <ViewTask
-        open={!!selectedAssignment}
-        onClose={() => setSelectedAssignment(null)}
-        assignment={selectedAssignment}
-      />
     </div>
   );
 };
