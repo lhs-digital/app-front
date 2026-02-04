@@ -5,12 +5,14 @@ import {
   Edit,
   KeyboardArrowDown,
   KeyboardArrowUp,
+  RemoveRedEye,
   Search,
   SettingsOutlined,
 } from "@mui/icons-material";
 import {
   Box,
   Button,
+  CircularProgress,
   IconButton,
   InputAdornment,
   Table,
@@ -22,72 +24,99 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ModalDelete from "../../../components/ModalDelete";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import { formatCpfCnpj } from "../../../services/formatters";
 import ModalCompany from "./components/ModalCompany";
 import ModalIntegration from "./components/ModalIntegration";
-import ModalViewCompany from "./components/ModalViewCompany";
 
 const Companies = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [modalIntegrationOpen, setModalIntegrationOpen] = useState(false);
-  const [viewOpen, setViewOpen] = useState(false);
-  const [data, setData] = useState([]);
   const [dataEdit, setDataEdit] = useState({});
-  const [dataView, setDataView] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [refresh, setRefresh] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    rowsPerPage: 5,
+  });
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
-  //eslint-disable-next-line
-  const [loading, setLoading] = useState(true);
+
   const [sortConfig, setSortConfig] = useState({
     key: "name",
     direction: "asc",
   });
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [totalCount, setTotalCount] = useState(0);
 
   const { permissions } = useUserState().state;
 
-  useEffect(() => {
-    const getData = async () => {
-      setLoading(true);
-      try {
-        const response = await api.get(
-          `/companies?page=${currentPage}&per_page=${rowsPerPage}`,
-          {
-            params: {
-              search: search,
-            },
-          },
-        );
-        setCurrentPage(response.data.meta.current_page);
-        setData(response.data.data);
-        setTotalCount(response.data.meta.total);
-      } catch (error) {
-        console.error("Erro ao verificar lista de empresas", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getData();
-  }, [setData, currentPage, search, refresh]);
+  const { data, isPending, isFetching } = useQuery({
+    queryKey: [
+      "companies",
+      pagination.currentPage,
+      pagination.rowsPerPage,
+      search,
+    ],
+    queryFn: async () => {
+      const params = {
+        page: pagination.currentPage,
+        per_page: pagination.rowsPerPage,
+        search: search || undefined,
+      };
 
-  const handleRemove = async () => {
-    try {
-      await api.delete(`/companies/${deleteId}`);
-      setRefresh(!refresh);
+      const response = await api.get("/companies", { params });
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: response.data.meta.current_page,
+      }));
+      return {
+        data: response.data.data,
+        total: response.data.meta.total,
+      };
+    },
+  });
+
+  const sortedData = useMemo(() => {
+    const companies = data?.data || [];
+    return [...companies].sort((a, b) => {
+      const aKey = sortConfig.key
+        .split(".")
+        .reduce((acc, part) => acc && acc[part], a);
+      const bKey = sortConfig.key
+        .split(".")
+        .reduce((acc, part) => acc && acc[part], b);
+
+      if (aKey < bKey) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aKey > bKey) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [data?.data, sortConfig]);
+
+  const { mutate: deleteCompany } = useMutation({
+    mutationFn: async (id) => {
+      await api.delete(`/companies/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["companies"]);
       toast.success("Empresa removida com sucesso!");
       setDeleteOpen(false);
-    } catch (error) {
+      setDeleteId(null);
+    },
+    onError: (error) => {
       console.error("Erro ao remover a empresa", error);
-    }
+      toast.error("Erro ao remover empresa");
+    },
+  });
+
+  const handleRemove = () => {
+    deleteCompany(deleteId);
   };
 
   const handleEdit = (company) => {
@@ -95,10 +124,8 @@ const Companies = () => {
     setModalOpen(true);
   };
 
-  const handleView = (index) => {
-    const selectedUser = data;
-    setDataView(selectedUser[index]);
-    setViewOpen(true);
+  const handleView = (id) => {
+    navigate(`/empresas/${id}`);
   };
 
   const handleDelete = (id) => {
@@ -107,20 +134,10 @@ const Companies = () => {
   };
 
   const handleSort = (key) => {
-    const direction =
-      sortConfig.direction === "asc" && sortConfig.key === key ? "desc" : "asc";
-
-    const sortedData = [...data].sort((a, b) => {
-      const aKey = key.split(".").reduce((acc, part) => acc && acc[part], a);
-      const bKey = key.split(".").reduce((acc, part) => acc && acc[part], b);
-
-      if (aKey < bKey) return direction === "asc" ? -1 : 1;
-      if (aKey > bKey) return direction === "asc" ? 1 : -1;
-      return 0;
-    });
-
-    setSortConfig({ key, direction });
-    setData(sortedData);
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.direction === "asc" && prev.key === key ? "desc" : "asc",
+    }));
   };
 
   const getSortIcon = (key) => {
@@ -133,14 +150,15 @@ const Companies = () => {
   };
 
   const handleChangePage = (event, newPage) => {
-    setCurrentPage(newPage + 1);
+    setPagination((prev) => ({ ...prev, currentPage: newPage + 1 }));
   };
 
   const handleChangeRowsPerPage = (event) => {
     const newRowsPerPage = parseInt(event.target.value, 10);
-    setRowsPerPage(newRowsPerPage);
-    setCurrentPage(1);
-    setRefresh((prev) => !prev);
+    setPagination({
+      currentPage: 1,
+      rowsPerPage: newRowsPerPage,
+    });
   };
 
   return (
@@ -148,28 +166,20 @@ const Companies = () => {
       <ModalIntegration
         isOpen={modalIntegrationOpen}
         onClose={() => setModalIntegrationOpen(false)}
-        setRefresh={setRefresh}
-        refresh={refresh}
+        setRefresh={() => queryClient.invalidateQueries(["companies"])}
       />
       <ModalCompany
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        data={data}
-        setData={setData}
+        data={sortedData}
         dataEdit={dataEdit}
         setDataEdit={setDataEdit}
-        setRefresh={setRefresh}
-        refresh={refresh}
+        setRefresh={() => queryClient.invalidateQueries(["companies"])}
       />
       <ModalDelete
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleRemove}
-      />
-      <ModalViewCompany
-        selectedCompany={dataView}
-        isOpen={viewOpen}
-        onClose={() => setViewOpen(false)}
       />
       <PageTitle
         title="Empresas"
@@ -201,18 +211,20 @@ const Companies = () => {
       <TextField
         fullWidth
         placeholder="Buscar empresa"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          },
         }}
         size="lg"
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
-          setCurrentPage(1);
+          setPagination((prev) => ({ ...prev, currentPage: 1 }));
         }}
       />
       <TableContainer>
@@ -247,14 +259,21 @@ const Companies = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.length === 0 ? (
+            {isPending && (
               <TableRow>
-                <TableCell colSpan={4} style={{ textAlign: "center" }}>
+                <TableCell colSpan={5} rowSpan={2} align="center">
+                  <CircularProgress size={24} />
+                </TableCell>
+              </TableRow>
+            )}
+            {!isFetching && sortedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} style={{ textAlign: "center" }}>
                   Não existem empresas cadastradas
                 </TableCell>
               </TableRow>
             ) : (
-              data.map(
+              sortedData.map(
                 (
                   {
                     name,
@@ -264,19 +283,33 @@ const Companies = () => {
                     roles_count,
                     address,
                     id,
+                    is_super_admin,
                   },
                   index,
                 ) => (
-                  <TableRow
-                    key={index}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleView(index)}
-                  >
+                  <TableRow key={index} style={{ cursor: "pointer" }}>
                     <TableCell> {name} </TableCell>
-                    <TableCell> {dba || "Não informado"} </TableCell>
-                    <TableCell> {cnpj} </TableCell>
-                    <TableCell> {responsible_cpf} </TableCell>
+                    <TableCell>
+                      {dba || (
+                        <span className="text-neutral-500">Não informado</span>
+                      )}
+                    </TableCell>
+                    <TableCell> {formatCpfCnpj(cnpj)} </TableCell>
+                    <TableCell> {formatCpfCnpj(responsible_cpf)} </TableCell>
                     <TableCell className="space-x-1">
+                      {permissions.some(
+                        (permissions) => permissions.name === "view_companies",
+                      ) ? (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleView(id);
+                          }}
+                        >
+                          <RemoveRedEye />
+                        </IconButton>
+                      ) : null}
                       {permissions.some(
                         (permissions) =>
                           permissions.name === "update_companies",
@@ -305,6 +338,7 @@ const Companies = () => {
                           permissions.name === "delete_companies",
                       ) ? (
                         <IconButton
+                          disabled={is_super_admin}
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -324,10 +358,10 @@ const Companies = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={totalCount}
+          count={data?.total || 0}
           labelRowsPerPage="Linhas por página"
-          rowsPerPage={rowsPerPage}
-          page={currentPage - 1}
+          rowsPerPage={pagination.rowsPerPage}
+          page={pagination.currentPage - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelDisplayedRows={({ from, to, count }) =>

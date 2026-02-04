@@ -7,7 +7,7 @@ const PublicRoute = () => {
   const { company } = useCompany();
 
   if (isAuthenticated && company) {
-    return <Navigate to="/painel" />;
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

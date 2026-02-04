@@ -13,12 +13,14 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useCompany } from "../../hooks/useCompany";
 
 const CompanyPicker = ({ open, onClose }) => {
   const { availableCompanies, setCompany } = useCompany();
   const [selectedCompany, setSelectedCompany] = useState("");
   const [loading, setLoading] = useState(false);
+  const user = useAuthUser();
 
   const onSelectClick = () => {
     if (!selectedCompany) {
@@ -43,8 +45,9 @@ const CompanyPicker = ({ open, onClose }) => {
           <span>
             <InfoOutlined fontSize="small" className="mr-2 mb-0.5" />
           </span>
-          Você pode alternar entre as empresas a qualquer momento, clicando no
-          nome da empresa no canto superior esquerdo.
+          {user?.isLighthouse
+            ? "Você pode continuar sem selecionar uma empresa ou alternar entre as empresas a qualquer momento, clicando no nome da empresa no canto superior esquerdo."
+            : "Você pode alternar entre as empresas a qualquer momento, clicando no nome da empresa no canto superior esquerdo."}
         </p>
         <Divider />
         <FormControl>
@@ -68,24 +71,33 @@ const CompanyPicker = ({ open, onClose }) => {
         </FormControl>
       </DialogContent>
       <DialogActions>
-        <Tooltip
-          title={!selectedCompany ? "Selecione uma empresa para continuar" : ""}
-          placement="top"
-          arrow
-        >
-          <div>
-            <Button
-              color="primary"
-              variant="contained"
-              loading={loading}
-              disabled={!selectedCompany}
-              onClick={onSelectClick}
-              endIcon={<Save />}
-            >
-              SELECIONAR
+        <div className="flex md:flex-row flex-col gap-2">
+          {user?.isLighthouse && (
+            <Button variant="text" onClick={() => onClose(false)}>
+              Continuar sem empresa
             </Button>
-          </div>
-        </Tooltip>
+          )}
+          <Tooltip
+            title={
+              !selectedCompany ? "Selecione uma empresa para continuar" : ""
+            }
+            placement="top"
+            arrow
+          >
+            <div>
+              <Button
+                color="primary"
+                variant="contained"
+                loading={loading}
+                disabled={!selectedCompany}
+                onClick={onSelectClick}
+                endIcon={<Save />}
+              >
+                SELECIONAR
+              </Button>
+            </div>
+          </Tooltip>
+        </div>
       </DialogActions>
     </Dialog>
   );

@@ -61,3 +61,19 @@ export const formatFrontendRulesToBackend = (frontendRules) => {
     priority: frontendRule.priority || 1,
   }));
 };
+
+export const trimText = (text, maxLength) => {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + "...";
+};
+
+export const formatCpfCnpj = (cpfCnpj) => {
+  if (!cpfCnpj) return "--";
+  if (cpfCnpj.length === 11)
+    return cpfCnpj.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  return cpfCnpj.replace(
+    /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+    "$1.$2.$3/$4-$5",
+  );
+};

@@ -1,35 +1,53 @@
 import {
-  Box,
+  Remove,
+  SettingsOutlined,
+  UploadFile,
+  VpnKey,
+} from "@mui/icons-material";
+import {
+  Accordion,
+  AccordionDetails,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  InputLabel,
+  Divider,
+  IconButton,
   MenuItem,
   Select,
   TextField,
+  Tooltip,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import api from "../../../../services/api";
+import FormField from "../../../../components/FormField/index";
 import { useCompany } from "../../../../hooks/useCompany";
+import api from "../../../../services/api";
 
-const ModalVpn = ({
-  data,
-  dataEdit,
-  isOpen,
-  onClose,
-  setRefresh,
-  refresh,
-}) => {
-  const [name, setName] = useState("");
+const ModalVpn = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
   const { company } = useCompany();
   const [fileVpn, setFileVpn] = useState(null);
+  const uploadInput = useRef(null);
+
+  const { register, setValue, reset } = useForm({
+    defaultValues: {
+      name: "",
+      ca_crt: "",
+      client_crt: "",
+      client_key: "",
+      ta_key: "",
+      protocol: "",
+      remote_address: "",
+      remote_port: "",
+      tls_type: "",
+    },
+  });
 
   useEffect(() => {
     if (dataEdit?.id) {
-      setName(dataEdit?.name);
+      setValue("name", dataEdit?.name);
     }
   }, [dataEdit]);
 
@@ -80,7 +98,7 @@ const ModalVpn = ({
   };
 
   const handleSave = () => {
-    if (!name || !fileVpn) {
+    if (!fileVpn) {
       toast.error("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
@@ -92,7 +110,6 @@ const ModalVpn = ({
     }
 
     cleanFields();
-
     onClose();
   };
 
@@ -101,45 +118,115 @@ const ModalVpn = ({
   };
 
   const cleanFields = () => {
-    setName("");
+    reset();
     setFileVpn(null);
-  }
-
+  };
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle>
-        {dataEdit?.id ? "Editar VPN" : "Cadastrar VPN"}
-      </DialogTitle>
-      <DialogContent
-        className="flex flex-col gap-4"
-        style={{ minWidth: 500, minHeight: 200, marginTop: 10 }}>
-        <TextField
-          label="Nome da VPN *"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth
-          margin="dense"
-        />
-
-        <Box>
-          <InputLabel>Empresa *</InputLabel>
-          <Select value={company.id} disabled fullWidth>
+    <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>{dataEdit?.id ? "Editar VPN" : "Cadastrar VPN"}</DialogTitle>
+      <DialogContent className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <FormField
+          label="Nome da VPN"
+          containerClass="col-span-full md:col-span-2"
+        >
+          <TextField
+            required
+            type="text"
+            fullWidth
+            {...register("name", { required: true })}
+          />
+        </FormField>
+        <FormField label="Empresa">
+          <Select value={company.id} readOnly fullWidth>
             <MenuItem value={company.id}>{company.name}</MenuItem>
           </Select>
-        </Box>
-
-        <div>
-          <input type="file" onChange={handleFileChange} />
+        </FormField>
+        <Divider className="col-span-full" />
+        <div className="col-span-full flex flex-row justify-between">
+          <div className="flex flex-row gap-4 items-center">
+            <Button
+              variant="outlined"
+              component="label"
+              size="large"
+              startIcon={<UploadFile />}
+              onClick={() => uploadInput.current.click()}
+            >
+              {fileVpn ? "Alterar arquivo OVPN" : "Selecionar arquivo OVPN"}
+              <input
+                type="file"
+                hidden
+                onChange={handleFileChange}
+                ref={uploadInput}
+              />
+            </Button>
+            {fileVpn ? (
+              <span>{fileVpn.name}</span>
+            ) : (
+              <span className="text-neutral-400">
+                Nenhum arquivo selecionado
+              </span>
+            )}
+          </div>
+          {fileVpn && (
+            <Tooltip>
+              <IconButton>
+                <Remove />
+              </IconButton>
+            </Tooltip>
+          )}
         </div>
+        <Divider className="col-span-full" />
+        <h2 className="col-span-full font-medium">
+          <SettingsOutlined className="mb-0.5" /> Configurações
+        </h2>
+        <FormField
+          label="Certificado da Autoridade Certificadora (CA)"
+          containerClass="col-span-full"
+        >
+          <TextField
+            multiline
+            minRows={6}
+            style={{ width: "100%", resize: "vertical" }}
+            {...register("ca_crt", { required: true })}
+          />
+        </FormField>
+        <FormField
+          label="Certificado do Cliente"
+          containerClass="col-span-full"
+        >
+          <TextField
+            multiline
+            minRows={6}
+            style={{ width: "100%", resize: "vertical" }}
+            {...register("client_crt", { required: true })}
+          />
+        </FormField>
+        <FormField label="Chave TLS" containerClass="col-span-full">
+          <TextField
+            multiline
+            minRows={6}
+            style={{ width: "100%", resize: "vertical" }}
+            {...register("ta_key", { required: true })}
+          />
+        </FormField>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => { onClose(); cleanFields(); }}>
+        <Button
+          onClick={() => {
+            onClose();
+            cleanFields();
+          }}
+        >
           VOLTAR
         </Button>
-        <Button onClick={handleSave} color="primary">
-          SALVAR
+        <Button
+          onClick={handleSave}
+          color="primary"
+          variant="contained"
+          startIcon={<VpnKey />}
+        >
+          Criar VPN
         </Button>
       </DialogActions>
     </Dialog>

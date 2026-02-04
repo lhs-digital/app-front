@@ -40,17 +40,15 @@ const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
   const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company } = useCompany();
-  // const [workOrderOpen, setWorkOrderOpen] = useState(false);
+
   const [selectedItem, setSelectedItem] = useState(null);
-  // const { isLighthouse } = useUserState().state;
 
   const { filters, updateFilters, resetFilters, searchParams } =
     useAuditFilters();
 
   useEffect(() => {
-    // Update URL when filters change
     const params = new URLSearchParams(searchParams);
-    let count = -1;
+    let count = 0;
     for (const key of params.keys()) {
       if (Object.prototype.hasOwnProperty.call(filterDefaults, key)) {
         if (params.get(key) !== filterDefaults[key]) {
@@ -144,17 +142,6 @@ const AuditList = () => {
   const handleCloseFilterMenu = () => {
     setAnchorEl(null);
   };
-
-  // const handleWorkOrder = (auditRecord) => {
-  //   console.log("auditRecord", auditRecord);
-  //   if (!filters.module) {
-  //     toast.error("Selecione um módulo para visualizar os dados.");
-  //     return;
-  //   }
-
-  //   setWorkOrderOpen(true);
-  //   setSelectedItem(auditRecord);
-  // };
 
   const handleView = (record) => {
     setSelectedItem(record);

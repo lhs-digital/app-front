@@ -22,13 +22,13 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import blackLogo from "../assets/lh_black.svg";
 import whiteLogo from "../assets/lh_white.svg";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { useThemeMode } from "../contexts/themeModeContext";
 import { useCompany } from "../hooks/useCompany";
-import { routes } from "../routes/modules";
+import { getBreadcrumbTrail } from "../routes/modules";
 import api from "../services/api";
 import { handleMode } from "../theme";
 import EnvironmentIndicator from "./components/EnvironmentIndicator";
@@ -46,12 +46,10 @@ const Layout = ({ children }) => {
   const user = useAuthUser();
   const navigate = useNavigate();
 
-  // Query para buscar dados do módulo quando necessário
   const moduleId = pathnames.find(
     (path, index) => pathnames[index - 1] === "modulos" && path !== "criar",
   );
 
-  // Query para buscar dados da tabela quando necessário
   const tableId = pathnames.find(
     (path, index) =>
       pathnames[index - 2] === "modulos" &&
@@ -90,11 +88,11 @@ const Layout = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (!company) {
-      navigate("/painel");
+    if (!company && !user?.isLighthouse) {
+      navigate("/");
       setEditingCompany(false);
     }
-  }, [company]);
+  }, [company, user]);
 
   const onCompanyChangeClick = () => {
     if (!editingCompany) {
@@ -104,7 +102,7 @@ const Layout = ({ children }) => {
 
     setCompany(selectedCompany);
     setEditingCompany(false);
-    navigate("/painel");
+    navigate("/");
   };
 
   const onConfirmChange = () => {
@@ -149,7 +147,9 @@ const Layout = ({ children }) => {
                 </Select>
               </div>
             ) : (
-              <p className="text-xl font-bold">{company?.name}</p>
+              <p className="text-xl font-bold">
+                {company?.name || (user?.isLighthouse ? "Lighthouse" : "")}
+              </p>
             )}
             {user && user?.isLighthouse && (
               <Tooltip
@@ -183,7 +183,7 @@ const Layout = ({ children }) => {
             transition: "all 0.3s ease-in-out",
           }}
         >
-          {pathnames.length > 0 && pathnames[0] !== "painel" && (
+          {pathnames.length > 0 && pathnames[0] !== "" && (
             <Breadcrumbs
               aria-label="breadcrumb"
               className="items-center"
@@ -201,27 +201,22 @@ const Layout = ({ children }) => {
               >
                 <HomeOutlined sx={{ fontSize: "18px" }} className="mb-0.5" />
               </Link>
-              {pathnames.map((_, index) => {
-                const to = `/${pathnames.slice(0, index + 1).join("/")}`;
-                const match = routes.find((r) =>
-                  matchPath({ path: r.path, end: true }, to),
-                );
-                let label = match?.label || pathnames[index];
+              {getBreadcrumbTrail(location.pathname).map((breadcrumb) => {
+                let label = breadcrumb.label;
 
-                // Se o label for "Módulo" e temos dados do módulo, adicionar o nome
+                // Handle dynamic labels for modules and tables
                 if (label === "Módulo" && moduleData?.name) {
                   label = `Módulo ${moduleData.name}`;
                 }
 
-                // Se o label for "Tabelas" e temos dados da tabela, adicionar o nome
                 if (label === "Tabelas" && tableData?.name) {
                   label = `Tabela ${tableData.name}`;
                 }
 
                 return (
                   <Link
-                    key={to}
-                    to={to}
+                    key={breadcrumb.path}
+                    to={breadcrumb.path}
                     className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-[--foreground-color] hover:underline"
                   >
                     {label}
@@ -230,7 +225,7 @@ const Layout = ({ children }) => {
               })}
             </Breadcrumbs>
           )}
-          {editingCompany ? (
+          {editingCompany && !user?.isLighthouse ? (
             <div className="flex flex-col gap-4 items-center justify-center h-[calc(100vh-4rem)]">
               <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 Selecione uma empresa para continuar

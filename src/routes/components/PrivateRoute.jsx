@@ -31,7 +31,7 @@ const PrivateRoute = () => {
     return <Navigate to="/" />;
   }
 
-  if (!company) {
+  if (!company && !state?.isLighthouse) {
     return <Navigate to="/selecionar-empresa" />;
   }
 

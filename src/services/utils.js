@@ -350,7 +350,7 @@ export const formatInterval = (interval) => {
 export const envMap = {
   STAGING: {
     label: "Ambiente de homologação",
-    alias: "HML",
+    alias: "STG",
   },
   DEVELOPMENT: {
     label: "Ambiente de desenvolvimento",
@@ -379,4 +379,11 @@ export const formatRuleLabel = (rule) => {
     return `${rule.validation.label} ${rule.validation.multiple ? `[${paramsStr}]` : `${paramsStr}`}`;
   }
   return rule.validation.label;
+};
+
+export const roleLevelMap = {
+  0: "Administrativo",
+  1: "Estratégico",
+  2: "Tático",
+  3: "Operacional",
 };
