@@ -10,13 +10,12 @@ import {
 } from "@mui/icons-material";
 import { Button, Skeleton, TextField } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { TransformWrapper } from "react-zoom-pan-pinch";
 import Diagram from "../../../components/ERDiagram/Diagram";
-import { parseStructure } from "../../../components/ERDiagram/erUtility";
 import FormField from "../../../components/FormField";
 import { useCompany } from "../../../hooks/useCompany";
 import useDebounce from "../../../hooks/useDebounce";
@@ -24,19 +23,41 @@ import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
 
-const ModuleForm = () => {
+const ACTION_BY_SEGMENT = {
+  criar: "create",
+  editar: "edit",
+};
+
+const getActionFromPath = (pathname) => {
+  for (const [segment, action] of Object.entries(ACTION_BY_SEGMENT)) {
+    if (pathname.includes(segment)) return action;
+  }
+  return "view";
+};
+
+const TablesSectionHeader = () => (
+  <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
+    <span className="mb-0.5">
+      <DataObject fontSize="small" />
+    </span>{" "}
+    <span>Tabelas</span>
+  </h2>
+);
+
+const ModuleView = () => {
   const { register, handleSubmit, reset } = useForm();
   const navigate = useNavigate();
   const { id } = useParams();
   const { company } = useCompany();
   const location = useLocation();
-  const [search, setSearch] = useState();
-  const [filteredTables, setFilteredTables] = useState([]);
-  const currentAction = location.pathname.includes("criar")
-    ? "create"
-    : location.pathname.includes("editar")
-      ? "edit"
-      : "view";
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [search, setSearch] = useState(
+    () => new URLSearchParams(location.search).get("search") || "",
+  );
+
+  const currentAction = getActionFromPath(location.pathname);
+  const isEditable = currentAction !== "view";
 
   const { data: activeModule = null, isLoading: isLoadingModule } = useQuery({
     queryKey: ["module", id, company],
@@ -50,43 +71,36 @@ const ModuleForm = () => {
     retry: false,
   });
 
-  const {
-    data: structure = [],
-    isLoading: isLoadingStructure,
-    isSuccess,
-  } = useQuery({
-    queryKey: ["tables", company],
+  const { data: structure = [], isLoading: isLoadingStructure } = useQuery({
+    queryKey: ["tables", company, debouncedSearch],
     queryFn: async () => {
+      const params = { with_module_info: id };
+      if (debouncedSearch) {
+        params.search = debouncedSearch;
+      }
       const response = await api.get(`/companies/${company.id}/structure`, {
-        params: { with_module_info: id },
+        params,
       });
-      const existingTables = activeModule.tables.map(
-        (table) => table.company_table_id,
-      );
-      return parseStructure(response.data.data, existingTables);
+      return response.data.data;
     },
     enabled: !!activeModule,
   });
 
-  const filterTables = (searchTerm) => {
-    if (!searchTerm) {
-      setFilteredTables(structure);
-      return;
-    }
-    const lowercasedTerm = searchTerm.toLowerCase();
-    const filtered = structure.filter((table) =>
-      table.name.toLowerCase().includes(lowercasedTerm),
-    );
-    setFilteredTables(filtered);
-  };
+  const handleSearch = useCallback(
+    (value) => {
+      setDebouncedSearch(value);
+      const params = new URLSearchParams(location.search);
+      if (value) {
+        params.set("search", value);
+      } else {
+        params.delete("search");
+      }
+      navigate(`${location.pathname}?${params.toString()}`);
+    },
+    [location.search, location.pathname, navigate],
+  );
 
-  useDebounce(search, 300, filterTables);
-
-  useEffect(() => {
-    if (isSuccess && !search) {
-      setFilteredTables(structure);
-    }
-  }, [isSuccess, search, structure]);
+  useDebounce(search, 300, handleSearch);
 
   useEffect(() => {
     if (activeModule) {
@@ -96,7 +110,7 @@ const ModuleForm = () => {
         tables: activeModule.tables.map((table) => table.id),
       });
     }
-  }, [activeModule]);
+  }, [activeModule, reset]);
 
   const { mutate: createModule } = useMutation({
     mutationFn: async (data) => {
@@ -131,20 +145,11 @@ const ModuleForm = () => {
     },
   });
 
-  const onSubmit = (data) => {
-    switch (currentAction) {
-      case "create":
-        createModule(data);
-        break;
-      case "edit":
-        updateModule(data);
-        break;
-      default:
-        break;
-    }
-  };
+  const submitByAction = { create: createModule, edit: updateModule };
 
-  const actions = {
+  const onSubmit = (data) => submitByAction[currentAction]?.(data);
+
+  const actionConfig = {
     create: {
       pageTitle: "Criar grupo de regras",
       icon: <Save />,
@@ -165,33 +170,41 @@ const ModuleForm = () => {
     },
   };
 
+  const { pageTitle, icon, buttonLabel, onClick } = actionConfig[currentAction];
+
+  const handleSelectTable = useCallback(
+    (table) => {
+      navigate(`/modulos/${id}/${table.id}?action=${currentAction}`);
+    },
+    [navigate, id, currentAction],
+  );
+
+  const isLoading = isLoadingStructure || isLoadingModule;
+
   return (
     <div className="flex flex-col gap-8 w-full">
       <PageTitle
-        title={activeModule?.name || actions[currentAction].pageTitle}
+        title={activeModule?.name || pageTitle}
         subtitle={activeModule?.description || "Grupo de regras"}
         icon={<Widgets />}
         buttons={[
           <Button
-            key="create-module"
+            key="action-module"
             type="button"
             variant="contained"
             color="primary"
-            onClick={actions[currentAction].onClick}
-            startIcon={actions[currentAction].icon}
+            onClick={onClick}
+            startIcon={icon}
           >
-            {actions[currentAction].buttonLabel}
+            {buttonLabel}
           </Button>,
         ]}
       />
-      {currentAction !== "view" && (
+
+      {isEditable && (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <FormField label="Nome do módulo" loading={isLoadingModule}>
-            <TextField
-              fullWidth
-              {...register("name", { required: true })}
-              disabled={currentAction === "view"}
-            />
+            <TextField fullWidth {...register("name", { required: true })} />
           </FormField>
           <FormField label="Descrição do módulo" loading={isLoadingModule}>
             <TextField
@@ -199,25 +212,30 @@ const ModuleForm = () => {
               rows={3}
               fullWidth
               {...register("description", { required: true })}
-              disabled={currentAction === "view"}
             />
           </FormField>
         </form>
       )}
-      {currentAction === "create" ? null : (
+
+      {currentAction !== "create" && (
         <div className="flex flex-col gap-4">
-          {isLoadingStructure || isLoadingModule ? (
+          {isLoading ? (
             <div className="flex flex-col gap-4">
-              <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
-                <span className="mb-0.5">
-                  <DataObject fontSize="small" />
-                </span>{" "}
-                <span>Tabelas</span>
-              </h2>
-              <Skeleton
-                variant="rectangular"
-                height={52}
-                className="rounded-lg"
+              <div className="flex flex-col gap-1">
+                <TablesSectionHeader />
+                <span>Carregando...</span>
+              </div>
+              <TextField
+                placeholder="Pesquisar tabelas..."
+                fullWidth
+                disabled
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <Search className="text-neutral-500 mr-2" />
+                    ),
+                  },
+                }}
               />
               <Skeleton
                 variant="rectangular"
@@ -235,18 +253,12 @@ const ModuleForm = () => {
               maxScale={1.5}
               wrapperStyle={{ width: "100%", height: "100%" }}
               centerZoomed
-              className="relative"
             >
               {({ zoomIn, zoomOut, centerView }) => (
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-row gap-2 items-end justify-between">
                     <div className="flex flex-col gap-1">
-                      <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
-                        <span className="mb-0.5">
-                          <DataObject fontSize="small" />
-                        </span>{" "}
-                        <span>Tabelas</span>
-                      </h2>
+                      <TablesSectionHeader />
                       <span>
                         Para adicionar uma ou mais colunas a este grupo,{" "}
                         <b>clique na tabela</b> que contém as colunas desejadas.
@@ -257,9 +269,7 @@ const ModuleForm = () => {
                         <Button
                           color="primary"
                           size="small"
-                          onClick={() => {
-                            centerView();
-                          }}
+                          onClick={centerView}
                           startIcon={<CenterFocusStrong />}
                         >
                           Centralizar
@@ -267,9 +277,7 @@ const ModuleForm = () => {
                         <Button
                           color="primary"
                           size="small"
-                          onClick={() => {
-                            zoomIn();
-                          }}
+                          onClick={zoomIn}
                           startIcon={<ZoomIn />}
                         >
                           Aumentar
@@ -277,9 +285,7 @@ const ModuleForm = () => {
                         <Button
                           color="primary"
                           size="small"
-                          onClick={() => {
-                            zoomOut();
-                          }}
+                          onClick={zoomOut}
                           startIcon={<ZoomOut />}
                         >
                           Diminuir
@@ -302,14 +308,10 @@ const ModuleForm = () => {
                   />
                   <div className="w-full h-[62.5vh] overflow-y-hidden border border-[--border] rounded-lg grid-bg relative">
                     <Diagram
-                      data={filteredTables}
+                      data={structure}
                       isLoading={isLoadingStructure}
-                      allowHover={true}
-                      onSelectTable={(table) => {
-                        navigate(
-                          `/modulos/${id}/${table.id}?action=${currentAction}`,
-                        );
-                      }}
+                      allowHover
+                      onSelectTable={handleSelectTable}
                     />
                   </div>
                 </div>
@@ -322,4 +324,4 @@ const ModuleForm = () => {
   );
 };
 
-export default ModuleForm;
+export default ModuleView;

@@ -47,19 +47,19 @@ import { Navigate } from "react-router-dom";
 import AuditConfig from "../modules/audit/AuditConfig";
 import EntityForm from "../modules/audit/EntityForm";
 import ModuleTables from "../modules/audit/ModuleTable";
-import ModuleForm from "../modules/audit/ModuleView";
+import ModuleView from "../modules/audit/ModuleView";
 import MyPermissions from "../modules/base/MyPermissions";
 import Roles from "../modules/base/Roles";
 import RoleView from "../modules/base/RoleView";
 import TestPage from "../modules/base/Test";
 import Users from "../modules/base/Users";
 import WorkOrder from "../modules/base/WorkOrder";
+import WorkOrderView from "../modules/base/WorkOrder/WorkOrderView";
 import Companies from "../modules/lighthouse/Companies";
 import CompanyView from "../modules/lighthouse/Companies/CompanyView";
 import Logs from "../modules/lighthouse/Logs";
 import RegisterVpn from "../modules/lighthouse/RegisterVPN";
 import Vpns from "../modules/lighthouse/Vpns";
-import WorkOrderView from "../modules/base/WorkOrder/WorkOrderView";
 
 const auditModule = {
   label: "Auditoria",
@@ -116,7 +116,7 @@ const auditModule = {
         {
           label: "Criar grupo de regras",
           path: "/modulos/criar",
-          element: <ModuleForm />,
+          element: <ModuleView />,
           icon: WidgetsOutlined,
           activeIcon: Widgets,
           hidden: true,
@@ -124,7 +124,7 @@ const auditModule = {
         {
           label: "Grupo de regras",
           path: "/modulos/:id",
-          element: <ModuleForm />,
+          element: <ModuleView />,
           icon: TableChartOutlined,
           activeIcon: TableChart,
           hidden: true,
@@ -139,7 +139,7 @@ const auditModule = {
         {
           label: "Módulo",
           path: "/modulos/:id/editar",
-          element: <ModuleForm />,
+          element: <ModuleView />,
           icon: TableChartOutlined,
           activeIcon: TableChart,
           hidden: true,
