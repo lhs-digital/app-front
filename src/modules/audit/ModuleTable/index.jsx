@@ -170,9 +170,12 @@ const ModuleTableView = () => {
     queryKey: ["tables", company, table, id],
     queryFn: async () => {
       const response = await api.get(`/companies/${company.id}/structure`, {
-        params: { with_module_info: id },
+        params: {
+          with_module_info: id,
+          table_id: table,
+        },
       });
-      const data = response.data.data.find((t) => t.id === parseInt(table));
+      const data = response.data.data[0];
       return data;
     },
     refetchInterval: action !== "view" ? false : 1500,
