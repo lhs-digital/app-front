@@ -3,9 +3,17 @@ export const statusInfo = {
     label: "Não iniciado",
     severity: "info",
   },
+  visualized: {
+    label: "Visualizado",
+    severity: "info",
+  },
   in_progress: {
     label: "Em andamento",
     severity: "warning",
+  },
+  canceled: {
+    label: "Cancelado",
+    severity: "error",
   },
   completed: {
     label: "Concluído",
@@ -15,13 +23,21 @@ export const statusInfo = {
     label: "Atrasado",
     severity: "error",
   },
-  canceled: {
-    label: "Cancelado",
-    severity: "error",
-  },
   rejected: {
     label: "Rejeitado",
     severity: "error",
+  },
+  corrected: {
+    label: "Corrigido",
+    severity: "success",
+  },
+  reopened: {
+    label: "Reaberto",
+    severity: "error",
+  },
+  closed: {
+    label: "Fechado",
+    severity: "success",
   },
 };
 
