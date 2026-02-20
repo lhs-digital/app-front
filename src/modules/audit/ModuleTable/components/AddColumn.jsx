@@ -109,7 +109,6 @@ export const AddColumn = ({
         column.rules,
         validations,
       );
-      console.log("Formatted rules:", formattedRules);
       setRules(formattedRules);
 
       // Update available rules by filtering out used ones

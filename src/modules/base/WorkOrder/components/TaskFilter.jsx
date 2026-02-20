@@ -1,22 +1,18 @@
 import { FilterAltOff } from "@mui/icons-material";
 import { Autocomplete, Button, TextField } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAssignmentFilters } from "../../../../hooks/useAssignmentFilters";
 import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
-import { qc } from "../../../../services/queryClient";
 
-export default function TaskFilter({
-  setAssignments,
-  isFetching,
-  setIsFetching,
-}) {
+export default function TaskFilter({ setAssignments, setQueryState }) {
   const { company } = useCompany();
   const navigate = useNavigate();
   const location = useLocation();
+  const qc = useQueryClient();
   const { filters, updateFilter, resetFilters, searchParams } =
     useAssignmentFilters();
 
@@ -29,7 +25,7 @@ export default function TaskFilter({
   //   enabled: !!company,
   // });
 
-  const { data: availableEntities = [] } = useQuery({
+  const entitiesQuery = useQuery({
     queryKey: ["availableEntities", filters.entity_type, company?.id],
     queryFn: async () => {
       const response = await api.get(`/entities/${filters.entity_type}`);
@@ -38,7 +34,7 @@ export default function TaskFilter({
     enabled: !!filters.entity_type && !!company,
   });
 
-  const { data: availableUsers = [], isLoading: isLoadingUsers } = useQuery({
+  const usersQuery = useQuery({
     queryKey: ["availableUsers", company?.id],
     queryFn: async () => {
       const response = await api.get(`/users`);
@@ -48,39 +44,39 @@ export default function TaskFilter({
   });
 
   useEffect(() => {
-    if (availableUsers?.length > 0) {
+    if (usersQuery.data?.length > 0) {
       const assigned_to_id = searchParams.get("assigned_to");
       const assigned_by_id = searchParams.get("assigned_by");
 
       if (assigned_to_id) {
-        const assigned_to = availableUsers.find(
+        const assigned_to = usersQuery.data.find(
           (user) => user.id.toString() === assigned_to_id,
         );
         if (assigned_to) updateFilter("assigned_to", assigned_to);
       }
 
       if (assigned_by_id) {
-        const assigned_by = availableUsers.find(
+        const assigned_by = usersQuery.data.find(
           (user) => user.id.toString() === assigned_by_id,
         );
         if (assigned_by) updateFilter("assigned_by", assigned_by);
       }
     }
-  }, [availableUsers, searchParams]);
+  }, [usersQuery.data, searchParams]);
 
   useEffect(() => {
-    if (availableEntities?.length > 0) {
+    if (entitiesQuery.data?.length > 0) {
       const entity_id_param = searchParams.get("entity_id");
       if (entity_id_param) {
-        const entity = availableEntities.find(
+        const entity = entitiesQuery.data.find(
           (e) => e.id.toString() === entity_id_param,
         );
         if (entity) updateFilter("entity_id", entity);
       }
     }
-  }, [availableEntities, searchParams]);
+  }, [entitiesQuery.data, searchParams]);
 
-  const { isLoading: isLoadingAssignments } = useQuery({
+  const workOrdersQuery = useQuery({
     queryKey: ["workOrders", company?.id, filters],
     queryFn: async () => {
       const params = {
@@ -91,15 +87,16 @@ export default function TaskFilter({
         entity_type: filters.entity_type || undefined,
         status: filters.status || undefined,
       };
-      const response = await api.get("/work_order", { params });
+      const response = await api.get("/work_orders", { params });
       setAssignments(response?.data?.data || []);
       return response.data.data;
     },
     onSettled: () => {
-      setIsFetching(false);
+      setQueryState("success");
     },
     onError: (error) => {
       console.error("Erro ao obter as atribuições", error);
+      setQueryState("error");
       toast.error("Erro ao obter as atribuições", {
         toastId: "assignmentError",
       });
@@ -108,8 +105,22 @@ export default function TaskFilter({
   });
 
   useEffect(() => {
-    setIsFetching(isLoadingAssignments || isLoadingUsers);
-  }, [isLoadingAssignments, isLoadingUsers, setIsFetching]);
+    if (
+      [usersQuery.state, entitiesQuery.state, workOrdersQuery.state].some(
+        (state) => state === "pending",
+      )
+    ) {
+      setQueryState("pending");
+    } else if (
+      [usersQuery.state, entitiesQuery.state, workOrdersQuery.state].some(
+        (state) => state === "error",
+      )
+    ) {
+      setQueryState("error");
+    } else {
+      setQueryState("success");
+    }
+  }, [usersQuery.state, entitiesQuery.state, workOrdersQuery.state]);
 
   const handleClean = () => {
     resetFilters();
@@ -138,11 +149,11 @@ export default function TaskFilter({
         value={filters.assigned_by}
         getOptionLabel={(option) => option.name}
         getOptionKey={(option) => option.id}
-        options={availableUsers || []}
+        options={usersQuery.data || []}
         className="col-span-1 md:col-span-2 lg:col-span-4"
         noOptionsText="Nenhum usuário disponível."
         loadingText="Carregando..."
-        disabled={!company || isLoadingUsers}
+        disabled={!company || usersQuery.isLoading}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -161,16 +172,16 @@ export default function TaskFilter({
         getOptionLabel={(option) => option.name}
         getOptionKey={(option) => option.id}
         options={
-          filters.assigned_by && availableUsers
-            ? availableUsers.filter(
+          filters.assigned_by && usersQuery.data
+            ? usersQuery.data.filter(
                 (user) => user.role.nivel > filters.assigned_by.role.nivel,
               )
-            : availableUsers || []
+            : usersQuery.data || []
         }
         className="col-span-1 md:col-span-2 lg:col-span-4"
         noOptionsText="Nenhum usuário disponível."
         loadingText="Carregando..."
-        disabled={!company || isLoadingUsers}
+        disabled={!company || usersQuery.isLoading}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -187,7 +198,7 @@ export default function TaskFilter({
         size="small"
         className="col-span-1 md:col-span-2 lg:col-span-2"
         value={filters.entity_type}
-        options={entityTypes || []}
+        options={entitiesQuery.data || []}
         noOptionsText="Digite para pesquisar"
         getOptionLabel={(option) => option}
         renderInput={(params) => (
@@ -199,7 +210,7 @@ export default function TaskFilter({
         size="small"
         className="col-span-1 md:col-span-2 lg:col-span-2"
         value={filters.entity_id}
-        options={availableEntities || []}
+        options={entitiesQuery.data || []}
         noOptionsText="Digite para pesquisar"
         getOptionLabel={(option) => option.name}
         disabled={!filters.entity_type}
@@ -225,7 +236,7 @@ export default function TaskFilter({
       <Button
         size="small"
         onClick={handleClean}
-        disabled={isFetching}
+        disabled={workOrdersQuery.isLoading || usersQuery.isLoading}
         startIcon={<FilterAltOff fontSize="small" />}
       >
         Limpar

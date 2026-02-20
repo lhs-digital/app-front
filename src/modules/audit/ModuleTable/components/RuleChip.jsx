@@ -1,10 +1,17 @@
-import { Remove } from "@mui/icons-material";
+import { Remove, TableChartOutlined } from "@mui/icons-material";
 import { Card, CardContent, Chip } from "@mui/material";
 
-const RuleChip = ({ column, onClick, onDelete, readOnly, disabled }) => {
+const RuleChip = ({
+  column,
+  tableName,
+  onClick,
+  onDelete,
+  readOnly,
+  disabled,
+}) => {
   const len = column.rules.length;
   return (
-    <div className="relative">
+    <div className="relative grow">
       <Card
         onClick={onClick}
         className={`${readOnly ? "cursor-default" : "cursor-pointer border hover:border-[--foreground-color]"} ${disabled ? "opacity-50 pointer-events-none" : ""}`}
@@ -15,6 +22,12 @@ const RuleChip = ({ column, onClick, onDelete, readOnly, disabled }) => {
             <p className="text-sm">
               Coluna <span>&quot;{column.name}&quot;</span>
             </p>
+            {tableName && (
+              <div className="flex flex-row items-center gap-1 text-sm text-neutral-500">
+                <TableChartOutlined fontSize="inherit" />
+                <p className="font-medium text-xs">{tableName}</p>
+              </div>
+            )}
           </div>
           <Chip
             size="small"

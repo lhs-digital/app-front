@@ -62,28 +62,30 @@ const WorkOrderForm = ({ assignment, compact = false }) => {
         />
       </div>
 
-      <div className="flex items-center gap-4">
-        <Tooltip title="Prazo da Ordem de Serviço" arrow>
-          <CalendarTodayOutlined fontSize="small" color="warning" />
-        </Tooltip>
-        <p>{formatDate(assignment?.deadline)}</p>
+      <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-6">
+        <div className="flex items-center gap-2">
+          <Tooltip title="Prazo da Ordem de Serviço" arrow>
+            <CalendarTodayOutlined fontSize="small" color="warning" />
+          </Tooltip>
+          <p>{formatDate(assignment?.deadline)}</p>
+        </div>
 
         {isCompleted && !isCorrected && (
-          <>
+          <div className="flex items-center gap-2">
             <Tooltip title="Concluída" arrow>
               <HourglassEmptyOutlined fontSize="small" color="info" />
             </Tooltip>
             <p>{formatDate(assignment?.completed_at)}</p>
-          </>
+          </div>
         )}
 
         {isCorrected && (
-          <>
+          <div className="flex items-center gap-2">
             <Tooltip title="Ordem de Serviço Corrigida em" arrow>
               <CheckCircleOutline fontSize="small" color="success" />
             </Tooltip>
             <p>{formatDate(assignment?.corrected_at)}</p>
-          </>
+          </div>
         )}
       </div>
 

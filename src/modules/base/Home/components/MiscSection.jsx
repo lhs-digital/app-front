@@ -175,7 +175,7 @@ const MiscSection = () => {
             <Card className="flex-1">
               <CardContent>
                 <Box display="flex" flexDirection="column" gap={2}>
-                  {isLighthouse ? (
+                  {!company && isLighthouse ? (
                     <Box>
                       <p className="text-sm text-neutral-500 dark:text-neutral-400">
                         Empresa Atual
