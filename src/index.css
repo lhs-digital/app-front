@@ -30,6 +30,7 @@
 [data-theme="light"] {
   --background-color: #ffffff;
   --foreground-color: #000000;
+  --highest-color: #000000;
   --border: #00000033;
   --faded-border: #0000000c;
 }
@@ -38,17 +39,15 @@
 [data-theme="dark"] {
   --background-color: #121212;
   --foreground-color: #ffffff;
+  --highest-color: #000000;
   --border: #ffffff33;
   --faded-border: #ffffff0c;
 }
 
 .grid-bg {
-  background: conic-gradient(
-      from 90deg at 1px 1px,
+  background: conic-gradient(from 90deg at 1px 1px,
       #0000 90deg,
-      var(--faded-border) 0
-    )
-    0 0/50px 50px;
+      var(--faded-border) 0) 0 0/50px 50px;
 }
 
 body {
@@ -94,17 +93,21 @@ button {
 
 /* Aplica a customização do scroll no WebKit */
 ::-webkit-scrollbar {
-  width: 6px; /* Define a largura da barra de rolagem */
+  width: 6px;
+  /* Define a largura da barra de rolagem */
   height: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #adb6bf; /* Cor do thumb (a parte que se move) */
-  border-radius: 10px; /* Deixa a barra mais arredondada */
+  background-color: #adb6bf;
+  /* Cor do thumb (a parte que se move) */
+  border-radius: 10px;
+  /* Deixa a barra mais arredondada */
 }
 
 ::-webkit-scrollbar-track {
-  background-color: transparent; /* Cor do fundo da barra de rolagem */
+  background-color: transparent;
+  /* Cor do fundo da barra de rolagem */
 }
 
 @media (max-width: 768px) {
