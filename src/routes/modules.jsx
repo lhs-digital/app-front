@@ -298,22 +298,6 @@ const lighthouseModule = {
           activeIcon: Lock,
           hidden: true,
         },
-        {
-          label: "Ver VPN",
-          path: "/vpns/:id",
-          element: <RegisterVpn />,
-          icon: LockOutlined,
-          activeIcon: Lock,
-          hidden: true,
-        },
-        {
-          label: "Editar VPN",
-          path: "/vpns/:id/editar",
-          element: <RegisterVpn />,
-          icon: LockOutlined,
-          activeIcon: Lock,
-          hidden: true,
-        },
       ],
     },
     {
