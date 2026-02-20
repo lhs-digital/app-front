@@ -1,10 +1,10 @@
 import {
   Clear,
-  Code,
   Edit,
   FormatListBulleted,
   Save,
   Search,
+  SelectAll,
   Widgets,
   Window,
 } from "@mui/icons-material";
@@ -29,7 +29,9 @@ import useDebounce from "../../../hooks/useDebounce";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
+import AddColumn from "../ModuleTable/components/AddColumn";
 import TableAccordion from "../ModuleTable/components/TableAccordion";
+import AddedTables from "./components/AddedTables";
 
 const ACTION_BY_SEGMENT = {
   criar: "create",
@@ -166,6 +168,41 @@ const ModuleView = () => {
     });
   };
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeColumn, setActiveColumn] = useState(null);
+  const [activeTableId, setActiveTableId] = useState(null);
+
+  const handleColumnClick = (column, table) => {
+    const hasRules = (column.rules?.length ?? 0) > 0;
+    setActiveColumn({ ...column, edit: hasRules });
+    setActiveTableId(table.id);
+    setDialogOpen(true);
+  };
+
+  const handleDialogSave = (column) => {
+    if (activeTableId) {
+      handleColumnSave(activeTableId, column);
+    }
+    setDialogOpen(false);
+    setActiveColumn(null);
+    setActiveTableId(null);
+  };
+
+  const handleDialogRemove = (column) => {
+    if (activeTableId) {
+      handleColumnRemove(activeTableId, column.id);
+    }
+    setDialogOpen(false);
+    setActiveColumn(null);
+    setActiveTableId(null);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setActiveColumn(null);
+    setActiveTableId(null);
+  };
+
   const { data: activeModule = null, isPending: isPendingModule } = useQuery({
     queryKey: ["module", moduleId, company],
     queryFn: async () => {
@@ -179,14 +216,7 @@ const ModuleView = () => {
   });
 
   const { data: structure = [], isPending: isPendingStructure } = useQuery({
-    queryKey: [
-      "tables",
-      company,
-      debouncedSearch,
-      pagination.current,
-      pagination.perPage,
-      viewMode,
-    ],
+    queryKey: ["tables", company, debouncedSearch, pagination, viewMode],
     queryFn: async () => {
       const params = {
         with_module_info: moduleId,
@@ -194,7 +224,7 @@ const ModuleView = () => {
         per_page: pagination.perPage,
       };
       if (viewMode === "added") {
-        params.has_rule = true;
+        params.has_rules = 1;
         delete params.with_module_info;
       }
       if (debouncedSearch) {
@@ -202,6 +232,13 @@ const ModuleView = () => {
       }
       const response = await api.get(`/companies/${company.id}/structure`, {
         params,
+      });
+      setPagination({
+        total: response.data.meta.total,
+        from: response.data.meta.from,
+        to: response.data.meta.to,
+        current: response.data.meta.current_page,
+        perPage: response.data.meta.per_page,
       });
       return response.data.data;
     },
@@ -254,13 +291,18 @@ const ModuleView = () => {
 
       return (
         <div className="flex flex-col gap-2">
+          <div className="flex flex-row items-center justify-between gap-1 p-2 border-b border-[--border] mb-2">
+            <div className="flex items-center gap-2">
+              <SelectAll fontSize="small" color="inherit" />
+              <h2>Todas as tabelas</h2>
+            </div>
+          </div>
           {structure.map((table) => (
             <TableAccordion
               key={table.id}
               table={table}
-              moduleId={moduleId}
               pendingColumns={pendingChanges[table.id]?.columns ?? []}
-              onColumnSave={(column) => handleColumnSave(table.id, column)}
+              onColumnClick={handleColumnClick}
               onColumnRemove={(columnId) =>
                 handleColumnRemove(table.id, columnId)
               }
@@ -272,12 +314,7 @@ const ModuleView = () => {
 
     if (viewMode === "added") {
       return (
-        <div className="flex flex-col items-center justify-center gap-4 p-16">
-          <Code fontSize="large" className="text-neutral-500" />
-          <p className="text-neutral-500">
-            Esta funcionalidade ainda não está disponível.
-          </p>
-        </div>
+        <AddedTables tables={structure} onColumnClick={handleColumnClick} />
       );
     }
   };
@@ -365,28 +402,31 @@ const ModuleView = () => {
 
       {renderView()}
 
-      {!isPendingStructure && pagination.total > pagination.perPage && (
+      {!isPendingStructure && (
         <TablePagination
+          rowsPerPageOptions={[10]}
           component="div"
-          count={pagination.total}
-          page={pagination.current}
+          labelRowsPerPage="Linhas por página"
+          count={pagination.total || 0}
           rowsPerPage={pagination.perPage}
+          page={pagination.current}
           onPageChange={(_, newPage) =>
             setPagination({ ...pagination, current: newPage })
           }
-          onRowsPerPageChange={(e) => {
-            setPagination({
-              ...pagination,
-              perPage: parseInt(e.target.value, 10),
-            });
-          }}
-          rowsPerPageOptions={[10, 25, 50]}
-          labelRowsPerPage="Tabelas por página:"
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}–${to} de ${count}`
+          labelDisplayedRows={({ count }) =>
+            `${pagination.from}–${pagination.to} de ${count !== -1 ? count : `mais de ${pagination.to}`}`
           }
         />
       )}
+
+      <AddColumn
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        column={activeColumn}
+        onAddColumn={handleDialogSave}
+        onEditColumn={handleDialogSave}
+        onRemoveColumn={() => handleDialogRemove(activeColumn)}
+      />
     </div>
   );
 };
