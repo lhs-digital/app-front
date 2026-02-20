@@ -54,7 +54,8 @@ const Layout = ({ children }) => {
     (path, index) =>
       pathnames[index - 2] === "modulos" &&
       pathnames[index - 1] !== "modulos" &&
-      pathnames[index - 1] !== "criar",
+      pathnames[index - 1] !== "criar" &&
+      /^\d+$/.test(path),
   );
 
   const { data: moduleData } = useQuery({
