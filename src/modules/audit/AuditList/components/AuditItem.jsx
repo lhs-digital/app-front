@@ -1,6 +1,9 @@
 import {
+  AssignmentInd,
+  AssignmentOutlined,
   CheckCircle,
   ContentPaste,
+  Info,
   KeyboardArrowDown,
   OpenInNew,
   WatchLaterOutlined,
@@ -12,9 +15,9 @@ import {
   Chip,
   colors,
   Divider,
+  IconButton,
   Tooltip,
   Typography,
-  useMediaQuery,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
@@ -25,15 +28,19 @@ import {
   dateFormatted,
   formattedPriority,
   getPriorityColor,
+  hasPermission,
 } from "../../../../services/utils";
 import { handleMode } from "../../../../theme";
 import ViewAuditItem from "./ViewAuditItem";
 
-const AuditItem = ({ auditRecord, onClick = () => {} }) => {
+const AuditItem = ({
+  auditRecord,
+  onViewClick = () => {},
+  onWorkOrderClick = () => {},
+}) => {
   const [dataView, setDataView] = useState(auditRecord);
   const { mode: themeMode } = useThemeMode();
   const theme = handleMode(themeMode);
-  const isMobile = useMediaQuery("(max-width: 768px)");
   const { permissions } = useUserState().state;
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const toggleAccordion = () => {
@@ -124,42 +131,34 @@ const AuditItem = ({ auditRecord, onClick = () => {} }) => {
 
         <Box display="flex" gap={2} alignItems="center">
           <Tooltip
-            title={`Prioridade: ${formattedPriority(auditRecord?.priority, theme)}`}
+            title={`Maior prioridade entre as regras infringidas`}
             aria-label="Prioridade"
           >
             <Chip
               sx={getPriorityColor(auditRecord?.priority, theme)}
               variant={theme === "dark" ? "outlined" : "filled"}
-              label={
-                <div>
-                  {isMobile ? "" : "Prioridade:"}{" "}
-                  <b>{formattedPriority(auditRecord?.priority, theme)}</b>
-                </div>
-              }
+              size="small"
+              label={formattedPriority(auditRecord?.priority, theme)}
             />
           </Tooltip>
-          {/* {permissions.some((per) => per.name === "update_tasks") &&
-            (auditRecord?.status === 0 ? (
+          {hasPermission(permissions, "update_tasks") &&
+            (auditRecord?.status !== "closed" ? (
               <Tooltip
                 title={auditRecord?.work_order ? "Ver O.S." : "Abrir O.S."}
                 aria-label="Abrir O.S."
               >
-                <button
-                  onClick={onClick}
-                  className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
-                  style={getPriorityColor(auditRecord?.priority, theme)}
-                >
+                <IconButton onClick={onWorkOrderClick}>
                   {auditRecord?.work_order ? (
-                    <OpenInNew fontSize="small" />
+                    <AssignmentInd fontSize="small" />
                   ) : (
                     <AssignmentOutlined fontSize="small" />
                   )}
-                </button>
+                </IconButton>
               </Tooltip>
             ) : (
               <Tooltip title="Informação" aria-label="Informação">
                 <button
-                  onClick={onClick}
+                  onClick={onViewClick}
                   className="p-2 aspect-square rounded-full flex flex-col items-center justify-center"
                   style={{
                     color:
@@ -171,15 +170,12 @@ const AuditItem = ({ auditRecord, onClick = () => {} }) => {
                   <Info fontSize="small" />
                 </button>
               </Tooltip>
-            ))} */}
+            ))}
           {permissions.some((per) => per.name === "update_tasks") && (
-            <Tooltip title={"Visualizar item"} aria-label="Visualizar item">
-              <button
-                onClick={onClick}
-                className="p-2 aspect-square rounded-full flex flex-col items-center justify-center border hover:bg-gray-500/35 transition-colors duration-200"
-              >
+            <Tooltip title={"Visão detalhada"} aria-label="Visão detalhada">
+              <IconButton onClick={onViewClick}>
                 <OpenInNew fontSize="small" />
-              </button>
+              </IconButton>
             </Tooltip>
           )}
         </Box>

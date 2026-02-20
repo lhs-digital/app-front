@@ -1,24 +1,22 @@
-import { Add, Assignment } from "@mui/icons-material";
+import { Assignment } from "@mui/icons-material";
 import { Masonry } from "@mui/lab";
-import { Button, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
-import { hasPermission } from "../../../services/utils";
+import { assignmentsMock } from "./assignment_mock";
 import CreateTask from "./components/CreateTask";
 import TaskCard from "./components/TaskCard";
 import TaskFilter from "./components/TaskFilter";
-import ViewTask from "./components/ViewTask";
-import { assignmentsMock } from "./assignment_mock";
-import { useNavigate } from "react-router-dom";
 
 const WorkOrder = () => {
   const user = useUserState().state;
   const { company } = useCompany();
   const showContent = user.isLighthouse ? !!company : true;
   const [assignments, setAssignments] = useState(assignmentsMock);
-  const [isFetching, setIsFetching] = useState(false);
+  const [queryState, setQueryState] = useState("pending");
   const [createOpen, setCreateOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -34,27 +32,18 @@ const WorkOrder = () => {
         title="Ordens de Serviço"
         subtitle="Gerencie as ordens de serviço atribuídas a você ou à sua equipe."
         icon={<Assignment />}
-        buttons={[
-          hasPermission(user.permissions, "create_work_orders") && (
-            <Button
-              key="add-task"
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setCreateOpen(true)}
-              disabled={!showContent}
-            >
-              ATRIBUIR
-            </Button>
-          ),
-        ]}
       />
       <TaskFilter
         setAssignments={handleSetAssignments}
-        setIsFetching={setIsFetching}
+        setQueryState={setQueryState}
       />
-      {isFetching ? (
+      {queryState === "pending" ? (
         <div className="col-span-full flex justify-center items-center h-32 lg:h-64">
           <CircularProgress size="1.5rem" />
+        </div>
+      ) : queryState === "error" ? (
+        <div className="col-span-full flex justify-center items-center h-32 text-neutral-500">
+          {queryState.errorMessage}
         </div>
       ) : assignments.length === 0 ? (
         <div className="col-span-full flex justify-center items-center h-32 text-neutral-500">
@@ -77,9 +66,7 @@ const WorkOrder = () => {
             <TaskCard
               key={assignment.id}
               assignment={assignment}
-              onClick={() =>
-                navigate(`/ordens-de-servico/${assignment?.id}`)
-              }
+              onClick={() => navigate(`/ordens-de-servico/${assignment?.id}`)}
             />
           ))}
         </Masonry>
