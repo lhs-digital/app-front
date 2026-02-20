@@ -1,20 +1,31 @@
+import { TableChartOutlined } from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
+  Chip,
+  colors,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useThemeMode } from "../../../../contexts/themeModeContext";
 import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
 import { qc } from "../../../../services/queryClient";
-const CreateTask = ({ open, onClose }) => {
+import {
+  formattedPriority,
+  getPriorityColor,
+} from "../../../../services/utils";
+import { handleMode } from "../../../../theme";
+const CreateTask = ({ open, onClose, auditRecord }) => {
   const { company } = useCompany();
+  const theme = handleMode(useThemeMode().mode);
 
   const [data, setData] = useState({
     assigned_to: null,
@@ -25,15 +36,7 @@ const CreateTask = ({ open, onClose }) => {
     description: "",
   });
 
-  const { data: entityTypes = [], isLoading } = useQuery({
-    queryKey: ["entityTypes"],
-    queryFn: async () => {
-      const response = await api.get("/assignables");
-      return response.data;
-    },
-  });
-
-  const { data: availableUsers = [] } = useQuery({
+  const { data: availableUsers = [], isLoading } = useQuery({
     queryKey: ["availableUsers", company?.id],
     queryFn: async () => {
       const response = await api.get("/users", {
@@ -46,15 +49,15 @@ const CreateTask = ({ open, onClose }) => {
     enabled: !!company,
   });
 
-  const { data: availableEntities = [] } = useQuery({
-    queryKey: ["availableEntities", data.entity_type],
-    queryFn: async () => {
-      const response = await api.get(`/entities/${data.entity_type}`);
-      console.log(response.data);
-      return response.data;
-    },
-    enabled: !!data.entity_type,
-  });
+  useEffect(() => {
+    if (auditRecord) {
+      setData({
+        ...data,
+        entity_id: auditRecord.id,
+        entity_type: "audit_invalid_record",
+      });
+    }
+  }, [auditRecord]);
 
   const submit = (e) => {
     e.preventDefault();
@@ -93,6 +96,62 @@ const CreateTask = ({ open, onClose }) => {
     >
       <DialogTitle>Nova ordem de serviço</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
+        {auditRecord && (
+          <div className="flex flex-col gap-2 p-4 border border-neutral-300 dark:border-neutral-700 rounded-xl">
+            <div className="flex flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-2">
+                <p className="text-lg">
+                  # AUD{auditRecord?.id.toString().padStart(3, "0")}
+                </p>
+                
+              </div>
+              <Chip
+                size="small"
+                label={formattedPriority(auditRecord?.priority)}
+                sx={getPriorityColor(auditRecord?.priority, theme)}
+                variant={theme === "dark" ? "outlined" : "filled"}
+              />
+            </div>
+            <div className="flex flex-row items-center gap-2">
+              <p className="text-sm">
+                Campos inválidos{" "}
+                <span
+                  style={{
+                    color:
+                      theme === "light" ? colors.red[500] : colors.red[400],
+                  }}
+                >
+                  ({auditRecord?.columns.length})
+                </span>
+                :{" "}
+              </p>
+              {auditRecord?.columns.slice(0, 2).map((col, index) => (
+                <Chip
+                  key={index}
+                  size="small"
+                  variant="outlined"
+                  label={col?.label}
+                  sx={{
+                    color: getPriorityColor(col?.priority, theme).color,
+                  }}
+                />
+              ))}
+              {auditRecord?.columns.length > 2 && (
+                <Tooltip
+                  title={auditRecord?.columns
+                    .slice(2)
+                    .map((col) => col?.label)
+                    .join(", ")}
+                  aria-label="Mais campos"
+                >
+                  <div className="flex flex-col items-center justify-center bg-neutral-300 dark:bg-neutral-700 aspect-square rounded-full px-1 text-xs">
+                    <p className="mr-0.5">+{auditRecord?.columns.length - 2}</p>
+                  </div>
+                </Tooltip>
+              )}
+            </div>
+          </div>
+        )}
         <form
           id="create-task-form"
           className="flex flex-col gap-6 pt-2"
@@ -172,35 +231,6 @@ const CreateTask = ({ open, onClose }) => {
             value={data.assigned_to}
             onChange={(e, newValue) =>
               setData({ ...data, assigned_to: newValue })
-            }
-          />
-          <Autocomplete
-            fullWidth
-            options={entityTypes}
-            noOptionsText="Nenhum tipo encontrado"
-            getOptionLabel={(option) => option}
-            loading={isLoading}
-            loadingText="Carregando..."
-            renderInput={(params) => (
-              <TextField {...params} label="Tipo de entidade" />
-            )}
-            value={data.entity_type}
-            onChange={(e, newValue) =>
-              setData({ ...data, entity_type: newValue })
-            }
-          />
-          <Autocomplete
-            fullWidth
-            options={availableEntities}
-            noOptionsText="Nenhuma entidade encontrada"
-            getOptionLabel={(option) => option.name}
-            getOptionKey={(option) => option.id}
-            loading={isLoading}
-            loadingText="Carregando..."
-            renderInput={(params) => <TextField {...params} label="Entidade" />}
-            value={data.entity_id}
-            onChange={(e, newValue) =>
-              setData({ ...data, entity_id: newValue })
             }
           />
           <TextField
