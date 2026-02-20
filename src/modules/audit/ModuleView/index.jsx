@@ -1,27 +1,35 @@
 import {
-  CenterFocusStrong,
-  DataObject,
+  Clear,
+  Code,
   Edit,
+  FormatListBulleted,
   Save,
   Search,
   Widgets,
-  ZoomIn,
-  ZoomOut,
+  Window,
 } from "@mui/icons-material";
-import { Button, Skeleton, TextField } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  IconButton,
+  TablePagination,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+} from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { TransformWrapper } from "react-zoom-pan-pinch";
-import Diagram from "../../../components/ERDiagram/Diagram";
 import FormField from "../../../components/FormField";
 import { useCompany } from "../../../hooks/useCompany";
 import useDebounce from "../../../hooks/useDebounce";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 import { qc } from "../../../services/queryClient";
+import TableAccordion from "../ModuleTable/components/TableAccordion";
 
 const ACTION_BY_SEGMENT = {
   criar: "create",
@@ -35,82 +43,24 @@ const getActionFromPath = (pathname) => {
   return "view";
 };
 
-const TablesSectionHeader = () => (
-  <h2 className="text-lg font-bold flex flex-row gap-2 items-center">
-    <span className="mb-0.5">
-      <DataObject fontSize="small" />
-    </span>{" "}
-    <span>Tabelas</span>
-  </h2>
-);
-
 const ModuleView = () => {
   const { register, handleSubmit, reset } = useForm();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id: moduleId } = useParams();
   const { company } = useCompany();
   const location = useLocation();
-
+  const currentAction = getActionFromPath(location.pathname);
+  const isEditable = currentAction !== "view";
+  const [viewMode, setViewMode] = useState("list");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [pagination, setPagination] = useState({
+    total: 0,
+    perPage: 10,
+    current: 1,
+  });
   const [search, setSearch] = useState(
     () => new URLSearchParams(location.search).get("search") || "",
   );
-
-  const currentAction = getActionFromPath(location.pathname);
-  const isEditable = currentAction !== "view";
-
-  const { data: activeModule = null, isLoading: isLoadingModule } = useQuery({
-    queryKey: ["module", id, company],
-    queryFn: async () => {
-      const response = await api.get(
-        `/companies/${company.id}/audit/modules/${id}`,
-      );
-      return response.data.data;
-    },
-    enabled: !!company,
-    retry: false,
-  });
-
-  const { data: structure = [], isLoading: isLoadingStructure } = useQuery({
-    queryKey: ["tables", company, debouncedSearch],
-    queryFn: async () => {
-      const params = { with_module_info: id };
-      if (debouncedSearch) {
-        params.search = debouncedSearch;
-      }
-      const response = await api.get(`/companies/${company.id}/structure`, {
-        params,
-      });
-      return response.data.data;
-    },
-    enabled: !!activeModule,
-  });
-
-  const handleSearch = useCallback(
-    (value) => {
-      setDebouncedSearch(value);
-      const params = new URLSearchParams(location.search);
-      if (value) {
-        params.set("search", value);
-      } else {
-        params.delete("search");
-      }
-      navigate(`${location.pathname}?${params.toString()}`);
-    },
-    [location.search, location.pathname, navigate],
-  );
-
-  useDebounce(search, 300, handleSearch);
-
-  useEffect(() => {
-    if (activeModule) {
-      reset({
-        name: activeModule.name,
-        description: activeModule.description,
-        tables: activeModule.tables.map((table) => table.id),
-      });
-    }
-  }, [activeModule, reset]);
 
   const { mutate: createModule } = useMutation({
     mutationFn: async (data) => {
@@ -133,14 +83,14 @@ const ModuleView = () => {
   const { mutate: updateModule } = useMutation({
     mutationFn: async (data) => {
       const response = await api.put(
-        `/companies/${company.id}/audit/modules/${id}`,
+        `/companies/${company.id}/audit/modules/${moduleId}`,
         data,
       );
       return response.data.data;
     },
     onSuccess: (data) => {
       qc.invalidateQueries(["module"]);
-      navigate(`/modulos/${id}`);
+      navigate(`/modulos/${moduleId}`);
       toast.success(`Módulo "${data.name}" atualizado com sucesso!`);
     },
   });
@@ -166,20 +116,171 @@ const ModuleView = () => {
       pageTitle: "Visualizar grupo de regras",
       icon: <Edit />,
       buttonLabel: "Editar",
-      onClick: () => navigate(`/modulos/${id}/editar`),
+      onClick: () => navigate(`/modulos/${moduleId}/editar`),
     },
   };
 
   const { pageTitle, icon, buttonLabel, onClick } = actionConfig[currentAction];
 
-  const handleSelectTable = useCallback(
-    (table) => {
-      navigate(`/modulos/${id}/${table.id}?action=${currentAction}`);
-    },
-    [navigate, id, currentAction],
-  );
+  const [pendingChanges, setPendingChanges] = useState({});
 
-  const isLoading = isLoadingStructure || isLoadingModule;
+  const handleColumnSave = (tableId, column) => {
+    setPendingChanges((prev) => {
+      const tableEntry = prev[tableId] ?? {
+        company_table_id: tableId,
+        columns: [],
+      };
+      const existingIdx = tableEntry.columns.findIndex(
+        (c) => c.id === column.id,
+      );
+      const updatedColumns =
+        existingIdx >= 0
+          ? tableEntry.columns.map((c, i) => (i === existingIdx ? column : c))
+          : [...tableEntry.columns, column];
+
+      return {
+        ...prev,
+        [tableId]: { ...tableEntry, columns: updatedColumns },
+      };
+    });
+  };
+
+  const handleColumnRemove = (tableId, columnId) => {
+    setPendingChanges((prev) => {
+      const tableEntry = prev[tableId];
+      if (!tableEntry) return prev;
+
+      const updatedColumns = tableEntry.columns.filter(
+        (c) => c.id !== columnId,
+      );
+      if (updatedColumns.length === 0) {
+        return Object.fromEntries(
+          Object.entries(prev).filter(([key]) => key !== String(tableId)),
+        );
+      }
+
+      return {
+        ...prev,
+        [tableId]: { ...tableEntry, columns: updatedColumns },
+      };
+    });
+  };
+
+  const { data: activeModule = null, isPending: isPendingModule } = useQuery({
+    queryKey: ["module", moduleId, company],
+    queryFn: async () => {
+      const response = await api.get(
+        `/companies/${company.id}/audit/modules/${moduleId}`,
+      );
+      return response.data.data;
+    },
+    enabled: !!company,
+    retry: false,
+  });
+
+  const { data: structure = [], isPending: isPendingStructure } = useQuery({
+    queryKey: [
+      "tables",
+      company,
+      debouncedSearch,
+      pagination.current,
+      pagination.perPage,
+      viewMode,
+    ],
+    queryFn: async () => {
+      const params = {
+        with_module_info: moduleId,
+        page: pagination.current,
+        per_page: pagination.perPage,
+      };
+      if (viewMode === "added") {
+        params.has_rule = true;
+        delete params.with_module_info;
+      }
+      if (debouncedSearch) {
+        params.search = debouncedSearch;
+      }
+      const response = await api.get(`/companies/${company.id}/structure`, {
+        params,
+      });
+      return response.data.data;
+    },
+    enabled: !!activeModule,
+  });
+
+  useEffect(() => {
+    if (activeModule) {
+      reset({
+        name: activeModule.name,
+        description: activeModule.description,
+        tables: activeModule.tables.map((table) => table.id),
+      });
+    }
+  }, [activeModule, reset]);
+
+  const handleSearch = (value) => {
+    setDebouncedSearch(value);
+    const params = new URLSearchParams(location.search);
+    if (value) {
+      params.set("search", value);
+    } else {
+      params.delete("search");
+    }
+    navigate(`${location.pathname}?${params.toString()}`);
+  };
+
+  useDebounce(search, 300, handleSearch);
+
+  const renderView = () => {
+    if (isPendingStructure || isPendingModule) {
+      return (
+        <div className="flex items-center justify-center py-4 h-64">
+          <CircularProgress size={42} />
+        </div>
+      );
+    }
+    if (viewMode === "list") {
+      if (structure.length === 0) {
+        return (
+          <div className="flex items-center justify-center py-4 h-64">
+            <p className="text-center py-4 text-neutral-500">
+              {search
+                ? "Não encontramos nenhuma tabela com o nome pesquisado."
+                : "Nenhuma tabela cadastrada."}
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex flex-col gap-2">
+          {structure.map((table) => (
+            <TableAccordion
+              key={table.id}
+              table={table}
+              moduleId={moduleId}
+              pendingColumns={pendingChanges[table.id]?.columns ?? []}
+              onColumnSave={(column) => handleColumnSave(table.id, column)}
+              onColumnRemove={(columnId) =>
+                handleColumnRemove(table.id, columnId)
+              }
+            />
+          ))}
+        </div>
+      );
+    }
+
+    if (viewMode === "added") {
+      return (
+        <div className="flex flex-col items-center justify-center gap-4 p-16">
+          <Code fontSize="large" className="text-neutral-500" />
+          <p className="text-neutral-500">
+            Esta funcionalidade ainda não está disponível.
+          </p>
+        </div>
+      );
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8 w-full">
@@ -203,10 +304,10 @@ const ModuleView = () => {
 
       {isEditable && (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <FormField label="Nome do módulo" loading={isLoadingModule}>
+          <FormField label="Nome do módulo" loading={isPendingModule}>
             <TextField fullWidth {...register("name", { required: true })} />
           </FormField>
-          <FormField label="Descrição do módulo" loading={isLoadingModule}>
+          <FormField label="Descrição do módulo" loading={isPendingModule}>
             <TextField
               multiline
               rows={3}
@@ -217,108 +318,74 @@ const ModuleView = () => {
         </form>
       )}
 
-      {currentAction !== "create" && (
-        <div className="flex flex-col gap-4">
-          {isLoading ? (
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <TablesSectionHeader />
-                <span>Carregando...</span>
-              </div>
-              <TextField
-                placeholder="Pesquisar tabelas..."
-                fullWidth
-                disabled
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <Search className="text-neutral-500 mr-2" />
-                    ),
-                  },
-                }}
-              />
-              <Skeleton
-                variant="rectangular"
-                height={480}
-                className="rounded-lg"
-              />
-            </div>
-          ) : (
-            <TransformWrapper
-              limitToBounds={false}
-              initialPositionX={150}
-              initialPositionY={150}
-              initialScale={0.75}
-              minScale={0.5}
-              maxScale={1.5}
-              wrapperStyle={{ width: "100%", height: "100%" }}
-              centerZoomed
-            >
-              {({ zoomIn, zoomOut, centerView }) => (
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-row gap-2 items-end justify-between">
-                    <div className="flex flex-col gap-1">
-                      <TablesSectionHeader />
-                      <span>
-                        Para adicionar uma ou mais colunas a este grupo,{" "}
-                        <b>clique na tabela</b> que contém as colunas desejadas.
-                      </span>
-                    </div>
-                    <div className="p-1 flex flex-row justify-between gap-2 border border-[--border] rounded-lg">
-                      <div className="flex flex-row gap-4">
-                        <Button
-                          color="primary"
-                          size="small"
-                          onClick={centerView}
-                          startIcon={<CenterFocusStrong />}
-                        >
-                          Centralizar
-                        </Button>
-                        <Button
-                          color="primary"
-                          size="small"
-                          onClick={zoomIn}
-                          startIcon={<ZoomIn />}
-                        >
-                          Aumentar
-                        </Button>
-                        <Button
-                          color="primary"
-                          size="small"
-                          onClick={zoomOut}
-                          startIcon={<ZoomOut />}
-                        >
-                          Diminuir
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  <TextField
-                    placeholder="Pesquisar tabelas..."
-                    fullWidth
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <Search className="text-neutral-500 mr-2" />
-                        ),
-                      },
-                    }}
-                  />
-                  <div className="w-full h-[62.5vh] overflow-y-hidden border border-[--border] rounded-lg grid-bg relative">
-                    <Diagram
-                      data={structure}
-                      isLoading={isLoadingStructure}
-                      allowHover
-                      onSelectTable={handleSelectTable}
-                    />
-                  </div>
-                </div>
-              )}
-            </TransformWrapper>
-          )}
-        </div>
+      <div className="flex items-center gap-2">
+        <TextField
+          placeholder="Pesquisar tabelas por nome..."
+          className="grow"
+          value={search}
+          disabled={isPendingStructure || isPendingModule}
+          onChange={(e) => setSearch(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: <Search className="text-neutral-500 mr-2" />,
+              endAdornment: search &&
+                !(isPendingStructure || isPendingModule) && (
+                  <IconButton size="small" onClick={() => setSearch("")}>
+                    <Clear fontSize="small" />
+                  </IconButton>
+                ),
+            },
+          }}
+        />
+        <ToggleButtonGroup
+          exclusive
+          value={viewMode}
+          onChange={(_, value) => value && setViewMode(value)}
+          className="h-14 rounded-lg overflow-hidden border border-[var(--border)]"
+          size="large"
+          variant="outlined"
+          sx={{
+            "& .MuiToggleButton-root": {
+              border: "none",
+            },
+          }}
+        >
+          <Tooltip title="Listar tabelas">
+            <ToggleButton value="list">
+              <FormatListBulleted />
+            </ToggleButton>
+          </Tooltip>
+          <Tooltip title="Colunas adicionadas">
+            <ToggleButton value="added">
+              <Window />
+            </ToggleButton>
+          </Tooltip>
+        </ToggleButtonGroup>
+      </div>
+
+      {renderView()}
+
+      {!isPendingStructure && pagination.total > pagination.perPage && (
+        <TablePagination
+          component="div"
+          count={pagination.total}
+          page={pagination.current}
+          rowsPerPage={pagination.perPage}
+          onPageChange={(_, newPage) =>
+            setPagination({ ...pagination, current: newPage })
+          }
+          onRowsPerPageChange={(e) => {
+            setPagination({
+              ...pagination,
+              perPage: parseInt(e.target.value, 10),
+            });
+          }}
+          rowsPerPageOptions={[10, 25, 50]}
+          labelRowsPerPage="Tabelas por página:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}–${to} de ${count}`
+          }
+        />
       )}
     </div>
   );
