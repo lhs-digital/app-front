@@ -14,18 +14,17 @@ import { useEffect, useState } from "react";
 import { Form, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import PageTitle from "../../../../layout/components/PageTitle";
-import WorkOrderForm from "../../../../components/WorkOrderForm";
 import api from "../../../../services/api";
 import { assignmentsMock } from "../assignment_mock";
 import FormField from "../../../../components/FormField";
 import { statusInfo } from "../utils";
-import { Controller } from "react-hook-form";
 
 const WorkOrderView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [formData, setFormData] = useState(null);
+  const [attachedFiles, setAttachedFiles] = useState([]);
 
   const {
     data: assignment,
@@ -44,15 +43,56 @@ const WorkOrderView = () => {
     },
   });
 
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      try {
+        const response = await api.get("/users");
+        return response.data?.data || [];
+      } catch (err) {
+        console.error("Erro ao buscar usuários:", err);
+        throw err;
+      }
+    },
+  });
+
   const { mutate: saveAssignment, isPending: isSaving } = useMutation({
     mutationFn: async (data) => {
-      return await api.put(`/assignments/${id}`, data);
+      const consolidatedData = {
+        id,
+        entity_type: formData?.entity_type,
+        entity_id: formData?.entity_id,
+        assigned_to: data.assigned_to,
+        assigned_by: data.assigned_by,
+        company_id: formData?.company_id,
+        description: data.description,
+        corrective_actions: data.corrective_actions,
+        deadline: data.deadline,
+        is_completed: formData?.is_completed,
+        status: data.status,
+        reopen_count: formData?.reopen_count,
+        is_persistent_error: data.is_persistent_error,
+        company: formData?.company,
+        entity: formData?.entity,
+        attached_files: attachedFiles.map((f) => ({
+          id: f.id,
+          name: f.name,
+          size: f.size,
+        })),
+      };
+
+      console.log("=== SALVANDO ORDEM DE SERVIÇO ===");
+      console.log("Dados consolidados:", consolidatedData);
+      console.log("Arquivos para upload:", attachedFiles);
+      console.log("====================================");
+
     },
     onSuccess: () => {
-      setIsEditing(false);
-      setFormData(null);
-      toast.success("Ordem de serviço atualizada com sucesso!");
-      refetch();
+      // setIsEditing(false);
+      // setFormData(null);
+      // setAttachedFiles([]);
+      // toast.success("Ordem de serviço atualizada com sucesso!");
+      // refetch();
     },
     onError: (error) => {
       console.error("Erro ao salvar ordem de serviço", error);
@@ -66,15 +106,71 @@ const WorkOrderView = () => {
     }
   }, [assignment, formData]);
 
-  const handleSave = () => {
-    if (formData) {
-      saveAssignment(formData);
+  useEffect(() => {
+    if (users.length > 0 && formData) {
+      const assignedToMatch = users.find(u => u.id === formData?.assigned_to?.id);
+      const assignedByMatch = users.find(u => u.id === formData?.assigned_by?.id);
     }
+  }, [users, formData]);
+
+  const handleSave = () => {
+    if (!formData?.status) {
+      toast.error("Status é obrigatório");
+      return;
+    }
+
+    if (!formData?.description) {
+      toast.error("Descrição é obrigatória");
+      return;
+    }
+
+    if (formData?.status === "corrected" && !formData?.corrective_actions) {
+      toast.error("Ações corretivas são obrigatórias quando status é 'Corrigido'");
+      return;
+    }
+
+    if (!formData?.assigned_to?.id) {
+      toast.error("Selecione um usuário para atribuir a OS");
+      return;
+    }
+
+    if (!formData?.assigned_by?.id) {
+      toast.error("Selecione um usuário que atribuiu a OS");
+      return;
+    }
+
+    const dataToSave = {
+      status: formData?.status,
+      description: formData?.description,
+      corrective_actions: formData?.corrective_actions,
+      is_persistent_error: formData?.is_persistent_error,
+      assigned_to: formData?.assigned_to,
+      assigned_by: formData?.assigned_by,
+      deadline: formData?.deadline,
+    };
+
+    saveAssignment(dataToSave);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setFormData(null);
+  };
+
+  const handleFileAttach = (event) => {
+    const files = Array.from(event.target.files || []);
+    const newFiles = files.map((file) => ({
+      id: `${file.name}-${Date.now()}`,
+      name: file.name,
+      size: file.size,
+      file: file,
+    }));
+    setAttachedFiles([...attachedFiles, ...newFiles]);
+    event.target.value = "";
+  };
+
+  const handleRemoveFile = (fileId) => {
+    setAttachedFiles(attachedFiles.filter((f) => f.id !== fileId));
   };
 
   if (isLoading) {
@@ -172,13 +268,15 @@ const WorkOrderView = () => {
           <Select
             fullWidth
             value={formData?.status || ""}
-
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                status: e.target.value,
-              })
-            }
+            onChange={(e) => {
+              if (isEditing) {
+                setFormData({
+                  ...formData,
+                  status: e.target.value,
+                });
+              }
+            }}
+            disabled={!isEditing}
           >
             {Object.entries(statusInfo).map(([key, status]) => (
               <MenuItem key={key} value={key}>
@@ -199,7 +297,15 @@ const WorkOrderView = () => {
             type="text"
             fullWidth
             value={formData?.reopening_count || 0}
-            disabled
+            onChange={(e) => {
+              if (isEditing) {
+                setFormData({
+                  ...formData,
+                  reopening_count: e.target.value,
+                });
+              }
+            }}
+            disabled={!isEditing}
           />
         </FormField>
 
@@ -210,10 +316,18 @@ const WorkOrderView = () => {
         >
           <TextField
             required
-            type="text"
+            type="datetime-local"
             fullWidth
-            value={new Date(formData?.deadline).toLocaleString() || ""}
-            disabled
+            value={formData?.deadline ? new Date(formData?.deadline).toISOString().slice(0, 16) : ""}
+            onChange={(e) => {
+              if (isEditing && e.target.value) {
+                setFormData({
+                  ...formData,
+                  deadline: new Date(e.target.value).toISOString(),
+                });
+              }
+            }}
+            disabled={!isEditing}
           />
         </FormField>
 
@@ -234,11 +348,35 @@ const WorkOrderView = () => {
             }
 
           >
-            <FormControlLabel disabled value="yes" control={<Radio />} label="Sim" />
-            <FormControlLabel disabled value="no" control={<Radio />} label="Não" />
+            <FormControlLabel disabled={!isEditing} value="yes" control={<Radio />} label="Sim" />
+            <FormControlLabel disabled={!isEditing} value="no" control={<Radio />} label="Não" />
           </RadioGroup>
         </FormField>
 
+        {formData?.status === 'corrected' && (
+          <FormField
+            label="Ações Corretivas"
+            info="Ações realizadas para a correção da OS."
+            containerClass="col-span-full md:col-span-4"
+          >
+            <TextField
+              required
+              placeholder="Remoção de caracteres especiais"
+              type="text"
+              fullWidth
+              value={formData?.corrective_actions || ""}
+              onChange={(e) => {
+                if (isEditing) {
+                  setFormData({
+                    ...formData,
+                    corrective_actions: e.target.value,
+                  });
+                }
+              }}
+              disabled={!isEditing}
+            />
+          </FormField>
+        )}
 
         <FormField
           required
@@ -250,7 +388,15 @@ const WorkOrderView = () => {
             minRows={6}
             style={{ width: "100%", resize: "vertical" }}
             value={formData?.description || ""}
-            disabled
+            onChange={(e) => {
+              if (isEditing) {
+                setFormData({
+                  ...formData,
+                  description: e.target.value,
+                });
+              }
+            }}
+            disabled={!isEditing}
           />
         </FormField>
 
@@ -259,14 +405,24 @@ const WorkOrderView = () => {
           info="Usuário para quem foi atribuida esta OS."
           containerClass="col-span-full md:col-span-4"
         >
-          <TextField
+          <Select
             required
-            placeholder="nome_exemplo"
-            type="text"
             fullWidth
-            value={formData?.assigned_to?.name || ""}
-            disabled
-          />
+            value={formData?.assigned_to?.id || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                assigned_to: users.find((user) => user.id === e.target.value) || formData?.assigned_to,
+              })
+            }
+            disabled={!isEditing}
+          >
+            {users.map((user) => (
+              <MenuItem key={user.id} value={user.id}>
+                {user.name}
+              </MenuItem>
+            ))}
+          </Select>
         </FormField>
 
         <FormField
@@ -274,14 +430,24 @@ const WorkOrderView = () => {
           info="Usuário que atribuiu a OS para outro usuário."
           containerClass="col-span-full md:col-span-4"
         >
-          <TextField
+          <Select
             required
-            placeholder="nome_exemplo"
-            type="text"
             fullWidth
-            value={formData?.assigned_by?.name || ""}
-            disabled
-          />
+            value={formData?.assigned_by?.id || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                assigned_by: users.find((user) => user.id === e.target.value) || formData?.assigned_by,
+              })
+            }
+            disabled={!isEditing}
+          >
+            {users.map((user) => (
+              <MenuItem key={user.id} value={user.id}>
+                {user.name}
+              </MenuItem>
+            ))}
+          </Select>
         </FormField>
 
         <FormField
@@ -299,42 +465,71 @@ const WorkOrderView = () => {
         </FormField>
 
         <FormField
-          containerClass="col-span-full md:col-span-3"
+          containerClass="col-span-full"
         >
-          <div className="flex items-center gap-3 w-full">
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<UploadOutlined fontSize="small" />}
-            >
-              Anexar arquivo
-            </Button>
-            <div className="flex items-center gap-2 flex-1 min-w-0 border rounded px-3 py-2 bg-gray-50">
-              <UploadFile fontSize="small" className="text-gray-500" />
-
-              <span className="truncate text-sm text-gray-700">
-                exemplo_arquivado.pdf
-              </span>
-
-              <IconButton size="small" color="error">
-                <RemoveCircleOutline fontSize="small" />
-              </IconButton>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <input
+                id="file-input"
+                type="file"
+                multiple
+                onChange={handleFileAttach}
+                disabled={!isEditing}
+                style={{ display: "none" }}
+              />
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<UploadOutlined fontSize="small" />}
+                onClick={() => document.getElementById("file-input").click()}
+                disabled={!isEditing}
+              >
+                Anexar arquivo
+              </Button>
             </div>
+
+            {attachedFiles.length > 0 && (
+              <div className="flex flex-col gap-2 border rounded p-4 bg-gray-50">
+                <p className="text-sm font-semibold text-gray-700">
+                  Arquivos anexados ({attachedFiles.length})
+                </p>
+                {attachedFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between gap-3 p-3 bg-white border rounded hover:bg-gray-100 transition"
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <UploadFile fontSize="small" className="text-gray-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-800 truncate">{file.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {(file.size / 1024).toFixed(2)} KB
+                        </p>
+                      </div>
+                    </div>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleRemoveFile(file.id)}
+                      disabled={!isEditing}
+                    >
+                      <RemoveCircleOutline fontSize="small" />
+                    </IconButton>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {attachedFiles.length === 0 && (
+              <div className="flex items-center justify-center gap-2 p-4 bg-gray-50 border border-dashed rounded text-gray-500">
+                <UploadFile fontSize="small" />
+                <span className="text-sm">Nenhum arquivo anexado ainda</span>
+              </div>
+            )}
           </div>
         </FormField>
 
-        <FormField
-          label="Arquivos anexados"
-          containerClass="col-span-full"
-        >
-          <TextField
-            multiline
-            minRows={6}
-            style={{ width: "100%", resize: "vertical" }}
-            value={formData?.attached_files || "Não há arquivos anexados."}
-            disabled
-          />
-        </FormField>
+        
 
       </form>
 

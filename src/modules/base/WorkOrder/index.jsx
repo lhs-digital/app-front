@@ -1,7 +1,7 @@
 import { Add, Assignment } from "@mui/icons-material";
 import { Masonry } from "@mui/lab";
 import { Button, CircularProgress } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
@@ -22,6 +22,11 @@ const WorkOrder = () => {
   const [createOpen, setCreateOpen] = useState(false);
 
   const navigate = useNavigate();
+
+  const handleSetAssignments = useCallback((newAssignments) => {
+    console.log("Atualizando assignments:", newAssignments);
+    setAssignments(newAssignments);
+  }, []);
 
   return (
     <div className="flex flex-col gap-8">
@@ -44,8 +49,7 @@ const WorkOrder = () => {
         ]}
       />
       <TaskFilter
-        setAssignments={setAssignments}
-        isFetching={isFetching}
+        setAssignments={handleSetAssignments}
         setIsFetching={setIsFetching}
       />
       {isFetching ? (

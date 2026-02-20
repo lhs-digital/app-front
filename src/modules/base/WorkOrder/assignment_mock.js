@@ -128,9 +128,9 @@ export const assignmentsMock = [
         entity_type: "audit_invalid_record",
         entity_id: "6",
         assigned_to: {
-            id: "a0f4c386-710f-45f4-82de-ffd309322e71",
-            name: "Operacional Um",
-            email: "operacional1@test.com",
+            id: "a10264a3-092a-43dc-bfe2-55739d47cfdb",
+            name: "Fabiano",
+            email: "radbios@gmail.com",
             email_verified_at: null,
             created_at: "2026-01-29T23:58:48.000000Z",
             updated_at: "2026-01-30T12:52:47.000000Z",

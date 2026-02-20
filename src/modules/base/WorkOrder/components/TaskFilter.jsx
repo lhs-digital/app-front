@@ -11,7 +11,6 @@ import { qc } from "../../../../services/queryClient";
 
 export default function TaskFilter({
   setAssignments,
-  isFetching,
   setIsFetching,
 }) {
   const { company } = useCompany();
@@ -80,9 +79,10 @@ export default function TaskFilter({
     }
   }, [availableEntities, searchParams]);
 
-  const { isLoading: isLoadingAssignments } = useQuery({
+  const { isLoading: isLoadingAssignments, isFetching: isFetchingAssignments } = useQuery({
     queryKey: ["workOrders", company?.id, filters],
     queryFn: async () => {
+      setIsFetching(true);
       const params = {
         assigned_to: filters.assigned_to?.id || undefined,
         assigned_by: filters.assigned_by?.id || undefined,
@@ -92,6 +92,7 @@ export default function TaskFilter({
         status: filters.status || undefined,
       };
       const response = await api.get("/work_order", { params });
+      console.log("Fetched assignments:", response?.data?.data);
       setAssignments(response?.data?.data || []);
       return response.data.data;
     },
@@ -100,6 +101,7 @@ export default function TaskFilter({
     },
     onError: (error) => {
       console.error("Erro ao obter as atribuições", error);
+      setIsFetching(false);
       toast.error("Erro ao obter as atribuições", {
         toastId: "assignmentError",
       });
@@ -108,8 +110,8 @@ export default function TaskFilter({
   });
 
   useEffect(() => {
-    setIsFetching(isLoadingAssignments || isLoadingUsers);
-  }, [isLoadingAssignments, isLoadingUsers, setIsFetching]);
+    setIsFetching(isLoadingUsers);
+  }, [isLoadingUsers, setIsFetching]);
 
   const handleClean = () => {
     resetFilters();
@@ -225,7 +227,7 @@ export default function TaskFilter({
       <Button
         size="small"
         onClick={handleClean}
-        disabled={isFetching}
+        disabled={isLoadingAssignments || isLoadingUsers}
         startIcon={<FilterAltOff fontSize="small" />}
       >
         Limpar

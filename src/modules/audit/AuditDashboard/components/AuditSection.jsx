@@ -39,35 +39,53 @@ const AuditSection = () => {
   const navigate = useNavigate();
   const { permissions } = useUserState().state;
   const theme = handleMode(useThemeMode().mode);
-  const [dataLastAudit, setDataLastAudit] = useState([]);
+  const [dataLastAudit, setDataLastAudit] = useState(0);
   const { company } = useCompany();
   const [auditModule, setAuditModule] = useState(null);
   const [chartData, setChartData] = useState({
     errorsCount: 0,
     fixedErrorsCount: 0,
   });
+  const [isLoadingChart, setIsLoadingChart] = useState(false);
 
   useEffect(() => {
-    if (!auditModule) return;
+    if (!auditModule) {
+      setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
+      return;
+    }
+
     const fetchData = async () => {
-      const response = await api.get(`/companies/${company?.id}/audit/summary`);
+      setIsLoadingChart(true);
+      try {
+        const response = await api.get(`/companies/${company?.id}/audit/summary`);
 
-      if (response.data.per_module && auditModule) {
-        const foundModule = response.data.per_module.find(
-          (mod) => mod.label === auditModule.name,
-        );
-        if (foundModule) {
-          setChartData({
-            errorsCount: foundModule.errors_count,
-            fixedErrorsCount: foundModule.fixed_errors_count,
-          });
+        console.log("response:", response)
+        setDataLastAudit(response.data.last_audit_date);
+
+        if (response.data.per_module && auditModule) {
+          const foundModule = response.data.per_module.find(
+            (mod) => mod.label === auditModule.name,
+          );
+          if (foundModule) {
+            setChartData({
+              errorsCount: foundModule.errors_count,
+              fixedErrorsCount: foundModule.fixed_errors_count,
+            });
+          } else {
+            setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
+          }
+        } else {
+          setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
         }
+      } catch (error) {
+        console.error("Erro ao buscar dados da auditoria:", error);
+        setChartData({ errorsCount: 0, fixedErrorsCount: 0 });
+      } finally {
+        setIsLoadingChart(false);
       }
-
-      setDataLastAudit(response.data.last_audit_date);
     };
     fetchData();
-  }, [auditModule]);
+  }, [auditModule, company]);
 
   const { data: availableModules = [] } = useQuery({
     queryKey: ["company_tables", company],
@@ -299,6 +317,7 @@ const AuditSection = () => {
           </Card>
         </Box>
         {/* Quick Actions for desktop */}
+        {console.log("informações do endpoint:", dataLastAudit)}
         <Card
           variant="outlined"
           className={`p-4 flex flex-col gap-2 grow ${isMobile ? "w-full" : "max-md:hidden"}`}
@@ -310,6 +329,14 @@ const AuditSection = () => {
               <p className="text-neutral-500">
                 Selecione uma empresa e uma tabela
               </p>
+            </div>
+          ) : isLoadingChart ? (
+            <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
+              <p className="text-neutral-500">Carregando dados...</p>
+            </div>
+          ) : chartData.errorsCount === 0 && chartData.fixedErrorsCount === 0 ? (
+            <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
+              <p className="text-neutral-500">Não há dados neste módulo</p>
             </div>
           ) : (
             <PieChart
