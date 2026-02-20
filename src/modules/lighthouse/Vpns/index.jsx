@@ -4,9 +4,7 @@ import {
   KeyboardArrowDown,
   KeyboardArrowUp,
   Lock,
-  PowerSettingsNew,
   Search,
-  WifiTetheringOff,
 } from "@mui/icons-material";
 import {
   Box,
@@ -23,15 +21,15 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import DockerIcon from "../../../components/Miscellaneous/DockerIcon.jsx";
 import ModalDelete from "../../../components/ModalDelete";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
-import VpnStatus from "./components/VpnStatus";
 
 const Vpns = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -67,31 +65,6 @@ const Vpns = () => {
       );
     },
     keepPreviousData: true,
-  });
-
-  const { mutate: switchStatus, isPending: isSwitchingStatus } = useMutation({
-    mutationFn: async ({ id, status }) => {
-      const endpoint =
-        status === "active" ? `/vpns/${id}/kill` : `/vpns/${id}/run`;
-      return await api.post(endpoint);
-    },
-    onSuccess: (_, variables) => {
-      setRefresh(!refresh);
-      const message =
-        variables.status === "active"
-          ? "VPN desativada com sucesso!"
-          : "VPN ativada com sucesso!";
-      toast.success(message);
-      setDeleteOpen(false);
-    },
-    onError: (error, variables) => {
-      const message =
-        variables.status === "active"
-          ? "Erro ao desativada a VPN"
-          : "Erro ao ativar a VPN";
-      console.error(message, error);
-      toast.error(message);
-    },
   });
 
   useEffect(() => {
@@ -155,6 +128,29 @@ const Vpns = () => {
     setRefresh((prev) => !prev);
   };
 
+  const handleDockerConfig = async (id, name) => {
+    toast.promise(
+      async () => {
+        const response = await api.get(`/vpns/${id}/docker_config`);
+        const fileName = `${new Date().toISOString().split("T")[0]}-${name.toLowerCase().replace(/ /g, "-")}-compose.yml`;
+        const file = new File([response.data], fileName, {
+          type: "text/plain",
+        });
+        const url = URL.createObjectURL(file);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      {
+        pending: "Adquirindo arquivo de configuração...",
+        success: "Arquivo de configuração baixado com sucesso",
+        error: "Erro ao baixar arquivo de configuração",
+      },
+    );
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <ModalDelete
@@ -216,12 +212,6 @@ const Vpns = () => {
               >
                 Empresa {getSortIcon("company.name")}
               </TableCell>
-              <TableCell
-                onClick={() => handleSort("status")}
-                style={{ cursor: "pointer" }}
-              >
-                Status {getSortIcon("status")}
-              </TableCell>
               <TableCell>Ações</TableCell>
             </TableRow>
           </TableHead>
@@ -243,28 +233,13 @@ const Vpns = () => {
                 <TableRow key={index} style={{ cursor: "pointer" }}>
                   <TableCell> {vpn.name} </TableCell>
                   <TableCell> {vpn.company?.name} </TableCell>
-                  <TableCell>
-                    <VpnStatus status={vpn.status} />
-                  </TableCell>
                   <TableCell className="space-x-1">
-                    <Tooltip
-                      title={
-                        vpn.status === "active" ? "Desativar VPN" : "Ativar VPN"
-                      }
-                    >
+                    <Tooltip title="Baixar arquivo de configuração">
                       <IconButton
                         size="small"
-                        onClick={() =>
-                          switchStatus({ id: vpn.id, status: vpn.status })
-                        }
-                        disabled={isSwitchingStatus}
-                        loading={isSwitchingStatus}
+                        onClick={() => handleDockerConfig(vpn.id, vpn.name)}
                       >
-                        {status === "active" ? (
-                          <WifiTetheringOff />
-                        ) : (
-                          <PowerSettingsNew />
-                        )}
+                        <DockerIcon color="primary" />
                       </IconButton>
                     </Tooltip>
                     {permissions.some(
