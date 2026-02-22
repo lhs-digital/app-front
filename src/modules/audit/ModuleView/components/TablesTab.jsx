@@ -16,7 +16,7 @@ const TablesTab = () => {
       <div className="flex flex-col gap-4">
         <div>
           <h2 className="font-semibold">Tabelas adicionadas</h2>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-zinc-500">
             Clique para editar ou remover uma tabela
           </p>
         </div>

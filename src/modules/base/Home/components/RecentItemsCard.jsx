@@ -41,7 +41,7 @@ const RecentItemsCard = ({
           ))}
         </Box>
       ) : (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center p-4">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center p-4">
           Nenhum item recente
         </p>
       )}

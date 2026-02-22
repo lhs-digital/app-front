@@ -267,7 +267,7 @@ const Roles = () => {
               ({ name, company, permissions_count, id, nivel }) => (
                 <TableRow
                   key={id}
-                  className="cursor-pointer hover:bg-gray-600/20 transition-all"
+                  className="cursor-pointer hover:bg-zinc-600/20 transition-all"
                 >
                   <TableCell>{name}</TableCell>
                   <TableCell>

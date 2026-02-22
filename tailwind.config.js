@@ -39,11 +39,11 @@ module.exports = {
         "blue-darker": "var(--blue-darker)",
         "blue-dark": "var(--blue-dark)",
         "blue-light": "var(--blue-light)",
-        "gray-darkest": "var(--gray-darkest)",
-        "gray-darker": "var(--gray-darker)",
-        "gray-dark": "var(--gray-dark)",
-        "gray-light": "var(--gray-light)",
-        "gray-background": "var(--gray-background)",
+        "gray-darkest": "var(--zinc-darkest)",
+        "gray-darker": "var(--zinc-darker)",
+        "gray-dark": "var(--zinc-dark)",
+        "gray-light": "var(--zinc-light)",
+        "gray-background": "var(--zinc-background)",
       },
       backgroundImage: {
         login:

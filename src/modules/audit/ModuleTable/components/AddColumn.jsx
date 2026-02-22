@@ -316,7 +316,7 @@ export const AddColumn = ({
                       </span>{" "}
                       Opções
                     </h2>
-                    <p className="text-sm text-neutral-500 mb-2">
+                    <p className="text-sm text-zinc-500 mb-2">
                       Lista de opções disponíveis para este campo select.
                     </p>
                   </div>
@@ -324,7 +324,7 @@ export const AddColumn = ({
 
                 <div className="flex flex-row flex-wrap gap-2 items-center col-span-6">
                   {options.length === 0 ? (
-                    <p className="text-sm text-neutral-400">
+                    <p className="text-sm text-zinc-400">
                       Não há opções adicionadas.
                     </p>
                   ) : (
@@ -391,14 +391,14 @@ export const AddColumn = ({
                   </span>{" "}
                   Regras
                 </h2>
-                <p className="text-sm text-neutral-500 mb-2">
+                <p className="text-sm text-zinc-500 mb-2">
                   Passe o mouse sobre uma regra para ver mais detalhes.
                 </p>
               </div>
             </div>
             <div className="flex flex-row flex-wrap gap-2 items-center col-span-6">
               {rules.length === 0 ? (
-                <p className="text-sm text-neutral-400">
+                <p className="text-sm text-zinc-400">
                   Não há regras adicionadas.
                 </p>
               ) : (

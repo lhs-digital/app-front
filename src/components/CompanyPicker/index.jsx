@@ -41,7 +41,7 @@ const CompanyPicker = ({ open, onClose }) => {
       <DialogTitle>Selecione a empresa</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         <p>Para acessar o sistema, escolha uma empresa.</p>
-        <p className="text-neutral-500 text-sm text-justify">
+        <p className="text-zinc-500 text-sm text-justify">
           <span>
             <InfoOutlined fontSize="small" className="mr-2 mb-0.5" />
           </span>

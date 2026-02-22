@@ -132,7 +132,7 @@ const TableAccordion = ({
         >
           <TableChartOutlined fontSize="small" color="primary" />
           <Typography fontWeight={600}>{table.label}</Typography>
-          <p className="text-sm text-neutral-500">({columns.length} colunas)</p>
+          <p className="text-sm text-zinc-500">({columns.length} colunas)</p>
           {totalRules > 0 && (
             <Chip
               label={`${totalRules} regra${totalRules !== 1 ? "s" : ""}`}
@@ -162,7 +162,7 @@ const TableAccordion = ({
             onChange={handleSearchChange}
             slotProps={{
               input: {
-                startAdornment: <Search className="text-neutral-500 mr-2" />,
+                startAdornment: <Search className="text-zinc-500 mr-2" />,
                 endAdornment: search && (
                   <IconButton size="small" onClick={() => setSearch("")}>
                     <Clear fontSize="small" />

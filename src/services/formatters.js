@@ -84,3 +84,10 @@ export const formatDuration = (duration) => {
   const seconds = Math.floor(duration % 60);
   return `${minutes} min ${seconds} s`;
 };
+
+export const formatAuditStatus = (status, capitalize = false) => {
+  if (status === "success") return capitalize ? "Concluído" : "concluído";
+  if (status === "pending") return capitalize ? "Pendente" : "pendente";
+  if (status === "failed") return capitalize ? "Falhou" : "falhou";
+  return capitalize ? "N/A" : "n/a";
+};

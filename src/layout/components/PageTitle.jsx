@@ -10,14 +10,13 @@ const PageTitle = ({
   buttons = <></>,
   icon = <TableChartOutlined fontSize="small" />,
 }) => {
-
   useEffect(() => {
     const environment = import.meta.env.VITE_ENVIRONMENT;
-    const alias = environment && envMap[environment] ? envMap[environment].alias : null;
+    const alias =
+      environment && envMap[environment] ? envMap[environment].alias : null;
 
     document.title = `${alias ? `[${alias}] ` : ""}LHS - ${title || "Página"}`;
   }, [title]);
-
 
   return (
     <div className="flex flex-row items-center justify-between w-full">
@@ -26,7 +25,7 @@ const PageTitle = ({
           <span className="mb-0.5">{icon}</span>
           <p className="text-xl font-bold">{title}</p>
         </div>
-        <div className="text-md text-neutral-400 flex flex-row gap-2 items-center">
+        <div className="text-md text-zinc-400 flex flex-row gap-2 items-center">
           {subtitle}
           {tag && (
             <Chip
@@ -35,7 +34,7 @@ const PageTitle = ({
                   className={
                     tag === "Você tem alterações não salvas"
                       ? "text-orange-500"
-                      : "text-neutral-500"
+                      : "text-zinc-500"
                   }
                 >
                   {tag}

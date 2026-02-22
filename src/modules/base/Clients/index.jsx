@@ -249,7 +249,7 @@ const Clients = () => {
                 .map((client) => (
                   <TableRow
                     key={client.id}
-                    className="cursor-pointer hover:bg-gray-600/20 transition-all"
+                    className="cursor-pointer hover:bg-zinc-600/20 transition-all"
                   >
                     <TableCell>{client.id}</TableCell>
                     <TableCell>{client.email}</TableCell>

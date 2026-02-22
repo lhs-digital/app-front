@@ -18,7 +18,7 @@ const AddedTables = ({ tables, onColumnClick }) => {
           <SellOutlined fontSize="small" color="inherit" />
           <h2>Regras adicionadas</h2>
         </div>
-        <div className="flex items-center gap-1 text-sm text-neutral-400">
+        <div className="flex items-center gap-1 text-sm text-zinc-400">
           <InfoOutlined fontSize="small" color="inherit" />
           <p>
             {ruleCount} regra{ruleCount !== 1 && "s"} ativa

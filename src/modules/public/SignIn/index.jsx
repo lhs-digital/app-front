@@ -127,7 +127,7 @@ const SignIn = () => {
           </div>
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-1">Bem-vindo ao Lighthouse</h1>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
               Entre com suas credenciais para acessar a plataforma.
             </p>
           </div>
@@ -205,7 +205,7 @@ const SignIn = () => {
         {/* Forgot Password Link */}
         <Link
           to="/recover-password"
-          className="text-center text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary dark:hover:text-primary-light transition-colors"
+          className="text-center text-sm text-zinc-600 dark:text-zinc-400 hover:text-primary dark:hover:text-primary-light transition-colors"
         >
           Esqueceu sua senha?{" "}
           <span className="underline font-medium">Recuperar senha</span>

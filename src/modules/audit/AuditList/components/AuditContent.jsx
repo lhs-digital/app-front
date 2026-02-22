@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useThemeMode } from "../../../../contexts/themeModeContext";
 import { useAuditFilters } from "../../../../hooks/useAuditFilters";
 import { useCompany } from "../../../../hooks/useCompany";
-import { handleMode } from "../../../../theme";
+import { handleMode, themeColors } from "../../../../theme";
 import CreateTask from "../../../base/WorkOrder/components/CreateTask";
 import AuditItem from "./AuditItem";
 
@@ -17,7 +17,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
   if (!company) {
     return (
       <div className="p-8 lg:py-12">
-        <p className="text-lg text-center text-neutral-500">
+        <p className="text-lg text-center text-zinc-500">
           Selecione uma empresa para visualizar as atividades.
         </p>
       </div>
@@ -27,7 +27,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
   if (!filters.moduleId) {
     return (
       <div className="p-8 lg:py-12">
-        <p className="text-lg text-center text-neutral-500">
+        <p className="text-lg text-center text-zinc-500">
           Selecione uma tabela para visualizar as atividades.
         </p>
       </div>
@@ -45,7 +45,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
   if (data?.length === 0) {
     return (
       <div className="p-8 lg:py-12">
-        <p className="text-lg text-center text-neutral-500">
+        <p className="text-lg text-center text-zinc-500">
           Não há atividades pendentes ou concluídas.
         </p>
       </div>
@@ -78,7 +78,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
                 width="12px"
                 height="12px"
                 borderRadius="30%"
-                bgcolor={colors.orange[theme === "light" ? 100 : 500]}
+                bgcolor={themeColors[theme].warning.main}
               />
               <p className="text-sm">Atividade Pendente</p>
             </Box>
@@ -87,7 +87,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
                 width="12px"
                 height="12px"
                 borderRadius="30%"
-                bgcolor={colors.green[theme === "light" ? 100 : 500]}
+                bgcolor={themeColors[theme].success.main}
               />
               <p className="text-sm">Atividade Concluída</p>
             </Box>

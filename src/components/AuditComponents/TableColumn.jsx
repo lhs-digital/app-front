@@ -36,7 +36,7 @@ const TableColumn = ({
             {column.pk && <Key />} {column.fk && <Link />}
           </span>
         </p>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-zinc-500">
           {column.type || "Tipo não definido"}
         </p>
       </div>

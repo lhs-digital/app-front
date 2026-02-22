@@ -105,24 +105,28 @@ const ModuleView = () => {
     create: {
       pageTitle: "Criar grupo de regras",
       icon: <Save />,
+      variant: "contained",
       buttonLabel: "Salvar",
       onClick: handleSubmit(onSubmit),
     },
     edit: {
-      pageTitle: "Editar grupo de regras",
+      pageTitle: "Gerenciar grupo de regras",
       icon: <Save />,
+      variant: "contained",
       buttonLabel: "Salvar",
       onClick: handleSubmit(onSubmit),
     },
     view: {
       pageTitle: "Visualizar grupo de regras",
       icon: <Edit />,
-      buttonLabel: "Editar",
+      variant: "outlined",
+      buttonLabel: "Renomear",
       onClick: () => navigate(`/modulos/${moduleId}/editar`),
     },
   };
 
-  const { pageTitle, icon, buttonLabel, onClick } = actionConfig[currentAction];
+  const { pageTitle, icon, variant, buttonLabel, onClick } =
+    actionConfig[currentAction];
 
   const [pendingChanges, setPendingChanges] = useState({});
 
@@ -280,7 +284,7 @@ const ModuleView = () => {
       if (structure.length === 0) {
         return (
           <div className="flex items-center justify-center py-4 h-64">
-            <p className="text-center py-4 text-neutral-500">
+            <p className="text-center py-4 text-zinc-500">
               {search
                 ? "Não encontramos nenhuma tabela com o nome pesquisado."
                 : "Nenhuma tabela cadastrada."}
@@ -329,10 +333,10 @@ const ModuleView = () => {
           <Button
             key="action-module"
             type="button"
-            variant="contained"
             color="primary"
             onClick={onClick}
             startIcon={icon}
+            variant={variant}
           >
             {buttonLabel}
           </Button>,
@@ -364,7 +368,7 @@ const ModuleView = () => {
           onChange={(e) => setSearch(e.target.value)}
           slotProps={{
             input: {
-              startAdornment: <Search className="text-neutral-500 mr-2" />,
+              startAdornment: <Search className="text-zinc-500 mr-2" />,
               endAdornment: search &&
                 !(isPendingStructure || isPendingModule) && (
                   <IconButton size="small" onClick={() => setSearch("")}>

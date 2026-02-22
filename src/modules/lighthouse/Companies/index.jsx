@@ -291,7 +291,7 @@ const Companies = () => {
                     <TableCell> {name} </TableCell>
                     <TableCell>
                       {dba || (
-                        <span className="text-neutral-500">Não informado</span>
+                        <span className="text-zinc-500">Não informado</span>
                       )}
                     </TableCell>
                     <TableCell> {formatCpfCnpj(cnpj)} </TableCell>

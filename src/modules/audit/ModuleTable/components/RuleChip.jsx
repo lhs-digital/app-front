@@ -23,7 +23,7 @@ const RuleChip = ({
               Coluna <span>&quot;{column.name}&quot;</span>
             </p>
             {tableName && (
-              <div className="flex flex-row items-center gap-1 text-sm text-neutral-500">
+              <div className="flex flex-row items-center gap-1 text-sm text-zinc-500">
                 <TableChartOutlined fontSize="inherit" />
                 <p className="font-medium text-xs">{tableName}</p>
               </div>

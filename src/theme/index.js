@@ -15,10 +15,10 @@ const lightPalette = {
     contrastText: "#fff",
   },
   info: {
-    main: "#7d7d7d",
-    light: "#a8a8a8",
-    dark: "#545454",
-    contrastText: "#FFF",
+    main: "#71717a",
+    light: "#a1a1aa",
+    dark: "#52525b",
+    contrastText: "#1D1F21",
   },
   success: {
     main: "#26ed7a",
@@ -31,6 +31,12 @@ const lightPalette = {
     light: "#ff7263",
     dark: "#c10f31",
     contrastText: "#fff",
+  },
+  warning: {
+    main: "#ff9800",
+    light: "#ffd146",
+    dark: "#e27100",
+    contrastText: "#1D1F21",
   },
 };
 
@@ -49,9 +55,9 @@ const darkPalette = {
     contrastText: "#fff",
   },
   info: {
-    main: "#7d7d7d",
-    light: "#a8a8a8",
-    dark: "#545454",
+    main: "#71717a",
+    light: "#a1a1aa",
+    dark: "#52525b",
     contrastText: "#FFF",
   },
   success: {
@@ -65,6 +71,12 @@ const darkPalette = {
     light: "#ff7263",
     dark: "#c10f31",
     contrastText: "#fff",
+  },
+  warning: {
+    main: "#ff9800",
+    light: "#ffd146",
+    dark: "#e27100",
+    contrastText: "#1D1F21",
   },
 };
 
@@ -159,4 +171,13 @@ export const getTheme = (mode) => {
       },
     },
   });
+};
+
+export const themeColors = {
+  dark: {
+    ...darkPalette,
+  },
+  light: {
+    ...lightPalette,
+  },
 };

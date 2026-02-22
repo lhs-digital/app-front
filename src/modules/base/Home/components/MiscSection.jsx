@@ -117,7 +117,7 @@ const MiscSection = () => {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={3}>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
                           Nenhuma auditoria encontrada
                         </p>
                       </TableCell>
@@ -187,7 +187,7 @@ const MiscSection = () => {
                 <Box display="flex" flexDirection="column" gap={2}>
                   {!company && isLighthouse ? (
                     <Box>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">
                         Empresa Atual
                       </p>
                       <p className="font-medium text-sm">
@@ -197,7 +197,7 @@ const MiscSection = () => {
                   ) : (
                     company && (
                       <Box>
-                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
                           Empresa Atual
                         </p>
                         <p className="font-medium">{company.name}</p>
@@ -210,7 +210,7 @@ const MiscSection = () => {
             <Card className="flex-1">
               <CardContent>
                 <Box>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Usuário Logado
                   </p>
                   <p className="font-medium">{userState?.name || "N/A"}</p>

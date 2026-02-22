@@ -41,11 +41,11 @@ const WorkOrder = () => {
           <CircularProgress size="1.5rem" />
         </div>
       ) : queryState === "error" ? (
-        <div className="col-span-full flex justify-center items-center h-32 text-neutral-500">
+        <div className="col-span-full flex justify-center items-center h-32 text-zinc-500">
           {queryState.errorMessage}
         </div>
       ) : assignments.length === 0 ? (
-        <div className="col-span-full flex justify-center items-center h-32 text-neutral-500">
+        <div className="col-span-full flex justify-center items-center h-32 text-zinc-500">
           {showContent
             ? "Nenhuma ordem de serviço encontrada"
             : "Selecione uma empresa para visualizar as ordens de serviço"}

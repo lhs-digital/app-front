@@ -128,7 +128,7 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
           />
           <FormHelperText>
             Pressione{" "}
-            <span className="px-2 bg-neutral-500/30 rounded-sm mx-0.5 border border-[--border]">
+            <span className="px-2 bg-zinc-500/30 rounded-sm mx-0.5 border border-[--border]">
               Enter
             </span>{" "}
             para adicionar um novo valor.
@@ -210,14 +210,14 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
           />
           {selectedValidation && (
             <div className="col-span-full flex flex-col gap-2 p-4 border border-[--border] rounded-md">
-              <div className="flex flex-row text-neutral-400 items-center">
+              <div className="flex flex-row text-zinc-400 items-center">
                 <InfoOutlined className="mb-0.5 mr-2" fontSize="small" />
                 <p>Sobre esta validação</p>
               </div>
               <p>{selectedValidation.description}</p>
               {selectedValidation.example && (
                 <div className="mt-4">
-                  <p className="text-neutral-400 text-sm">Exemplo de uso</p>
+                  <p className="text-zinc-400 text-sm">Exemplo de uso</p>
                   <p>{selectedValidation.example}</p>
                 </div>
               )}

@@ -297,7 +297,7 @@ const ModuleTableView = () => {
         <div>
           <h2 className="font-semibold">Regras adicionadas</h2>
           {action !== "view" && (
-            <p className="text-md text-neutral-500">
+            <p className="text-md text-zinc-500">
               Selecione uma coluna no campo abaixo para editar ou remover suas
               regras.
             </p>
@@ -364,9 +364,9 @@ const ModuleTableView = () => {
         <div className="flex flex-col gap-1">
           <h2 className="font-semibold">Colunas sem regras</h2>
           {action !== "view" && (
-            <p className="text-md text-neutral-500">
+            <p className="text-md text-zinc-500">
               Clique no{" "}
-              <span className="bg-neutral-500/30 mx-0.5 border border-[--border] rounded-full">
+              <span className="bg-zinc-500/30 mx-0.5 border border-[--border] rounded-full">
                 <Add fontSize="small" className="mb-0.5" />
               </span>{" "}
               ao lado de uma coluna para adicioná-la ao grupo de regras.
@@ -432,9 +432,7 @@ const ModuleTableView = () => {
             ))}
         </div>
       ) : (
-        <p className="text-neutral-500">
-          Todas as colunas já foram adicionadas
-        </p>
+        <p className="text-zinc-500">Todas as colunas já foram adicionadas</p>
       )}
       <ConfirmDialog
         isOpen={openConfirmDialog}
