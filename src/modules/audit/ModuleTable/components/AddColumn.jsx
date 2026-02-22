@@ -218,11 +218,7 @@ export const AddColumn = ({
         fullWidth
         scroll="body"
       >
-        <DialogTitle>
-          {column && !column.edit
-            ? "Criar regras para a coluna"
-            : "Editar regras da coluna"}
-        </DialogTitle>
+        <DialogTitle>{column && "Gerenciar regras da coluna"}</DialogTitle>
         <DialogContent>
           <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 w-full">
             <h2 className="font-semibold col-span-6 text-lg mb-2">
@@ -453,7 +449,7 @@ export const AddColumn = ({
               toast.error("Preencha todos os campos corretamente"),
             )}
           >
-            {column?.edit ? "Atualizar coluna" : "Adicionar coluna"}
+            {column?.edit ? "Atualizar coluna" : "Adicionar coluna ao grupo"}
           </Button>
         </DialogActions>
       </Dialog>

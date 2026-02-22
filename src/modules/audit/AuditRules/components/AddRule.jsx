@@ -212,7 +212,7 @@ const AddRule = ({
       scroll="body"
     >
       <DialogTitle>
-        {data !== null ? "Editar coluna" : "Adicionar coluna"}
+        {data !== null ? "Editar regra" : "Adicionar regra ao grupo"}
       </DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         <form
