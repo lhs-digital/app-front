@@ -32,7 +32,7 @@ module.exports = {
           light: "#F2F2F2",
           DEFAULT: "#BFBFBF",
           dark: "#808080",
-          black: "#000000",
+          black: "#1D1F21",
         },
 
         "blue-darkest": "var(--blue-darkest)",

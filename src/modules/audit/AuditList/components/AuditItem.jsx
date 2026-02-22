@@ -69,7 +69,7 @@ const AuditItem = ({
       overflow="clip"
       border="1px solid"
       borderColor="divider"
-      backgroundColor={theme === "light" ? "#fff" : "#121212"}
+      backgroundColor={theme === "light" ? "#fff" : "#1D1F21"}
     >
       <Box
         display="flex"

@@ -334,14 +334,17 @@ const AuditSection = () => {
             <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
               <p className="text-neutral-500">Carregando dados...</p>
             </div>
-          ) : chartData.errorsCount === 0 && chartData.fixedErrorsCount === 0 ? (
+          ) : chartData.errorsCount === 0 &&
+            chartData.fixedErrorsCount === 0 ? (
             <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
               <p className="text-neutral-500">Não há dados neste módulo</p>
             </div>
           ) : (
             <PieChart
               colors={
-                theme === "light" ? [amber[600], "#000"] : [amber[400], "#fff"]
+                theme === "light"
+                  ? [amber[600], "#1D1F21"]
+                  : [amber[400], "#fff"]
               }
               series={[
                 {

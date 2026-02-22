@@ -3,9 +3,9 @@ import { createTheme } from "@mui/material";
 const lightPalette = {
   mode: "light",
   primary: {
-    main: "#000000",
-    light: "#DFDFEB",
-    dark: "#2B2B30",
+    main: "#1D1F21",
+    light: "#e4e6e7",
+    dark: "#3f4346",
     contrastText: "#fff",
   },
   secondary: {
@@ -19,6 +19,18 @@ const lightPalette = {
     light: "#a8a8a8",
     dark: "#545454",
     contrastText: "#FFF",
+  },
+  success: {
+    main: "#26ed7a",
+    light: "#7afbb0",
+    dark: "#06b350",
+    contrastText: "#1D1F21",
+  },
+  error: {
+    main: "#f73b51",
+    light: "#ff7263",
+    dark: "#c10f31",
+    contrastText: "#fff",
   },
 };
 
@@ -26,9 +38,9 @@ const darkPalette = {
   mode: "dark",
   primary: {
     main: "#fff",
-    light: "#2B2B30",
-    dark: "#DFDFEB",
-    contrastText: "#000",
+    light: "#3f4346",
+    dark: "#a1a5aa",
+    contrastText: "#1D1F21",
   },
   secondary: {
     main: "#0a8feb",
@@ -41,6 +53,18 @@ const darkPalette = {
     light: "#a8a8a8",
     dark: "#545454",
     contrastText: "#FFF",
+  },
+  success: {
+    main: "#26ed7a",
+    light: "#7afbb0",
+    dark: "#06b350",
+    contrastText: "#1D1F21",
+  },
+  error: {
+    main: "#f73b51",
+    light: "#ff7263",
+    dark: "#c10f31",
+    contrastText: "#fff",
   },
 };
 
