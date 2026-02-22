@@ -6,10 +6,10 @@ const InformationTab = () => {
   const { register } = useFormContext();
   return (
     <div className="flex flex-col gap-4 w-full">
-      <FormField label="Nome do módulo">
+      <FormField label="Nome do grupo">
         <TextField fullWidth {...register("name")} />
       </FormField>
-      <FormField label="Descrição do módulo">
+      <FormField label="Descrição do grupo">
         <TextField multiline rows={3} fullWidth {...register("description")} />
       </FormField>
     </div>

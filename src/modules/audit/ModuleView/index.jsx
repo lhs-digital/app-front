@@ -106,7 +106,7 @@ const ModuleView = () => {
       pageTitle: "Criar grupo de regras",
       icon: <Save />,
       variant: "contained",
-      buttonLabel: "Salvar",
+      buttonLabel: "Criar",
       onClick: handleSubmit(onSubmit),
     },
     edit: {
@@ -215,7 +215,7 @@ const ModuleView = () => {
       );
       return response.data.data;
     },
-    enabled: !!company,
+    enabled: !!company && currentAction !== "create",
     retry: false,
   });
 
@@ -246,7 +246,7 @@ const ModuleView = () => {
       });
       return response.data.data;
     },
-    enabled: !!activeModule,
+    enabled: !!activeModule && currentAction !== "create",
   });
 
   useEffect(() => {
@@ -273,6 +273,16 @@ const ModuleView = () => {
   useDebounce(search, 300, handleSearch);
 
   const renderView = () => {
+    if (currentAction === "create") {
+      return (
+        <div className="grid-bg flex flex-col gap-4 items-center justify-center py-4 h-32 border border-[--border] rounded-lg">
+          <p className="text-center text-zinc-500 dark:text-zinc-400">
+            Crie um grupo de regras para começar a gerenciar as regras de
+            auditoria.
+          </p>
+        </div>
+      );
+    }
     if (isPendingStructure || isPendingModule) {
       return (
         <div className="flex items-center justify-center py-4 h-64">
@@ -345,10 +355,16 @@ const ModuleView = () => {
 
       {isEditable && (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <FormField label="Nome do módulo" loading={isPendingModule}>
+          <FormField
+            label="Nome do grupo"
+            loading={isPendingModule && currentAction !== "create"}
+          >
             <TextField fullWidth {...register("name", { required: true })} />
           </FormField>
-          <FormField label="Descrição do módulo" loading={isPendingModule}>
+          <FormField
+            label="Descrição do grupo"
+            loading={isPendingModule && currentAction !== "create"}
+          >
             <TextField
               multiline
               rows={3}
@@ -359,50 +375,52 @@ const ModuleView = () => {
         </form>
       )}
 
-      <div className="flex items-center gap-2">
-        <TextField
-          placeholder="Pesquisar tabelas por nome..."
-          className="grow"
-          value={search}
-          disabled={isPendingStructure || isPendingModule}
-          onChange={(e) => setSearch(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: <Search className="text-zinc-500 mr-2" />,
-              endAdornment: search &&
-                !(isPendingStructure || isPendingModule) && (
-                  <IconButton size="small" onClick={() => setSearch("")}>
-                    <Clear fontSize="small" />
-                  </IconButton>
-                ),
-            },
-          }}
-        />
-        <ToggleButtonGroup
-          exclusive
-          value={viewMode}
-          onChange={(_, value) => value && setViewMode(value)}
-          className="h-14 rounded-lg overflow-hidden border border-[var(--border)]"
-          size="large"
-          variant="outlined"
-          sx={{
-            "& .MuiToggleButton-root": {
-              border: "none",
-            },
-          }}
-        >
-          <Tooltip title="Listar tabelas">
-            <ToggleButton value="list">
-              <FormatListBulleted />
-            </ToggleButton>
-          </Tooltip>
-          <Tooltip title="Colunas adicionadas">
-            <ToggleButton value="added">
-              <Window />
-            </ToggleButton>
-          </Tooltip>
-        </ToggleButtonGroup>
-      </div>
+      {currentAction !== "create" && (
+        <div className="flex items-center gap-2">
+          <TextField
+            placeholder="Pesquisar tabelas por nome..."
+            className="grow"
+            value={search}
+            disabled={isPendingStructure || isPendingModule}
+            onChange={(e) => setSearch(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: <Search className="text-zinc-500 mr-2" />,
+                endAdornment: search &&
+                  !(isPendingStructure || isPendingModule) && (
+                    <IconButton size="small" onClick={() => setSearch("")}>
+                      <Clear fontSize="small" />
+                    </IconButton>
+                  ),
+              },
+            }}
+          />
+          <ToggleButtonGroup
+            exclusive
+            value={viewMode}
+            onChange={(_, value) => value && setViewMode(value)}
+            className="h-14 rounded-lg overflow-hidden border border-[var(--border)]"
+            size="large"
+            variant="outlined"
+            sx={{
+              "& .MuiToggleButton-root": {
+                border: "none",
+              },
+            }}
+          >
+            <Tooltip title="Listar tabelas">
+              <ToggleButton value="list">
+                <FormatListBulleted />
+              </ToggleButton>
+            </Tooltip>
+            <Tooltip title="Colunas adicionadas">
+              <ToggleButton value="added">
+                <Window />
+              </ToggleButton>
+            </Tooltip>
+          </ToggleButtonGroup>
+        </div>
+      )}
 
       {renderView()}
 
