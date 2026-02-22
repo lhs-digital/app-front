@@ -105,7 +105,7 @@ export const getTheme = (mode) => {
         },
         styleOverrides: {
           tooltip: {
-            borderRadius: "0.75rem",
+            borderRadius: "0.5rem",
           },
         },
       },
