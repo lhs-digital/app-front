@@ -10,9 +10,11 @@ import {
 } from "@mui/material";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import ReactInputMask from "react-input-mask";
 import { toast } from "react-toastify";
 import FormField from "../../../../components/FormField/index";
 import api from "../../../../services/api";
+import { validarCNPJ, validarCPF } from "../../../../services/utils";
 
 const defaultValues = {
   name: "",
@@ -101,90 +103,6 @@ const ModalCompany = ({
     }
   }, [watchedPostalCode, setValue]);
 
-  const validarCpf = (cpf) => {
-    cpf = cpf.replace(/[^\d]/g, "");
-    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-
-    let soma = 0;
-    for (let i = 0; i < 9; i++) {
-      soma += parseInt(cpf.charAt(i)) * (10 - i);
-    }
-    let resto = soma % 11;
-    let digito1 = resto < 2 ? 0 : 11 - resto;
-    if (digito1 !== parseInt(cpf.charAt(9))) return false;
-
-    soma = 0;
-    for (let i = 0; i < 10; i++) {
-      soma += parseInt(cpf.charAt(i)) * (11 - i);
-    }
-    resto = soma % 11;
-    let digito2 = resto < 2 ? 0 : 11 - resto;
-    if (digito2 !== parseInt(cpf.charAt(10))) return false;
-
-    return true;
-  };
-
-  const validarCNPJ = (cnpj) => {
-    cnpj = cnpj.replace(/[^\d]/g, "");
-    if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
-
-    let tamanho = cnpj.length - 2;
-    let numeros = cnpj.substring(0, tamanho);
-    let digitos = cnpj.substring(tamanho);
-    let soma = 0;
-    let pos = tamanho - 7;
-
-    for (let i = tamanho; i >= 1; i--) {
-      soma += numeros[tamanho - i] * pos--;
-      if (pos < 2) pos = 9;
-    }
-
-    let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
-    if (resultado !== parseInt(digitos[0])) return false;
-
-    tamanho++;
-    numeros = cnpj.substring(0, tamanho);
-    soma = 0;
-    pos = tamanho - 7;
-
-    for (let i = tamanho; i >= 1; i--) {
-      soma += numeros[tamanho - i] * pos--;
-      if (pos < 2) pos = 9;
-    }
-
-    resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
-    if (resultado !== parseInt(digitos[1])) return false;
-
-    return true;
-  };
-
-  const cnpjAlreadyExists = (cnpjValue) => {
-    const cleanCnpj = (v) => (v ? v.replace(/\D/g, "") : "");
-    if (cleanCnpj(dataEdit?.cnpj) !== cleanCnpj(cnpjValue) && data?.length) {
-      return data.find((item) => cleanCnpj(item.cnpj) === cleanCnpj(cnpjValue));
-    }
-    return false;
-  };
-
-  const formatCNPJ = (value) => {
-    const digits = value.replace(/\D/g, "");
-    if (digits.length === 14) {
-      return digits.replace(
-        /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-        "$1.$2.$3/$4-$5",
-      );
-    }
-    return value;
-  };
-
-  const formatCPF = (value) => {
-    const digits = value.replace(/\D/g, "");
-    if (digits.length === 11) {
-      return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    }
-    return value;
-  };
-
   const buildPayload = (formData) => ({
     name: formData.name,
     cnpj: formData.cnpj,
@@ -208,13 +126,8 @@ const ModalCompany = ({
       return;
     }
 
-    if (!validarCpf(formData.responsible_cpf)) {
+    if (!validarCPF(formData.responsible_cpf)) {
       toast.warning("CPF de Responsável da Empresa inválido!");
-      return;
-    }
-
-    if (cnpjAlreadyExists(formData.cnpj)) {
-      toast.warning("CNPJ já cadastrado!");
       return;
     }
 
@@ -283,14 +196,25 @@ const ModalCompany = ({
                 containerClass="col-span-full md:col-span-3"
                 required
               >
-                <TextField
+                <ReactInputMask
+                  mask="99.999.999/9999-99"
+                  maskChar=" "
                   {...field}
-                  fullWidth
-                  error={!!errors.cnpj}
-                  helperText={errors.cnpj?.message}
-                  slotProps={{ input: { maxLength: 18 } }}
-                  onChange={(e) => field.onChange(formatCNPJ(e.target.value))}
-                />
+                >
+                  {(inputProps) => (
+                    <TextField
+                      {...inputProps}
+                      error={!!errors.cnpj}
+                      fullWidth
+                      slotProps={{
+                        input: {
+                          maxLength: 18,
+                          readOnly: !dataEdit?.id,
+                        },
+                      }}
+                    />
+                  )}
+                </ReactInputMask>
               </FormField>
             )}
           />
@@ -306,14 +230,18 @@ const ModalCompany = ({
                 containerClass="col-span-full md:col-span-3"
                 required
               >
-                <TextField
-                  {...field}
-                  fullWidth
-                  error={!!errors.responsible_cpf}
-                  helperText={errors.responsible_cpf?.message}
-                  slotProps={{ input: { maxLength: 14 } }}
-                  onChange={(e) => field.onChange(formatCPF(e.target.value))}
-                />
+                <ReactInputMask mask="999.999.999-99" maskChar=" " {...field}>
+                  {(inputProps) => (
+                    <TextField
+                      {...inputProps}
+                      error={!!errors.responsible_cpf}
+                      fullWidth
+                      slotProps={{
+                        input: { readOnly: !dataEdit?.id, maxLength: 14 },
+                      }}
+                    />
+                  )}
+                </ReactInputMask>
               </FormField>
             )}
           />
