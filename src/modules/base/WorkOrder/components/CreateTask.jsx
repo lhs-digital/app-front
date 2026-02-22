@@ -1,4 +1,3 @@
-import { TableChartOutlined } from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
@@ -63,7 +62,7 @@ const CreateTask = ({ open, onClose, auditRecord }) => {
     e.preventDefault();
 
     api
-      .post("/work_order", {
+      .post("/work_orders", {
         ...data,
         assigned_to: data.assigned_to.id,
         assigned_by: data.assigned_by.id,
@@ -103,7 +102,6 @@ const CreateTask = ({ open, onClose, auditRecord }) => {
                 <p className="text-lg">
                   # AUD{auditRecord?.id.toString().padStart(3, "0")}
                 </p>
-                
               </div>
               <Chip
                 size="small"

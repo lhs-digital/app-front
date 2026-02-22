@@ -63,10 +63,10 @@ const Home = () => {
   const { data: workOrdersData, isLoading: isLoadingWorkOrders } = useQuery({
     queryKey: ["dashboard_work_orders", company?.id],
     queryFn: async () => {
-      const response = await api.get("/work_order", {
+      const response = await api.get("/work_orders", {
         params: {
           company_id: company?.id || undefined,
-          per_page: 100,
+          per_page: 5,
         },
       });
       const allOrders = response.data?.data || [];

@@ -47,7 +47,7 @@ const AuditWorkOrder = ({ open, onClose, auditRecord, handleView }) => {
 
   const { mutate: submitTask, isPending } = useMutation({
     mutationFn: async (data) => {
-      await api.post("/work_order", {
+      await api.post("/work_orders", {
         ...data,
         company: user.company.id,
         assigned_to: data.assigned_to.id,
