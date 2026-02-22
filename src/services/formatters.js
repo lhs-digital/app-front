@@ -77,3 +77,10 @@ export const formatCpfCnpj = (cpfCnpj) => {
     "$1.$2.$3/$4-$5",
   );
 };
+
+export const formatDuration = (duration) => {
+  if (!duration) return "N/A";
+  const minutes = Math.floor(duration / 60);
+  const seconds = Math.floor(duration % 60);
+  return `${minutes} min ${seconds} s`;
+};

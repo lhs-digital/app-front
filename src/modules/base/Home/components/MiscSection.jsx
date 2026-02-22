@@ -12,6 +12,12 @@ import {
   CardActionArea,
   CardContent,
   IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Tooltip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
@@ -20,7 +26,8 @@ import AuditStatus from "../../../../components/AuditComponents/AuditStatus";
 import { useCompany } from "../../../../hooks/useCompany";
 import { useUserState } from "../../../../hooks/useUserState";
 import api from "../../../../services/api";
-import { dateFormatted, hasPermission } from "../../../../services/utils";
+import { formatDuration } from "../../../../services/formatters";
+import { hasPermission } from "../../../../services/utils";
 
 const MiscSection = () => {
   const navigate = useNavigate();
@@ -85,37 +92,40 @@ const MiscSection = () => {
         </div>
         <Card>
           <CardContent>
-            <Box display="flex" flexDirection="column" gap={2}>
-              {auditLogs.length > 0 ? (
-                auditLogs.map((log, index) => (
-                  <Box
-                    key={index}
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    p={1.5}
-                    sx={{
-                      borderRadius: 1,
-                      bgcolor: "action.hover",
-                    }}
-                  >
-                    <Box>
-                      <p className="text-sm font-medium">Auditoria executada</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                        {dateFormatted(log.created_at)}
-                      </p>
-                    </Box>
-                    <AuditStatus status={log.status} size="small" />
-                  </Box>
-                ))
-              ) : (
-                <Box>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    Nenhuma auditoria encontrada
-                  </p>
-                </Box>
-              )}
-            </Box>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Auditoria</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell align="right">Duração</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {auditLogs.length > 0 ? (
+                    auditLogs.map((log, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{log.executed_at}</TableCell>
+                        <TableCell>
+                          <AuditStatus status={log.status} size="small" />
+                        </TableCell>
+                        <TableCell align="right">
+                          {formatDuration(log.duration)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3}>
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                          Nenhuma auditoria encontrada
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </CardContent>
         </Card>
       </Box>
