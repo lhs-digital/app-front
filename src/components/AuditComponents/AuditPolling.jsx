@@ -2,12 +2,7 @@ import { History } from "@mui/icons-material";
 import { CircularProgress, Skeleton, Tooltip } from "@mui/material";
 import AuditStatus from "./AuditStatus";
 
-const AuditPolling = ({
-  companyId,
-  latestAudit,
-  moduleId = null,
-  loading = false,
-}) => {
+const AuditPolling = ({ latestAudit, loading = false }) => {
   const renderText = () => {
     if (latestAudit.status === "pending" && latestAudit?.executed_at) {
       return "Auditoria iniciada em " + latestAudit?.executed_at;
