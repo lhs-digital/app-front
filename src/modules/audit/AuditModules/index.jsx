@@ -1,4 +1,10 @@
-import { Add, Delete, Edit, Visibility, Widgets } from "@mui/icons-material";
+import {
+  Add,
+  Delete,
+  OpenInBrowser,
+  Visibility,
+  Widgets,
+} from "@mui/icons-material";
 import {
   Button,
   IconButton,
@@ -10,6 +16,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -50,7 +57,7 @@ const AuditModules = () => {
       if (response.data.meta) {
         setPagination((prev) => ({
           ...prev,
-          total: response.data.meta.total || response.data.data.length,
+          total: response.data.meta.total,
           perPage: response.data.meta.per_page,
           current: response.data.meta.current_page,
         }));
@@ -142,24 +149,32 @@ const AuditModules = () => {
                 <TableRow key={m.id}>
                   <TableCell className="w-10/12">{m.name}</TableCell>
                   <TableCell className="space-x-2">
-                    <IconButton
-                      onClick={() => navigate(`/modulos/${m.id}`)}
-                      size="small"
-                    >
-                      <Visibility />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => navigate(`/modulos/${m.id}/editar`)}
-                      size="small"
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleDeleteClick(m)}
-                      size="small"
-                    >
-                      <Delete />
-                    </IconButton>
+                    <Tooltip title="Ver detalhes do módulo">
+                      <IconButton
+                        onClick={() => navigate(`/modulos/${m.id}`)}
+                        size="small"
+                      >
+                        <Visibility />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver itens auditados">
+                      <IconButton
+                        onClick={() =>
+                          navigate(`/auditorias?module_id=${m.id}`)
+                        }
+                        size="small"
+                      >
+                        <OpenInBrowser />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Excluir módulo">
+                      <IconButton
+                        onClick={() => handleDeleteClick(m)}
+                        size="small"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))

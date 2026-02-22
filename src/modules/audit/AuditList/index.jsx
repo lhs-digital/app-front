@@ -32,6 +32,7 @@ import { useCompany } from "../../../hooks/useCompany";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
 
+import AuditPolling from "../../../components/AuditComponents/AuditPolling";
 import AuditContent from "./components/AuditContent";
 import AuditFilters from "./components/AuditFilters";
 import AuditItemModal from "./components/AuditItemModal";
@@ -40,8 +41,8 @@ const AuditList = () => {
   const [refresh, setRefresh] = useState(false);
   const [currentFilterCount, setCurrentFilterCount] = useState(0);
   const { company } = useCompany();
-
   const [selectedItem, setSelectedItem] = useState(null);
+  const [previousStatus, setPreviousStatus] = useState(null);
 
   const { filters, updateFilters, resetFilters, searchParams } =
     useAuditFilters();
@@ -183,9 +184,11 @@ const AuditList = () => {
     },
   });
 
-  const { mutate: startingAudit, isPending: isStarting } = useMutation({
+  const { mutate: manualAudit, isPending: isRequesting } = useMutation({
     mutationFn: async () => {
-      const response = await api.post(`/companies/${company.id}/audit`);
+      const response = await api.post(`/companies/${company.id}/audit`, {
+        module: filters.moduleId,
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -197,38 +200,77 @@ const AuditList = () => {
     },
   });
 
+  const { data: latestAudit = null, isLoading: isLatestAuditLoading } =
+    useQuery({
+      queryKey: ["latestAudit", company.id, refresh],
+      queryFn: async () => {
+        const response = await api.get(
+          `/companies/${company.id}/audit/logs/latest`,
+          filters.moduleId
+            ? { params: { module: filters.moduleId } }
+            : undefined,
+        );
+        setPreviousStatus(latestAudit?.status);
+        return response.data;
+      },
+      enabled: !!company.id,
+      refetchInterval: ["queued", "pending", "running"].includes(previousStatus)
+        ? 1500
+        : 1000 * 60,
+      retry: true,
+    });
+
+  const manualAuditText = () => {
+    if (latestAudit?.status === "pending") {
+      return "Auditoria pendente. Aguarde a execução.";
+    }
+    if (latestAudit?.status === "running") {
+      return "Auditoria em andamento. Aguarde a conclusão.";
+    }
+    return "Iniciar a auditoria deste módulo manualmente.";
+  };
+
   return (
     <div className="flex flex-col w-full gap-6 items-center">
       <PageTitle
         icon={<AssignmentLate fontSize="small" />}
         buttons={[
-          <Tooltip
-            key="start-audit"
-            title={`Iniciar auditoria manualmente da empresa atual: ${company?.name}`}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={startingAudit}
-              loading={isStarting}
-              startIcon={<PlayCircleOutline />}
-            >
-              Iniciar Auditoria
-            </Button>
-          </Tooltip>,
+          <div key="start-audit-manual" className="flex items-center gap-3">
+            <AuditPolling
+              companyId={company.id}
+              moduleId={filters.moduleId || ""}
+              latestAudit={latestAudit}
+              loading={isLatestAuditLoading}
+            />
+            <Tooltip title={manualAuditText()}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={manualAudit}
+                loading={isRequesting}
+                disabled={
+                  latestAudit?.status === "pending" ||
+                  latestAudit?.status === "running"
+                }
+                startIcon={<PlayCircleOutline />}
+              >
+                Auditar
+              </Button>
+            </Tooltip>
+          </div>,
           <Tooltip
             title="Baixar relatório com a seleção e filtros atuais"
             key="download-report"
             arrow
           >
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
               startIcon={<FileOpenOutlined />}
               onClick={downloadReport}
               loading={isDownloading}
             >
-              Exportar relatório
+              Gerar relatório
             </Button>
           </Tooltip>,
         ]}
