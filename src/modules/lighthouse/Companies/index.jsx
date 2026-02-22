@@ -171,7 +171,6 @@ const Companies = () => {
       <ModalCompany
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        data={sortedData}
         dataEdit={dataEdit}
         setDataEdit={setDataEdit}
         setRefresh={() => queryClient.invalidateQueries(["companies"])}

@@ -1,9 +1,8 @@
 import {
   HomeOutlined,
   NavigateNext,
-  SaveOutlined,
   SwapHoriz,
-  WarningAmberOutlined,
+  WarningRounded,
 } from "@mui/icons-material";
 import {
   Box,
@@ -14,8 +13,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  MenuItem,
-  Select,
   Tooltip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
@@ -31,16 +28,16 @@ import { useCompany } from "../hooks/useCompany";
 import { getBreadcrumbTrail } from "../routes/modules";
 import api from "../services/api";
 import { handleMode } from "../theme";
+import CompanySelect from "./components/CompanySelect";
 import EnvironmentIndicator from "./components/EnvironmentIndicator";
 import Sidebar from "./components/Sidebar";
 
 const Layout = ({ children }) => {
   const { company, availableCompanies, setCompany } = useCompany();
-  const [selectedCompany, setSelectedCompany] = useState(company || "");
-  const [confirmChangeOpen, setConfirmChangeOpen] = useState(false);
+  const [companyListOpen, setCompanyListOpen] = useState(false);
+  const [companyToConfirm, setCompanyToConfirm] = useState(null);
   const theme = handleMode(useThemeMode().mode);
   const location = useLocation();
-  const [editingCompany, setEditingCompany] = useState(false);
   const pathnames = location.pathname.split("/").filter(Boolean);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const user = useAuthUser();
@@ -91,28 +88,18 @@ const Layout = ({ children }) => {
   useEffect(() => {
     if (!company && !user?.isLighthouse) {
       navigate("/");
-      setEditingCompany(false);
     }
   }, [company, user]);
 
-  const onCompanyChangeClick = () => {
-    if (!editingCompany) {
-      setEditingCompany(true);
-      return;
-    }
+  const handleSelectCompany = (selected) => {
+    setCompanyListOpen(false);
+    setCompanyToConfirm(selected);
+  };
 
-    setCompany(selectedCompany);
-    setEditingCompany(false);
+  const handleConfirmCompanyChange = () => {
+    setCompany(companyToConfirm);
+    setCompanyToConfirm(null);
     navigate("/");
-  };
-
-  const onConfirmChange = () => {
-    setConfirmChangeOpen(false);
-    setEditingCompany(true);
-  };
-
-  const promptCompanyChange = () => {
-    setConfirmChangeOpen(true);
   };
 
   const onSidebarOpenChange = (value) => {
@@ -131,43 +118,13 @@ const Layout = ({ children }) => {
               alt="Lighthouse"
               className="h-8 mb-2"
             />
-            {editingCompany ? (
-              <div className="min-w-[200px]">
-                <Select
-                  size="small"
-                  value={selectedCompany}
-                  onChange={(e) => setSelectedCompany(e.target.value)}
-                  fullWidth
-                  disabled={availableCompanies.length === 0}
-                >
-                  {availableCompanies.map((company) => (
-                    <MenuItem key={company.id} value={company}>
-                      {company.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </div>
-            ) : (
-              <p className="text-xl font-bold">
-                {company?.name || (user?.isLighthouse ? "Lighthouse" : "")}
-              </p>
-            )}
+            <p className="text-xl font-bold">
+              {company?.name || (user?.isLighthouse ? "Lighthouse" : "")}
+            </p>
             {user && user?.isLighthouse && (
-              <Tooltip
-                title={editingCompany ? "Salvar" : "Alterar empresa"}
-                arrow
-                placement="right"
-              >
-                <IconButton
-                  onClick={
-                    editingCompany ? onCompanyChangeClick : promptCompanyChange
-                  }
-                >
-                  {editingCompany ? (
-                    <SaveOutlined fontSize="small" />
-                  ) : (
-                    <SwapHoriz fontSize="small" />
-                  )}
+              <Tooltip title="Alterar empresa" arrow placement="right">
+                <IconButton onClick={() => setCompanyListOpen(true)}>
+                  <SwapHoriz fontSize="small" />
                 </IconButton>
               </Tooltip>
             )}
@@ -226,42 +183,40 @@ const Layout = ({ children }) => {
               })}
             </Breadcrumbs>
           )}
-          {editingCompany && !user?.isLighthouse ? (
-            <div className="flex flex-col gap-4 items-center justify-center h-[calc(100vh-4rem)]">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Selecione uma empresa para continuar
-              </p>
-            </div>
-          ) : (
-            children
-          )}
+          {children}
         </motion.div>
       </div>
+      <CompanySelect
+        open={companyListOpen}
+        onClose={() => setCompanyListOpen(false)}
+        companies={availableCompanies}
+        onSelect={handleSelectCompany}
+        currentCompany={company}
+      />
       <Dialog
-        open={confirmChangeOpen}
+        open={!!companyToConfirm}
         maxWidth="xs"
         fullWidth
-        onClose={() => setConfirmChangeOpen(false)}
+        onClose={() => setCompanyToConfirm(null)}
       >
         <DialogTitle className="flex flex-row gap-2 items-center">
-          <WarningAmberOutlined fontSize="small" />
-          <p className="text-lg font-bold">Alterar empresa</p>
+          <WarningRounded />
+          <p className="text-lg font-bold">Confirmar alteração</p>
         </DialogTitle>
-        <DialogContent>
-          <p className="text-justify">
-            <b>Tem certeza que deseja alterar a empresa?</b> Você será
-            redirecionado para a página inicial e poderá perder alterações não
-            salvas.
+        <DialogContent className="flex flex-col gap-3">
+          <p>
+            Deseja alterar a empresa ativa para <b>{companyToConfirm?.name}</b>?
+          </p>
+          <p className=" dark:text-zinc-400 text-zinc-500 text-sm text-justify">
+            Ao confirmar, você será redirecionado de volta para a página inicial
+            e perderá alterações não salvas.
           </p>
         </DialogContent>
         <DialogActions>
-          <Button
-            variant="contained"
-            onClick={() => setConfirmChangeOpen(false)}
-          >
+          <Button variant="contained" onClick={() => setCompanyToConfirm(null)}>
             Cancelar
           </Button>
-          <Button variant="outlined" onClick={onConfirmChange}>
+          <Button variant="outlined" onClick={handleConfirmCompanyChange}>
             Confirmar
           </Button>
         </DialogActions>
