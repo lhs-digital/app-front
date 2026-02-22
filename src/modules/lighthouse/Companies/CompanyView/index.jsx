@@ -637,9 +637,7 @@ const CompanyView = () => {
 
         <FormField containerClass="col-span-full">
           {roles.length === 0 ? (
-            <p className="text-neutral-500 text-sm">
-              Nenhum cargo foi encontrado
-            </p>
+            <p className="text-zinc-500 text-sm">Nenhum cargo foi encontrado</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {roles.map((role) => (
@@ -690,9 +688,7 @@ const CompanyView = () => {
 
         {!connection ? (
           <FormField containerClass="col-span-full">
-            <p className="text-neutral-500 text-sm">
-              Nenhuma conexão configurada
-            </p>
+            <p className="text-zinc-500 text-sm">Nenhuma conexão configurada</p>
           </FormField>
         ) : connection?.type === "db" ? (
           <>
@@ -826,7 +822,7 @@ const CompanyView = () => {
           </>
         ) : (
           <FormField containerClass="col-span-full">
-            <p className="text-neutral-500 text-sm">
+            <p className="text-zinc-500 text-sm">
               Tipo de conexão desconhecido
             </p>
           </FormField>

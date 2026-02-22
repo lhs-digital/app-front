@@ -8,15 +8,25 @@ import {
   UploadOutlined,
   WorkOutline,
 } from "@mui/icons-material";
-import { Button, Checkbox, CircularProgress, FormControlLabel, IconButton, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  FormControlLabel,
+  IconButton,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  Select,
+  TextField,
+} from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Form, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import FormField from "../../../../components/FormField";
 import PageTitle from "../../../../layout/components/PageTitle";
 import api from "../../../../services/api";
 import { assignmentsMock } from "../assignment_mock";
-import FormField from "../../../../components/FormField";
 import { statusInfo } from "../utils";
 
 const WorkOrderView = () => {
@@ -36,14 +46,18 @@ const WorkOrderView = () => {
     queryFn: async () => {
       // Usando mock data por enquanto
       const found = assignmentsMock.find(
-        (item) => String(item.id) === String(id)
+        (item) => String(item.id) === String(id),
       );
       if (!found) throw new Error("Ordem de serviço não encontrada");
       return found;
     },
   });
 
-  const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
+  const {
+    data: users = [],
+    isLoading: usersLoading,
+    error: usersError,
+  } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       try {
@@ -85,7 +99,6 @@ const WorkOrderView = () => {
       console.log("Dados consolidados:", consolidatedData);
       console.log("Arquivos para upload:", attachedFiles);
       console.log("====================================");
-
     },
     onSuccess: () => {
       // setIsEditing(false);
@@ -108,8 +121,12 @@ const WorkOrderView = () => {
 
   useEffect(() => {
     if (users.length > 0 && formData) {
-      const assignedToMatch = users.find(u => u.id === formData?.assigned_to?.id);
-      const assignedByMatch = users.find(u => u.id === formData?.assigned_by?.id);
+      const assignedToMatch = users.find(
+        (u) => u.id === formData?.assigned_to?.id,
+      );
+      const assignedByMatch = users.find(
+        (u) => u.id === formData?.assigned_by?.id,
+      );
     }
   }, [users, formData]);
 
@@ -125,7 +142,9 @@ const WorkOrderView = () => {
     }
 
     if (formData?.status === "corrected" && !formData?.corrective_actions) {
-      toast.error("Ações corretivas são obrigatórias quando status é 'Corrigido'");
+      toast.error(
+        "Ações corretivas são obrigatórias quando status é 'Corrigido'",
+      );
       return;
     }
 
@@ -255,10 +274,7 @@ const WorkOrderView = () => {
         ]}
       />
 
-      <form
-        id="os-form"
-        className="grid grid-cols-1 md:grid-cols-12 gap-6"
-      >
+      <form id="os-form" className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <FormField
           required
           label="Status"
@@ -285,7 +301,6 @@ const WorkOrderView = () => {
             ))}
           </Select>
         </FormField>
-
 
         <FormField
           label="Quantidade de reaberturas"
@@ -318,7 +333,11 @@ const WorkOrderView = () => {
             required
             type="datetime-local"
             fullWidth
-            value={formData?.deadline ? new Date(formData?.deadline).toISOString().slice(0, 16) : ""}
+            value={
+              formData?.deadline
+                ? new Date(formData?.deadline).toISOString().slice(0, 16)
+                : ""
+            }
             onChange={(e) => {
               if (isEditing && e.target.value) {
                 setFormData({
@@ -335,7 +354,6 @@ const WorkOrderView = () => {
           label="Erro Persistente"
           info="Indica se a OS é referente a um erro persistente."
           containerClass="col-span-full md:col-span-2"
-
         >
           <RadioGroup
             row
@@ -346,14 +364,23 @@ const WorkOrderView = () => {
                 is_persistent_error: e.target.value === "yes",
               })
             }
-
           >
-            <FormControlLabel disabled={!isEditing} value="yes" control={<Radio />} label="Sim" />
-            <FormControlLabel disabled={!isEditing} value="no" control={<Radio />} label="Não" />
+            <FormControlLabel
+              disabled={!isEditing}
+              value="yes"
+              control={<Radio />}
+              label="Sim"
+            />
+            <FormControlLabel
+              disabled={!isEditing}
+              value="no"
+              control={<Radio />}
+              label="Não"
+            />
           </RadioGroup>
         </FormField>
 
-        {formData?.status === 'corrected' && (
+        {formData?.status === "corrected" && (
           <FormField
             label="Ações Corretivas"
             info="Ações realizadas para a correção da OS."
@@ -378,11 +405,7 @@ const WorkOrderView = () => {
           </FormField>
         )}
 
-        <FormField
-          required
-          label="Descrição"
-          containerClass="col-span-full"
-        >
+        <FormField required label="Descrição" containerClass="col-span-full">
           <TextField
             multiline
             minRows={6}
@@ -412,7 +435,9 @@ const WorkOrderView = () => {
             onChange={(e) =>
               setFormData({
                 ...formData,
-                assigned_to: users.find((user) => user.id === e.target.value) || formData?.assigned_to,
+                assigned_to:
+                  users.find((user) => user.id === e.target.value) ||
+                  formData?.assigned_to,
               })
             }
             disabled={!isEditing}
@@ -437,7 +462,9 @@ const WorkOrderView = () => {
             onChange={(e) =>
               setFormData({
                 ...formData,
-                assigned_by: users.find((user) => user.id === e.target.value) || formData?.assigned_by,
+                assigned_by:
+                  users.find((user) => user.id === e.target.value) ||
+                  formData?.assigned_by,
               })
             }
             disabled={!isEditing}
@@ -464,9 +491,7 @@ const WorkOrderView = () => {
           />
         </FormField>
 
-        <FormField
-          containerClass="col-span-full"
-        >
+        <FormField containerClass="col-span-full">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <input
@@ -489,20 +514,25 @@ const WorkOrderView = () => {
             </div>
 
             {attachedFiles.length > 0 && (
-              <div className="flex flex-col gap-2 border rounded p-4 bg-gray-50">
-                <p className="text-sm font-semibold text-gray-700">
+              <div className="flex flex-col gap-2 border rounded p-4 bg-zinc-50">
+                <p className="text-sm font-semibold text-zinc-700">
                   Arquivos anexados ({attachedFiles.length})
                 </p>
                 {attachedFiles.map((file) => (
                   <div
                     key={file.id}
-                    className="flex items-center justify-between gap-3 p-3 bg-white border rounded hover:bg-gray-100 transition"
+                    className="flex items-center justify-between gap-3 p-3 bg-white border rounded hover:bg-zinc-100 transition"
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <UploadFile fontSize="small" className="text-gray-500 flex-shrink-0" />
+                      <UploadFile
+                        fontSize="small"
+                        className="text-zinc-500 flex-shrink-0"
+                      />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-800 truncate">{file.name}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm text-zinc-800 truncate">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-zinc-500">
                           {(file.size / 1024).toFixed(2)} KB
                         </p>
                       </div>
@@ -521,18 +551,14 @@ const WorkOrderView = () => {
             )}
 
             {attachedFiles.length === 0 && (
-              <div className="flex items-center justify-center gap-2 p-4 bg-gray-50 border border-dashed rounded text-gray-500">
+              <div className="flex items-center justify-center gap-2 p-4 bg-zinc-50 border border-dashed rounded text-zinc-500">
                 <UploadFile fontSize="small" />
                 <span className="text-sm">Nenhum arquivo anexado ainda</span>
               </div>
             )}
           </div>
         </FormField>
-
-        
-
       </form>
-
     </div>
   );
 };

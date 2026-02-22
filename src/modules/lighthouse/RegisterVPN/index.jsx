@@ -138,7 +138,6 @@ const RegisterVpn = () => {
             variant="outlined"
             key="import-button"
             component="label"
-            size="large"
             loading={isParsing}
             startIcon={<UploadFile />}
             onClick={() => uploadInput.current.click()}

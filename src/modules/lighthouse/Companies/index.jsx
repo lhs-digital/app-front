@@ -171,7 +171,6 @@ const Companies = () => {
       <ModalCompany
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        data={sortedData}
         dataEdit={dataEdit}
         setDataEdit={setDataEdit}
         setRefresh={() => queryClient.invalidateQueries(["companies"])}
@@ -291,7 +290,7 @@ const Companies = () => {
                     <TableCell> {name} </TableCell>
                     <TableCell>
                       {dba || (
-                        <span className="text-neutral-500">Não informado</span>
+                        <span className="text-zinc-500">Não informado</span>
                       )}
                     </TableCell>
                     <TableCell> {formatCpfCnpj(cnpj)} </TableCell>

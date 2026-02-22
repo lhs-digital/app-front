@@ -5,8 +5,6 @@ import {
   VpnKey,
 } from "@mui/icons-material";
 import {
-  Accordion,
-  AccordionDetails,
   Button,
   Dialog,
   DialogActions,
@@ -148,7 +146,6 @@ const ModalVpn = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
             <Button
               variant="outlined"
               component="label"
-              size="large"
               startIcon={<UploadFile />}
               onClick={() => uploadInput.current.click()}
             >
@@ -163,9 +160,7 @@ const ModalVpn = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
             {fileVpn ? (
               <span>{fileVpn.name}</span>
             ) : (
-              <span className="text-neutral-400">
-                Nenhum arquivo selecionado
-              </span>
+              <span className="text-zinc-400">Nenhum arquivo selecionado</span>
             )}
           </div>
           {fileVpn && (

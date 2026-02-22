@@ -191,19 +191,19 @@ const AuditRules = () => {
   const renderWarning = () => {
     if (!company && !table) {
       return (
-        <p className="text-sm text-neutral-400">
+        <p className="text-sm text-zinc-400">
           Selecione uma empresa e uma tabela para ver as regras de auditoria.
         </p>
       );
     }
 
     if (!company) {
-      return <p className="text-sm text-neutral-400">Selecione uma empresa</p>;
+      return <p className="text-sm text-zinc-400">Selecione uma empresa</p>;
     }
 
     if (!table) {
       return (
-        <p className="text-sm text-neutral-400">
+        <p className="text-sm text-zinc-400">
           Selecione uma tabela para ver as regras de auditoria.
         </p>
       );

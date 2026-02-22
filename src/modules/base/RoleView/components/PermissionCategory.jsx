@@ -18,7 +18,7 @@ const PermissionCategory = ({
       </h2>
       <table className="w-full">
         <thead>
-          <tr className="text-left font-medium text-sm border-b [&>*]:py-4 [&>*]:px-4 bg-neutral-500/20">
+          <tr className="text-left font-medium text-sm border-b [&>*]:py-4 [&>*]:px-4 bg-zinc-500/20">
             <th className="w-1/3">Permissão</th>
             <th>Ativo</th>
           </tr>

@@ -145,17 +145,17 @@ const ModalHierarchy = ({
 
       const payload = desHierarchy
         ? {
-          responsible_user_id: user.isLighthouse
-            ? responsibleUser?.id
-            : user?.id,
-          target_user_ids: targetUserIds,
-        }
+            responsible_user_id: user.isLighthouse
+              ? responsibleUser?.id
+              : user?.id,
+            target_user_ids: targetUserIds,
+          }
         : {
-          responsible_user_id: user.isLighthouse
-            ? responsibleUser?.id
-            : user?.id,
-          target_user_ids: targetUserIds,
-        };
+            responsible_user_id: user.isLighthouse
+              ? responsibleUser?.id
+              : user?.id,
+            target_user_ids: targetUserIds,
+          };
 
       const endpoint = desHierarchy
         ? "/users/unassign-responsible"
@@ -210,7 +210,7 @@ const ModalHierarchy = ({
           {operationStyle[operation].icon}
           <h2>{operationStyle[operation].title}</h2>
         </div>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-zinc-500">
           {operationStyle[operation].description}
         </p>
       </DialogTitle>
@@ -218,9 +218,9 @@ const ModalHierarchy = ({
         {viewHierarchy ? (
           <Box>
             {associatedUsers.length === 0 ? (
-              <div className="flex flex-col gap-2 py-4 items-center justify-center border-2 border-neutral-700 rounded-md border-dashed">
+              <div className="flex flex-col gap-2 py-4 items-center justify-center border-2 border-zinc-700 rounded-md border-dashed">
                 <PersonOffOutlined fontSize="large" color="disabled" />
-                <p className="text-sm text-neutral-400">
+                <p className="text-sm text-zinc-400">
                   Não há usuários na sua equipe.
                 </p>
               </div>

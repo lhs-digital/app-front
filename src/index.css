@@ -13,11 +13,11 @@
 
 :root {
   --toastify-toast-width: 480px;
-  --toastify-color-dark: #020202;
+  --toastify-color-dark: #1D1F21;
   --toastify-color-info: #7d7d7d;
-  --toastify-color-success: #4caf50;
+  --toastify-color-success: #26ed7a;
   --toastify-color-warning: #ff9800;
-  --toastify-color-error: #d60026;
+  --toastify-color-error: #f73b51;
   --toastify-color-transparent: rgba(255, 255, 255, 0.7);
 
   --toastify-icon-color-info: var(--toastify-color-info);
@@ -29,25 +29,25 @@
 :root,
 [data-theme="light"] {
   --background-color: #ffffff;
-  --foreground-color: #000000;
-  --highest-color: #000000;
-  --border: #00000033;
-  --faded-border: #0000000c;
+  --foreground-color: #1D1F21;
+  --highest-color: #1D1F21;
+  --border: #1D1F2133;
+  --faded-border: #1D1F210c;
 }
 
 .dark,
 [data-theme="dark"] {
   --background-color: #121212;
   --foreground-color: #ffffff;
-  --highest-color: #000000;
+  --highest-color: #1D1F21;
   --border: #ffffff33;
   --faded-border: #ffffff0c;
 }
 
 .grid-bg {
   background: conic-gradient(from 90deg at 1px 1px,
-      #0000 90deg,
-      var(--faded-border) 0) 0 0/50px 50px;
+      #121212 90deg,
+      var(--faded-border) 0) 0 0/25px 25px;
 }
 
 body {

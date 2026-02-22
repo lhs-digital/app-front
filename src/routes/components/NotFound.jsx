@@ -14,7 +14,7 @@ export function NotFound() {
             404
           </div>
           <div className="flex items-center gap-3">
-            <SearchOff sx={{ fontSize: 48 }} className="text-neutral-400" />
+            <SearchOff sx={{ fontSize: 48 }} className="text-zinc-400" />
             <h1 className="font-bold text-3xl text-center">
               Página não encontrada
             </h1>
@@ -25,10 +25,10 @@ export function NotFound() {
 
         {/* Description */}
         <div className="flex flex-col gap-4 text-center">
-          <h2 className="text-lg text-neutral-600 dark:text-neutral-400">
+          <h2 className="text-lg text-zinc-600 dark:text-zinc-400">
             A página que você está procurando não existe ou foi movida.
           </h2>
-          <p className="text-sm text-neutral-500 dark:text-neutral-500">
+          <p className="text-sm text-zinc-500 dark:text-zinc-500">
             Verifique o endereço digitado ou retorne à página inicial.
           </p>
         </div>

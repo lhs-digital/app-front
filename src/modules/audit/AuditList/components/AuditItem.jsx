@@ -30,7 +30,7 @@ import {
   getPriorityColor,
   hasPermission,
 } from "../../../../services/utils";
-import { handleMode } from "../../../../theme";
+import { handleMode, themeColors } from "../../../../theme";
 import ViewAuditItem from "./ViewAuditItem";
 
 const AuditItem = ({
@@ -69,7 +69,7 @@ const AuditItem = ({
       overflow="clip"
       border="1px solid"
       borderColor="divider"
-      backgroundColor={theme === "light" ? "#fff" : "#121212"}
+      backgroundColor={theme === "light" ? "#fff" : "#1D1F21"}
     >
       <Box
         display="flex"
@@ -98,24 +98,18 @@ const AuditItem = ({
               style={{
                 backgroundColor:
                   auditRecord?.status === 1
-                    ? theme === "light"
-                      ? colors.green[100]
-                      : colors.green[200]
-                    : theme === "light"
-                      ? colors.orange[100]
-                      : colors.orange[200],
+                    ? themeColors[theme].success.light
+                    : themeColors[theme].warning.light,
+                color:
+                  auditRecord?.status === 1
+                    ? themeColors[theme].success.dark
+                    : themeColors[theme].warning.dark,
               }}
             >
               {auditRecord?.status === 1 ? (
-                <CheckCircle
-                  fontSize="small"
-                  className="text-green-500 dark:text-green-600"
-                />
+                <CheckCircle fontSize="small" />
               ) : (
-                <WatchLaterOutlined
-                  fontSize="small"
-                  className="text-orange-500 dark:text-orange-600"
-                />
+                <WatchLaterOutlined fontSize="small" />
               )}
             </div>
           </Tooltip>
@@ -123,7 +117,7 @@ const AuditItem = ({
             <p className="text-lg">
               AUD{auditRecord?.id.toString().padStart(3, "0")}
             </p>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 -mt-1">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 -mt-1">
               {getEntityIds(auditRecord?.record_id)}
             </p>
           </div>
@@ -221,7 +215,7 @@ const AuditItem = ({
                 .join(", ")}
               aria-label="Mais campos"
             >
-              <div className="flex flex-col items-center justify-center bg-neutral-300 dark:bg-neutral-700 aspect-square rounded-full px-1 text-xs">
+              <div className="flex flex-col items-center justify-center bg-zinc-300 dark:bg-zinc-700 aspect-square rounded-full px-1 text-xs">
                 <p className="mr-0.5">+{auditRecord?.columns.length - 2}</p>
               </div>
             </Tooltip>

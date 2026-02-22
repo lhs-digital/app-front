@@ -57,9 +57,11 @@ const AuditSection = () => {
     const fetchData = async () => {
       setIsLoadingChart(true);
       try {
-        const response = await api.get(`/companies/${company?.id}/audit/summary`);
+        const response = await api.get(
+          `/companies/${company?.id}/audit/summary`,
+        );
 
-        console.log("response:", response)
+        console.log("response:", response);
         setDataLastAudit(response.data.last_audit_date);
 
         if (response.data.per_module && auditModule) {
@@ -276,7 +278,7 @@ const AuditSection = () => {
                       key={index}
                     >
                       <button
-                        className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-gray-500/25"
+                        className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-zinc-500/25"
                         style={{
                           backgroundColor:
                             theme === "light" ? colors.grey[900] : "#fff",
@@ -286,7 +288,7 @@ const AuditSection = () => {
                       >
                         {action.icon}
                       </button>
-                      <label className="text-xs text-neutral-500 dark:text-[--foreground-color]">
+                      <label className="text-xs text-zinc-500 dark:text-[--foreground-color]">
                         {action.label}
                       </label>
                     </div>
@@ -297,7 +299,7 @@ const AuditSection = () => {
                     key={index}
                   >
                     <button
-                      className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-gray-500/25"
+                      className="p-3 w-fit aspect-square rounded-full flex flex-col items-center justify-center outline outline-transparent hover:outline-3 transition-all hover:outline-zinc-500/25"
                       style={{
                         backgroundColor:
                           theme === "light" ? colors.grey[900] : "#fff",
@@ -307,7 +309,7 @@ const AuditSection = () => {
                     >
                       {action.icon}
                     </button>
-                    <label className="text-xs text-neutral-500 dark:text-[--foreground-color]">
+                    <label className="text-xs text-zinc-500 dark:text-[--foreground-color]">
                       {action.label}
                     </label>
                   </div>
@@ -325,23 +327,26 @@ const AuditSection = () => {
           <p>Atividades por status</p>
           {!auditModule ? (
             <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
-              <p className="text-neutral-500">Não há dados para exibir...</p>
-              <p className="text-neutral-500">
+              <p className="text-zinc-500">Não há dados para exibir...</p>
+              <p className="text-zinc-500">
                 Selecione uma empresa e uma tabela
               </p>
             </div>
           ) : isLoadingChart ? (
             <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
-              <p className="text-neutral-500">Carregando dados...</p>
+              <p className="text-zinc-500">Carregando dados...</p>
             </div>
-          ) : chartData.errorsCount === 0 && chartData.fixedErrorsCount === 0 ? (
+          ) : chartData.errorsCount === 0 &&
+            chartData.fixedErrorsCount === 0 ? (
             <div className="flex flex-col justify-center items-center margin-auto h-full w-full">
-              <p className="text-neutral-500">Não há dados neste módulo</p>
+              <p className="text-zinc-500">Não há dados neste módulo</p>
             </div>
           ) : (
             <PieChart
               colors={
-                theme === "light" ? [amber[600], "#000"] : [amber[400], "#fff"]
+                theme === "light"
+                  ? [amber[600], "#1D1F21"]
+                  : [amber[400], "#fff"]
               }
               series={[
                 {

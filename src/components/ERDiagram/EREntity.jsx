@@ -45,13 +45,13 @@ const EREntity = ({
                       : "opacity-100 cursor-pointer"
                   }`}
     >
-      <div className="w-full py-1 bg-gray-500/10 border-b border-[--border] flex items-center justify-center">
+      <div className="w-full py-1 bg-zinc-500/10 border-b border-[--border] flex items-center justify-center">
         {table.name}
       </div>
       <div className="w-full flex flex-col gap-1 [&>*:not(:last-child)]:border-b">
         {table.columns.map((column) => (
           <div
-            className={`flex flex-row w-full p-1 items-center justify-between border-[--border] relative ${column.rules?.length === 0 && "text-neutral-500"}`}
+            className={`flex flex-row w-full p-1 items-center justify-between border-[--border] relative ${column.rules?.length === 0 && "text-zinc-500"}`}
             key={column.name}
           >
             <div className="w-12 flex items-center justify-center ">

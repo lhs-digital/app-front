@@ -3,8 +3,8 @@ import { Button, Chip, Divider } from "@mui/material";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import TableColumn from "../../../../components/AuditComponents/TableColumn";
-import { useModuleForm } from "../index";
 import AddColumn from "../../ModuleTable/components/AddColumn";
+import { useModuleForm } from "../index";
 
 const FieldsTab = () => {
   const { setValue, getValues, watch } = useFormContext();
@@ -53,7 +53,7 @@ const FieldsTab = () => {
       <div className="flex flex-col gap-4">
         <div>
           <h2 className="font-semibold">Colunas adicionadas</h2>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-zinc-500">
             Clique para editar ou remover uma coluna
           </p>
         </div>

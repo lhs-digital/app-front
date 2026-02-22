@@ -105,24 +105,28 @@ const ModuleView = () => {
     create: {
       pageTitle: "Criar grupo de regras",
       icon: <Save />,
-      buttonLabel: "Salvar",
+      variant: "contained",
+      buttonLabel: "Criar",
       onClick: handleSubmit(onSubmit),
     },
     edit: {
-      pageTitle: "Editar grupo de regras",
+      pageTitle: "Gerenciar grupo de regras",
       icon: <Save />,
+      variant: "contained",
       buttonLabel: "Salvar",
       onClick: handleSubmit(onSubmit),
     },
     view: {
       pageTitle: "Visualizar grupo de regras",
       icon: <Edit />,
-      buttonLabel: "Editar",
+      variant: "outlined",
+      buttonLabel: "Renomear",
       onClick: () => navigate(`/modulos/${moduleId}/editar`),
     },
   };
 
-  const { pageTitle, icon, buttonLabel, onClick } = actionConfig[currentAction];
+  const { pageTitle, icon, variant, buttonLabel, onClick } =
+    actionConfig[currentAction];
 
   const [pendingChanges, setPendingChanges] = useState({});
 
@@ -211,7 +215,7 @@ const ModuleView = () => {
       );
       return response.data.data;
     },
-    enabled: !!company,
+    enabled: !!company && currentAction !== "create",
     retry: false,
   });
 
@@ -242,7 +246,7 @@ const ModuleView = () => {
       });
       return response.data.data;
     },
-    enabled: !!activeModule,
+    enabled: !!activeModule && currentAction !== "create",
   });
 
   useEffect(() => {
@@ -269,6 +273,16 @@ const ModuleView = () => {
   useDebounce(search, 300, handleSearch);
 
   const renderView = () => {
+    if (currentAction === "create") {
+      return (
+        <div className="grid-bg flex flex-col gap-4 items-center justify-center py-4 h-32 border border-[--border] rounded-lg">
+          <p className="text-center text-zinc-500 dark:text-zinc-400">
+            Crie um grupo de regras para começar a gerenciar as regras de
+            auditoria.
+          </p>
+        </div>
+      );
+    }
     if (isPendingStructure || isPendingModule) {
       return (
         <div className="flex items-center justify-center py-4 h-64">
@@ -280,7 +294,7 @@ const ModuleView = () => {
       if (structure.length === 0) {
         return (
           <div className="flex items-center justify-center py-4 h-64">
-            <p className="text-center py-4 text-neutral-500">
+            <p className="text-center py-4 text-zinc-500">
               {search
                 ? "Não encontramos nenhuma tabela com o nome pesquisado."
                 : "Nenhuma tabela cadastrada."}
@@ -329,10 +343,10 @@ const ModuleView = () => {
           <Button
             key="action-module"
             type="button"
-            variant="contained"
             color="primary"
             onClick={onClick}
             startIcon={icon}
+            variant={variant}
           >
             {buttonLabel}
           </Button>,
@@ -341,10 +355,16 @@ const ModuleView = () => {
 
       {isEditable && (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <FormField label="Nome do módulo" loading={isPendingModule}>
+          <FormField
+            label="Nome do grupo"
+            loading={isPendingModule && currentAction !== "create"}
+          >
             <TextField fullWidth {...register("name", { required: true })} />
           </FormField>
-          <FormField label="Descrição do módulo" loading={isPendingModule}>
+          <FormField
+            label="Descrição do grupo"
+            loading={isPendingModule && currentAction !== "create"}
+          >
             <TextField
               multiline
               rows={3}
@@ -355,50 +375,52 @@ const ModuleView = () => {
         </form>
       )}
 
-      <div className="flex items-center gap-2">
-        <TextField
-          placeholder="Pesquisar tabelas por nome..."
-          className="grow"
-          value={search}
-          disabled={isPendingStructure || isPendingModule}
-          onChange={(e) => setSearch(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: <Search className="text-neutral-500 mr-2" />,
-              endAdornment: search &&
-                !(isPendingStructure || isPendingModule) && (
-                  <IconButton size="small" onClick={() => setSearch("")}>
-                    <Clear fontSize="small" />
-                  </IconButton>
-                ),
-            },
-          }}
-        />
-        <ToggleButtonGroup
-          exclusive
-          value={viewMode}
-          onChange={(_, value) => value && setViewMode(value)}
-          className="h-14 rounded-lg overflow-hidden border border-[var(--border)]"
-          size="large"
-          variant="outlined"
-          sx={{
-            "& .MuiToggleButton-root": {
-              border: "none",
-            },
-          }}
-        >
-          <Tooltip title="Listar tabelas">
-            <ToggleButton value="list">
-              <FormatListBulleted />
-            </ToggleButton>
-          </Tooltip>
-          <Tooltip title="Colunas adicionadas">
-            <ToggleButton value="added">
-              <Window />
-            </ToggleButton>
-          </Tooltip>
-        </ToggleButtonGroup>
-      </div>
+      {currentAction !== "create" && (
+        <div className="flex items-center gap-2">
+          <TextField
+            placeholder="Pesquisar tabelas por nome..."
+            className="grow"
+            value={search}
+            disabled={isPendingStructure || isPendingModule}
+            onChange={(e) => setSearch(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: <Search className="text-zinc-500 mr-2" />,
+                endAdornment: search &&
+                  !(isPendingStructure || isPendingModule) && (
+                    <IconButton size="small" onClick={() => setSearch("")}>
+                      <Clear fontSize="small" />
+                    </IconButton>
+                  ),
+              },
+            }}
+          />
+          <ToggleButtonGroup
+            exclusive
+            value={viewMode}
+            onChange={(_, value) => value && setViewMode(value)}
+            className="h-14 rounded-lg overflow-hidden border border-[var(--border)]"
+            size="large"
+            variant="outlined"
+            sx={{
+              "& .MuiToggleButton-root": {
+                border: "none",
+              },
+            }}
+          >
+            <Tooltip title="Listar tabelas">
+              <ToggleButton value="list">
+                <FormatListBulleted />
+              </ToggleButton>
+            </Tooltip>
+            <Tooltip title="Colunas adicionadas">
+              <ToggleButton value="added">
+                <Window />
+              </ToggleButton>
+            </Tooltip>
+          </ToggleButtonGroup>
+        </div>
+      )}
 
       {renderView()}
 

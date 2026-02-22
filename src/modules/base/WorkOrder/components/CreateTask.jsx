@@ -1,4 +1,3 @@
-import { TableChartOutlined } from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
@@ -63,7 +62,7 @@ const CreateTask = ({ open, onClose, auditRecord }) => {
     e.preventDefault();
 
     api
-      .post("/work_order", {
+      .post("/work_orders", {
         ...data,
         assigned_to: data.assigned_to.id,
         assigned_by: data.assigned_by.id,
@@ -97,13 +96,12 @@ const CreateTask = ({ open, onClose, auditRecord }) => {
       <DialogTitle>Nova ordem de serviço</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         {auditRecord && (
-          <div className="flex flex-col gap-2 p-4 border border-neutral-300 dark:border-neutral-700 rounded-xl">
+          <div className="flex flex-col gap-2 p-4 border border-zinc-300 dark:border-zinc-700 rounded-xl">
             <div className="flex flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
                 <p className="text-lg">
                   # AUD{auditRecord?.id.toString().padStart(3, "0")}
                 </p>
-                
               </div>
               <Chip
                 size="small"
@@ -144,7 +142,7 @@ const CreateTask = ({ open, onClose, auditRecord }) => {
                     .join(", ")}
                   aria-label="Mais campos"
                 >
-                  <div className="flex flex-col items-center justify-center bg-neutral-300 dark:bg-neutral-700 aspect-square rounded-full px-1 text-xs">
+                  <div className="flex flex-col items-center justify-center bg-zinc-300 dark:bg-zinc-700 aspect-square rounded-full px-1 text-xs">
                     <p className="mr-0.5">+{auditRecord?.columns.length - 2}</p>
                   </div>
                 </Tooltip>

@@ -16,7 +16,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../../../services/api";
-import { moduleEndpoints, moduleRoutes } from "../../../../services/moduleRoutes";
+import {
+  moduleEndpoints,
+  moduleRoutes,
+} from "../../../../services/moduleRoutes";
 import { qc } from "../../../../services/queryClient";
 import { statusInfo, taskStatuses } from "../utils";
 
@@ -55,7 +58,7 @@ const ViewTask = ({ assignment, open, onClose }) => {
   const { mutate: updateStatus, isPending } = useMutation({
     mutationFn: async (data) => {
       setPendingStatus(data.status);
-      await api.put(`/work_order/${assignment.id}/status`, data);
+      await api.put(`/work_orders/${assignment.id}/status`, data);
     },
     onSuccess: () => {
       qc.invalidateQueries(["work_orders"]);

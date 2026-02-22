@@ -3,9 +3,9 @@ import { createTheme } from "@mui/material";
 const lightPalette = {
   mode: "light",
   primary: {
-    main: "#000000",
-    light: "#DFDFEB",
-    dark: "#2B2B30",
+    main: "#1D1F21",
+    light: "#e4e6e7",
+    dark: "#3f4346",
     contrastText: "#fff",
   },
   secondary: {
@@ -15,10 +15,28 @@ const lightPalette = {
     contrastText: "#fff",
   },
   info: {
-    main: "#7d7d7d",
-    light: "#a8a8a8",
-    dark: "#545454",
-    contrastText: "#FFF",
+    main: "#71717a",
+    light: "#a1a1aa",
+    dark: "#52525b",
+    contrastText: "#1D1F21",
+  },
+  success: {
+    main: "#26ed7a",
+    light: "#7afbb0",
+    dark: "#06b350",
+    contrastText: "#1D1F21",
+  },
+  error: {
+    main: "#f73b51",
+    light: "#ff7263",
+    dark: "#c10f31",
+    contrastText: "#fff",
+  },
+  warning: {
+    main: "#ff9800",
+    light: "#ffd146",
+    dark: "#e27100",
+    contrastText: "#1D1F21",
   },
 };
 
@@ -26,9 +44,9 @@ const darkPalette = {
   mode: "dark",
   primary: {
     main: "#fff",
-    light: "#2B2B30",
-    dark: "#DFDFEB",
-    contrastText: "#000",
+    light: "#3f4346",
+    dark: "#a1a5aa",
+    contrastText: "#1D1F21",
   },
   secondary: {
     main: "#0a8feb",
@@ -37,10 +55,28 @@ const darkPalette = {
     contrastText: "#fff",
   },
   info: {
-    main: "#7d7d7d",
-    light: "#a8a8a8",
-    dark: "#545454",
+    main: "#71717a",
+    light: "#a1a1aa",
+    dark: "#52525b",
     contrastText: "#FFF",
+  },
+  success: {
+    main: "#26ed7a",
+    light: "#7afbb0",
+    dark: "#06b350",
+    contrastText: "#1D1F21",
+  },
+  error: {
+    main: "#f73b51",
+    light: "#ff7263",
+    dark: "#c10f31",
+    contrastText: "#fff",
+  },
+  warning: {
+    main: "#ff9800",
+    light: "#ffd146",
+    dark: "#e27100",
+    contrastText: "#1D1F21",
   },
 };
 
@@ -69,18 +105,19 @@ export const getTheme = (mode) => {
         },
         styleOverrides: {
           tooltip: {
-            borderRadius: "0.75rem",
+            borderRadius: "0.5rem",
           },
         },
       },
       MuiButton: {
         defaultProps: {
           disableElevation: true,
-          size: "large",
+          size: "medium",
         },
         styleOverrides: {
           root: {
             borderRadius: "0.75rem",
+            paddingY: "0.255rem",
           },
         },
       },
@@ -135,4 +172,13 @@ export const getTheme = (mode) => {
       },
     },
   });
+};
+
+export const themeColors = {
+  dark: {
+    ...darkPalette,
+  },
+  light: {
+    ...lightPalette,
+  },
 };

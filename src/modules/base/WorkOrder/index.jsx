@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
-import { assignmentsMock } from "./assignment_mock";
 import CreateTask from "./components/CreateTask";
 import TaskCard from "./components/TaskCard";
 import TaskFilter from "./components/TaskFilter";
@@ -15,7 +14,7 @@ const WorkOrder = () => {
   const user = useUserState().state;
   const { company } = useCompany();
   const showContent = user.isLighthouse ? !!company : true;
-  const [assignments, setAssignments] = useState(assignmentsMock);
+  const [assignments, setAssignments] = useState([]);
   const [queryState, setQueryState] = useState("pending");
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -42,11 +41,11 @@ const WorkOrder = () => {
           <CircularProgress size="1.5rem" />
         </div>
       ) : queryState === "error" ? (
-        <div className="col-span-full flex justify-center items-center h-32 text-neutral-500">
+        <div className="col-span-full flex justify-center items-center h-32 text-zinc-500">
           {queryState.errorMessage}
         </div>
       ) : assignments.length === 0 ? (
-        <div className="col-span-full flex justify-center items-center h-32 text-neutral-500">
+        <div className="col-span-full flex justify-center items-center h-32 text-zinc-500">
           {showContent
             ? "Nenhuma ordem de serviço encontrada"
             : "Selecione uma empresa para visualizar as ordens de serviço"}
@@ -62,13 +61,14 @@ const WorkOrder = () => {
           spacing={2}
           width="100%"
         >
-          {assignments.map((assignment) => (
-            <TaskCard
-              key={assignment.id}
-              assignment={assignment}
-              onClick={() => navigate(`/ordens-de-servico/${assignment?.id}`)}
-            />
-          ))}
+          {queryState === "success" &&
+            assignments.map((assignment) => (
+              <TaskCard
+                key={assignment.id}
+                assignment={assignment}
+                onClick={() => navigate(`/ordens-de-servico/${assignment?.id}`)}
+              />
+            ))}
         </Masonry>
       )}
       <CreateTask open={createOpen} onClose={() => setCreateOpen(false)} />
