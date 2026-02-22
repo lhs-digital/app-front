@@ -112,11 +112,12 @@ export const getTheme = (mode) => {
       MuiButton: {
         defaultProps: {
           disableElevation: true,
-          size: "large",
+          size: "medium",
         },
         styleOverrides: {
           root: {
             borderRadius: "0.75rem",
+            paddingY: "0.255rem",
           },
         },
       },

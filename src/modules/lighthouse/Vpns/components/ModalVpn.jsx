@@ -146,7 +146,6 @@ const ModalVpn = ({ dataEdit, isOpen, onClose, setRefresh, refresh }) => {
             <Button
               variant="outlined"
               component="label"
-              size="large"
               startIcon={<UploadFile />}
               onClick={() => uploadInput.current.click()}
             >
