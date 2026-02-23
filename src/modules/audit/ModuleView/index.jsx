@@ -315,7 +315,7 @@ const ModuleView = () => {
             <TableAccordion
               key={table.id}
               table={table}
-              pendingColumns={pendingChanges[table.id]?.columns ?? []}
+              pendingColumns={pendingChanges[table.id]}
               onColumnClick={handleColumnClick}
               onColumnRemove={(columnId) =>
                 handleColumnRemove(table.id, columnId)
