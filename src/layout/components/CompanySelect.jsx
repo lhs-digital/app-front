@@ -17,7 +17,10 @@ const CompanySelect = ({
   onSelect,
   currentCompany,
 }) => {
-  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedCompany, setSelectedCompany] = useState({
+    id: "",
+    name: "Selecione uma empresa",
+  });
 
   const handleClose = () => {
     setSelectedCompany();
@@ -33,15 +36,17 @@ const CompanySelect = ({
     <Dialog open={open} maxWidth="xs" fullWidth onClose={handleClose}>
       <DialogTitle>Selecionar empresa</DialogTitle>
       <DialogContent sx={{ p: 3 }}>
-        <div className="flex flex-row gap-2 items-center mb-4 text-lg w-full border-b border-[--border] pb-2">
-          <label
-            htmlFor="currentCompany"
-            className="flex flex-row gap-2 items-center"
-          >
-            <Radio checked={true} id="currentCompany" />
-            {currentCompany?.name}
-          </label>
-        </div>
+        {currentCompany && (
+          <div className="flex flex-row gap-2 items-center mb-4 text-lg w-full border-b border-[--border] pb-2">
+            <label
+              htmlFor="currentCompany"
+              className="flex flex-row gap-2 items-center"
+            >
+              <Radio checked={true} id="currentCompany" />
+              {currentCompany?.name}
+            </label>
+          </div>
+        )}
         <Autocomplete
           options={companies.filter(
             (company) => company.id !== currentCompany?.id,
@@ -50,7 +55,14 @@ const CompanySelect = ({
           getOptionKey={(option) => option.id}
           renderInput={(params) => <TextField {...params} fullWidth />}
           value={selectedCompany}
-          placeholder="Selecione uma empresa"
+          noOptionsText="Nenhuma empresa encontrada."
+          onFocus={() =>
+            selectedCompany.id === "" &&
+            setSelectedCompany({
+              id: "",
+              name: "",
+            })
+          }
           onChange={(e, newValue) => setSelectedCompany(newValue)}
         />
       </DialogContent>
