@@ -60,8 +60,9 @@ const TableAccordion = ({
     if (
       pendingColumns.updated?.length === 0 &&
       pendingColumns.deleted?.length === 0
-    )
+    ) {
       return serverCols;
+    }
 
     const pendingMap = new Map(pendingColumns.updated.map((c) => [c.id, c]));
     return serverCols.map((col) => pendingMap.get(col.id) ?? col);
