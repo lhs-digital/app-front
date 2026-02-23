@@ -23,7 +23,7 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
     defaultValues: {
       name: "",
       message: "",
-      validation: "",
+      validation: null,
       params: "",
       priority: "",
     },
@@ -161,26 +161,23 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
             render={({ field }) => (
               <FormControl className="col-span-1 md:col-span-2 lg:col-span-4">
                 <FormLabel>Validação</FormLabel>
-                <Select
+                <Autocomplete
                   fullWidth
+                  options={validations}
+                  getOptionLabel={(option) => option.label}
+                  getOptionKey={(option) => option.id}
                   key="validation"
-                  value={field.value?.name || ""}
-                  onChange={(e) => {
-                    const validation = validations.find(
-                      (v) => v.name === e.target.value,
-                    );
-                    field.onChange(validation);
+                  value={field.value}
+                  onChange={(_, newValue) => {
+                    field.onChange(newValue);
                   }}
-                >
-                  {validations.map((validation) => (
-                    <MenuItem
-                      key={`${validation.id}/${validation.name}`}
-                      value={validation.name}
-                    >
-                      {validation.label}
-                    </MenuItem>
-                  ))}
-                </Select>
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Selecione uma validação"
+                    />
+                  )}
+                />
               </FormControl>
             )}
           />

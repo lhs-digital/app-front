@@ -19,15 +19,25 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  useBlocker,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../../components/FormField";
 import { useCompany } from "../../../hooks/useCompany";
 import useDebounce from "../../../hooks/useDebounce";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import {
+  applyColumnRemove,
+  applyColumnSave,
+  formatModuleTablesPayload,
+} from "../../../services/formatters";
 import { qc } from "../../../services/queryClient";
 import AddColumn from "../ModuleTable/components/AddColumn";
 import TableAccordion from "../ModuleTable/components/TableAccordion";
@@ -55,6 +65,7 @@ const ModuleView = () => {
   const isEditable = currentAction !== "view";
   const [viewMode, setViewMode] = useState("list");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [expanded, setExpanded] = useState("");
   const [pagination, setPagination] = useState({
     total: 0,
     perPage: 10,
@@ -97,6 +108,41 @@ const ModuleView = () => {
     },
   });
 
+  const allowNavigationRef = useRef(false);
+
+  useBlocker(() => {
+    if (isSavingRules && !allowNavigationRef.current) {
+      toast.warning("Você tem alterações não salvas!");
+      return true;
+    }
+    allowNavigationRef.current = false;
+    return false;
+  });
+
+  const { mutate: saveRules, isPending: isSavingRules } = useMutation({
+    mutationFn: async () => {
+      const formattedData = formatModuleTablesPayload(
+        pendingChanges,
+        structure,
+      );
+
+      const promises = formattedData.map((table) =>
+        api.post(
+          `/companies/${company.id}/audit/modules/${moduleId}/tables`,
+          table,
+        ),
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      toast.success("Colunas salvas com sucesso!");
+      refetchStructure();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao salvar colunas. Tente novamente.");
+    },
+  });
+
   const submitByAction = { create: createModule, edit: updateModule };
 
   const onSubmit = (data) => submitByAction[currentAction]?.(data);
@@ -131,45 +177,11 @@ const ModuleView = () => {
   const [pendingChanges, setPendingChanges] = useState({});
 
   const handleColumnSave = (tableId, column) => {
-    setPendingChanges((prev) => {
-      const tableEntry = prev[tableId] ?? {
-        company_table_id: tableId,
-        columns: [],
-      };
-      const existingIdx = tableEntry.columns.findIndex(
-        (c) => c.id === column.id,
-      );
-      const updatedColumns =
-        existingIdx >= 0
-          ? tableEntry.columns.map((c, i) => (i === existingIdx ? column : c))
-          : [...tableEntry.columns, column];
-
-      return {
-        ...prev,
-        [tableId]: { ...tableEntry, columns: updatedColumns },
-      };
-    });
+    setPendingChanges((prev) => applyColumnSave(prev, tableId, column));
   };
 
   const handleColumnRemove = (tableId, columnId) => {
-    setPendingChanges((prev) => {
-      const tableEntry = prev[tableId];
-      if (!tableEntry) return prev;
-
-      const updatedColumns = tableEntry.columns.filter(
-        (c) => c.id !== columnId,
-      );
-      if (updatedColumns.length === 0) {
-        return Object.fromEntries(
-          Object.entries(prev).filter(([key]) => key !== String(tableId)),
-        );
-      }
-
-      return {
-        ...prev,
-        [tableId]: { ...tableEntry, columns: updatedColumns },
-      };
-    });
+    setPendingChanges((prev) => applyColumnRemove(prev, tableId, columnId));
   };
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -219,7 +231,11 @@ const ModuleView = () => {
     retry: false,
   });
 
-  const { data: structure = [], isPending: isPendingStructure } = useQuery({
+  const {
+    data: structure = [],
+    isPending: isPendingStructure,
+    refetch: refetchStructure,
+  } = useQuery({
     queryKey: ["tables", company, debouncedSearch, pagination, viewMode],
     queryFn: async () => {
       const params = {
@@ -244,9 +260,13 @@ const ModuleView = () => {
         current: response.data.meta.current_page,
         perPage: response.data.meta.per_page,
       });
+      setPendingChanges({});
       return response.data.data;
     },
-    enabled: !!activeModule && currentAction !== "create",
+    enabled:
+      !!activeModule &&
+      currentAction !== "create" &&
+      Object.keys(pendingChanges).length === 0,
   });
 
   useEffect(() => {
@@ -313,9 +333,13 @@ const ModuleView = () => {
           </div>
           {structure.map((table) => (
             <TableAccordion
+              pendingColumns={pendingChanges[table.id]}
+              isExpanded={expanded === table.id}
+              onExpand={() =>
+                setExpanded(expanded === table.id ? "" : table.id)
+              }
               key={table.id}
               table={table}
-              pendingColumns={pendingChanges[table.id]?.columns ?? []}
               onColumnClick={handleColumnClick}
               onColumnRemove={(columnId) =>
                 handleColumnRemove(table.id, columnId)
@@ -349,6 +373,18 @@ const ModuleView = () => {
             variant={variant}
           >
             {buttonLabel}
+          </Button>,
+          <Button
+            key="save-columns"
+            type="button"
+            disabled={Object.keys(pendingChanges).length === 0}
+            color="primary"
+            onClick={() => saveRules()}
+            startIcon={<Save />}
+            variant="contained"
+            loading={isSavingRules}
+          >
+            Salvar colunas
           </Button>,
         ]}
       />

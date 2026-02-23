@@ -14,14 +14,12 @@ import {
   Divider,
   FormControl,
   FormLabel,
-  MenuItem,
-  Select,
   TextField,
   Tooltip,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Validation from "../../../../components/AuditComponents/Validation";
 import Info from "../../../../components/Miscellaneous/Info";
@@ -29,7 +27,6 @@ import api from "../../../../services/api";
 import { formatBackendRulesToFrontend } from "../../../../services/formatters";
 import AddColumnRule from "./AddColumnRule";
 import AddSelectOptions from "./AddSelectOptions";
-import OptionChip from "./OptionChip";
 
 export const AddColumn = ({
   open,
@@ -47,7 +44,7 @@ export const AddColumn = ({
   const {
     register,
     handleSubmit,
-    control,
+    // control,
     setValue,
     reset,
     watch,
@@ -98,12 +95,18 @@ export const AddColumn = ({
     if (column && validations.length > 0 && !loadingValidations) {
       setValue("name", column.name || "");
       setValue("label", column.label || "");
-      setValue("priority", column.priority || "");
-      setValue("form.size", column.form?.size || "");
-      setValue("form.type", column.form?.type || "");
+      setValue("priority", column.priority || 1);
+      setValue("form.size", column.form?.size || "grow");
+      setValue("form.type", column.form?.type || "text");
       setOptions(column.form?.options || []);
-      setValue("form.help_text", column.form?.help_text || "");
-      setValue("form.placeholder", column.form?.placeholder || "");
+      setValue(
+        "form.help_text",
+        column.form?.help_text || "Ajuda para o usuário",
+      );
+      setValue(
+        "form.placeholder",
+        column.form?.placeholder || "Lorem ipsum dolor sit amet",
+      );
 
       const formattedRules = formatBackendRulesToFrontend(
         column.rules,
@@ -172,9 +175,9 @@ export const AddColumn = ({
     setOptions((prev) => [...prev, newOption]);
   };
 
-  const handleDeleteOption = (index) => {
-    setOptions((prevOptions) => prevOptions.filter((_, i) => i !== index));
-  };
+  // const handleDeleteOption = (index) => {
+  //   setOptions((prevOptions) => prevOptions.filter((_, i) => i !== index));
+  // };
 
   const removeRule = (rule) => {
     setRules((prev) =>
@@ -251,7 +254,7 @@ export const AddColumn = ({
                 })}
               />
             </FormControl>
-            <Controller
+            {/* <Controller
               name={`form.size`}
               control={control}
               rules={{ required: "Tamanho é obrigatório" }}
@@ -377,7 +380,7 @@ export const AddColumn = ({
                   required: "Placeholder é obrigatório",
                 })}
               />
-            </FormControl>
+            </FormControl> */}
             <Divider className="col-span-full" />
             <div className="col-span-full flex flex-row justify-between">
               <div>

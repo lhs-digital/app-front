@@ -43,9 +43,11 @@ const comparators = {
 
 const TableAccordion = ({
   table,
-  pendingColumns = [],
+  pendingColumns = { updated: [], deleted: [] },
   onColumnClick,
   onColumnRemove,
+  isExpanded,
+  onExpand,
 }) => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -55,21 +57,29 @@ const TableAccordion = ({
 
   const columns = useMemo(() => {
     const serverCols = table.columns ?? [];
-    if (pendingColumns.length === 0) return serverCols;
+    if (!pendingColumns) return serverCols;
 
-    const pendingMap = new Map(pendingColumns.map((c) => [c.id, c]));
+    if (
+      pendingColumns.updated?.length === 0 &&
+      pendingColumns.deleted?.length === 0
+    ) {
+      return serverCols;
+    }
+
+    const pendingMap = new Map(pendingColumns.updated.map((c) => [c.id, c]));
     return serverCols.map((col) => pendingMap.get(col.id) ?? col);
-  }, [table.columns, pendingColumns]);
+  }, [table.columns, pendingColumns.updated, pendingColumns.deleted]);
 
   const totalRules = columns.reduce(
     (sum, col) => sum + (col.rules?.length ?? 0),
     0,
   );
 
-  const pendingRulesTotal = pendingColumns.reduce(
-    (sum, col) => sum + (col.rules?.length ?? 0),
-    0,
-  );
+  const pendingRulesTotal =
+    pendingColumns.updated?.reduce(
+      (sum, col) => sum + (col.updated?.rules?.length ?? 0),
+      0,
+    ) + (pendingColumns.deleted?.length ?? 0);
 
   const filtered = useMemo(() => {
     if (!search) return columns;
@@ -113,6 +123,8 @@ const TableAccordion = ({
   return (
     <Accordion
       disableGutters
+      expanded={isExpanded}
+      onChange={onExpand}
       slotProps={{ transition: { unmountOnExit: true } }}
       sx={{
         borderRadius: "8px !important",
@@ -141,12 +153,12 @@ const TableAccordion = ({
               color="primary"
             />
           )}
-          {pendingRulesTotal > 0 && (
+          {pendingRulesTotal > 0 && pendingColumns.deleted?.length !== 0 && (
             <Chip
-              label={`+${pendingRulesTotal} não salva${pendingRulesTotal !== 1 ? "s" : ""}`}
+              label={`${pendingRulesTotal} alteraç${pendingRulesTotal !== 1 ? "ões" : "ão"} não salva${pendingRulesTotal !== 1 ? "s" : ""}`}
               size="small"
               variant="outlined"
-              color="info"
+              color="warning"
             />
           )}
         </div>
@@ -206,6 +218,9 @@ const TableAccordion = ({
                   hover
                   sx={{
                     cursor: "pointer",
+                    opacity: pendingColumns.deleted?.includes(column.id)
+                      ? 0.4
+                      : 1,
                     "&:last-child td": { borderBottom: 0 },
                   }}
                 >
@@ -243,7 +258,9 @@ const TableAccordion = ({
                       <IconButton
                         onClick={() => onColumnRemove?.(column.id)}
                         disabled={
-                          !pendingColumns.some((c) => c.id === column.id)
+                          !pendingColumns.updated.some(
+                            (c) => c.id === column.id,
+                          ) && !pendingColumns.deleted.includes(column.id)
                         }
                       >
                         <Delete fontSize="small" />
