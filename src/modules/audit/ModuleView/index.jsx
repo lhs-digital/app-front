@@ -340,10 +340,6 @@ const ModuleView = () => {
               }
               key={table.id}
               table={table}
-<<<<<<< HEAD
-=======
-              pendingColumns={pendingChanges[table.id]}
->>>>>>> 890e7050926e964b9e72c9a3eefa37f22b4493f2
               onColumnClick={handleColumnClick}
               onColumnRemove={(columnId) =>
                 handleColumnRemove(table.id, columnId)
