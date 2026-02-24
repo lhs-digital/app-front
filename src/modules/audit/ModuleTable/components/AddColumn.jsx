@@ -57,8 +57,8 @@ export const AddColumn = ({
       form: {
         placeholder: "",
         help_text: "",
-        size: "",
-        type: "",
+        size: "grow",
+        type: "text",
         options: [],
       },
       rule: {
@@ -89,10 +89,10 @@ export const AddColumn = ({
       );
       setAvailableRules(filtered);
     }
-  }, [rules, loadingValidations, column, validations]);
+  }, [rules, loadingValidations, column?.id, validations?.length]);
 
   useEffect(() => {
-    if (column && validations.length > 0 && !loadingValidations) {
+    if (column) {
       setValue("name", column.name || "");
       setValue("label", column.label || "");
       setValue("priority", column.priority || 1);
@@ -108,28 +108,30 @@ export const AddColumn = ({
         column.form?.placeholder || "Lorem ipsum dolor sit amet",
       );
 
-      const formattedRules = formatBackendRulesToFrontend(
-        column.rules,
-        validations,
-      );
-      setRules(formattedRules);
-
-      // Update available rules by filtering out used ones
-      if (formattedRules.length > 0) {
-        const usedRuleNames = formattedRules.map((rule) => rule.name);
-        const filtered = validations.filter(
-          (validation) => !usedRuleNames.includes(validation.name),
+      if (!loadingValidations && validations.length > 0) {
+        const formattedRules = formatBackendRulesToFrontend(
+          column.rules,
+          validations,
         );
-        setAvailableRules(filtered);
-      } else {
-        setAvailableRules(validations);
+        setRules(formattedRules);
+
+        if (formattedRules.length > 0) {
+          const usedRuleNames = formattedRules.map((rule) => rule.name);
+          const filtered = validations.filter(
+            (validation) => !usedRuleNames.includes(validation.name),
+          );
+          setAvailableRules(filtered);
+        } else {
+          setAvailableRules(validations);
+        }
       }
     } else if (!column) {
       setRules([]);
       setAvailableRules(validations);
       reset();
     }
-  }, [column, setValue, validations]);
+  }, [open, column?.id, loadingValidations, validations?.length]);
+
   const onSubmit = (formData) => {
     if (Object.keys(errors).length > 0) {
       return toast.error("Preencha todos os campos corretamente");

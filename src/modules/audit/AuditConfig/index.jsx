@@ -163,13 +163,13 @@ const AuditConfig = () => {
                   Array.from({ length: 5 }).map((_, index) => (
                     <TableRow key={index}>
                       <TableCell>
-                        <Skeleton variant="text" height={52} />
+                        <Skeleton variant="text" height={46} />
                       </TableCell>
                       <TableCell>
-                        <Skeleton variant="text" height={52} />
+                        <Skeleton variant="text" height={46} />
                       </TableCell>
                       <TableCell>
-                        <Skeleton variant="text" height={52} />
+                        <Skeleton variant="text" height={46} />
                       </TableCell>
                     </TableRow>
                   ))

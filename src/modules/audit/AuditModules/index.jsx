@@ -132,10 +132,10 @@ const AuditModules = () => {
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={index}>
                     <TableCell className="w-10/12">
-                      <Skeleton variant="text" height={52} />
+                      <Skeleton variant="text" height={46} />
                     </TableCell>
                     <TableCell>
-                      <Skeleton variant="text" height={52} />
+                      <Skeleton variant="text" height={46} />
                     </TableCell>
                   </TableRow>
                 ))
@@ -149,7 +149,7 @@ const AuditModules = () => {
                 <TableRow key={m.id}>
                   <TableCell className="w-10/12">{m.name}</TableCell>
                   <TableCell className="space-x-2">
-                    <Tooltip title="Ver detalhes do módulo">
+                    <Tooltip title="Ver detalhes do grupo">
                       <IconButton
                         onClick={() => navigate(`/modulos/${m.id}`)}
                         size="small"
@@ -167,7 +167,7 @@ const AuditModules = () => {
                         <OpenInBrowser />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Excluir módulo">
+                    <Tooltip title="Excluir grupo de regras">
                       <IconButton
                         onClick={() => handleDeleteClick(m)}
                         size="small"

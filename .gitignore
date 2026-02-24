@@ -33,5 +33,6 @@ yarn-error.log*
 # Configuração de IDEs e Editores
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo

@@ -17,9 +17,18 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { priorities } from "../../../../services/utils";
+import Validator from "../../../../services/validator";
 
 const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
-  const { register, control, watch, reset, handleSubmit } = useForm({
+  const {
+    register,
+    control,
+    watch,
+    reset,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       name: "",
       message: "",
@@ -29,7 +38,7 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
     },
   });
   const [ruleParams, setRuleParams] = useState(new Set());
-  const [inputValue, setInputValue] = useState();
+  const [inputValue, setInputValue] = useState("");
   const selectedValidation = watch("validation");
 
   // Essa parte vai ser pra implementar a edição.
@@ -61,12 +70,47 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
       return;
     }
 
-    if (
-      ruleParams?.size === 0 &&
-      (selectedValidation === "in" || selectedValidation === "not_in")
-    ) {
-      toast.warn("Adicione pelo menos um valor para a regra.");
-      return;
+    switch (selectedValidation.name) {
+      case "between":
+        if (!rule.minValue || !rule.maxValue) {
+          toast.warn("Preencha todos os campos para a regra entre.");
+          setError("minValue");
+          setError("maxValue");
+          return;
+        }
+        if (rule.minValue > rule.maxValue) {
+          toast.warn("O valor mínimo não pode ser maior que o valor máximo.");
+          setError("minValue");
+          return;
+        }
+
+        if (
+          !Validator.isNumeric(rule.minValue.trim()) ||
+          !Validator.isNumeric(rule.maxValue.trim())
+        ) {
+          toast.warn("Os valores devem ser numéricos.");
+          setError("minValue");
+          setError("maxValue");
+          return;
+        }
+
+        setRuleParams(new Set([rule.minValue, rule.maxValue]));
+        break;
+
+      case "in":
+        if (ruleParams.size === 0) {
+          toast.warn("Adicione pelo menos um valor para a regra.");
+          setError("ruleParams");
+          return;
+        }
+        break;
+      case "not_in":
+        if (ruleParams.size === 0) {
+          toast.warn("Adicione pelo menos um valor para a regra.");
+          setError("ruleParams");
+          return;
+        }
+        break;
     }
 
     reset();
@@ -86,12 +130,26 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
 
   const renderValidationField = () => {
     if (!selectedValidation) return null;
+    if (selectedValidation.name === "between")
+      return (
+        <div className="flex flex-row gap-4">
+          <FormControl fullWidth>
+            <FormLabel id="rules">Valor mínimo</FormLabel>
+            <TextField {...register("minValue")} error={!!errors.minValue} />
+          </FormControl>
+          <FormControl fullWidth>
+            <FormLabel id="rules">Valor máximo</FormLabel>
+            <TextField {...register("maxValue")} error={!!errors.maxValue} />
+          </FormControl>
+        </div>
+      );
     if (selectedValidation.multiple)
       return (
         <FormControl fullWidth>
           <FormLabel id="rules">Valores possíveis</FormLabel>
           <Autocomplete
             multiple
+            error={!!errors.ruleParams}
             key="rule-chips"
             options={[...ruleParams, inputValue && inputValue.trim()].filter(
               (item) => item !== "",
@@ -125,6 +183,11 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
                 placeholder="Comece a digitar para adicionar"
               />
             )}
+            sx={{
+              "& .MuiInputBase-root": {
+                height: "56px",
+              },
+            }}
           />
           <FormHelperText>
             Pressione{" "}
@@ -138,7 +201,10 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
     return (
       <FormControl fullWidth>
         <FormLabel id="rules">Valor de comparação</FormLabel>
-        <TextField {...register("comparisonValue")} />
+        <TextField
+          {...register("comparisonValue")}
+          error={!!errors.comparisonValue}
+        />
       </FormControl>
     );
   };
@@ -158,16 +224,18 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
           <Controller
             name="validation"
             control={control}
+            rules={{ required: "Este campo é obrigatório" }}
             render={({ field }) => (
               <FormControl className="col-span-1 md:col-span-2 lg:col-span-4">
-                <FormLabel>Validação</FormLabel>
+                <FormLabel required>Validação</FormLabel>
                 <Autocomplete
                   fullWidth
+                  error={!!errors.validation}
                   options={validations}
-                  getOptionLabel={(option) => option.label}
-                  getOptionKey={(option) => option.id}
+                  getOptionLabel={(option) => option?.label ?? ""}
+                  getOptionKey={(option) => option?.id}
                   key="validation"
-                  value={field.value}
+                  value={field.value ?? null}
                   onChange={(_, newValue) => {
                     field.onChange(newValue);
                   }}
@@ -184,11 +252,13 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
           <Controller
             name="priority"
             control={control}
+            rules={{ required: "Este campo é obrigatório" }}
             render={({ field }) => (
               <FormControl className="col-span-1 md:col-span-2 lg:col-span-2">
-                <FormLabel>Prioridade</FormLabel>
+                <FormLabel required>Prioridade</FormLabel>
                 <Select
                   fullWidth
+                  error={!!errors.priority}
                   key="priority"
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
@@ -208,7 +278,7 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
           {selectedValidation && (
             <div className="col-span-full flex flex-col gap-2 p-4 border border-[--border] rounded-md">
               <div className="flex flex-row text-zinc-400 items-center">
-                <InfoOutlined className="mb-0.5 mr-2" fontSize="small" />
+                <InfoOutlined className="mb-0.5 mr-2" fontSize="inherit" />
                 <p>Sobre esta validação</p>
               </div>
               <p>{selectedValidation.description}</p>
@@ -226,8 +296,11 @@ const AddColumnRule = ({ open, onClose, submit, validations = [] }) => {
             </div>
           )}
           <FormControl className="col-span-1 md:col-span-2 lg:col-span-6">
-            <FormLabel>Mensagem de erro</FormLabel>
-            <TextField {...register("message")} />
+            <FormLabel required>Mensagem de erro</FormLabel>
+            <TextField
+              {...register("message", { required: "Este campo é obrigatório" })}
+              error={!!errors.message}
+            />
             <FormHelperText>
               Mensagem que será exibida quando a regra for violada.
             </FormHelperText>

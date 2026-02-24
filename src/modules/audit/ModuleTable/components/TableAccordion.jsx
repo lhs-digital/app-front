@@ -43,7 +43,6 @@ const comparators = {
 
 const TableAccordion = ({
   table,
-  pendingColumns = { updated: [], deleted: [] },
   onColumnClick,
   onColumnRemove,
   isExpanded,
@@ -55,31 +54,12 @@ const TableAccordion = ({
   const [orderBy, setOrderBy] = useState("rules");
   const [order, setOrder] = useState("desc");
 
-  const columns = useMemo(() => {
-    const serverCols = table.columns ?? [];
-    if (!pendingColumns) return serverCols;
-
-    if (
-      pendingColumns.updated?.length === 0 &&
-      pendingColumns.deleted?.length === 0
-    ) {
-      return serverCols;
-    }
-
-    const pendingMap = new Map(pendingColumns.updated.map((c) => [c.id, c]));
-    return serverCols.map((col) => pendingMap.get(col.id) ?? col);
-  }, [table.columns, pendingColumns.updated, pendingColumns.deleted]);
+  const columns = useMemo(() => table.columns, [table.columns]);
 
   const totalRules = columns.reduce(
     (sum, col) => sum + (col.rules?.length ?? 0),
     0,
   );
-
-  const pendingRulesTotal =
-    pendingColumns.updated?.reduce(
-      (sum, col) => sum + (col.updated?.rules?.length ?? 0),
-      0,
-    ) + (pendingColumns.deleted?.length ?? 0);
 
   const filtered = useMemo(() => {
     if (!search) return columns;
@@ -153,14 +133,6 @@ const TableAccordion = ({
               color="primary"
             />
           )}
-          {pendingRulesTotal > 0 && pendingColumns.deleted?.length !== 0 && (
-            <Chip
-              label={`${pendingRulesTotal} alteraç${pendingRulesTotal !== 1 ? "ões" : "ão"} não salva${pendingRulesTotal !== 1 ? "s" : ""}`}
-              size="small"
-              variant="outlined"
-              color="warning"
-            />
-          )}
         </div>
       </AccordionSummary>
 
@@ -218,9 +190,6 @@ const TableAccordion = ({
                   hover
                   sx={{
                     cursor: "pointer",
-                    opacity: pendingColumns.deleted?.includes(column.id)
-                      ? 0.4
-                      : 1,
                     "&:last-child td": { borderBottom: 0 },
                   }}
                 >
@@ -255,14 +224,7 @@ const TableAccordion = ({
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Remover do grupo" placement="top">
-                      <IconButton
-                        onClick={() => onColumnRemove?.(column.id)}
-                        disabled={
-                          !pendingColumns.updated.some(
-                            (c) => c.id === column.id,
-                          ) && !pendingColumns.deleted.includes(column.id)
-                        }
-                      >
+                      <IconButton onClick={() => onColumnRemove?.(column.id)}>
                         <Delete fontSize="small" />
                       </IconButton>
                     </Tooltip>

@@ -147,10 +147,15 @@ export const getTheme = (mode) => {
         },
       },
       MuiInputBase: {
+        defaultProps: {
+          size: "medium",
+        },
         styleOverrides: {
           root: {
+            padding: "2px 4px",
             borderRadius: "0.75rem",
             overflow: "clip",
+            height: "46px",
           },
         },
       },
@@ -167,6 +172,16 @@ export const getTheme = (mode) => {
           root: {
             fontSize: "0.8rem",
             marginTop: "0.3rem",
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          shrink: {
+            transform: "translate(14px, -9px) scale(0.75)",
+          },
+          "&.Mui-focused": {
+            transform: "translate(14px, -9px) scale(0.75)",
           },
         },
       },

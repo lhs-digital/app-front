@@ -340,7 +340,7 @@ const AuditList = () => {
           >
             <IconButton
               onClick={handleOpenFilterMenu}
-              className="h-[52px] w-[52px]"
+              className="h-[46px] w-[46px]"
             >
               {isModulesLoading ? (
                 <CircularProgress size={16} />

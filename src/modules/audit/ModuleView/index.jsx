@@ -85,11 +85,13 @@ const ModuleView = () => {
     },
     onSuccess: (data) => {
       navigate(`/modulos/${data.id}`);
-      toast.success(`Módulo "${data.name}" criado com sucesso!`);
+      toast.success(`Grupo de regras "${data.name}" criado com sucesso!`);
     },
     onError: (error) => {
-      console.error("Erro ao criar módulo:", error);
-      toast.error(error.message || "Erro ao criar módulo. Tente novamente.");
+      console.error("Erro ao criar grupo de regras:", error);
+      toast.error(
+        error.message || "Erro ao criar grupo de regras. Tente novamente.",
+      );
     },
   });
 
@@ -109,39 +111,6 @@ const ModuleView = () => {
   });
 
   const allowNavigationRef = useRef(false);
-
-  useBlocker(() => {
-    if (isSavingRules && !allowNavigationRef.current) {
-      toast.warning("Você tem alterações não salvas!");
-      return true;
-    }
-    allowNavigationRef.current = false;
-    return false;
-  });
-
-  const { mutate: saveRules, isPending: isSavingRules } = useMutation({
-    mutationFn: async () => {
-      const formattedData = formatModuleTablesPayload(
-        pendingChanges,
-        structure,
-      );
-
-      const promises = formattedData.map((table) =>
-        api.post(
-          `/companies/${company.id}/audit/modules/${moduleId}/tables`,
-          table,
-        ),
-      );
-      await Promise.all(promises);
-    },
-    onSuccess: () => {
-      toast.success("Colunas salvas com sucesso!");
-      refetchStructure();
-    },
-    onError: (error) => {
-      toast.error(error.message || "Erro ao salvar colunas. Tente novamente.");
-    },
-  });
 
   const submitByAction = { create: createModule, edit: updateModule };
 
@@ -174,19 +143,15 @@ const ModuleView = () => {
   const { pageTitle, icon, variant, buttonLabel, onClick } =
     actionConfig[currentAction];
 
-  const [pendingChanges, setPendingChanges] = useState({});
-
-  const handleColumnSave = (tableId, column) => {
-    setPendingChanges((prev) => applyColumnSave(prev, tableId, column));
-  };
-
-  const handleColumnRemove = (tableId, columnId) => {
-    setPendingChanges((prev) => applyColumnRemove(prev, tableId, columnId));
-  };
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeColumn, setActiveColumn] = useState(null);
   const [activeTableId, setActiveTableId] = useState(null);
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setActiveColumn(null);
+    setActiveTableId(null);
+  };
 
   const handleColumnClick = (column, table) => {
     const hasRules = (column.rules?.length ?? 0) > 0;
@@ -196,28 +161,40 @@ const ModuleView = () => {
   };
 
   const handleDialogSave = (column) => {
-    if (activeTableId) {
-      handleColumnSave(activeTableId, column);
-    }
-    setDialogOpen(false);
-    setActiveColumn(null);
-    setActiveTableId(null);
+    if (!activeTableId) return;
+    toast.promise(
+      saveTableRulesAsync({
+        tableId: activeTableId,
+        structure,
+        action: column?.edit ? "edit" : "add",
+        columnOrId: column,
+      }).then(closeDialog),
+      {
+        pending: "Salvando regra(s)...",
+        success: "Regra(s) salva(s) com sucesso!",
+        error: "Erro ao salvar regra(s). Tente novamente.",
+      },
+    );
   };
 
   const handleDialogRemove = (column) => {
-    if (activeTableId) {
-      handleColumnRemove(activeTableId, column.id);
-    }
-    setDialogOpen(false);
-    setActiveColumn(null);
-    setActiveTableId(null);
+    if (!activeTableId || !column) return;
+    toast.promise(
+      saveTableRulesAsync({
+        tableId: activeTableId,
+        structure,
+        action: "remove",
+        columnOrId: column.id,
+      }).then(closeDialog),
+      {
+        pending: "Excluindo regra(s)...",
+        success: "Regra(s) excluída(s) com sucesso!",
+        error: "Erro ao excluir regra(s). Tente novamente.",
+      },
+    );
   };
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    setActiveColumn(null);
-    setActiveTableId(null);
-  };
+  const handleDialogClose = () => closeDialog();
 
   const { data: activeModule = null, isPending: isPendingModule } = useQuery({
     queryKey: ["module", moduleId, company],
@@ -260,13 +237,43 @@ const ModuleView = () => {
         current: response.data.meta.current_page,
         perPage: response.data.meta.per_page,
       });
-      setPendingChanges({});
       return response.data.data;
     },
-    enabled:
-      !!activeModule &&
-      currentAction !== "create" &&
-      Object.keys(pendingChanges).length === 0,
+    enabled: !!activeModule && currentAction !== "create",
+  });
+
+  const { mutateAsync: saveTableRulesAsync, isPending: isSavingTable } =
+    useMutation({
+      mutationFn: async ({
+        tableId,
+        structure: structureData,
+        action,
+        columnOrId,
+      }) => {
+        const pending =
+          action === "remove"
+            ? applyColumnRemove({}, tableId, columnOrId)
+            : applyColumnSave({}, tableId, columnOrId);
+        const formatted = formatModuleTablesPayload(pending, structureData);
+        const payload = formatted[0];
+        if (!payload) throw new Error("Payload vazio");
+        await api.post(
+          `/companies/${company.id}/audit/modules/${moduleId}/tables`,
+          payload,
+        );
+      },
+      onSuccess: () => {
+        refetchStructure();
+      },
+    });
+
+  useBlocker(() => {
+    if (isSavingTable && !allowNavigationRef.current) {
+      toast.warning("Salvando colunas...");
+      return true;
+    }
+    allowNavigationRef.current = false;
+    return false;
   });
 
   useEffect(() => {
@@ -333,7 +340,6 @@ const ModuleView = () => {
           </div>
           {structure.map((table) => (
             <TableAccordion
-              pendingColumns={pendingChanges[table.id]}
               isExpanded={expanded === table.id}
               onExpand={() =>
                 setExpanded(expanded === table.id ? "" : table.id)
@@ -342,7 +348,19 @@ const ModuleView = () => {
               table={table}
               onColumnClick={handleColumnClick}
               onColumnRemove={(columnId) =>
-                handleColumnRemove(table.id, columnId)
+                toast.promise(
+                  saveTableRulesAsync({
+                    tableId: table.id,
+                    structure,
+                    action: "remove",
+                    columnOrId: columnId,
+                  }),
+                  {
+                    pending: "Excluindo regra(s)...",
+                    success: "Regra(s) excluída(s) com sucesso!",
+                    error: "Erro ao excluir regra(s). Tente novamente.",
+                  },
+                )
               }
             />
           ))}
@@ -373,18 +391,6 @@ const ModuleView = () => {
             variant={variant}
           >
             {buttonLabel}
-          </Button>,
-          <Button
-            key="save-columns"
-            type="button"
-            disabled={Object.keys(pendingChanges).length === 0}
-            color="primary"
-            onClick={() => saveRules()}
-            startIcon={<Save />}
-            variant="contained"
-            loading={isSavingRules}
-          >
-            Salvar colunas
           </Button>,
         ]}
       />
