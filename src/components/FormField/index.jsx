@@ -27,7 +27,7 @@ const FormField = ({
         <Skeleton
           variant="rectangular"
           width="100%"
-          height={56}
+          height={46}
           className="rounded-md"
         />
       ) : (
