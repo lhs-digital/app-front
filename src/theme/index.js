@@ -152,6 +152,7 @@ export const getTheme = (mode) => {
         },
         styleOverrides: {
           root: {
+            padding: "2px 4px",
             borderRadius: "0.75rem",
             overflow: "clip",
             height: "46px",
@@ -179,7 +180,7 @@ export const getTheme = (mode) => {
           shrink: {
             transform: "translate(14px, -9px) scale(0.75)",
           },
-          focused: {
+          "&.Mui-focused": {
             transform: "translate(14px, -9px) scale(0.75)",
           },
         },
