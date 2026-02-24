@@ -1,6 +1,9 @@
 import {
   ArrowBack,
   Cancel,
+  Delete,
+  DeleteForever,
+  Download,
   Edit,
   RemoveCircleOutline,
   Save,
@@ -19,7 +22,7 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -28,13 +31,37 @@ import PageTitle from "../../../../layout/components/PageTitle";
 import api from "../../../../services/api";
 import { assignmentsMock } from "../assignment_mock";
 import { statusInfo } from "../utils";
+import ModalDelete from "../../../../components/ModalDelete";
 
 const WorkOrderView = () => {
+  const [modalState, setModalState] = useState({
+    type: null,
+    mode: "create",
+    isOpen: false,
+  });
+
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(true);
-  const [formData, setFormData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState();
   const [attachedFiles, setAttachedFiles] = useState([]);
+  const queryClient = useQueryClient();
+  const [deleteId, setDeleteId] = useState(null);
+
+  const { mutate: deleteWorkOrder } = useMutation({
+    mutationFn: async (id) => await api.delete(`/work_orders/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["work_orders"]);
+      navigate("/ordens-de-servico");
+      toast.success("Ordem de serviço removida com sucesso!");
+      setModalState({ type: null, isOpen: false });
+      setDeleteId(null);
+    },
+    onError: (error) => {
+      console.error("Erro ao verificar lista de ordens de serviço", error);
+      toast.error("Erro ao remover ordem de serviço");
+    },
+  });
 
   const {
     data: assignment,
@@ -44,13 +71,11 @@ const WorkOrderView = () => {
   } = useQuery({
     queryKey: ["assignment", id],
     queryFn: async () => {
-      // Usando mock data por enquanto
-      const found = assignmentsMock.find(
-        (item) => String(item.id) === String(id),
-      );
-      if (!found) throw new Error("Ordem de serviço não encontrada");
-      return found;
+      const response = await api.get(`/work_orders/${id}`);
+      console.log("Resposta da API de ordem de serviço:", response);
+      return response.data;
     },
+    enabled: !!id,
   });
 
   const {
@@ -62,6 +87,7 @@ const WorkOrderView = () => {
     queryFn: async () => {
       try {
         const response = await api.get("/users");
+        console.log("Resposta da API de usuários:", response);
         return response.data?.data || [];
       } catch (err) {
         console.error("Erro ao buscar usuários:", err);
@@ -72,40 +98,26 @@ const WorkOrderView = () => {
 
   const { mutate: saveAssignment, isPending: isSaving } = useMutation({
     mutationFn: async (data) => {
-      const consolidatedData = {
-        id,
-        entity_type: formData?.entity_type,
-        entity_id: formData?.entity_id,
-        assigned_to: data.assigned_to,
-        assigned_by: data.assigned_by,
-        company_id: formData?.company_id,
-        description: data.description,
-        corrective_actions: data.corrective_actions,
-        deadline: data.deadline,
-        is_completed: formData?.is_completed,
-        status: data.status,
-        reopen_count: formData?.reopen_count,
-        is_persistent_error: data.is_persistent_error,
-        company: formData?.company,
-        entity: formData?.entity,
-        attached_files: attachedFiles.map((f) => ({
-          id: f.id,
-          name: f.name,
-          size: f.size,
-        })),
-      };
-
-      console.log("=== SALVANDO ORDEM DE SERVIÇO ===");
-      console.log("Dados consolidados:", consolidatedData);
-      console.log("Arquivos para upload:", attachedFiles);
-      console.log("====================================");
+      try {
+        const response = await api.put(`/work_orders/${id}`, {
+          status: data.status,
+          description: data.description,
+          corrective_actions: data.corrective_actions,
+          is_persistent_error: data.is_persistent_error,
+          assigned_to: typeof data.assigned_to === "object" ? data.assigned_to.id : data.assigned_to,
+          assigned_by: typeof data.assigned_by === "object" ? data.assigned_by.id : data.assigned_by,
+          deadline: data.deadline,
+        });
+        return response.data;
+      } catch (error) {
+        console.error("Erro ao salvar ordem de serviço:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
-      // setIsEditing(false);
-      // setFormData(null);
-      // setAttachedFiles([]);
-      // toast.success("Ordem de serviço atualizada com sucesso!");
-      // refetch();
+      toast.success("Ordem de serviço atualizada com sucesso!");
+      setIsEditing(false);
+      refetch();
     },
     onError: (error) => {
       console.error("Erro ao salvar ordem de serviço", error);
@@ -113,22 +125,65 @@ const WorkOrderView = () => {
     },
   });
 
-  useEffect(() => {
-    if (assignment && !formData) {
-      setFormData(assignment);
-    }
-  }, [assignment, formData]);
+  const { mutate: uploadEvidences, isPending: isUploading } = useMutation({
+    mutationFn: async () => {
+      if (attachedFiles.length === 0) {
+        throw new Error("Nenhum arquivo para enviar");
+      }
+
+      const uploadPromises = attachedFiles.map((file) => {
+        const formData = new FormData();
+        formData.append("file", file.file);
+
+        if (file.description) {
+          formData.append("description", file.description);
+        }
+
+        return api.post(`/work_orders/${id}/evidences`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      });
+
+      return Promise.all(uploadPromises);
+    },
+    onSuccess: () => {
+      toast.success("Evidências enviadas com sucesso!");
+      setAttachedFiles([]);
+      refetch();
+    },
+    onError: (error) => {
+      console.error("Erro ao enviar evidências:", error);
+      toast.error("Erro ao enviar evidências");
+    },
+  });
+
+  const { mutate: deleteEvidence, isPending: isDeleting } = useMutation({
+    mutationFn: async (evidenceId) => {
+      await api.delete(`/work_orders/${id}/evidences/${evidenceId}`);
+      return null;
+    },
+    onSuccess: () => {
+      toast.success("Evidência removida com sucesso!");
+      refetch();
+    },
+    onError: (error) => {
+      console.error("Erro ao remover evidência:", error);
+      toast.error("Erro ao remover evidência");
+    },
+  });
 
   useEffect(() => {
-    if (users.length > 0 && formData) {
-      const assignedToMatch = users.find(
-        (u) => u.id === formData?.assigned_to?.id,
-      );
-      const assignedByMatch = users.find(
-        (u) => u.id === formData?.assigned_by?.id,
-      );
+    if (assignment) {
+      setFormData(assignment);
     }
-  }, [users, formData]);
+  }, [assignment]);
+
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setModalState({ type: "delete", isOpen: true });
+  };
 
   const handleSave = () => {
     if (!formData?.status) {
@@ -148,12 +203,12 @@ const WorkOrderView = () => {
       return;
     }
 
-    if (!formData?.assigned_to?.id) {
+    if (!formData?.assigned_to) {
       toast.error("Selecione um usuário para atribuir a OS");
       return;
     }
 
-    if (!formData?.assigned_by?.id) {
+    if (!formData?.assigned_by) {
       toast.error("Selecione um usuário que atribuiu a OS");
       return;
     }
@@ -173,23 +228,50 @@ const WorkOrderView = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setFormData(null);
+    setFormData(assignment);
   };
 
   const handleFileAttach = (event) => {
     const files = Array.from(event.target.files || []);
-    const newFiles = files.map((file) => ({
-      id: `${file.name}-${Date.now()}`,
-      name: file.name,
-      size: file.size,
-      file: file,
-    }));
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+    const newFiles = files
+      .filter((file) => {
+        if (file.type !== "application/pdf") {
+          toast.error(`${file.name} - Apenas arquivos PDF são aceitos`);
+          return false;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+          toast.error(
+            `${file.name} - Arquivo excede o tamanho máximo de 10 MB`,
+          );
+          return false;
+        }
+
+        return true;
+      })
+      .map((file) => ({
+        id: `${file.name}-${Date.now()}`,
+        name: file.name,
+        size: file.size,
+        file: file,
+        description: "",
+      }));
+
     setAttachedFiles([...attachedFiles, ...newFiles]);
     event.target.value = "";
   };
 
   const handleRemoveFile = (fileId) => {
     setAttachedFiles(attachedFiles.filter((f) => f.id !== fileId));
+  };
+
+  const handleDownloadFile = (filePath, fileName) => {
+    const link = document.createElement("a");
+    link.href = `${filePath}`;
+    link.download = fileName;
+    link.click();
   };
 
   if (isLoading) {
@@ -218,6 +300,15 @@ const WorkOrderView = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full">
+      <ModalDelete
+        isOpen={modalState.type === "delete" && modalState.isOpen}
+        message="Você tem certeza que deseja excluir esta Ordem de Serviço?"
+        onClose={() => {
+          setModalState({ type: null, isOpen: false });
+          setDeleteId(null);
+        }}
+        onConfirm={() => deleteWorkOrder(deleteId)}
+      />
       <PageTitle
         title={`Ordem de Serviço #${String(assignment.id).padStart(4, "0")}`}
         icon={<WorkOutline />}
@@ -235,9 +326,23 @@ const WorkOrderView = () => {
           >
             Voltar
           </Button>,
+          <Button
+            key="cancel-button"
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteForever />}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(id);
+            }}
+            disabled={isSaving}
+          >
+            Excluir
+          </Button>,
 
           isEditing ? (
             <>
+
               <Button
                 key="cancel-button"
                 variant="outlined"
@@ -407,7 +512,7 @@ const WorkOrderView = () => {
 
         <FormField required label="Descrição" containerClass="col-span-full">
           <TextField
-            multiline
+            type="text"
             minRows={6}
             style={{ width: "100%", resize: "vertical" }}
             value={formData?.description || ""}
@@ -431,13 +536,11 @@ const WorkOrderView = () => {
           <Select
             required
             fullWidth
-            value={formData?.assigned_to?.id || ""}
+            value={formData?.assigned_to || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                assigned_to:
-                  users.find((user) => user.id === e.target.value) ||
-                  formData?.assigned_to,
+                assigned_to: e.target.value,
               })
             }
             disabled={!isEditing}
@@ -458,13 +561,11 @@ const WorkOrderView = () => {
           <Select
             required
             fullWidth
-            value={formData?.assigned_by?.id || ""}
+            value={formData?.assigned_by || ""}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                assigned_by:
-                  users.find((user) => user.id === e.target.value) ||
-                  formData?.assigned_by,
+                assigned_by: e.target.value,
               })
             }
             disabled={!isEditing}
@@ -486,10 +587,64 @@ const WorkOrderView = () => {
             required
             type="text"
             fullWidth
-            value={formData?.company?.name || ""}
+            value={formData?.company_id || ""}
             disabled
           />
         </FormField>
+
+        {formData?.evidences && formData.evidences.length > 0 && (
+          <FormField label="Evidências Enviadas" containerClass="col-span-full">
+            <div className="flex flex-col gap-2 border rounded p-4 bg-blue-50">
+              <p className="text-sm font-semibold text-zinc-700">
+                {formData.evidences.length} arquivo(s) salvo(s)
+              </p>
+              {formData.evidences.map((evidence) => (
+                <div
+                  key={evidence.id}
+                  className="flex items-center justify-between gap-3 p-3 bg-white border rounded hover:bg-blue-50 transition"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <UploadFile
+                      fontSize="small"
+                      className="text-blue-500 flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-zinc-800 truncate">
+                        {evidence.file_name}
+                      </p>
+                      <div className="flex gap-2 text-xs text-zinc-500">
+                        <span>{(evidence.file_size / 1024).toFixed(2)} KB</span>
+                        {evidence.description && (
+                          <span className="italic">"{evidence.description}"</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <IconButton
+                    size="small"
+                    color="secondary"
+                    onClick={() =>
+                      handleDownloadFile(evidence.file_path, evidence.file_name)
+                    }
+                    title="Baixar arquivo"
+                  >
+                    <Download fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => deleteEvidence(evidence.id)}
+                    disabled={isDeleting}
+                    title="Remover comprovante"
+                    disabled={!isEditing}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </div>
+              ))}
+            </div>
+          </FormField>
+        )}
 
         <FormField containerClass="col-span-full">
           <div className="flex flex-col gap-4">
@@ -498,6 +653,7 @@ const WorkOrderView = () => {
                 id="file-input"
                 type="file"
                 multiple
+                accept="application/pdf"
                 onChange={handleFileAttach}
                 disabled={!isEditing}
                 style={{ display: "none" }}
@@ -509,7 +665,7 @@ const WorkOrderView = () => {
                 onClick={() => document.getElementById("file-input").click()}
                 disabled={!isEditing}
               >
-                Anexar arquivo
+                Anexar PDF (máx. 10 MB)
               </Button>
             </div>
 
@@ -521,30 +677,63 @@ const WorkOrderView = () => {
                 {attachedFiles.map((file) => (
                   <div
                     key={file.id}
-                    className="flex items-center justify-between gap-3 p-3 bg-white border rounded hover:bg-zinc-100 transition"
+                    className="flex flex-col gap-3 p-3 bg-white border-none rounded hover:bg-zinc-100 transition"
                   >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <UploadFile
-                        fontSize="small"
-                        className="text-zinc-500 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-zinc-800 truncate">
-                          {file.name}
-                        </p>
-                        <p className="text-xs text-zinc-500">
-                          {(file.size / 1024).toFixed(2)} KB
-                        </p>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <UploadFile
+                          fontSize="small"
+                          className="text-zinc-500 flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-zinc-800 truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-zinc-500">
+                            {(file.size / 1024).toFixed(2)} KB
+                          </p>
+                        </div>
                       </div>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleRemoveFile(file.id)}
+                        disabled={!isEditing}
+                      >
+                        <RemoveCircleOutline fontSize="small" />
+                      </IconButton>
                     </div>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleRemoveFile(file.id)}
-                      disabled={!isEditing}
-                    >
-                      <RemoveCircleOutline fontSize="small" />
-                    </IconButton>
+
+                    {isEditing && (
+                      <TextField
+                        size="small"
+                        className="bg-[#121212] border-sm"
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            "& fieldset": {
+                              borderColor: "transparent",
+                            },
+                            "&:hover fieldset": {
+                              borderColor: "transparent",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "transparent",
+                            },
+                          },
+                        }}
+                        placeholder="Descrição opcional (máx. 500 caracteres)"
+                        fullWidth
+                        multiline
+                        maxRows={3}
+                        value={file?.description}
+                        onChange={(e) =>
+                          handleFileDescriptionChange(
+                            file.id,
+                            e.target.value.slice(0, 500),
+                          )
+                        }
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -555,6 +744,19 @@ const WorkOrderView = () => {
                 <UploadFile fontSize="small" />
                 <span className="text-sm">Nenhum arquivo anexado ainda</span>
               </div>
+            )}
+
+            {attachedFiles.length > 0 && (
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={<UploadFile fontSize="small" />}
+                onClick={() => uploadEvidences()}
+                disabled={isUploading}
+                fullWidth
+              >
+                {isUploading ? <CircularProgress size={20} /> : "Salvar Anexos"}
+              </Button>
             )}
           </div>
         </FormField>

@@ -52,7 +52,7 @@ const CreateTask = ({ open, onClose, auditRecord }) => {
     if (auditRecord) {
       setData({
         ...data,
-        entity_id: auditRecord.id,
+        entity_id: auditRecord?.id,
         entity_type: "audit_invalid_record",
       });
     }
@@ -61,14 +61,16 @@ const CreateTask = ({ open, onClose, auditRecord }) => {
   const submit = (e) => {
     e.preventDefault();
 
+    const payload = {
+      ...data,
+      assigned_to: data.assigned_to?.id,
+      assigned_by: data.assigned_by?.id,
+      company_id: company?.id,
+      entity_id: data.entity_id,
+    };
+
     api
-      .post("/work_orders", {
-        ...data,
-        assigned_to: data.assigned_to.id,
-        assigned_by: data.assigned_by.id,
-        company_id: company?.id,
-        entity_id: data.entity_id.id,
-      })
+      .post("/work_orders", payload)
       .then(() => {
         toast.success("Tarefa criada com sucesso");
         onClose();
@@ -207,8 +209,8 @@ const CreateTask = ({ open, onClose, auditRecord }) => {
             options={
               data.assigned_by
                 ? availableUsers.filter(
-                    (user) => user.role.nivel > data.assigned_by.role.nivel,
-                  )
+                  (user) => user.role.nivel > data.assigned_by.role.nivel,
+                )
                 : availableUsers
             }
             noOptionsText="Nenhum usuário encontrado"
