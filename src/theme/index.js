@@ -180,6 +180,9 @@ export const getTheme = (mode) => {
           shrink: {
             transform: "translate(14px, -9px) scale(0.75)",
           },
+          "&.MuiInputLabel-animated": {
+            transform: "translate(14px, 12px) scale(1)",
+          },
           "&.Mui-focused": {
             transform: "translate(14px, -9px) scale(0.75)",
           },
