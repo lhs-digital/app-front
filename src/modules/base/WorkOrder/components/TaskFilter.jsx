@@ -145,7 +145,6 @@ export default function TaskFilter({ setAssignments, setQueryState }) {
         />
       )} */}
       <Autocomplete
-        size="small"
         value={filters.assigned_by}
         getOptionLabel={(option) => option.name}
         getOptionKey={(option) => option.id}
@@ -167,7 +166,6 @@ export default function TaskFilter({ setAssignments, setQueryState }) {
         onChange={(e, newValue) => updateFilter("assigned_by", newValue)}
       />
       <Autocomplete
-        size="small"
         value={filters.assigned_to}
         getOptionLabel={(option) => option.name}
         getOptionKey={(option) => option.id}
