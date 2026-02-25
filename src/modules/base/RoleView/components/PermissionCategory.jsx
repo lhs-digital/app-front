@@ -10,24 +10,18 @@ const PermissionCategory = ({
 }) => {
   return (
     <div className="flex flex-col">
-      <h2 className="font-semibold border-b-2 border-b-black dark:border-b-white px-4 py-4 border-t dark:border-t-white/20">
+      <h2 className="font-semibold px-4 py-2 border-y bg-zinc-200 dark:bg-zinc-800 my-2">
         <span>
           <LabelOutlined fontSize="small" className="mr-2 mb-0.5" />
         </span>
         {category}
       </h2>
       <table className="w-full">
-        <thead>
-          <tr className="text-left font-medium text-sm border-b [&>*]:py-4 [&>*]:px-4 bg-zinc-500/20">
-            <th className="w-1/3">Permissão</th>
-            <th>Ativo</th>
-          </tr>
-        </thead>
         <tbody>
           {permissions.map((permission) => (
             <tr key={permission.id} className="[&>*]:py-2">
-              <td className="px-4">{permission.label}</td>
-              <td className="px-3">
+              <td className="px-4 w-1/3">{permission.label}</td>
+              <td className="px-2">
                 <Checkbox
                   checked={selectedPermissions.some(
                     (rolePermission) => rolePermission.id === permission.id,

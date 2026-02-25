@@ -1,7 +1,7 @@
-import { Edit, LockOpen, Save } from "@mui/icons-material";
-import { Button, MenuItem, Select, TextField } from "@mui/material";
+import { ArrowUpward, Edit, LockOpen, Save } from "@mui/icons-material";
+import { Button, Checkbox, MenuItem, Select, TextField } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -24,7 +24,7 @@ const RoleView = () => {
   const { state: userState } = useUserState();
   const { company, availableCompanies } = useCompany();
   const [selectedPermissions, setSelectedPermissions] = useState([]);
-
+  const permissionsContainerRef = useRef(null);
   // const { data: companies, isFetched: isCompanyFetched } = useQuery({
   //   queryKey: ["companies", id],
   //   queryFn: async () => {
@@ -181,7 +181,7 @@ const RoleView = () => {
           }
         />
         <form
-          className="grid grid-cols-1 lg:grid-cols-6 gap-4 w-full"
+          className="grid grid-cols-1 lg:grid-cols-6 gap-4 w-full relative"
           id="role-form"
           onSubmit={methods.handleSubmit(onSubmit)}
         >
@@ -282,8 +282,46 @@ const RoleView = () => {
               />
             </FormField>
           )}
-          <div className="col-span-full flex flex-col">
+          <div
+            className="col-span-full flex flex-col pt-8"
+            ref={permissionsContainerRef}
+          >
             <h2 className="text-lg font-semibold mb-4">Permissões</h2>
+            <div className="w-full text-zinc-500 dark:text-zinc-300 flex items-center text-left font-medium text-sm py-4 border-y border-[--border] z-10 sticky top-0 bg-[--background-color]">
+              <p className="w-1/3 px-4">Permissão</p>
+              <p className="w-12 px-3">Ativo</p>
+            </div>
+            <div
+              key="all-permissions"
+              className="w-full flex items-center pt-2"
+            >
+              <p className="w-1/3 px-4 font-medium">Todas as permissões</p>
+              <div className="px-2">
+                <Checkbox
+                  checked={
+                    permissions &&
+                    selectedPermissions.length ===
+                      Object.values(permissions).flat().length
+                  }
+                  slotProps={{
+                    input: {
+                      "aria-label": "controlled",
+                    },
+                  }}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedPermissions(
+                        Object.values(permissions)
+                          .flat()
+                          .map((permission) => permission),
+                      );
+                    } else {
+                      setSelectedPermissions([]);
+                    }
+                  }}
+                />
+              </div>
+            </div>
             {permissions &&
               Object.keys(permissions).map((category) => (
                 <PermissionCategory
@@ -297,6 +335,27 @@ const RoleView = () => {
               ))}
           </div>
         </form>
+        <Button
+          id="scroll-to-top-button"
+          variant="contained"
+          color="primary"
+          className="h-[46px] w-[46px] aspect-square"
+          onClick={() => {
+            permissionsContainerRef.current?.scrollIntoView({
+              behavior: "smooth",
+            });
+          }}
+          sx={{
+            minWidth: 0,
+            borderRadius: "50%",
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            zIndex: 1000,
+          }}
+        >
+          <ArrowUpward fontSize="small" />
+        </Button>
       </div>
     </FormProvider>
   );
