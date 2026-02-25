@@ -32,8 +32,10 @@ const PermissionCategory = ({
                   checked={selectedPermissions.some(
                     (rolePermission) => rolePermission.id === permission.id,
                   )}
-                  inputProps={{
-                    "aria-label": "controlled",
+                  slotProps={{
+                    input: {
+                      "aria-label": "controlled",
+                    },
                   }}
                   onChange={(e) => {
                     if (readOnly) return;
