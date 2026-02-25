@@ -10,6 +10,7 @@ import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
 import PageTitle from "../../../layout/components/PageTitle";
 import api from "../../../services/api";
+import { roleLevelMap } from "../../../services/utils";
 import PermissionCategory from "./components/PermissionCategory";
 
 const RoleView = () => {
@@ -216,10 +217,11 @@ const RoleView = () => {
                   onChange={(e) => field.onChange(e.target.value)}
                   readOnly={!isEditing && !isCreating}
                 >
-                  <MenuItem value={0}>Alto</MenuItem>
-                  <MenuItem value={1}>Médio</MenuItem>
-                  <MenuItem value={2}>Baixo</MenuItem>
-                  <MenuItem value={3}>Muito Baixo</MenuItem>
+                  {Object.entries(roleLevelMap).map(([key, value]) => (
+                    <MenuItem key={key} value={key}>
+                      {value}
+                    </MenuItem>
+                  ))}
                 </Select>
               )}
             />
