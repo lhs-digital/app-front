@@ -177,9 +177,6 @@ export const getTheme = (mode) => {
       },
       MuiInputLabel: {
         styleOverrides: {
-          root: {
-            transform: "translate(14px, 12px) scale(1)",
-          },
           shrink: {
             transform: "translate(14px, -9px) scale(0.75)",
           },
