@@ -30,7 +30,7 @@ import api from "../services/api";
 import { handleMode } from "../theme";
 import CompanySelect from "./components/CompanySelect";
 import EnvironmentIndicator from "./components/EnvironmentIndicator";
-import Sidebar from "./components/Sidebar";
+import Sidebar, { DRAWER_WIDTH_DEFAULT } from "./components/Sidebar";
 
 const Layout = ({ children }) => {
   const { company, availableCompanies, setCompany } = useCompany();
@@ -40,6 +40,10 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter(Boolean);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const stored = localStorage.getItem("sidebarWidth");
+    return stored ? Number(stored) : DRAWER_WIDTH_DEFAULT;
+  });
   const user = useAuthUser();
   const navigate = useNavigate();
 
@@ -102,6 +106,11 @@ const Layout = ({ children }) => {
     navigate("/");
   };
 
+  const handleSidebarWidthChange = (newWidth) => {
+    setSidebarWidth(newWidth);
+    localStorage.setItem("sidebarWidth", String(newWidth));
+  };
+
   const onSidebarOpenChange = (value) => {
     setSidebarOpen(value);
     localStorage.setItem("sidebarOpen", value);
@@ -109,8 +118,13 @@ const Layout = ({ children }) => {
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden">
-      <Sidebar open={sidebarOpen} setOpen={onSidebarOpenChange} />
-      <div className="grow flex flex-col">
+      <Sidebar
+        open={sidebarOpen}
+        setOpen={onSidebarOpenChange}
+        width={sidebarWidth}
+        setWidth={handleSidebarWidthChange}
+      />
+      <div className="grow flex flex-col min-w-0">
         <div className="h-16 border-b border-b-black/10 dark:border-b-white/15 flex flex-row items-center justify-between px-4">
           <Box className="flex flex-row gap-2 items-center">
             <img
@@ -134,13 +148,7 @@ const Layout = ({ children }) => {
             <ThemeSwitcher />
           </div>
         </div>
-        <motion.div
-          className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6"
-          style={{
-            width: sidebarOpen ? "calc(100vw - 320px)" : "calc(100vw - 65px)",
-            transition: "all 0.3s ease-in-out",
-          }}
-        >
+        <motion.div className="max-h-[calc(100vh-4rem)] px-8 pb-8 pt-4 overflow-y-scroll space-y-6 w-full">
           {pathnames.length > 0 && pathnames[0] !== "" && (
             <Breadcrumbs
               aria-label="breadcrumb"

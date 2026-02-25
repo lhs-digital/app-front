@@ -23,7 +23,7 @@ import {
   useTheme,
 } from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -32,8 +32,10 @@ import { useUserState } from "../../hooks/useUserState";
 import { modules } from "../../routes/modules";
 import { routeIcon } from "./RouteIcon";
 
-const drawerWidth = 320;
-const drawerWidthClosed = 64;
+const DRAWER_WIDTH_MIN = 200;
+const DRAWER_WIDTH_MAX = 400;
+const DRAWER_WIDTH_CLOSED = 64;
+const DRAWER_WIDTH_DEFAULT = 240;
 
 const Drawer = MuiDrawer;
 
@@ -145,9 +147,20 @@ const SidebarMenuItem = ({
               <>
                 <ListItemText
                   primary={item.label}
-                  primaryTypographyProps={{
-                    fontSize: "0.875rem",
-                    fontWeight: isPathActive ? 600 : 400,
+                  slotProps={{
+                    primary: {
+                      fontSize: "0.875rem",
+                      fontWeight: isPathActive ? 600 : 400,
+                    },
+                  }}
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                    whiteSpace: "nowrap",
+                    width: "min-content",
+                    maxWidth: "100%",
+                    marginRight: "8px",
                   }}
                 />
                 {hasVisibleChildren && (
@@ -232,9 +245,11 @@ const SidebarMenuItem = ({
                 </ListItemIcon>
                 <ListItemText
                   primary={child.label}
-                  primaryTypographyProps={{
-                    fontSize: "0.875rem",
-                    fontWeight: isChildActive ? 600 : 400,
+                  slotProps={{
+                    primary: {
+                      fontSize: "0.875rem",
+                      fontWeight: isChildActive ? 600 : 400,
+                    },
                   }}
                 />
                 {hasGrandchildren && (
@@ -277,7 +292,7 @@ const SidebarMenuItem = ({
   );
 };
 
-const Sidebar = ({ open, setOpen }) => {
+const Sidebar = ({ open, setOpen, width, setWidth }) => {
   const user = useAuthUser();
   const signOut = useSignOut();
   const theme = useTheme();
@@ -329,6 +344,52 @@ const Sidebar = ({ open, setOpen }) => {
     if (path) navigate(path);
   };
 
+  const [isResizing, setIsResizing] = useState(false);
+  const isResizingRef = useRef(false);
+  const setWidthRef = useRef(setWidth);
+
+  useEffect(() => {
+    setWidthRef.current = setWidth;
+  }, [setWidth]);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isResizingRef.current) return;
+    const newWidth = Math.min(
+      DRAWER_WIDTH_MAX,
+      Math.max(DRAWER_WIDTH_MIN, e.clientX),
+    );
+    setWidthRef.current(newWidth);
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isResizingRef.current = false;
+    setIsResizing(false);
+    document.body.style.userSelect = "";
+    document.body.style.cursor = "";
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  }, [handleMouseMove]);
+
+  const handleDragStart = useCallback(
+    (e) => {
+      e.preventDefault();
+      isResizingRef.current = true;
+      setIsResizing(true);
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "col-resize";
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    },
+    [handleMouseMove, handleMouseUp],
+  );
+
+  useEffect(() => {
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
   const filterVisibleModules = (items) => {
     return items.filter((item) => {
       // Check permissions
@@ -352,18 +413,20 @@ const Sidebar = ({ open, setOpen }) => {
       variant="permanent"
       open={open}
       sx={{
-        width: open ? drawerWidth : drawerWidthClosed,
+        width: open ? width : DRAWER_WIDTH_CLOSED,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: open ? drawerWidth : drawerWidthClosed,
+          width: open ? width : DRAWER_WIDTH_CLOSED,
           boxSizing: "border-box",
           border: "none",
           borderRight: `1px solid ${theme.palette.divider}`,
           borderRadius: 0,
-          transition: theme.transitions.create("width", {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
+          transition: isResizing
+            ? "none"
+            : theme.transitions.create("width", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
           overflowX: "hidden",
         },
       }}
@@ -561,8 +624,31 @@ const Sidebar = ({ open, setOpen }) => {
           </Tooltip>
         </Box>
       )}
+      {open && (
+        <Box
+          onMouseDown={handleDragStart}
+          role="separator"
+          aria-label="Resize sidebar"
+          tabIndex={0}
+          sx={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 4,
+            cursor: "col-resize",
+            zIndex: (t) => t.zIndex.drawer + 1,
+            backgroundColor: "transparent",
+            transition: "background-color 0.15s",
+            "&:hover, &:active": {
+              backgroundColor: theme.palette.primary.main,
+            },
+          }}
+        />
+      )}
     </Drawer>
   );
 };
 
+export { DRAWER_WIDTH_CLOSED, DRAWER_WIDTH_DEFAULT };
 export default Sidebar;
