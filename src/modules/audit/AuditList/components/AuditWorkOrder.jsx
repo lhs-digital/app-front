@@ -39,7 +39,6 @@ const AuditWorkOrder = ({ open, onClose, auditRecord, handleView }) => {
         },
       });
       const assignables = await api.get("/assignables");
-      console.log(assignables.data);
       return response.data.data;
     },
     enabled: !!user.company,

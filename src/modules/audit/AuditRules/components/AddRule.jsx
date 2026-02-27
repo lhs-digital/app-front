@@ -94,7 +94,6 @@ const AddRule = ({
 
   useEffect(() => {
     if (data) {
-      console.log("addRule", data);
       reset({
         column: {
           name: data.name || "",
@@ -123,7 +122,6 @@ const AddRule = ({
           };
         });
 
-        console.log("formattedRules", formattedRules);
 
         setRules(formattedRules);
       }

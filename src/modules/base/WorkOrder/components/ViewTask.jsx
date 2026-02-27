@@ -24,7 +24,6 @@ import { qc } from "../../../../services/queryClient";
 import { statusInfo, taskStatuses } from "../utils";
 
 const ViewTask = ({ assignment, open, onClose }) => {
-  console.log("assignment", assignment);
   const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState(
     assignment?.status || "not_started",
@@ -73,12 +72,10 @@ const ViewTask = ({ assignment, open, onClose }) => {
   };
 
   const handleView = (auditRecord) => {
-    console.log("auditRecord", auditRecord);
     const navigateRoute = [];
 
     navigateRoute.push(moduleRoutes[auditRecord?.table.name]);
     navigateRoute.push(auditRecord?.record_id);
-    console.log("navigateRoute", navigateRoute);
 
     return navigate(`/${navigateRoute.join("/")}`, {
       state: {

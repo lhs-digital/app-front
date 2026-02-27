@@ -25,7 +25,6 @@ const ContextSelect = ({ company, table, setTable }) => {
     queryKey: ["company_tables", company],
     queryFn: async () => {
       const response = await api.get(`/companies/3/audit/modules/1/tables`);
-      console.log("auditable", response.data.data);
       return response.data.data;
     },
     enabled: !!company,

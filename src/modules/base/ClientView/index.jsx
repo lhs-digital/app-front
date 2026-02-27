@@ -142,7 +142,6 @@ const ClientForm = () => {
 
   const { mutate: updateClient, isPending: updateIsPending } = useMutation({
     mutationFn: async (data) => {
-      console.log("data", data);
       const response = await api.put(`/module/cliente/${id}`, data);
       return response.data;
     },

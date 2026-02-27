@@ -42,7 +42,6 @@ const SignIn = () => {
   };
 
   const onCompanyPickerClose = (success = false) => {
-    console.log("onCompanyPickerClose", success);
     if (success) {
       navigate("/");
       setCompanyPickerOpen(false);

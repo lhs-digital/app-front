@@ -61,7 +61,6 @@ const AuditSection = () => {
           `/companies/${company?.id}/audit/summary`,
         );
 
-        console.log("response:", response);
         setDataLastAudit(response.data.last_audit_date);
 
         if (response.data.per_module && auditModule) {
@@ -318,8 +317,6 @@ const AuditSection = () => {
             </Box>
           </Card>
         </Box>
-        {/* Quick Actions for desktop */}
-        {console.log("informações do endpoint:", dataLastAudit)}
         <Card
           variant="outlined"
           className={`p-4 flex flex-col gap-2 grow ${isMobile ? "w-full" : "max-md:hidden"}`}

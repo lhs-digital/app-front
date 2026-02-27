@@ -71,8 +71,6 @@ const AuditList = () => {
           `/companies/${company.id}/audit/modules`,
         );
         const modules = response.data.data;
-        console.log("modules", modules);
-        console.log("filters.moduleId", filters.moduleId);
         if (modules.length > 0 && !filters.moduleId) {
           updateFilters({ moduleId: modules[0].id });
         }

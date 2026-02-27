@@ -27,7 +27,6 @@ export const CompanyContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (localStorage.getItem("company") && !user) {
-      console.log("resetting company");
       resetCompany();
     }
   }, [user]);

@@ -84,7 +84,6 @@ const FieldsTab = () => {
                         </IconButton>
                         <IconButton
                           onClick={() => {
-                            console.log(column);
                           }}
                         >
                           <Delete fontSize="small" />

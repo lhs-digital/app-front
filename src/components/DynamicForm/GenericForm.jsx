@@ -27,7 +27,6 @@ const GenericForm = () => {
 
   const handleSubmit = async (data) => {
     try {
-      console.log("Form submitted:", data);
       toast.success("Dados salvos com sucesso!");
 
       if (module) {

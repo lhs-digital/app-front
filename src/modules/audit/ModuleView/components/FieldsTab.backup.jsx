@@ -15,7 +15,6 @@ const FieldsTab = () => {
   const columnList = watch("columns") || [];
 
   const handleAddColumn = (column) => {
-    console.log(column);
     let columns = getValues("columns") || [];
     columns = [...columns, column];
     setValue("columns", columns);

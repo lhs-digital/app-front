@@ -21,7 +21,6 @@ const WorkOrder = () => {
   const navigate = useNavigate();
 
   const handleSetAssignments = useCallback((newAssignments) => {
-    console.log("Atualizando assignments:", newAssignments);
     setAssignments(newAssignments);
   }, []);
 

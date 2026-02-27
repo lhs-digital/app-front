@@ -122,7 +122,6 @@ const RoleView = () => {
       return toast.error("Preencha todos os campos corretamente");
     }
 
-    console.log("data", data);
 
     const payload = {
       ...data,
@@ -133,7 +132,6 @@ const RoleView = () => {
     // Remove company from payload if it's not needed in the API
     delete payload.company;
 
-    console.log("payload", payload);
 
     if (isCreating) {
       return createRole(payload);

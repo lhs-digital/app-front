@@ -73,7 +73,6 @@ const AuditRules = () => {
           company_id: company.id,
         },
       });
-      console.log("tables", response.data.data);
       return response.data.data;
     },
     enabled: company !== "",

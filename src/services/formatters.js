@@ -17,7 +17,6 @@ export const formatBackendRulesToFrontend = (
   }
 
   return backendRules.map((rule) => {
-    console.log(rule);
     // Find the validation object from available validations by matching the rule name
     const validationObject = availableValidations.find(
       (validation) => validation.name === rule.name,

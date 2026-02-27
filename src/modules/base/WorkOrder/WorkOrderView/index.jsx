@@ -73,7 +73,6 @@ const WorkOrderView = () => {
     queryKey: ["assignment", id],
     queryFn: async () => {
       const response = await api.get(`/work_orders/${id}`);
-      console.log("Resposta da API de ordem de serviço:", response);
       return response.data;
     },
     enabled: !!id,
@@ -101,7 +100,6 @@ const WorkOrderView = () => {
     queryFn: async () => {
       try {
         const response = await api.get("/users");
-        console.log("Resposta da API de usuários:", response);
         return response.data?.data || [];
       } catch (err) {
         console.error("Erro ao buscar usuários:", err);

@@ -84,7 +84,6 @@ const ModalHierarchy = ({
     try {
       const id = responsibleId || responsibleUser?.id || user?.id;
 
-      console.log("fetchEligibleSubordinates id:", id);
       const endpoint = desHierarchy
         ? `/users/my-subordinates?userId=${id}`
         : `/users/eligible-subordinates/${id}`;
@@ -269,7 +268,6 @@ const ModalHierarchy = ({
                   options={eligibleResponsibleUsers}
                   value={responsibleUser}
                   onChange={(event, newValue) => {
-                    console.log("newValue", newValue);
                     setResponsibleUser(newValue);
                     setAssociatedUsers([]);
                     if (newValue) {

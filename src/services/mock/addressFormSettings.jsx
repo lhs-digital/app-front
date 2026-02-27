@@ -90,6 +90,5 @@ export const mockAddressFormSettings = {
     id_conta: "Cob123",
   },
   onSubmit: (data) => {
-    console.log("Mock address form submitted:", data);
   },
 };

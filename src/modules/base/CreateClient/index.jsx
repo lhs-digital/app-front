@@ -31,7 +31,6 @@ export const ClientFormProvider = ({ children }) => {
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(location.state?.edit || false);
   const errors = location.state?.columns;
-  console.log("errors", errors);
   const isCreating = id === "novo";
   const methods = useForm();
 

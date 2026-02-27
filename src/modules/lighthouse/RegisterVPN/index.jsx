@@ -107,7 +107,6 @@ const RegisterVpn = () => {
     try {
       setIsPending(true);
 
-      console.log(data);
 
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
