@@ -21,7 +21,9 @@ const WorkOrderForm = ({ assignment, compact = false }) => {
 
   return (
     <div className={`flex flex-col ${compact ? "gap-2.5" : "gap-4"}`}>
-      <strong>OS{String(assignment?.id).padStart(4, '0')}</strong>
+      <div className="flex justify-between">
+        <strong>OS{String(assignment?.id).padStart(4, '0')}</strong>
+      </div>
       <Divider />
 
       <div className="flex justify-between items-center">

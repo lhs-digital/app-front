@@ -7,6 +7,7 @@ import { useCompany } from "../../../../hooks/useCompany";
 import { handleMode, themeColors } from "../../../../theme";
 import CreateTask from "../../../base/WorkOrder/components/CreateTask";
 import AuditItem from "./AuditItem";
+import { useNavigate } from "react-router-dom";
 
 const AuditContent = ({ isLoading, data, handleView }) => {
   const theme = handleMode(useThemeMode().mode);
@@ -14,6 +15,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
   const { company } = useCompany();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const [selectedAuditRecord, setSelectedAuditRecord] = useState(null);
+  const navigate = useNavigate();
   if (!company) {
     return (
       <div className="p-8 lg:py-12">
@@ -53,8 +55,7 @@ const AuditContent = ({ isLoading, data, handleView }) => {
   }
 
   const handleWorkOrderClick = (auditRecord) => {
-    setSelectedAuditRecord(auditRecord);
-    setOpenWorkOrder(true);
+    navigate(`/ordens-de-servico/${auditRecord?.work_order?.id}`);
   };
 
   return (

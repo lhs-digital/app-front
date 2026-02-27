@@ -29,9 +29,10 @@ import { toast } from "react-toastify";
 import FormField from "../../../../components/FormField";
 import PageTitle from "../../../../layout/components/PageTitle";
 import api from "../../../../services/api";
-import { assignmentsMock } from "../assignment_mock";
 import { statusInfo } from "../utils";
+
 import ModalDelete from "../../../../components/ModalDelete";
+import AuditItemTable from "./AuditItemTable";
 
 const WorkOrderView = () => {
   const [modalState, setModalState] = useState({
@@ -76,6 +77,19 @@ const WorkOrderView = () => {
       return response.data;
     },
     enabled: !!id,
+  });
+
+  // Extrair companyId e auditRecordId após definir assignment
+  const companyId = assignment?.company_id;
+  const auditRecordId = assignment?.entity?.id;
+
+  const { data: auditRecord, isLoading: auditLoading } = useQuery({
+    queryKey: ["auditRecord", companyId, auditRecordId],
+    enabled: !!companyId && !!auditRecordId,
+    queryFn: async () => {
+      const response = await api.get(`/companies/${companyId}/audit/${auditRecordId}`);
+      return response.data.data;
+    },
   });
 
   const {
@@ -761,6 +775,17 @@ const WorkOrderView = () => {
           </div>
         </FormField>
       </form>
+
+      {auditRecord && (
+        <div className="mt-8 flex flex-col gap-4">
+          <PageTitle
+            title={`Item Auditado #${String(assignment?.entity?.id).padStart(4, "0")}`}
+            subtitle="Informações do Item Auditado relacionado a esta Ordem de Serviço"
+          />
+          <AuditItemTable item={auditRecord} />
+        </div>
+      )}
+
     </div>
   );
 };
