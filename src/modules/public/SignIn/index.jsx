@@ -14,6 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Lighthouse from "../../../assets/favicon_neutral.svg";
 import CompanyPicker from "../../../components/CompanyPicker";
+import { useCompany } from "../../../hooks/useCompany";
 import { useUserState } from "../../../hooks/useUserState";
 import api from "../../../services/api";
 import { formatUserObject } from "../../../services/utils";
@@ -32,6 +33,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   const { setUserState } = useUserState();
   const authUser = useAuthUser();
+  const { setCompany } = useCompany();
 
   const handleRememberMeChange = () => {
     setRememberMe(!rememberMe);
@@ -83,9 +85,15 @@ const SignIn = () => {
         setUserState(formattedUser);
 
         if (formattedUser.isLighthouse) {
-          navigate("/");
-        } else {
+          console.log("User is lighthouse, company is", formattedUser.company);
           setCompanyPickerOpen(true);
+        } else {
+          console.log(
+            "User is not lighthouse, company is",
+            formattedUser.company,
+          );
+          await setCompany(formattedUser.company);
+          navigate("/");
         }
       } else {
         toast.error("Ocorreu um erro ao realizar login.");

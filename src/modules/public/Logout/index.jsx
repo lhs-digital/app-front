@@ -1,13 +1,17 @@
 import { CircularProgress } from "@mui/material";
+import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "../../../hooks/useCompany";
 
 const Logout = () => {
   const navigate = useNavigate();
   const { resetCompany } = useCompany();
+  const signOut = useSignOut();
 
   setTimeout(() => {
+    signOut();
     resetCompany();
+    localStorage.removeItem("token");
     navigate("/");
   }, 1000);
 
