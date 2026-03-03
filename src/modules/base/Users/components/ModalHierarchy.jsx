@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useCompany } from "../../../../hooks/useCompany";
 import api from "../../../../services/api";
@@ -34,12 +35,20 @@ const ModalHierarchy = ({
   responsibleHierarchy,
   onHierarchyUpdated,
 }) => {
-  const [responsibleUser, setResponsibleUser] = useState(null);
   const [eligibleResponsibleUsers, setEligibleResponsibleUsers] = useState([]);
-  const [associatedUsers, setAssociatedUsers] = useState([]);
   const [eligibleSubordinates, setEligibleSubordinates] = useState([]);
   const user = useAuthUser();
   const { company } = useCompany();
+
+  const { control, handleSubmit, reset, watch, setValue } = useForm({
+    defaultValues: {
+      responsibleUser: null,
+      associatedUsers: [],
+    },
+  });
+
+  const responsibleUser = watch("responsibleUser");
+  const associatedUsers = watch("associatedUsers");
 
   const operationStyle = {
     view: {
@@ -117,7 +126,7 @@ const ModalHierarchy = ({
       if (desHierarchy) {
         setEligibleSubordinates(formattedSubordinates || []);
       } else {
-        setAssociatedUsers(formattedSubordinates || []);
+        setValue("associatedUsers", formattedSubordinates || []);
       }
     } catch (error) {
       toast.error("Erro ao buscar membros da equipe elegíveis.");
@@ -126,35 +135,34 @@ const ModalHierarchy = ({
   };
 
   useEffect(() => {
-    if (isOpen && (desHierarchy || viewHierarchy)) {
+    if (!isOpen) return;
+
+    if (!user?.isLighthouse) {
+      setValue("responsibleUser", { id: user?.id, name: user?.name });
+    }
+
+    if (desHierarchy || viewHierarchy) {
       fetchMySubordinates();
-      fetchEligibleResponsibleUsers();
-    } else if (isOpen) {
+      if (user?.isLighthouse) fetchEligibleResponsibleUsers();
+    } else {
       fetchEligibleSubordinates();
-      fetchEligibleResponsibleUsers();
+      if (user?.isLighthouse) fetchEligibleResponsibleUsers();
     }
   }, [isOpen]);
 
-  const handleSave = async () => {
+  const onSubmit = async (data) => {
     try {
-      const targetUserIds = associatedUsers.map((user) => user.id);
-      const targetUserNames = associatedUsers
+      const targetUserIds = data.associatedUsers.map((user) => user.id);
+      const targetUserNames = data.associatedUsers
         .map((user) => user.name)
         .join(", ");
 
-      const payload = desHierarchy
-        ? {
-            responsible_user_id: user.isLighthouse
-              ? responsibleUser?.id
-              : user?.id,
-            target_user_ids: targetUserIds,
-          }
-        : {
-            responsible_user_id: user.isLighthouse
-              ? responsibleUser?.id
-              : user?.id,
-            target_user_ids: targetUserIds,
-          };
+      const payload = {
+        responsible_user_id: user.isLighthouse
+          ? data.responsibleUser?.id
+          : user?.id,
+        target_user_ids: targetUserIds,
+      };
 
       const endpoint = desHierarchy
         ? "/users/unassign-responsible"
@@ -181,22 +189,23 @@ const ModalHierarchy = ({
     }
   };
 
-  const handleAddUser = (user) => {
-    if (user && !associatedUsers.some((u) => u.id === user.id)) {
-      setAssociatedUsers((prev) => [...prev, user]);
-    }
+  const handleAddUser = (newUser) => {
+    if (!newUser || associatedUsers.some((u) => u.id === newUser.id)) return;
+    setValue("associatedUsers", [...associatedUsers, newUser]);
   };
 
-  const handleRemoveUser = (user) => {
-    setAssociatedUsers((prev) => prev.filter((u) => u.id !== user.id));
+  const handleRemoveUser = (targetUser) => {
+    setValue(
+      "associatedUsers",
+      associatedUsers.filter((u) => u.id !== targetUser.id),
+    );
   };
 
   const handleClose = () => {
     onClose();
     setTimeout(() => {
       setEligibleSubordinates([]);
-      setResponsibleUser(null);
-      setAssociatedUsers([]);
+      reset();
       setDesHierarchy(false);
       setViewHierarchy(false);
     }, 100);
@@ -261,32 +270,41 @@ const ModalHierarchy = ({
           </Box>
         ) : (
           <>
-            {
+            {user?.isLighthouse && (
               <Box>
                 <InputLabel>Selecione o usuário responsável</InputLabel>
-                <Autocomplete
-                  options={eligibleResponsibleUsers}
-                  value={responsibleUser}
-                  onChange={(event, newValue) => {
-                    setResponsibleUser(newValue);
-                    setAssociatedUsers([]);
-                    if (newValue) {
-                      fetchEligibleSubordinates(newValue.id);
-                    } else {
-                      setEligibleSubordinates([]);
-                    }
-                  }}
-                  getOptionLabel={(option) => option.name}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder={"Selecione um usuário responsável da equipe"}
-                      fullWidth
+                <Controller
+                  name="responsibleUser"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      options={eligibleResponsibleUsers}
+                      value={field.value}
+                      onChange={(_, newValue) => {
+                        field.onChange(newValue);
+                        setValue("associatedUsers", []);
+                        if (newValue) {
+                          fetchEligibleSubordinates(newValue.id);
+                        } else {
+                          setEligibleSubordinates([]);
+                        }
+                      }}
+                      getOptionLabel={(option) => option.name}
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value?.id
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Selecione um usuário responsável da equipe"
+                          fullWidth
+                        />
+                      )}
                     />
                   )}
                 />
               </Box>
-            }
+            )}
             <Box>
               <InputLabel>
                 {desHierarchy
@@ -294,16 +312,33 @@ const ModalHierarchy = ({
                   : "Usuários para adicionar *"}
               </InputLabel>
               <Autocomplete
-                options={eligibleSubordinates}
+                options={eligibleSubordinates.filter(
+                  (opt) => !associatedUsers.some((u) => u.id === opt.id),
+                )}
                 getOptionLabel={(option) => option.name}
-                onChange={(event, newValue) => handleAddUser(newValue)}
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value?.id
+                }
+                disabled={
+                  eligibleSubordinates.length > 0 &&
+                  eligibleSubordinates.every((opt) =>
+                    associatedUsers.some((u) => u.id === opt.id),
+                  )
+                }
+                onChange={(_, newValue) => handleAddUser(newValue)}
+                value={null}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     placeholder={
-                      desHierarchy
-                        ? "Selecione um usuário para remover da equipe"
-                        : "Selecione um usuário para adicionar à equipe"
+                      eligibleSubordinates.length > 0 &&
+                      eligibleSubordinates.every((opt) =>
+                        associatedUsers.some((u) => u.id === opt.id),
+                      )
+                        ? "Todos os usuários já foram adicionados"
+                        : desHierarchy
+                          ? "Selecione um usuário para remover da equipe"
+                          : "Selecione um usuário para adicionar à equipe"
                     }
                     fullWidth
                   />
@@ -334,7 +369,7 @@ const ModalHierarchy = ({
             <Button color="info" onClick={handleClose}>
               CANCELAR
             </Button>
-            <Button color="primary" onClick={handleSave}>
+            <Button color="primary" onClick={handleSubmit(onSubmit)}>
               CONFIRMAR
             </Button>
           </>

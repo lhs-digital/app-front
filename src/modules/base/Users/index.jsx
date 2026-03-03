@@ -17,7 +17,6 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
-  InputLabel,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -220,55 +219,55 @@ const Users = () => {
             permission.name === "assign_responsible_users" ||
             permission.name === "unassign_responsible_users",
         ) && (
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                setHierarchyState((prev) => ({ ...prev, viewHierarchy: true }));
-                setModalState({ type: "hierarchy", isOpen: true });
-              }}
-            >
-              <ListItemIcon>
-                <Groups fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Visualizar equipe</ListItemText>
-            </MenuItem>
-          )}
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              setHierarchyState((prev) => ({ ...prev, viewHierarchy: true }));
+              setModalState({ type: "hierarchy", isOpen: true });
+            }}
+          >
+            <ListItemIcon>
+              <Groups fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Visualizar equipe</ListItemText>
+          </MenuItem>
+        )}
         {permissions.some(
           (permission) => permission.name === "assign_responsible_users",
         ) && (
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                setHierarchyState((prev) => ({ ...prev, selectedUser: null }));
-                setModalState({ type: "hierarchy", isOpen: true });
-              }}
-            >
-              <ListItemIcon>
-                <GroupAddIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Adicionar membro</ListItemText>
-            </MenuItem>
-          )}
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              setHierarchyState((prev) => ({ ...prev, selectedUser: null }));
+              setModalState({ type: "hierarchy", isOpen: true });
+            }}
+          >
+            <ListItemIcon>
+              <GroupAddIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Adicionar membro</ListItemText>
+          </MenuItem>
+        )}
         {permissions.some(
           (permission) => permission.name === "unassign_responsible_users",
         ) && (
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                setHierarchyState((prev) => ({
-                  ...prev,
-                  desHierarchy: true,
-                  selectedUser: null,
-                }));
-                setModalState({ type: "hierarchy", isOpen: true });
-              }}
-            >
-              <ListItemIcon>
-                <GroupRemoveIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Remover membro</ListItemText>
-            </MenuItem>
-          )}
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              setHierarchyState((prev) => ({
+                ...prev,
+                desHierarchy: true,
+                selectedUser: null,
+              }));
+              setModalState({ type: "hierarchy", isOpen: true });
+            }}
+          >
+            <ListItemIcon>
+              <GroupRemoveIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Remover membro</ListItemText>
+          </MenuItem>
+        )}
       </Menu>
       <ModalHierarchy
         isOpen={modalState.type === "hierarchy" && modalState.isOpen}
@@ -312,31 +311,31 @@ const Users = () => {
                 permission.name === "assign_responsible_users" ||
                 permission.name === "unassign_responsible_users",
             ) && (
-                <Button
-                  onClick={(e) => setAnchorEl(e.currentTarget)}
-                  variant="contained"
-                  color="primary"
-                  startIcon={<PeopleAltOutlined />}
-                  endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
-                >
-                  EQUIPES
-                </Button>
-              )}
+              <Button
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+                variant="contained"
+                color="primary"
+                startIcon={<PeopleAltOutlined />}
+                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+              >
+                EQUIPES
+              </Button>
+            )}
             {permissions.some(
               (permission) => permission.name === "create_users",
             ) && (
-                <Button
-                  onClick={() => {
-                    setUserModal({ user: {}, mode: "create" });
-                    setModalState({ type: "user", isOpen: true });
-                  }}
-                  variant="contained"
-                  color="primary"
-                  startIcon={<Add />}
-                >
-                  NOVO USUÁRIO
-                </Button>
-              )}
+              <Button
+                onClick={() => {
+                  setUserModal({ user: {}, mode: "create" });
+                  setModalState({ type: "user", isOpen: true });
+                }}
+                variant="contained"
+                color="primary"
+                startIcon={<Add />}
+              >
+                NOVO USUÁRIO
+              </Button>
+            )}
           </>
         }
       />
@@ -353,15 +352,14 @@ const Users = () => {
               ),
             },
           }}
-          size="lg"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
             setPagination((prev) => ({ ...prev, currentPage: 1 }));
           }}
-          className="col-span-1 lg:col-span-4"
+          className={`${userState?.isLighthouse ? "col-span-1 lg:col-span-4 " : "col-span-full"}`}
         />
-        {userState?.isLighthouse ? (
+        {userState?.isLighthouse && (
           <div className="col-span-1 lg:col-span-2">
             <Select
               fullWidth
@@ -402,15 +400,6 @@ const Users = () => {
                   {companyItem.name}
                 </MenuItem>
               ))}
-            </Select>
-          </div>
-        ) : (
-          <div className="col-span-1 lg:col-span-2">
-            <InputLabel>Empresa</InputLabel>
-            <Select fullWidth disabled value={company?.id || ""} size="lg">
-              {company && (
-                <MenuItem value={company.id}>{company.name}</MenuItem>
-              )}
             </Select>
           </div>
         )}
@@ -466,28 +455,30 @@ const Users = () => {
                   Cargo
                 </TableSortLabel>
               </TableCell>
-              <TableCell
-                sortDirection={
-                  sortConfig.key === "company.name"
-                    ? sortConfig.direction
-                    : false
-                }
-                sx={{
-                  display: !company || !isMobile ? undefined : "none",
-                }}
-              >
-                <TableSortLabel
-                  active={sortConfig.key === "company.name"}
-                  direction={
+              {userState?.isLighthouse && (
+                <TableCell
+                  sortDirection={
                     sortConfig.key === "company.name"
                       ? sortConfig.direction
-                      : "asc"
+                      : false
                   }
-                  onClick={() => handleSort("company.name")}
+                  sx={{
+                    display: !company || !isMobile ? undefined : "none",
+                  }}
                 >
-                  Empresa
-                </TableSortLabel>
-              </TableCell>
+                  <TableSortLabel
+                    active={sortConfig.key === "company.name"}
+                    direction={
+                      sortConfig.key === "company.name"
+                        ? sortConfig.direction
+                        : "asc"
+                    }
+                    onClick={() => handleSort("company.name")}
+                  >
+                    Empresa
+                  </TableSortLabel>
+                </TableCell>
+              )}
               <TableCell
                 sortDirection={
                   sortConfig.key === "responsible"
@@ -529,16 +520,16 @@ const Users = () => {
               (!search
                 ? sortedData
                 : sortedData.filter(
-                  (user) =>
-                    user.name.toLowerCase().includes(search.toLowerCase()) ||
-                    user.email.toLowerCase().includes(search.toLowerCase()) ||
-                    user.role?.name
-                      ?.toLowerCase()
-                      .includes(search.toLowerCase()) ||
-                    user.company?.name
-                      ?.toLowerCase()
-                      .includes(search.toLowerCase()),
-                )
+                    (user) =>
+                      user.name.toLowerCase().includes(search.toLowerCase()) ||
+                      user.email.toLowerCase().includes(search.toLowerCase()) ||
+                      user.role?.name
+                        ?.toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                      user.company?.name
+                        ?.toLowerCase()
+                        .includes(search.toLowerCase()),
+                  )
               ).map(
                 (
                   { name, email, role, company: userCompany, id, responsible },
@@ -570,15 +561,17 @@ const Users = () => {
                       {" "}
                       {role?.name}{" "}
                     </TableCell>
-                    <TableCell
-                      sx={{
-                        maxWidth: isMobile ? 5 : 100,
-                        display: !company || !isMobile ? undefined : "none",
-                      }}
-                    >
-                      {" "}
-                      {userCompany?.name || "N/A"}{" "}
-                    </TableCell>
+                    {userState?.isLighthouse && (
+                      <TableCell
+                        sx={{
+                          maxWidth: isMobile ? 5 : 100,
+                          display: !company || !isMobile ? undefined : "none",
+                        }}
+                      >
+                        {" "}
+                        {userCompany?.name || "N/A"}{" "}
+                      </TableCell>
+                    )}
                     <TableCell
                       sx={{
                         maxWidth: isMobile ? 5 : 100,
@@ -601,27 +594,27 @@ const Users = () => {
                       {permissions.some(
                         (permissions) => permissions.name === "update_users",
                       ) && (
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEdit(index);
-                            }}
-                          >
-                            <Edit fontSize="small" />
-                          </IconButton>
-                        )}
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(index);
+                          }}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      )}
                       {permissions.some(
                         (permissions) => permissions.name === "delete_users",
                       ) && (
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(id);
-                            }}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        )}
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(id);
+                          }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      )}
                     </TableCell>
                   </TableRow>
                 ),
