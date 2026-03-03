@@ -187,14 +187,14 @@ const Logs = () => {
         </Box>
         <Box flexBasis="50%">
           <InputLabel>Período</InputLabel>
-          <Box display="flex" alignItems="center" gap="6px">
+          <Box display="flex" alignItems="center" gap="18px">
             <TextField
               type="date"
               value={createdAt[0] || ""}
               onChange={(e) => setCreatedAt([e.target.value, createdAt[1]])}
               fullWidth
             />
-            até
+            <p>até</p>
             <TextField
               type="date"
               value={createdAt[1] || ""}
@@ -224,7 +224,7 @@ const Logs = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </Box>
-        <ButtonGroup className="h-14">
+        <ButtonGroup className="h-[46px]">
           <Button onClick={handleClean} startIcon={<FilterAltOff />}>
             Limpar
           </Button>
