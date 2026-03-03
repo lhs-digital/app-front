@@ -54,6 +54,7 @@ const SidebarMenuItem = ({
 }) => {
   const theme = useTheme();
   const [menuAnchor, setMenuAnchor] = useState(null);
+  const user = useAuthUser();
 
   // Check permissions
   if (item?.permissions && item?.permissions.length > 0) {
@@ -207,6 +208,10 @@ const SidebarMenuItem = ({
           }}
         >
           {visibleChildren.map((child) => {
+            if (child.super && !user.isLighthouse) {
+              return null;
+            }
+
             // Check child permissions
             if (
               child?.permissions &&
@@ -272,19 +277,21 @@ const SidebarMenuItem = ({
       {open && hasVisibleChildren && (
         <Collapse in={isItemOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {visibleChildren.map((child) => (
-              <SidebarMenuItem
-                key={child.path || child.label}
-                item={child}
-                open={open}
-                collapsedChildren={collapsedChildren}
-                onToggleCollapse={onToggleCollapse}
-                onNavigate={onNavigate}
-                hasPermission={hasPermission}
-                isActive={isActive}
-                depth={depth + 1}
-              />
-            ))}
+            {visibleChildren.map((child) =>
+              child.super && !user.isLighthouse ? null : (
+                <SidebarMenuItem
+                  key={child.path || child.label}
+                  item={child}
+                  open={open}
+                  collapsedChildren={collapsedChildren}
+                  onToggleCollapse={onToggleCollapse}
+                  onNavigate={onNavigate}
+                  hasPermission={hasPermission}
+                  isActive={isActive}
+                  depth={depth + 1}
+                />
+              ),
+            )}
           </List>
         </Collapse>
       )}
@@ -392,6 +399,10 @@ const Sidebar = ({ open, setOpen, width, setWidth }) => {
 
   const filterVisibleModules = (items) => {
     return items.filter((item) => {
+      if (item.super && !user.isLighthouse) {
+        return false;
+      }
+
       // Check permissions
       if (item?.permissions && item?.permissions.length > 0) {
         if (!hasPermission(item.permissions)) {

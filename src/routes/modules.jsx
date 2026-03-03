@@ -217,6 +217,7 @@ const lighthouseModule = {
       element: <Companies />,
       icon: BusinessCenterOutlined,
       activeIcon: BusinessCenter,
+      super: true,
       permissions: [
         "view_companies",
         "view_any_companies",
@@ -289,6 +290,7 @@ const lighthouseModule = {
       element: <Vpns />,
       icon: LockOutlined,
       activeIcon: Lock,
+      super: true,
       children: [
         {
           label: "Registrar VPN",
@@ -303,6 +305,7 @@ const lighthouseModule = {
     {
       label: "Logs",
       path: "/logs",
+      super: true,
       element: <Logs />,
       icon: Subject,
       activeIcon: Subject,
