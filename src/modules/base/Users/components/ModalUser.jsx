@@ -1,12 +1,10 @@
 import { Save } from "@mui/icons-material";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  InputLabel,
   MenuItem,
   Select,
   TextField,
@@ -16,6 +14,7 @@ import { useEffect } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import FormField from "../../../../components/FormField";
 import { useCompany } from "../../../../hooks/useCompany";
 import { useUserState } from "../../../../hooks/useUserState";
 import api from "../../../../services/api";
@@ -181,8 +180,7 @@ const ModalUser = ({ selectedUser, mode, isOpen, onClose, data = [] }) => {
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent className="w-[480px] flex flex-col gap-4">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <Box>
-            <InputLabel>Nome *</InputLabel>
+          <FormField label="Nome" required={true}>
             <Controller
               name="name"
               control={control}
@@ -198,9 +196,8 @@ const ModalUser = ({ selectedUser, mode, isOpen, onClose, data = [] }) => {
                 />
               )}
             />
-          </Box>
-          <Box>
-            <InputLabel>E-mail *</InputLabel>
+          </FormField>
+          <FormField label="E-mail" required={true}>
             <Controller
               name="email"
               control={control}
@@ -224,10 +221,13 @@ const ModalUser = ({ selectedUser, mode, isOpen, onClose, data = [] }) => {
                 />
               )}
             />
-          </Box>
+          </FormField>
           {canEditCompany ? (
-            <Box>
-              <InputLabel>Empresa *</InputLabel>
+            <FormField
+              label="Empresa"
+              required={true}
+              info="Selecione a empresa que o usuário fará parte"
+            >
               <Controller
                 name="company"
                 control={control}
@@ -253,10 +253,13 @@ const ModalUser = ({ selectedUser, mode, isOpen, onClose, data = [] }) => {
                   {errors.company.message}
                 </span>
               )}
-            </Box>
+            </FormField>
           ) : (
-            <Box>
-              <InputLabel>Empresa *</InputLabel>
+            <FormField
+              label="Empresa"
+              required={true}
+              info="Selecione a empresa que o usuário fará parte"
+            >
               <Controller
                 name="company"
                 control={control}
@@ -273,14 +276,17 @@ const ModalUser = ({ selectedUser, mode, isOpen, onClose, data = [] }) => {
                   </Select>
                 )}
               />
-            </Box>
+            </FormField>
           )}
-          <Box>
-            <InputLabel>Role *</InputLabel>
+          <FormField
+            label="Cargo"
+            required={true}
+            info="Selecione o cargo do usuário"
+          >
             <Controller
               name="role"
               control={control}
-              rules={{ required: "Role é obrigatória" }}
+              rules={{ required: "O cargo do usuário é obrigatório." }}
               render={({ field }) => (
                 <Select
                   {...field}
@@ -302,7 +308,7 @@ const ModalUser = ({ selectedUser, mode, isOpen, onClose, data = [] }) => {
                 {errors.role.message}
               </span>
             )}
-          </Box>
+          </FormField>
         </form>
       </DialogContent>
       <DialogActions>

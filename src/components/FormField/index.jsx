@@ -13,7 +13,13 @@ const FormField = ({
 }) => {
   return (
     <Box className={containerClass}>
-      <div className="flex flex-row gap-2 items-start">
+      <Box
+        display="flex"
+        flexDirection="row"
+        gap="2"
+        alignItems="start"
+        justifyContent="space-between"
+      >
         <InputLabel
           {...props}
           className={`mb-1 ${error ? "text-red-500" : ""}`}
@@ -22,7 +28,7 @@ const FormField = ({
           {label}
         </InputLabel>
         {info && <Info description={info} />}
-      </div>
+      </Box>
       {loading ? (
         <Skeleton
           variant="rectangular"
