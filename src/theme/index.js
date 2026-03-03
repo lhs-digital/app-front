@@ -177,10 +177,10 @@ export const getTheme = (mode) => {
       },
       MuiInputLabel: {
         styleOverrides: {
-          "&.MuiInputLabel-animated": {
+          formControl: {
             transform: "translate(14px, 12px) scale(1)",
           },
-          "&.Mui-focused": {
+          shrink: {
             transform: "translate(14px, -9px) scale(0.75)",
           },
         },
