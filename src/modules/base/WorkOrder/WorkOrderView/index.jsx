@@ -1,5 +1,6 @@
 import {
   ArrowBack,
+  CalendarToday,
   Cancel,
   Delete,
   DeleteForever,
@@ -16,6 +17,7 @@ import {
   CircularProgress,
   FormControlLabel,
   IconButton,
+  InputAdornment,
   MenuItem,
   Radio,
   RadioGroup,
@@ -23,31 +25,39 @@ import {
   TextField,
 } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../../../components/FormField";
 import PageTitle from "../../../../layout/components/PageTitle";
 import api from "../../../../services/api";
 import { statusInfo } from "../utils";
+import { useThemeMode } from "../../../../contexts/themeModeContext";
 
 import ModalDelete from "../../../../components/ModalDelete";
 import AuditItemTable from "./AuditItemTable";
 
 const WorkOrderView = () => {
-  const [modalState, setModalState] = useState({
-    type: null,
-    mode: "create",
-    isOpen: false,
+  const [pendingUpdates, setPendingUpdates] = useState({
+    fields: false,
+    assignment: false,
+    status: false,
   });
 
   const { id } = useParams();
   const navigate = useNavigate();
+  const { mode } = useThemeMode();
+  const deadlineInputRef = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState();
   const [attachedFiles, setAttachedFiles] = useState([]);
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState(null);
+  const [modalState, setModalState] = useState({
+    type: null,
+    mode: "create",
+    isOpen: false,
+  });
 
   const { mutate: deleteWorkOrder } = useMutation({
     mutationFn: async (id) => await api.delete(`/work_orders/${id}`),
@@ -78,7 +88,6 @@ const WorkOrderView = () => {
     enabled: !!id,
   });
 
-  // Extrair companyId e auditRecordId após definir assignment
   const companyId = assignment?.company_id;
   const auditRecordId = assignment?.entity?.id;
 
@@ -108,32 +117,87 @@ const WorkOrderView = () => {
     },
   });
 
-  const { mutate: saveAssignment, isPending: isSaving } = useMutation({
+  const { mutate: updateWorkOrder, isPending: isUpdating } = useMutation({
     mutationFn: async (data) => {
       try {
         const response = await api.put(`/work_orders/${id}`, {
-          status: data.status,
           description: data.description,
           corrective_actions: data.corrective_actions,
-          is_persistent_error: data.is_persistent_error,
-          assigned_to: typeof data.assigned_to === "object" ? data.assigned_to.id : data.assigned_to,
-          assigned_by: typeof data.assigned_by === "object" ? data.assigned_by.id : data.assigned_by,
           deadline: data.deadline,
+          is_persistent_error: data.is_persistent_error,
         });
         return response.data;
       } catch (error) {
-        console.error("Erro ao salvar ordem de serviço:", error);
+        console.error("Erro ao atualizar ordem de serviço:", error);
         throw error;
       }
     },
     onSuccess: () => {
-      toast.success("Ordem de serviço atualizada com sucesso!");
-      setIsEditing(false);
+      const updates = [];
+      if (formData?.description !== assignment?.description) updates.push("Descrição");
+      if (formData?.corrective_actions !== assignment?.corrective_actions) updates.push("Ações corretivas");
+      if (formData?.is_persistent_error !== assignment?.is_persistent_error) updates.push("Erro persistente");
+      if (formData?.deadline !== assignment?.deadline) updates.push("Prazo");
+
+      if (updates.length > 0) {
+        toast.success(`${updates.join(", ")} atualizado(s) com sucesso!`);
+      }
+      setPendingUpdates(prev => ({ ...prev, fields: false }));
       refetch();
     },
     onError: (error) => {
-      console.error("Erro ao salvar ordem de serviço", error);
-      toast.error("Erro ao salvar a ordem de serviço");
+      console.error("Erro ao atualizar ordem de serviço", error);
+      toast.error("Erro ao atualizar a ordem de serviço");
+      setPendingUpdates(prev => ({ ...prev, fields: false }));
+    },
+  });
+
+  const { mutate: updateWorkOrderStatus, isPending: isUpdatingStatus } = useMutation({
+    mutationFn: async (status) => {
+      try {
+        const response = await api.put(`/work_orders/${id}/status`, {
+          status,
+        });
+        return response.data;
+      } catch (error) {
+        console.error("Erro ao atualizar status:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Status atualizado com sucesso!");
+      setPendingUpdates(prev => ({ ...prev, status: false }));
+      refetch();
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar status", error);
+      toast.error("Erro ao atualizar o status");
+      setPendingUpdates(prev => ({ ...prev, status: false }));
+    },
+  });
+
+  const { mutate: reassignWorkOrder, isPending: isReassigning } = useMutation({
+    mutationFn: async (data) => {
+      try {
+        const response = await api.put(`/work_orders/${id}/assign`, {
+          assigned_to: typeof data.assigned_to === "object" ? data.assigned_to.id : data.assigned_to,
+          assigned_by: typeof data.assigned_by === "object" ? data.assigned_by.id : data.assigned_by,
+        });
+        return response.data;
+      } catch (error) {
+        console.error("Erro ao reatribuir ordem de serviço:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Usuários atualizados com sucesso!");
+      setPendingUpdates(prev => ({ ...prev, assignment: false }));
+      refetch();
+    },
+    onError: (error) => {
+      console.error("Erro ao reatribuir ordem de serviço", error);
+      toast.error("Erro ao reatribuir a ordem de serviço");
+      setPendingUpdates(prev => ({ ...prev, assignment: false }));
     },
   });
 
@@ -225,17 +289,52 @@ const WorkOrderView = () => {
       return;
     }
 
-    const dataToSave = {
-      status: formData?.status,
-      description: formData?.description,
-      corrective_actions: formData?.corrective_actions,
-      is_persistent_error: formData?.is_persistent_error,
-      assigned_to: formData?.assigned_to,
-      assigned_by: formData?.assigned_by,
-      deadline: formData?.deadline,
-    };
+    const hasFieldChanges =
+      formData?.description !== assignment?.description ||
+      formData?.corrective_actions !== assignment?.corrective_actions ||
+      formData?.is_persistent_error !== assignment?.is_persistent_error ||
+      formData?.deadline !== assignment?.deadline;
 
-    saveAssignment(dataToSave);
+    const hasAssignmentChanges =
+      formData?.assigned_to !== assignment?.assigned_to ||
+      formData?.assigned_by !== assignment?.assigned_by;
+
+    const hasStatusChange = formData?.status !== assignment?.status;
+
+    if (!hasFieldChanges && !hasAssignmentChanges && !hasStatusChange) {
+      toast.info("Nenhuma mudança foi realizada");
+      setIsEditing(false);
+      return;
+    }
+
+    if (hasFieldChanges) {
+      const dataToUpdate = {
+        description: formData?.description,
+        corrective_actions: formData?.corrective_actions,
+        is_persistent_error: formData?.is_persistent_error,
+        deadline: formData?.deadline,
+      };
+      setPendingUpdates(prev => ({ ...prev, fields: true }));
+      updateWorkOrder(dataToUpdate);
+    }
+
+    if (hasAssignmentChanges) {
+      const assignmentData = {
+        assigned_to: formData?.assigned_to,
+        assigned_by: formData?.assigned_by,
+      };
+      setPendingUpdates(prev => ({ ...prev, assignment: true }));
+      reassignWorkOrder(assignmentData);
+    }
+
+    if (hasStatusChange) {
+      setPendingUpdates(prev => ({ ...prev, status: true }));
+      updateWorkOrderStatus(formData?.status);
+    }
+
+    setTimeout(() => {
+      setIsEditing(false);
+    }, 500);
   };
 
   const handleCancel = () => {
@@ -277,6 +376,12 @@ const WorkOrderView = () => {
 
   const handleRemoveFile = (fileId) => {
     setAttachedFiles(attachedFiles.filter((f) => f.id !== fileId));
+  };
+
+  const handleFileDescriptionChange = (fileId, description) => {
+    setAttachedFiles(attachedFiles.map((f) =>
+      f.id === fileId ? { ...f, description } : f
+    ));
   };
 
   const handleDownloadFile = (filePath, fileName) => {
@@ -347,7 +452,7 @@ const WorkOrderView = () => {
               e.stopPropagation();
               handleDelete(id);
             }}
-            disabled={isSaving}
+            disabled={isUpdating || isUpdatingStatus || isReassigning}
           >
             Excluir
           </Button>,
@@ -361,7 +466,7 @@ const WorkOrderView = () => {
                 color="error"
                 startIcon={<Cancel />}
                 onClick={handleCancel}
-                disabled={isSaving}
+                disabled={isUpdating || isUpdatingStatus || isReassigning}
               >
                 Cancelar
               </Button>
@@ -372,9 +477,9 @@ const WorkOrderView = () => {
                 color="primary"
                 startIcon={<Save />}
                 onClick={handleSave}
-                disabled={isSaving}
+                disabled={isUpdating || isUpdatingStatus || isReassigning}
               >
-                {isSaving ? <CircularProgress size={20} /> : "Salvar"}
+                {isUpdating || isUpdatingStatus || isReassigning ? <CircularProgress size={20} /> : "Salvar"}
               </Button>
             </>
           ) : (
@@ -444,12 +549,18 @@ const WorkOrderView = () => {
         <FormField
           label="Prazo de Conclusão"
           info="Prazo para conclusão da Ordem de Serviço."
-          containerClass="col-span-full md:col-span-3"
+          containerClass="col-span-full md:col-span-2"
         >
           <TextField
             required
             type="datetime-local"
             fullWidth
+            sx={{
+              "& input[type='datetime-local']::-webkit-calendar-picker-indicator": {
+                filter: mode === "dark" ? "invert(1)" : "none",
+                cursor: "pointer",
+              },
+            }}
             value={
               formData?.deadline
                 ? new Date(formData?.deadline).toISOString().slice(0, 16)
@@ -464,6 +575,20 @@ const WorkOrderView = () => {
               }
             }}
             disabled={!isEditing}
+          />
+        </FormField>
+
+        <FormField
+          label="Empresa"
+          info="Empresa relacionada a esta OS."
+          containerClass="col-span-full md:col-span-2"
+        >
+          <TextField
+            required
+            type="text"
+            fullWidth
+            value={formData?.company_id || ""}
+            disabled
           />
         </FormField>
 
@@ -497,6 +622,7 @@ const WorkOrderView = () => {
           </RadioGroup>
         </FormField>
 
+
         {formData?.status === "corrected" && (
           <FormField
             label="Ações Corretivas"
@@ -522,7 +648,7 @@ const WorkOrderView = () => {
           </FormField>
         )}
 
-        <FormField required label="Descrição" containerClass="col-span-full">
+        <FormField required label="Descrição" containerClass="col-span-full md:col-span-6">
           <TextField
             type="text"
             minRows={6}
@@ -539,6 +665,25 @@ const WorkOrderView = () => {
             disabled={!isEditing}
           />
         </FormField>
+
+        <FormField required label="Ações Corretivas" containerClass="col-span-full md:col-span-6">
+          <TextField
+            type="text"
+            minRows={6}
+            style={{ width: "100%", resize: "vertical" }}
+            value={formData?.corrective_actions || ""}
+            onChange={(e) => {
+              if (isEditing) {
+                setFormData({
+                  ...formData,
+                  corrective_actions: e.target.value,
+                });
+              }
+            }}
+            disabled={!isEditing}
+          />
+        </FormField>
+
 
         <FormField
           label="Atribuida para"
@@ -588,20 +733,6 @@ const WorkOrderView = () => {
               </MenuItem>
             ))}
           </Select>
-        </FormField>
-
-        <FormField
-          label="Empresa"
-          info="Empresa relacionada a esta OS."
-          containerClass="col-span-full md:col-span-4"
-        >
-          <TextField
-            required
-            type="text"
-            fullWidth
-            value={formData?.company_id || ""}
-            disabled
-          />
         </FormField>
 
         {formData?.evidences && formData.evidences.length > 0 && (
