@@ -20,10 +20,11 @@ import {
   Radio,
   RadioGroup,
   Select,
+  Skeleton,
   TextField,
 } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../../../components/FormField";
@@ -36,16 +37,9 @@ import ModalDelete from "../../../../components/ModalDelete";
 import AuditItemTable from "./AuditItemTable";
 
 const WorkOrderView = () => {
-  const [pendingUpdates, setPendingUpdates] = useState({
-    fields: false,
-    assignment: false,
-    status: false,
-  });
-
   const { id } = useParams();
   const navigate = useNavigate();
   const { mode } = useThemeMode();
-  const deadlineInputRef = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState();
   const [attachedFiles, setAttachedFiles] = useState([]);
@@ -145,13 +139,11 @@ const WorkOrderView = () => {
       if (updates.length > 0) {
         toast.success(`${updates.join(", ")} atualizado(s) com sucesso!`);
       }
-      setPendingUpdates((prev) => ({ ...prev, fields: false }));
       refetch();
     },
     onError: (error) => {
       console.error("Erro ao atualizar ordem de serviço", error);
       toast.error("Erro ao atualizar a ordem de serviço");
-      setPendingUpdates((prev) => ({ ...prev, fields: false }));
     },
   });
 
@@ -170,13 +162,11 @@ const WorkOrderView = () => {
       },
       onSuccess: () => {
         toast.success("Status atualizado com sucesso!");
-        setPendingUpdates((prev) => ({ ...prev, status: false }));
         refetch();
       },
       onError: (error) => {
         console.error("Erro ao atualizar status", error);
         toast.error("Erro ao atualizar o status");
-        setPendingUpdates((prev) => ({ ...prev, status: false }));
       },
     });
 
@@ -201,13 +191,11 @@ const WorkOrderView = () => {
     },
     onSuccess: () => {
       toast.success("Usuários atualizados com sucesso!");
-      setPendingUpdates((prev) => ({ ...prev, assignment: false }));
       refetch();
     },
     onError: (error) => {
       console.error("Erro ao reatribuir ordem de serviço", error);
       toast.error("Erro ao reatribuir a ordem de serviço");
-      setPendingUpdates((prev) => ({ ...prev, assignment: false }));
     },
   });
 
@@ -324,7 +312,6 @@ const WorkOrderView = () => {
         is_persistent_error: formData?.is_persistent_error,
         deadline: formData?.deadline,
       };
-      setPendingUpdates((prev) => ({ ...prev, fields: true }));
       updateWorkOrder(dataToUpdate);
     }
 
@@ -333,12 +320,10 @@ const WorkOrderView = () => {
         assigned_to: formData?.assigned_to,
         assigned_by: formData?.assigned_by,
       };
-      setPendingUpdates((prev) => ({ ...prev, assignment: true }));
       reassignWorkOrder(assignmentData);
     }
 
     if (hasStatusChange) {
-      setPendingUpdates((prev) => ({ ...prev, status: true }));
       updateWorkOrderStatus(formData?.status);
     }
 
@@ -515,6 +500,7 @@ const WorkOrderView = () => {
           label="Status"
           info="Status da Ordem de Serviço."
           containerClass="col-span-full md:col-span-4"
+          loading={isUpdatingStatus}
         >
           <Select
             fullWidth
@@ -541,6 +527,7 @@ const WorkOrderView = () => {
           label="Quantidade de reaberturas"
           info="Número de vezes que a OS foi reaberta."
           containerClass="col-span-full md:col-span-2"
+          loading={isUpdating}
         >
           <TextField
             required
@@ -563,6 +550,7 @@ const WorkOrderView = () => {
           label="Prazo de Conclusão"
           info="Prazo para conclusão da Ordem de Serviço."
           containerClass="col-span-full md:col-span-2"
+          loading={isUpdating}
         >
           <TextField
             required
@@ -610,6 +598,7 @@ const WorkOrderView = () => {
           label="Erro Persistente"
           info="Indica se a OS é referente a um erro persistente."
           containerClass="col-span-full md:col-span-2"
+          loading={isUpdating}
         >
           <RadioGroup
             row
@@ -641,6 +630,7 @@ const WorkOrderView = () => {
             label="Ações Corretivas"
             info="Ações realizadas para a correção da OS."
             containerClass="col-span-full md:col-span-4"
+            loading={isUpdating}
           >
             <TextField
               required
@@ -665,6 +655,7 @@ const WorkOrderView = () => {
           required
           label="Descrição"
           containerClass="col-span-full md:col-span-6"
+          loading={isUpdating}
         >
           <TextField
             type="text"
@@ -687,6 +678,7 @@ const WorkOrderView = () => {
           required
           label="Ações Corretivas"
           containerClass="col-span-full md:col-span-6"
+          loading={isUpdating}
         >
           <TextField
             type="text"
@@ -709,6 +701,8 @@ const WorkOrderView = () => {
           label="Atribuida para"
           info="Usuário para quem foi atribuida esta OS."
           containerClass="col-span-full md:col-span-4"
+          loading={usersLoading || isReassigning}
+          error={!!usersError}
         >
           <Select
             required
@@ -734,6 +728,8 @@ const WorkOrderView = () => {
           label="Atribuida por"
           info="Usuário que atribuiu a OS para outro usuário."
           containerClass="col-span-full md:col-span-4"
+          loading={usersLoading || isReassigning}
+          error={!!usersError}
         >
           <Select
             required
@@ -801,8 +797,13 @@ const WorkOrderView = () => {
                     onClick={() => deleteEvidence(evidence.id)}
                     disabled={isDeleting || !isEditing}
                     title="Remover comprovante"
+                    aria-label="Remover comprovante"
                   >
-                    <Delete fontSize="small" />
+                    {isDeleting ? (
+                      <CircularProgress size={16} color="error" />
+                    ) : (
+                      <Delete fontSize="small" />
+                    )}
                   </IconButton>
                 </div>
               ))}
@@ -926,7 +927,19 @@ const WorkOrderView = () => {
         </FormField>
       </form>
 
-      {auditRecord && (
+      {companyId && auditRecordId && auditLoading && (
+        <div className="mt-8 flex flex-col gap-4">
+          <Skeleton variant="text" width={260} height={32} />
+          <Skeleton
+            variant="rectangular"
+            width="100%"
+            height={200}
+            className="rounded-md"
+          />
+        </div>
+      )}
+
+      {auditRecord && !auditLoading && (
         <div className="mt-8 flex flex-col gap-4">
           <PageTitle
             title={`Item Auditado #${String(assignment?.entity?.id).padStart(4, "0")}`}
