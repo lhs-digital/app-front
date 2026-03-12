@@ -1,6 +1,5 @@
 import {
   ArrowBack,
-  CalendarToday,
   Cancel,
   Delete,
   DeleteForever,
@@ -17,7 +16,6 @@ import {
   CircularProgress,
   FormControlLabel,
   IconButton,
-  InputAdornment,
   MenuItem,
   Radio,
   RadioGroup,
@@ -25,14 +23,14 @@ import {
   TextField,
 } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import FormField from "../../../../components/FormField";
+import { useThemeMode } from "../../../../contexts/themeModeContext";
 import PageTitle from "../../../../layout/components/PageTitle";
 import api from "../../../../services/api";
 import { statusInfo } from "../utils";
-import { useThemeMode } from "../../../../contexts/themeModeContext";
 
 import ModalDelete from "../../../../components/ModalDelete";
 import AuditItemTable from "./AuditItemTable";
@@ -95,7 +93,9 @@ const WorkOrderView = () => {
     queryKey: ["auditRecord", companyId, auditRecordId],
     enabled: !!companyId && !!auditRecordId,
     queryFn: async () => {
-      const response = await api.get(`/companies/${companyId}/audit/${auditRecordId}`);
+      const response = await api.get(
+        `/companies/${companyId}/audit/${auditRecordId}`,
+      );
       return response.data.data;
     },
   });
@@ -134,54 +134,64 @@ const WorkOrderView = () => {
     },
     onSuccess: () => {
       const updates = [];
-      if (formData?.description !== assignment?.description) updates.push("Descrição");
-      if (formData?.corrective_actions !== assignment?.corrective_actions) updates.push("Ações corretivas");
-      if (formData?.is_persistent_error !== assignment?.is_persistent_error) updates.push("Erro persistente");
+      if (formData?.description !== assignment?.description)
+        updates.push("Descrição");
+      if (formData?.corrective_actions !== assignment?.corrective_actions)
+        updates.push("Ações corretivas");
+      if (formData?.is_persistent_error !== assignment?.is_persistent_error)
+        updates.push("Erro persistente");
       if (formData?.deadline !== assignment?.deadline) updates.push("Prazo");
 
       if (updates.length > 0) {
         toast.success(`${updates.join(", ")} atualizado(s) com sucesso!`);
       }
-      setPendingUpdates(prev => ({ ...prev, fields: false }));
+      setPendingUpdates((prev) => ({ ...prev, fields: false }));
       refetch();
     },
     onError: (error) => {
       console.error("Erro ao atualizar ordem de serviço", error);
       toast.error("Erro ao atualizar a ordem de serviço");
-      setPendingUpdates(prev => ({ ...prev, fields: false }));
+      setPendingUpdates((prev) => ({ ...prev, fields: false }));
     },
   });
 
-  const { mutate: updateWorkOrderStatus, isPending: isUpdatingStatus } = useMutation({
-    mutationFn: async (status) => {
-      try {
-        const response = await api.put(`/work_orders/${id}/status`, {
-          status,
-        });
-        return response.data;
-      } catch (error) {
-        console.error("Erro ao atualizar status:", error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      toast.success("Status atualizado com sucesso!");
-      setPendingUpdates(prev => ({ ...prev, status: false }));
-      refetch();
-    },
-    onError: (error) => {
-      console.error("Erro ao atualizar status", error);
-      toast.error("Erro ao atualizar o status");
-      setPendingUpdates(prev => ({ ...prev, status: false }));
-    },
-  });
+  const { mutate: updateWorkOrderStatus, isPending: isUpdatingStatus } =
+    useMutation({
+      mutationFn: async (status) => {
+        try {
+          const response = await api.put(`/work_orders/${id}/status`, {
+            status,
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Erro ao atualizar status:", error);
+          throw error;
+        }
+      },
+      onSuccess: () => {
+        toast.success("Status atualizado com sucesso!");
+        setPendingUpdates((prev) => ({ ...prev, status: false }));
+        refetch();
+      },
+      onError: (error) => {
+        console.error("Erro ao atualizar status", error);
+        toast.error("Erro ao atualizar o status");
+        setPendingUpdates((prev) => ({ ...prev, status: false }));
+      },
+    });
 
   const { mutate: reassignWorkOrder, isPending: isReassigning } = useMutation({
     mutationFn: async (data) => {
       try {
         const response = await api.put(`/work_orders/${id}/assign`, {
-          assigned_to: typeof data.assigned_to === "object" ? data.assigned_to.id : data.assigned_to,
-          assigned_by: typeof data.assigned_by === "object" ? data.assigned_by.id : data.assigned_by,
+          assigned_to:
+            typeof data.assigned_to === "object"
+              ? data.assigned_to.id
+              : data.assigned_to,
+          assigned_by:
+            typeof data.assigned_by === "object"
+              ? data.assigned_by.id
+              : data.assigned_by,
         });
         return response.data;
       } catch (error) {
@@ -191,13 +201,13 @@ const WorkOrderView = () => {
     },
     onSuccess: () => {
       toast.success("Usuários atualizados com sucesso!");
-      setPendingUpdates(prev => ({ ...prev, assignment: false }));
+      setPendingUpdates((prev) => ({ ...prev, assignment: false }));
       refetch();
     },
     onError: (error) => {
       console.error("Erro ao reatribuir ordem de serviço", error);
       toast.error("Erro ao reatribuir a ordem de serviço");
-      setPendingUpdates(prev => ({ ...prev, assignment: false }));
+      setPendingUpdates((prev) => ({ ...prev, assignment: false }));
     },
   });
 
@@ -314,7 +324,7 @@ const WorkOrderView = () => {
         is_persistent_error: formData?.is_persistent_error,
         deadline: formData?.deadline,
       };
-      setPendingUpdates(prev => ({ ...prev, fields: true }));
+      setPendingUpdates((prev) => ({ ...prev, fields: true }));
       updateWorkOrder(dataToUpdate);
     }
 
@@ -323,12 +333,12 @@ const WorkOrderView = () => {
         assigned_to: formData?.assigned_to,
         assigned_by: formData?.assigned_by,
       };
-      setPendingUpdates(prev => ({ ...prev, assignment: true }));
+      setPendingUpdates((prev) => ({ ...prev, assignment: true }));
       reassignWorkOrder(assignmentData);
     }
 
     if (hasStatusChange) {
-      setPendingUpdates(prev => ({ ...prev, status: true }));
+      setPendingUpdates((prev) => ({ ...prev, status: true }));
       updateWorkOrderStatus(formData?.status);
     }
 
@@ -379,9 +389,9 @@ const WorkOrderView = () => {
   };
 
   const handleFileDescriptionChange = (fileId, description) => {
-    setAttachedFiles(attachedFiles.map((f) =>
-      f.id === fileId ? { ...f, description } : f
-    ));
+    setAttachedFiles(
+      attachedFiles.map((f) => (f.id === fileId ? { ...f, description } : f)),
+    );
   };
 
   const handleDownloadFile = (filePath, fileName) => {
@@ -459,7 +469,6 @@ const WorkOrderView = () => {
 
           isEditing ? (
             <>
-
               <Button
                 key="cancel-button"
                 variant="outlined"
@@ -479,7 +488,11 @@ const WorkOrderView = () => {
                 onClick={handleSave}
                 disabled={isUpdating || isUpdatingStatus || isReassigning}
               >
-                {isUpdating || isUpdatingStatus || isReassigning ? <CircularProgress size={20} /> : "Salvar"}
+                {isUpdating || isUpdatingStatus || isReassigning ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  "Salvar"
+                )}
               </Button>
             </>
           ) : (
@@ -556,10 +569,11 @@ const WorkOrderView = () => {
             type="datetime-local"
             fullWidth
             sx={{
-              "& input[type='datetime-local']::-webkit-calendar-picker-indicator": {
-                filter: mode === "dark" ? "invert(1)" : "none",
-                cursor: "pointer",
-              },
+              "& input[type='datetime-local']::-webkit-calendar-picker-indicator":
+                {
+                  filter: mode === "dark" ? "invert(1)" : "none",
+                  cursor: "pointer",
+                },
             }}
             value={
               formData?.deadline
@@ -622,7 +636,6 @@ const WorkOrderView = () => {
           </RadioGroup>
         </FormField>
 
-
         {formData?.status === "corrected" && (
           <FormField
             label="Ações Corretivas"
@@ -648,7 +661,11 @@ const WorkOrderView = () => {
           </FormField>
         )}
 
-        <FormField required label="Descrição" containerClass="col-span-full md:col-span-6">
+        <FormField
+          required
+          label="Descrição"
+          containerClass="col-span-full md:col-span-6"
+        >
           <TextField
             type="text"
             minRows={6}
@@ -666,7 +683,11 @@ const WorkOrderView = () => {
           />
         </FormField>
 
-        <FormField required label="Ações Corretivas" containerClass="col-span-full md:col-span-6">
+        <FormField
+          required
+          label="Ações Corretivas"
+          containerClass="col-span-full md:col-span-6"
+        >
           <TextField
             type="text"
             minRows={6}
@@ -683,7 +704,6 @@ const WorkOrderView = () => {
             disabled={!isEditing}
           />
         </FormField>
-
 
         <FormField
           label="Atribuida para"
@@ -737,14 +757,14 @@ const WorkOrderView = () => {
 
         {formData?.evidences && formData.evidences.length > 0 && (
           <FormField label="Evidências Enviadas" containerClass="col-span-full">
-            <div className="flex flex-col gap-2 border rounded p-4 bg-blue-50">
-              <p className="text-sm font-semibold text-zinc-700">
+            <div className="flex flex-col gap-2 border rounded p-4 bg-zinc-50 dark:bg-zinc-800">
+              <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                 {formData.evidences.length} arquivo(s) salvo(s)
               </p>
               {formData.evidences.map((evidence) => (
                 <div
                   key={evidence.id}
-                  className="flex items-center justify-between gap-3 p-3 bg-white border rounded hover:bg-blue-50 transition"
+                  className="flex items-center justify-between gap-3 p-3 border rounded transition"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <UploadFile
@@ -752,13 +772,15 @@ const WorkOrderView = () => {
                       className="text-blue-500 flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-zinc-800 truncate">
+                      <p className="text-sm text-zinc-800 dark:text-zinc-300 truncate">
                         {evidence.file_name}
                       </p>
-                      <div className="flex gap-2 text-xs text-zinc-500">
+                      <div className="flex gap-2 text-xs">
                         <span>{(evidence.file_size / 1024).toFixed(2)} KB</span>
                         {evidence.description && (
-                          <span className="italic">"{evidence.description}"</span>
+                          <span className="italic">
+                            &quot;{evidence.description}&quot;
+                          </span>
                         )}
                       </div>
                     </div>
@@ -777,9 +799,8 @@ const WorkOrderView = () => {
                     size="small"
                     color="error"
                     onClick={() => deleteEvidence(evidence.id)}
-                    disabled={isDeleting}
+                    disabled={isDeleting || !isEditing}
                     title="Remover comprovante"
-                    disabled={!isEditing}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -813,14 +834,14 @@ const WorkOrderView = () => {
             </div>
 
             {attachedFiles.length > 0 && (
-              <div className="flex flex-col gap-2 border rounded p-4 bg-zinc-50">
+              <div className="flex flex-col gap-2 border rounded p-4 bg-zinc-50 dark:bg-zinc-900">
                 <p className="text-sm font-semibold text-zinc-700">
                   Arquivos anexados ({attachedFiles.length})
                 </p>
                 {attachedFiles.map((file) => (
                   <div
                     key={file.id}
-                    className="flex flex-col gap-3 p-3 bg-white border-none rounded hover:bg-zinc-100 transition"
+                    className="flex flex-col gap-3 p-3 bg-zinc-50 dark:bg-zinc-900 border-none rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -883,7 +904,7 @@ const WorkOrderView = () => {
             )}
 
             {attachedFiles.length === 0 && (
-              <div className="flex items-center justify-center gap-2 p-4 bg-zinc-50 border border-dashed rounded text-zinc-500">
+              <div className="flex items-center justify-center gap-2 p-4 bg-zinc-50 dark:bg-zinc-900 border border-dashed rounded text-zinc-500">
                 <UploadFile fontSize="small" />
                 <span className="text-sm">Nenhum arquivo anexado ainda</span>
               </div>
@@ -914,7 +935,6 @@ const WorkOrderView = () => {
           <AuditItemTable item={auditRecord} />
         </div>
       )}
-
     </div>
   );
 };
