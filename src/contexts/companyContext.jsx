@@ -56,11 +56,11 @@ export const CompanyContextProvider = ({ children }) => {
     return (
       <CompanyContext.Provider
         value={{
-          company: null,
-          setCompany: () => {},
+          company,
+          setCompany: changeCompany,
           availableCompanies: [],
           refetchAvailableCompanies: () => {},
-          resetCompany: () => {},
+          resetCompany,
         }}
       >
         {children}

@@ -79,19 +79,14 @@ const SignIn = () => {
             token: response.data.access_token,
             type: "Bearer",
           },
-          userState: formatUserObject(formattedUser),
+          userState: formattedUser,
         })
       ) {
         setUserState(formattedUser);
 
         if (formattedUser.isLighthouse) {
-          console.log("User is lighthouse, company is", formattedUser.company);
           setCompanyPickerOpen(true);
         } else {
-          console.log(
-            "User is not lighthouse, company is",
-            formattedUser.company,
-          );
           await setCompany(formattedUser.company);
           navigate("/");
         }
