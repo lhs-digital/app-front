@@ -6,10 +6,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAssignmentFilters } from "../../../../hooks/useAssignmentFilters";
 import { useCompany } from "../../../../hooks/useCompany";
+import { useUserState } from "../../../../hooks/useUserState";
 import api from "../../../../services/api";
 
 export default function TaskFilter({ setAssignments, setQueryState }) {
   const { company } = useCompany();
+  const user = useUserState().state;
+  const isLighthouse = user.isLighthouse;
+  const roleLevel = user.role?.level;
+  const showAssignedBy = isLighthouse;
   const navigate = useNavigate();
   const location = useLocation();
   const qc = useQueryClient();
@@ -50,19 +55,31 @@ export default function TaskFilter({ setAssignments, setQueryState }) {
 
       if (assigned_to_id) {
         const assigned_to = usersQuery.data.find(
-          (user) => user.id.toString() === assigned_to_id,
+          (u) => u.id.toString() === assigned_to_id,
         );
         if (assigned_to) updateFilter("assigned_to", assigned_to);
       }
 
       if (assigned_by_id) {
         const assigned_by = usersQuery.data.find(
-          (user) => user.id.toString() === assigned_by_id,
+          (u) => u.id.toString() === assigned_by_id,
         );
         if (assigned_by) updateFilter("assigned_by", assigned_by);
       }
     }
   }, [usersQuery.data, searchParams]);
+
+  useEffect(() => {
+    if (
+      !isLighthouse &&
+      roleLevel <= 1 &&
+      usersQuery.data?.length > 0 &&
+      !filters.assigned_by
+    ) {
+      const loggedUser = usersQuery.data.find((u) => u.id === user.id);
+      if (loggedUser) updateFilter("assigned_by", loggedUser);
+    }
+  }, [usersQuery.data, filters.assigned_by, isLighthouse, roleLevel, user.id]);
 
   useEffect(() => {
     if (entitiesQuery.data?.length > 0) {
@@ -88,7 +105,6 @@ export default function TaskFilter({ setAssignments, setQueryState }) {
         status: filters.status || undefined,
       };
       const response = await api.get("/work_orders", { params });
-      setAssignments(response?.data?.data || []);
       return response.data.data;
     },
     onSettled: () => {
@@ -103,6 +119,10 @@ export default function TaskFilter({ setAssignments, setQueryState }) {
     },
     enabled: !!company,
   });
+
+  useEffect(() => {
+    setAssignments(workOrdersQuery.data ?? []);
+  }, [workOrdersQuery.data]);
 
   useEffect(() => {
     if (
@@ -129,7 +149,7 @@ export default function TaskFilter({ setAssignments, setQueryState }) {
   };
 
   return (
-    <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-4">
+    <div className="mb-4 flex flex-row gap-4">
       {/* {user.isLighthouse && (
         <Autocomplete
           className="col-span-1 md:col-span-2 lg:col-span-8"
@@ -144,27 +164,29 @@ export default function TaskFilter({ setAssignments, setQueryState }) {
           onChange={(e, newValue) => setCompany(newValue)}
         />
       )} */}
-      <Autocomplete
-        value={filters.assigned_by}
-        getOptionLabel={(option) => option.name}
-        getOptionKey={(option) => option.id}
-        options={usersQuery.data || []}
-        className="col-span-1 md:col-span-2 lg:col-span-4"
-        noOptionsText="Nenhum usuário disponível."
-        loadingText="Carregando..."
-        disabled={!company || usersQuery.isLoading}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={
-              !company
-                ? "Selecione uma empresa para pesquisar"
-                : "Atribuído por"
-            }
-          />
-        )}
-        onChange={(e, newValue) => updateFilter("assigned_by", newValue)}
-      />
+      {showAssignedBy && (
+        <Autocomplete
+          value={filters.assigned_by}
+          getOptionLabel={(option) => option.name}
+          getOptionKey={(option) => option.id}
+          options={usersQuery.data || []}
+          className="grow"
+          noOptionsText="Nenhum usuário disponível."
+          loadingText="Carregando..."
+          disabled={!company || usersQuery.isLoading}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={
+                !company
+                  ? "Selecione uma empresa para pesquisar"
+                  : "Atribuído por"
+              }
+            />
+          )}
+          onChange={(e, newValue) => updateFilter("assigned_by", newValue)}
+        />
+      )}
       <Autocomplete
         value={filters.assigned_to}
         getOptionLabel={(option) => option.name}
@@ -176,7 +198,7 @@ export default function TaskFilter({ setAssignments, setQueryState }) {
               )
             : usersQuery.data || []
         }
-        className="col-span-1 md:col-span-2 lg:col-span-4"
+        className="grow"
         noOptionsText="Nenhum usuário disponível."
         loadingText="Carregando..."
         disabled={!company || usersQuery.isLoading}
